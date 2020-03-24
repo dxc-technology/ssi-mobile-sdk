@@ -1,0 +1,187 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="TransparentToolbar" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:windowActionBarOverlay">true</item>
+        <!-- Support Library compability -->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="Text">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">@dimen/text_medium</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="TextProfile" parent="Text">
+        <item name="android:textColor">@color/gray_light</item>
+    </style>
+
+    <style name="TextReceiptItem" parent="Text">
+        <item name="android:textSize">@dimen/text_big</item>
+        <item name="android:textColor">@color/gray_dark</item>
+    </style>
+
+    <style name="ToolbarText">
+        <item name="android:textSize">19.5sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="Card">
+        <item name="cardCornerRadius">@dimen/card_corners</item>
+        <item name="cardElevation">2dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="MyProgressBar" parent="@style/Widget.AppCompat.ProgressBar">
+        <item name="android:indeterminateTint">#ff666666</item>
+        <!--        <item name="android:indeterminateDrawable">@drawable/custom_progress</item>-->
+    </style>
+
+    <style name="MyProgressBarWhite" parent="@style/Widget.AppCompat.ProgressBar">
+        <item name="android:indeterminateTint">@color/white</item>
+        <!--        <item name="android:indeterminateDrawable">@drawable/custom_progress</item>-->
+    </style>
+
+    <style name="textViewVerifierMain">
+        <item name="android:textSize">24sp</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:fontFamily">@font/helvetica_regular</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/textBlack</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="textViewStartSplash">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:fontFamily">@font/helvetica_regular</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="textViewTimeOut">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:fontFamily">@font/helvetica_regular</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/textGrey</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="textViewAppNameSplash">
+        <item name="android:textSize">26sp</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:fontFamily">@font/helvetica_bold</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="textViewStatus">
+        <item name="android:textSize">18sp</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:fontFamily">@font/helvetica_bold</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/textBlack</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="textViewDrinks">
+        <item name="android:textSize">18sp</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:fontFamily">@font/helvetica_regular</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/textBlack</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="textViewRedButtonBold">
+        <item name="android:textSize">18sp</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:fontFamily">@font/helvetica_bold</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="textViewRedButton">
+        <item name="android:textSize">18sp</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:fontFamily">@font/helvetica_regular</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="textViewLogItem">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:fontFamily">@font/helvetica_regular</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/textBlack</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="textViewToMainScreen">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:fontFamily">@font/helvetica_bold</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="textViewLogHeader">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:fontFamily">@font/helvetica_bold</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/textBlack</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+</resources>

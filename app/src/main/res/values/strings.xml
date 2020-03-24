@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">VerifierApp</string>
+
+    <string name="splash_waiting">wait a moment…</string>
+
+    <string name="confirmation_code">Confirmation code</string>
+    <string name="plus_18_age_group">18+ age group</string>
+    <string name="plus_16_age_group">16+ age group</string>
+    <string name="spirits_aperitifs_alcopops">Spirits, aperitifs, alcopops</string>
+    <string name="wine_beer_cider">Wine, beer, cider</string>
+    <string name="select_age_group_to_confirmation">Select age group to confirmation</string>
+    <string name="waiting_for_proof">Waiting for proof</string>
+    <string name="approve">Personality approvement</string>
+    <string name="verifier">Verifier</string>
+    <string name="logs">Logs</string>
+    <string name="proof_log">Age Check Log</string>
+    <string name="verification">Verification</string>
+    <string name="photo_match">Photo Match</string>
+    <string name="wine">Wine, Beer, Cider only</string>
+    <string name="age_confirmed">age is confirmed</string>
+    <string name="age_not_confirmed">Age is not confirmed</string>
+    <string name="age_group">age group request</string>
+    <string name="qr_error">Failed to create QR code. Please try again.</string>
+    <string name="age_not_conf">age is not confirmed</string>
+    <string name="person_confirmed">Personality is confirmed</string>
+    <string name="person_not_conf">Personality is not confirmed</string>
+    <string name="age_confirmation">age group confirmation</string>
+    <string name="error_proof_receiving">Failed to receive the proof. Please try again.</string>
+    <string name="error_prover_connect">Prover didn’t connect. Please try again.</string>
+    <string name="permission">You should grant permissions if you want to use app.</string>
+    <string name="start">App starts</string>
+    <string name="init">Initialization</string>
+    <string name="connect">Connection</string>
+    <string name="welcome">Welcome</string>
+    <string name="check_internet">Please check your internet connection and try again.</string>
+    <string name="ok">OK</string>
+    <string name="plus_18">18+</string>
+    <string name="plus_16">16+</string>
+    <string name="the_proof_is_received">The proof is received</string>
+    <string name="exit_to_main_screen">EXIT TO MAIN SCREEN</string>
+</resources>

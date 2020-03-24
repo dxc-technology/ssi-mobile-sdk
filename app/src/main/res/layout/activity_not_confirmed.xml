@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.luxoft.blockchainlab.poc.ssi.ssimobile.views.activities.QRActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp"
+        android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+            <ImageView
+                android:layout_marginTop="120dp"
+                android:src="@drawable/ico_failed_grey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="60dp"
+                android:layout_gravity="center_horizontal"
+                />
+
+
+        <TextView
+            style="@style/textViewStatus"
+            android:layout_width="match_parent"
+            android:textAlignment="center"
+            android:text="@string/the_proof_is_received"
+            android:layout_height="wrap_content"/>
+        <TextView
+            style="@style/textViewStatus"
+            android:id="@+id/textViewAgeGroup"
+            android:layout_width="match_parent"
+            android:textAlignment="center"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:orientation="vertical">
+
+
+
+        <TextView
+            style="@style/textViewToMainScreen"
+            android:id="@+id/textViewToMainScreen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:text="@string/exit_to_main_screen"
+            android:layout_marginBottom="8dp"
+            />
+
+    </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

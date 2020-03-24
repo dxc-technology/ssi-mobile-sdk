@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VerifierApp</string>
+    <string name="splash_waiting">Bitte warten Sie einen Augenblick…</string>
+    <string name="confirmation_code">Einladungscode</string>
+    <string name="plus_18_age_group">Altersgruppe 18+</string>
+    <string name="plus_16_age_group">Altersgruppe 16+</string>
+    <string name="spirits_aperitifs_alcopops">Spirituosen, Aperitifs, Alkopops</string>
+    <string name="wine_beer_cider">Wein, Bier, Apfelwein</string>
+    <string name="select_age_group_to_confirmation">Wählen Sie die zu überprüfende Altersgruppe aus:</string>
+
+    <string name="waiting_for_proof">Warten auf den Nachweis…</string>
+    <string name="approve">Bestätigung der Identität</string>
+    <string name="verifier">Verifizierer</string>
+    <string name="logs">Protokolle</string>
+    <string name="proof_log">Nachweisprotokolle</string>
+    <string name="verification">Verifikation</string>
+    <string name="photo_match">Fotobestätigung</string>
+    <string name="wine">Nur Wein, Bier, Apfelwein</string>
+    <string name="age_confirmed">Der Altersgruppennachweis ist bestätigt.</string>
+    <string name="age_not_confirmed">Der Altersgruppennachweis ist nicht bestätigt.</string>
+    <string name="age_group">Altersgruppenanfrage</string>
+    <string name="qr_error">Der QR-Code konnte nicht erstellt werden. Bitte versuchen Sie es erneut.</string>
+    <string name="age_not_conf">Das Alter wurde nicht überprüft.</string>
+    <string name="person_confirmed">Die Identität ist bestätigt.</string>
+    <string name="person_not_conf">Die Identität ist nicht bestätigt.</string>
+    <string name="age_confirmation">Altersgruppenüberprüfung</string>
+    <string name="error_proof_receiving">Der Nachweis konnte nicht empfangen werden. Bitte versuchen Sie es erneut.</string>
+    <string name="error_prover_connect">Die Einladung  für den Nachweis ist abgelaufen. Bitte versuchen Sie es erneut.</string>
+    <string name="permission">Bitte erlauben Sie der App auf den Speicher zuzugreifen.</string>
+    <string name="start">Die App startet</string>
+    <string name="init">Initialisierung</string>
+    <string name="connect">Verbindung</string>
+    <string name="welcome">Herzlich willkommen!</string>
+    <string name="check_internet">Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.</string>
+    <string name="ok">OK</string>
+    <string name="plus_18">18+</string>
+    <string name="plus_16">16+</string>
+    <string name="the_proof_is_received">Der Nachweis ist bestätigt.</string>
+    <string name="exit_to_main_screen">ZUR STARTSEITE</string>
+</resources>
