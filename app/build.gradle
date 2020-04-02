@@ -45,8 +45,10 @@ android {
 }
 
 dependencies {
-    implementation("com.github.hyperledger-labs.cordentity:cordentity-indy-utils:$cordentity_version")
     implementation("com.github.hyperledger-labs.cordentity:cordentity-agent-connection:$cordentity_version")
+    implementation("com.github.hyperledger-labs.cordentity:cordentity-indy-utils:$cordentity_version") {
+        exclude group: 'org.json', module: 'json'  // conflicts with Android classes
+    }
 
 //        implementation('net.java.dev.jna:jna:5.5.0@aar')
     implementation('net.java.dev.jna:jna:4.5.1@aar')

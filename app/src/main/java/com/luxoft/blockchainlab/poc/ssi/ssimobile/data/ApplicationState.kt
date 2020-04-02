@@ -48,11 +48,11 @@ class ApplicationState(
     val user: LiveData<UserState> =
             walletCredentials.map { creds ->
                 val credRef = creds.firstOrNull { it.getSchemaIdObject().name == KnownSchemas.PersonalId.schemaName }
-                val firstName = credRef?.attributes?.getOrDefault(KnownSchemas.PersonalId.attributes.firstName, null)?.toString()
-                val birthDate = credRef?.attributes?.getOrDefault(KnownSchemas.PersonalId.attributes.birthDate, null)?.toString()
-                val photo = credRef?.attributes?.getOrDefault(KnownSchemas.PersonalId.attributes.photo, null)?.toString()
-                val secondName = credRef?.attributes?.getOrDefault(KnownSchemas.PersonalId.attributes.secondName, null)?.toString()
-                val number = credRef?.attributes?.getOrDefault(KnownSchemas.PersonalId.attributes.number, null)?.toString()
+                val firstName = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.firstName)?.toString()
+                val birthDate = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.birthDate)?.toString()
+                val photo = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.photo)?.toString()
+                val secondName = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.secondName)?.toString()
+                val number = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.number)?.toString()
 
                 UserState(firstName, birthDate, photo, secondName, number)
             }
