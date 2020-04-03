@@ -1,8 +1,11 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android'
+
+group = 'com.luxoft.blockchainlab'
+version = '1.0'
 
 android {
     compileSdkVersion 28
@@ -14,11 +17,10 @@ android {
         jvmTarget = '1.8'
     }
     defaultConfig {
-        applicationId 'com.luxoft.blockchainlab.ssimobile'
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
-        versionName "1.0"
+        versionName version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
