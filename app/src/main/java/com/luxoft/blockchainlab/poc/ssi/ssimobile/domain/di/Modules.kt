@@ -21,6 +21,7 @@ import com.luxoft.blockchainlab.corda.hyperledger.indy.AgentConnection
 import com.luxoft.blockchainlab.corda.hyperledger.indy.PythonRefAgentConnection
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.application.*
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.data.ApplicationState
+import com.luxoft.blockchainlab.poc.ssi.ssimobile.data.IndyState
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.data.SharedPreferencesStore
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.data.idatasource.LocalDataSource
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.data.idatasource.RemoteDataSource
@@ -30,23 +31,9 @@ import com.luxoft.blockchainlab.poc.ssi.ssimobile.datasource.remote.RemoteDataSo
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.domain.irepository.IndyRepository
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.domain.usecase.*
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.loadKoinModules
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import java.net.InetAddress
-
-fun injectFeature() = loadFeature
-
-private val loadFeature by lazy {
-    loadKoinModules(
-            useCaseModule,
-            repositoryModule,
-            dataSourceModule,
-            sharedPreferencesStoreModule,
-            applicationsStateModule,
-            agentConnectionModule
-    )
-}
 
 val useCaseModule: Module = module {
     factory { GetCredentialsUseCase(indyRepository = get()) }
@@ -58,42 +45,39 @@ val useCaseModule: Module = module {
 }
 
 val repositoryModule: Module = module {
-    single { IndyRepositoryImpl(localDataSource = get(), remoteDataSource = get()) as IndyRepository }
+    single<IndyRepository> {
+        IndyRepositoryImpl(localDataSource = get(), remoteDataSource = get())
+    }
 }
 
 val applicationsStateModule: Module = module {
     single<ApplicationState> {
-        applicationState.context = androidContext()
-        applicationState
+        val phoneStorage = Environment.getExternalStorageDirectory().toURI()
+
+        val indy = IndyState(
+            InetAddress.getByName(GENESIS_IP),
+            phoneStorage.resolve(GENESIS_PATH),
+            phoneStorage.resolve(TAILS_PATH)
+        )
+
+        ApplicationState(androidContext(), indy)
     }
 }
 
-val phoneStorage = Environment.getExternalStorageDirectory().toURI()
-
-val applicationState = ApplicationState(
-        InetAddress.getByName(GENESIS_IP),
-        phoneStorage.resolve(GENESIS_PATH),
-        phoneStorage.resolve(TAILS_PATH)
-)
-
 val dataSourceModule: Module = module {
-    single { RemoteDataSourceImpl(agentConnection = agentConnection, applicationState = applicationState, sharedPreferencesStore = get()) as RemoteDataSource }
-    single { LocalDataSourceImpl() as LocalDataSource }
+    single<RemoteDataSource> { RemoteDataSourceImpl(agentConnection = get(), applicationState = get(), sharedPreferencesStore = get()) }
+    single<LocalDataSource> { LocalDataSourceImpl()}
 }
 
 val sharedPreferencesStoreModule: Module = module {
     single { SharedPreferencesStore(androidContext()) }
 }
 
-
-
 val agentConnectionModule: Module = module {
     single<AgentConnection>(createdAtStart = true) {
+        val agentConnection = PythonRefAgentConnection()
+        val agentConnectionProgress = agentConnection.connect(WS_ENDPOINT, WS_LOGIN, WS_PASS).toBlocking().value()
         agentConnection
     }
 }
-
-val agentConnection = PythonRefAgentConnection()
-val agentConnectionProgress = agentConnection.connect(WS_ENDPOINT, WS_LOGIN, WS_PASS).toBlocking().value()
-
 

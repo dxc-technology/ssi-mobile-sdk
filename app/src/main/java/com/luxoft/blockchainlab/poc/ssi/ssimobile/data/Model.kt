@@ -17,9 +17,6 @@
 package com.luxoft.blockchainlab.poc.ssi.ssimobile.data
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.realm.RealmObject
-import io.realm.annotations.PrimaryKey
-import io.realm.annotations.RealmClass
 
 data class Invite(val invite: String, @JsonProperty("clientUUID") val clientUUID: String?)
 

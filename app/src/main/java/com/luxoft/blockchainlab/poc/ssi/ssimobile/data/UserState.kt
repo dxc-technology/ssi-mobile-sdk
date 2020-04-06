@@ -16,8 +16,12 @@
 
 package com.luxoft.blockchainlab.poc.ssi.ssimobile.data
 
+import android.graphics.drawable.Drawable
 
 class UserState(
+        val fullName: String?,
+        val profilePic: Drawable?,
+
         val firstName: String?,
         val birthDate: String?,
         val photo: String?,

@@ -17,46 +17,59 @@
 package com.luxoft.blockchainlab.poc.ssi.ssimobile.data
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import androidx.lifecycle.LiveData
 import com.luxoft.blockchainlab.hyperledger.indy.models.CredentialReference
+import com.luxoft.blockchainlab.poc.ssi.ssimobile.R
+import com.luxoft.blockchainlab.poc.ssi.ssimobile.utils.MutableLiveData
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.utils.VolatileLiveDataHolder
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.utils.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.net.InetAddress
-import java.net.URI
 
 class ApplicationState(
-        indyPoolIp: InetAddress,
-        indyPoolGenesisPath: URI,
-        indyPoolTailsPath: URI,
-        indyPoolGenesisContent: (nodeIp: InetAddress) -> String = ::StandardIndyPoolGenesis)
+    val context: Context,
+    val indyState: IndyState)
 {
-    val indyState: IndyState = IndyState(
-            indyPoolIp,
-            indyPoolGenesisPath,
-            indyPoolTailsPath,
-            indyPoolGenesisContent)
-
     private val refreshedIndyUser = VolatileLiveDataHolder(indyState.indyUser)
     val walletCredentials: LiveData<List<CredentialReference>> = refreshedIndyUser.liveData.map { indyUser ->
         indyUser.walletUser.getCredentials().asSequence().toList()
     }
 
-    lateinit var context: Context
     val user: LiveData<UserState> =
-            walletCredentials.map { creds ->
-                val credRef = creds.firstOrNull { it.getSchemaIdObject().name == KnownSchemas.PersonalId.schemaName }
-                val firstName = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.firstName)?.toString()
-                val birthDate = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.birthDate)?.toString()
-                val photo = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.photo)?.toString()
-                val secondName = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.secondName)?.toString()
-                val number = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.number)?.toString()
+        walletCredentials.map { creds ->
+            var fullName: String? = null
+            var profilePic: Drawable? = null
+            var firstName: String? = null
+            var birthDate: String? = null
+            var photo: String? = null
+            var secondName: String? = null
+            var number: String? = null
 
-                UserState(firstName, birthDate, photo, secondName, number)
+            // ignores credentials of the same schema
+            val availableSchemas = creds.associateBy { it.getSchemaIdObject().name }
+
+            if(KnownSchemas.PatientId.schemaName in availableSchemas) {
+                val credRef = availableSchemas[KnownSchemas.PatientId.schemaName]
+                fullName = credRef?.attributes?.get(KnownSchemas.PatientId.attributes.name)?.toString()
+                profilePic = context.getDrawable(R.drawable.user)
             }
 
+            if(KnownSchemas.PersonalId.schemaName in availableSchemas) {
+                val credRef = availableSchemas[KnownSchemas.PersonalId.schemaName]
+                firstName = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.firstName)?.toString()
+                birthDate = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.birthDate)?.toString()
+                photo = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.photo)?.toString()
+                secondName = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.secondName)?.toString()
+                number = credRef?.attributes?.get(KnownSchemas.PersonalId.attributes.number)?.toString()
+            }
+
+            UserState(fullName, profilePic, firstName, birthDate, photo, secondName, number)
+        }
+
+    private val mutAuthenticationHistory = MutableLiveData(initialValue = listOf<VerificationEvent>())
+    val authenticationHistory: LiveData<List<VerificationEvent>> = mutAuthenticationHistory
 
     fun updateWalletCredentials() {
         GlobalScope.launch(Dispatchers.Main) {
@@ -64,5 +77,22 @@ class ApplicationState(
         }
     }
 
+    fun clearAuthenticationHistory() {
+        GlobalScope.launch(Dispatchers.Main) {
+            mutAuthenticationHistory.value = listOf()
+        }
+    }
+
+    fun clearLocalData() {
+        indyState.resetWallet()
+        clearAuthenticationHistory()
+    }
+
+    fun storeVerificationEvent(event: VerificationEvent) {
+        val oldList = mutAuthenticationHistory.value ?: listOf()
+        GlobalScope.launch(Dispatchers.Main) {
+            mutAuthenticationHistory.value = oldList + listOf(event)
+        }
+    }
 }
 
