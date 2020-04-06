@@ -75,7 +75,8 @@ class IndyState(
     fun resetWallet() {
         wallet.value?.close()
 
-        val folder = Environment.getExternalStorageDirectory().toPath().resolve(".indy_client").toFile()
+        val deviceRootFolder = Environment.getExternalStorageDirectory()
+        val folder = File(deviceRootFolder, ".indy_client")
         val success = folder.deleteRecursively()
         Log.i("clear-indy-user", "Deleted Indy Client folder: $success")
 
