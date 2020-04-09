@@ -33,6 +33,14 @@ object KnownSchemas {
         }
     }
 
+    object PatientId {
+        val schemaName = "Patient Demographics"
+
+        object attributes {
+            val name = "Full_Legal_Name"
+        }
+    }
+
     object Common {
         object attributes {
             val type = "Credential_Type"

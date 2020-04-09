@@ -17,16 +17,6 @@
 package com.luxoft.blockchainlab.poc.ssi.ssimobile.application
 
 
-const val GENESIS_PATH = "./docker.txn"
-const val TAILS_PATH = "./tails"
-
-const val GENESIS_IP = """00.00.00.00"""
-const val WS_ENDPOINT = "ws://00.00.00.00:8095/ws"
-
-const val WS_LOGIN = ""
-const val WS_PASS = ""
-
-
 const val sharedPreferencesRequstedDataName = "REQUESTED_DATA_SP"
 const val sharedPreferencesRequstedDataKey = "REQUESTED_DATA_KEY"
 
