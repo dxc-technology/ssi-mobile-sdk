@@ -21,10 +21,17 @@ import com.luxoft.blockchainlab.corda.hyperledger.indy.IndyPartyConnection
 import com.luxoft.blockchainlab.hyperledger.indy.models.ProofRequest
 import io.reactivex.Single
 
-
+/**
+ * Data source interface.
+ * For methods to work with local data storage
+ * */
 interface LocalDataSource {
 }
 
+/**
+ * Data source interface.
+ * Methods to interact between indy users.
+ * */
 interface RemoteDataSource {
     fun getCredentials(url : String): Single<String>
     fun sendProofOnRequest(url: String): Single<String>

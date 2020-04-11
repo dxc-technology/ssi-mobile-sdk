@@ -20,6 +20,10 @@ import com.luxoft.blockchainlab.corda.hyperledger.indy.IndyPartyConnection
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.domain.irepository.IndyRepository
 import io.reactivex.Single
 
+/**
+ * Use case to interact between UI and data repository.
+ * Indy user waits connection after invitation sending.
+ * */
 class WaitForInvitedPartyUseCase constructor(
         private val indyRepository: IndyRepository
 ) {

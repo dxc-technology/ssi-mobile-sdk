@@ -24,6 +24,9 @@ import com.luxoft.blockchainlab.poc.ssi.ssimobile.data.idatasource.RemoteDataSou
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.domain.irepository.IndyRepository
 import io.reactivex.Single
 
+/**
+ * Implementation of repository interface.
+ * */
 class IndyRepositoryImpl constructor(private val localDataSource: LocalDataSource, private val remoteDataSource: RemoteDataSource) :
     IndyRepository {
 

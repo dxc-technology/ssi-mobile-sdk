@@ -19,6 +19,10 @@ package com.luxoft.blockchainlab.poc.ssi.ssimobile.domain.usecase
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.domain.irepository.IndyRepository
 import io.reactivex.Single
 
+/**
+ * Use case to interact between UI and data repository.
+ * Holder gets credentials from Issuer.
+ * */
 class GetCredentialsUseCase constructor(
         private val indyRepository: IndyRepository
 ) {

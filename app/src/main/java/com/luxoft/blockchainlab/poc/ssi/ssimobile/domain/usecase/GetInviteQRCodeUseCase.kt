@@ -20,6 +20,10 @@ import android.graphics.Bitmap
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.domain.irepository.IndyRepository
 import io.reactivex.Single
 
+/**
+ * Use case to interact between UI and data repository.
+ * Indy user gets QR-code containing URL to invite other indy user to connect.
+ * */
 class GetInviteQRCodeUseCase constructor(
         private val indyRepository: IndyRepository
 ) {

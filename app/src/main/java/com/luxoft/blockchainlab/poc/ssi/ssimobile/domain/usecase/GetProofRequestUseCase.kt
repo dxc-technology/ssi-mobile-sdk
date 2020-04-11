@@ -20,6 +20,10 @@ import com.luxoft.blockchainlab.hyperledger.indy.models.ProofRequest
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.domain.irepository.IndyRepository
 import io.reactivex.Single
 
+/**
+ * Use case to interact between UI and data repository.
+ * Holder receives proof request from Verifier.
+ * */
 class GetProofRequestUseCase constructor(
         private val indyRepository: IndyRepository
 ) {

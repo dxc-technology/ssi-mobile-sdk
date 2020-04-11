@@ -20,6 +20,10 @@ import com.luxoft.blockchainlab.corda.hyperledger.indy.IndyPartyConnection
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.domain.irepository.IndyRepository
 import io.reactivex.Single
 
+/**
+ * Use case to interact between UI and data repository.
+ * Verifier sends proof request to Holder, receives proof and verify it.
+ * */
 class SendProofRequestReceiveVerifyUseCase constructor(
         private val indyRepository: IndyRepository
 ) {

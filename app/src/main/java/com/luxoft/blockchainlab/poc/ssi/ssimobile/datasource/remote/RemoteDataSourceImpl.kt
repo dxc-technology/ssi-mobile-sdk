@@ -39,13 +39,17 @@ import com.luxoft.blockchainlab.poc.ssi.ssimobile.data.Invite
 import java.util.*
 import java.util.Calendar.*
 
-
+/**
+ * Data source interface implementation.
+ * Methods to interact between indy users.
+ * */
 class RemoteDataSourceImpl constructor(
     private val agentConnection: AgentConnection,
     private val applicationState: ApplicationState,
     private val sharedPreferencesStore: SharedPreferencesStore
 ) : RemoteDataSource {
 
+    //Holder gets credentials from Issuer
     override fun getCredentials(url: String): Single<String> {
         return Single.create<String> { s ->
             run {
@@ -86,6 +90,7 @@ class RemoteDataSourceImpl constructor(
         }
     }
 
+    //Holder receives proof request from Verifier and then sends proof back
     override fun sendProofOnRequest(url: String): Single<String> {
         return Single.create<String> { s ->
             run {
@@ -115,7 +120,7 @@ class RemoteDataSourceImpl constructor(
         }
     }
 
-    //use for buyer wallet app role
+    //Holder receives proof request from Verifier
     override fun receiveProofRequest(url: String): Single<ProofRequest> {
         return Single.create<ProofRequest> { s ->
             run {
@@ -136,7 +141,7 @@ class RemoteDataSourceImpl constructor(
         }
     }
 
-    //use for buyer wallet app role
+    //Holder sends proof to Verifier
     override fun sendProof(proofRequest: ProofRequest): Single<String> {
         return Single.create<String> { s ->
             run {
@@ -168,7 +173,7 @@ class RemoteDataSourceImpl constructor(
         }
     }
 
-    //use for kiosk verifier app role
+    //Indy user gets QR-code containing URL to invite other indy user to connect
     override fun getInviteQRCode(): Single<Bitmap> {
         return Single.create<Bitmap> { bitmap ->
             run {
@@ -192,7 +197,7 @@ class RemoteDataSourceImpl constructor(
         }
     }
 
-    //use for kiosk verifier app role
+    //Indy user waits connection after invitation sending
     override fun waitForInvitedParty(timeout: Long): Single<IndyPartyConnection> {
         return Single.create<IndyPartyConnection> { connection ->
             run {
@@ -216,7 +221,7 @@ class RemoteDataSourceImpl constructor(
         }
     }
 
-    //use for kiosk verifier app role
+    //Verifier sends proof request to Holder, receives proof and verify it
     override fun sendProofRequestReceiveAndVerify(indyPartyConnection: IndyPartyConnection?): Single<Boolean> {
         return Single.create<Boolean> { boolean ->
             run {

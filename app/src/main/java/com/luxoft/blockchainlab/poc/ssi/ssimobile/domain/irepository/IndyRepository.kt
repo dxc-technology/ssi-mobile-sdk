@@ -21,7 +21,9 @@ import com.luxoft.blockchainlab.corda.hyperledger.indy.IndyPartyConnection
 import com.luxoft.blockchainlab.hyperledger.indy.models.ProofRequest
 import io.reactivex.Single
 
-
+/**
+ * Repository interface gives access from business logic layer to different data sources.
+ * */
 interface IndyRepository {
     fun getCredentials(url : String) : Single<String>
     fun sendProofOnRequest(url: String): Single<String>

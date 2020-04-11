@@ -18,5 +18,9 @@ package com.luxoft.blockchainlab.poc.ssi.ssimobile.datasource.local
 
 import com.luxoft.blockchainlab.poc.ssi.ssimobile.data.idatasource.LocalDataSource
 
+/**
+ * Data source interface implementation.
+ * For methods to work with local data storage
+ * */
 class LocalDataSourceImpl : LocalDataSource {
 }
