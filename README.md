@@ -1,4 +1,4 @@
-# Self Sovereign Identity Mobile SDK
+# Self Sovreign Identity Mobile SDK
  This repository holds source code for building a mobile SDK to use with Self Sovereign Indentity applications.
 
 # License and Copyright
