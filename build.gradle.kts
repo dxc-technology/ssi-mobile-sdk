@@ -5,6 +5,7 @@ val ktorVersion: String = "1.5.1"
 val okhttpVersion: String = "3.5.0"
 val kotlinxCourutinesVersion = "1.4.2"
 val uuidVersion = "0.2.3"
+val junitVersion = "4.13"
 
 plugins {
     val kotlinVersion = "1.4.30"
@@ -12,7 +13,6 @@ plugins {
     id("com.android.library")
     /* TODO: Deal with : The 'kotlin-android-extensions' Gradle plugin is deprecated. Please use this migration guide (https://goo.gle/kotlin-android-extensions-deprecation) to start working with View Binding (https://developer.android.com/topic/libraries/view-binding) and the 'kotlin-parcelize' plugin.*/
     id("kotlin-android-extensions")
-   // id("kotlinx-serialization")
     kotlin("plugin.serialization") version kotlinVersion
 }
 
@@ -55,9 +55,6 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
-                //implementation("io.ktor:ktor-client-core:$ktorVersion")
-                //TODO: remove ktor from everywhere except utils part since we won't use it
-                //implementation("io.ktor:ktor-client-websockets:$ktorVersion")
                 implementation("io.ktor:ktor-utils:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
                 implementation ("com.benasher44:uuid:$uuidVersion")
@@ -79,9 +76,6 @@ kotlin {
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
                 implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-
-
-
             }
         }
         val jvmTest by getting {
@@ -99,18 +93,18 @@ kotlin {
                     exclude(group = "org.slf4j", module = "slf4j-api")
                 }
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
-                //implementation("io.ktor:ktor-client-android:$ktorVersion")
+                implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
             }
         }
         val androidTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
-                implementation("junit:junit:4.13")
+                implementation("junit:junit:$junitVersion")
             }
         }
         val iosMain by getting {
             dependencies {
-                //implementation("io.ktor:ktor-client-ios:$ktorVersion")
             }
         }
         val iosTest by getting
@@ -125,6 +119,7 @@ android {
         targetSdkVersion(29)
     }
 }
+//TODO: check if this section is needed at all or it should be moved to JVM and Android packages
 dependencies {
-    implementation("junit:junit:4.12")
+    implementation("junit:junit:$junitVersion")
 }

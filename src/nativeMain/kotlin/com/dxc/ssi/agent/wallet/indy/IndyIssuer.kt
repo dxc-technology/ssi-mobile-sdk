@@ -1,7 +1,9 @@
 package com.dxc.ssi.agent.wallet.indy
 
 import com.dxc.ssi.agent.api.pluggable.wallet.Issuer
+import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.IdentityDetails
+import com.dxc.ssi.agent.model.messages.Message
 
 actual class IndyIssuer : IndyWalletHolder(), Issuer {
     actual override fun sign(data: String): String {
@@ -21,6 +23,18 @@ actual class IndyIssuer : IndyWalletHolder(), Issuer {
     }
 
     actual override fun getTailsPath(): String {
+        TODO("Not yet implemented")
+    }
+
+    override fun getConnectionRecordById(connectionId: String): Connection? {
+        TODO("Not yet implemented")
+    }
+
+    override fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
+        TODO("Not yet implemented")
+    }
+
+    override fun unPackMessage(packedMessage: Message): Message {
         TODO("Not yet implemented")
     }
 

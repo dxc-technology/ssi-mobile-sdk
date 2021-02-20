@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.transport
 
+
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -21,6 +22,9 @@ internal actual class PlatformSocket actual constructor(url: String) {
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) = listener.onClosed(code, reason)
             }
         )
+
+
+
     }
     actual fun closeSocket(code: Int, reason: String) {
         webSocket?.close(code, reason)

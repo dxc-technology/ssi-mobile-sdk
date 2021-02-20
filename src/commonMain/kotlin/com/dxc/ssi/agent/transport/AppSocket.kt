@@ -51,7 +51,7 @@ class AppSocket(url: String, incomingMessagesQueue: MutableList<MessageEnvelop>)
         println("Sent message to websocket")
     }
 
-    private val socketListener = object : PlatformSocketListener {
+    private val socketListener:PlatformSocketListener = object : PlatformSocketListener {
         override fun onOpen() {
             println("Opened socket")
             currentState = State.CONNECTED

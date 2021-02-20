@@ -7,12 +7,15 @@ import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.transport.Sleeper
+import org.junit.Ignore
 import org.junit.Test
 
 class SsiAgentApiImplTest {
 
 
     @Test
+    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+    //TODO: Move integration tests to separate module
     fun basicTest() {
 
         val ssiAgentApi = SsiAgentBuilderImpl()
