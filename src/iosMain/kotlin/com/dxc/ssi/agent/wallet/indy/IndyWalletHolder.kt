@@ -26,20 +26,20 @@ actual open class IndyWalletHolder: WalletHolder {
         TODO("Not yet implemented")
     }
 
-
-
     actual override fun getConnectionRecordById(connectionId: String): Connection? {
         TODO("Not yet implemented")
     }
 
     actual override fun openOrCreateWallet() {
+        TODO("Not yet implemented")
     }
 
-    actual override fun packMessage(message: Message, recipientKeys: List<String>): ByteArray {
+    actual override fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
         TODO("Not yet implemented")
     }
 
     actual override fun unPackMessage(packedMessage: Message): Message {
         TODO("Not yet implemented")
     }
+
 }

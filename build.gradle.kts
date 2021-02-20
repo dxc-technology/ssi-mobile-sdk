@@ -14,6 +14,7 @@ plugins {
     /* TODO: Deal with : The 'kotlin-android-extensions' Gradle plugin is deprecated. Please use this migration guide (https://goo.gle/kotlin-android-extensions-deprecation) to start working with View Binding (https://developer.android.com/topic/libraries/view-binding) and the 'kotlin-parcelize' plugin.*/
     id("kotlin-android-extensions")
     kotlin("plugin.serialization") version kotlinVersion
+    kotlin("native.cocoapods") version kotlinVersion
 }
 
 group = "com.dxc"
@@ -36,6 +37,7 @@ kotlin {
         }
     }
     android()
+    /*
     iosX64("ios") {
         binaries {
             framework {
@@ -43,6 +45,24 @@ kotlin {
             }
         }
     }
+    */
+
+
+    ios()
+    cocoapods {
+        // Configure fields required by CocoaPods.
+        summary = "Some description for a Kotlin/Native module"
+        homepage = "Link to a Kotlin/Native module homepage"
+
+        // You can change the name of the produced framework.
+        // By default, it is the name of the Gradle project.
+        frameworkName = "my_framework"
+
+        pod("AFNetworking") {
+            version = "~> 4.0.1"
+        }
+    }
+
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
     val nativeTarget = when {
