@@ -1,0 +1,15 @@
+package com.dxc.ssi.agent.didcomm.states.didexchange
+
+import com.dxc.ssi.agent.didcomm.states.State
+
+interface DidExchangeState: State
+
+class DidExchangeStateStarted: DidExchangeState
+class DidExchangeStateInvitationReceived: DidExchangeState
+class DidExchangeStateInvitationSent: DidExchangeState
+class DidExchangeStateRequestSent: DidExchangeState
+class DidExchangeStateRequestReceived: DidExchangeState
+class DidExchangeStateResponseSent: DidExchangeState
+class DidExchangeStateResponseReceived: DidExchangeState
+class DidExchangeStateAbandoned: DidExchangeState
+class DidExchangeStateCompleted: DidExchangeState

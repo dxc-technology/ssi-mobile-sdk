@@ -1,3 +1,15 @@
+# Overview 
+This is initial POC of multiplatform library which works without inntermediate cloud agent and implements did connection protocol
+Currently work is in progress and there are a lot of TODOs in the code 
+
+#iOS
+
+For adding iOS dependencies install and configure cocoapods.
+See 
+https://kotlinlang.org/docs/mobile/add-dependencies.html#ios-dependencies
+and 
+https://kotlinlang.org/docs/native-cocoapods.html#install-the-cocoapods-dependency-manager-and-plugin
+
 # Self Sovereign Identity Mobile SDK
 A new Mobile SDK to use with Self Sovereign Identity (SSI) applications is available as an open-source project from Luxoft DXC. The SSI Mobile SDK provides libraries and tools to accelerate integration of digital wallet capabilities into existing mobile apps.
 
