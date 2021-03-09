@@ -6,6 +6,7 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
+import com.dxc.ssi.agent.didcomm.model.common.Service
 import com.dxc.ssi.agent.didcomm.model.didexchange.*
 import com.dxc.ssi.agent.didcomm.model.envelop.EncryptedEnvelop
 import com.dxc.ssi.agent.didcomm.model.other.Forward
@@ -47,6 +48,7 @@ class ReceiveInvitationAction(
             invitation = invitationUrl,
             isSelfInitiated = true,
             peerRecipientKeys = invitation.recipientKeys,
+            peerDid = inviterDid,
             endpoint = endpoint
         )
 

@@ -4,7 +4,7 @@ package com.dxc.ssi.agent.api.pluggable.wallet
  * By default, system has only one top-level-trustee entity, which should share it's rights with others.
  * Hash read-write access to public ledger.
  */
-interface Trustee : WalletHolder {
+interface Trustee {
     /**
      * Adds provided identity to whitelist
      *

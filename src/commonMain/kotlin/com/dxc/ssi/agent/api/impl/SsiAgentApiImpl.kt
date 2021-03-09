@@ -5,6 +5,7 @@ import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.model.Connection
@@ -17,13 +18,19 @@ class SsiAgentApiImpl(
     private val ledgerConnector: LedgerConnector,
     private val callbacks: Callbacks
 ) : SsiAgentApi {
-    private val messageListener: MessageListener = MessageListenerImpl(transport, walletConnector, callbacks)
+    private val messageListener: MessageListener =
+        MessageListenerImpl(transport, walletConnector, ledgerConnector, callbacks)
 
     //TODO: add callback controllers here
 
 
     override fun init() {
         walletConnector.walletHolder.openOrCreateWallet()
+        ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
+
+        if (walletConnector.prover != null) {
+            walletConnector.prover!!.createMasterSecret(Configuration.masterSecretId)
+        }
 
 //TODO: design proper concurrency there
         GlobalScope.launch { messageListener.listen() }

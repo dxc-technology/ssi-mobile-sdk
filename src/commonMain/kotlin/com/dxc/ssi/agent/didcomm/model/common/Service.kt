@@ -1,4 +1,4 @@
-package com.dxc.ssi.agent.didcomm.model.didexchange
+package com.dxc.ssi.agent.didcomm.model.common
 
 import com.dxc.ssi.agent.model.Connection
 import kotlinx.serialization.Serializable

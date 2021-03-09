@@ -37,19 +37,23 @@ class SsiAgentBuilderImpl : SsiAgentBuilder {
         if (transport == null) {
             transport = WebSocketTransportImpl()
         }
+
         if (ledgerConnector == null)
             ledgerConnector = IndyLedgerConnector()
 
-        if (issuer == null)
-            issuer = IndyIssuer()
-        if (verifier == null)
-            verifier = IndyVerifier()
-        if (trustee == null)
-            trustee = IndyTrustee()
-        if (prover == null)
-            prover = IndyProver()
+        //TODO: it seems that all wallet-related entities must be assigned at once. It can not be the case that issuer is indy and verifier is some non-indy...
+        //TODO: combine all of those classes into IndyWalletConnector implementation
         if (walletHolder == null)
             walletHolder = IndyWalletHolder()
+        if (issuer == null)
+            issuer = IndyIssuer(walletHolder!!)
+        if (verifier == null)
+            verifier = IndyVerifier(walletHolder!!)
+        if (trustee == null)
+            trustee = IndyTrustee(walletHolder!!)
+        if (prover == null)
+            prover = IndyProver(walletHolder!!)
+
 
 
         val walletConnector = WalletConnector(

@@ -25,7 +25,8 @@ class WebSocketTransportImpl : Transport {
     override fun sendMessage(connection: Connection, message: MessageEnvelop) {
 
         //TODO: properly parse host
-        val host = "localhost"
+        //val host = "localhost"
+        val host = parseHostFromEndpoint(connection.endpoint)
         val port = parsePortFromEndpoint(connection.endpoint)
         val path = parsePathFromEndpoint(connection.endpoint)
         val protocol = parseProtocolFromEndpoint(connection.endpoint)

@@ -5,6 +5,7 @@ import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
+import com.dxc.ssi.agent.utils.JsonUtils.extractValue
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.utils.SerializationUtils
 import org.hyperledger.indy.sdk.crypto.Crypto
@@ -13,7 +14,7 @@ import org.hyperledger.indy.sdk.non_secrets.WalletRecord
 import org.hyperledger.indy.sdk.wallet.Wallet
 import org.hyperledger.indy.sdk.wallet.WalletItemNotFoundException
 import java.util.concurrent.ExecutionException
-import java.util.regex.Pattern
+
 
 actual open class IndyWalletHolder : WalletHolder {
     //TODO: think where do we need to store did
@@ -99,15 +100,6 @@ actual open class IndyWalletHolder : WalletHolder {
 
     }
 
-    private fun extractValue(retrievedValue: String?): String {
-        val matcher = Pattern.compile("value\":\"(.*})\",").matcher(retrievedValue)
-        matcher.find()
-        val group = matcher.group(1).replace("\\", "")
-
-        println(group)
-        return group
-    }
-
     actual override fun openOrCreateWallet() {
 
         //TODO: think where to store name and password and how to pass it properly
@@ -123,6 +115,10 @@ actual open class IndyWalletHolder : WalletHolder {
         val didResult = Did.createAndStoreMyDid(wallet, SerializationUtils.anyToJSON(DidConfig())).get()
         did = didResult.did
         verkey = didResult.verkey
+    }
+
+    override fun getWallet(): Any {
+        TODO("Not yet implemented")
     }
 
     //TODO: remove all unnecessary code and beautify this function
@@ -156,5 +152,9 @@ actual open class IndyWalletHolder : WalletHolder {
 
         return Message(decodedString)
 
+    }
+
+    actual override  fun findConnectionByVerKey(verKey: String): Connection? {
+        TODO("Not yet implemented")
     }
 }

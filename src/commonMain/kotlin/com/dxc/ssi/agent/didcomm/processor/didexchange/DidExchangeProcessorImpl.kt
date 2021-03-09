@@ -14,6 +14,7 @@ import com.dxc.ssi.agent.didcomm.states.didexchange.DidExchangeStateMachine
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
 import com.dxc.ssi.agent.model.messages.Message
+import com.dxc.ssi.agent.model.messages.MessageContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -48,24 +49,25 @@ class DidExchangeProcessorImpl(
     }
 
     //TODO: see if it is possible to generalize this function in order to go back to AbstractProcessor
-    override fun processMessage(message: Message) {
+    override fun processMessage(messageContext: MessageContext) {
 
-        println("Started processing message $message")
+        println("Started processing message $messageContext")
 
         //1. Determine message type and parse message
 
 
-        when (getMessageType(message)) {
+        when (getMessageType(messageContext.receivedUnpackedMessage.message)) {
             DidExchangeMessageType.INVITATION -> TODO("Not implemented")
             DidExchangeMessageType.CONNECTION_REQUEST -> TODO("Not implemented")
             DidExchangeMessageType.CONNECTION_RESPONSE -> {
                 val connectionResponseMesage =
-                    Json { ignoreUnknownKeys = true }.decodeFromString<ConnectionResponse>(message.payload)
+                    Json { ignoreUnknownKeys = true }.decodeFromString<ConnectionResponse>(messageContext.receivedUnpackedMessage.message)
 
 
                 val ourConnectionId = connectionResponseMesage.thread.thid
 
                 //TODO: think about moving wallet operation out of this abstraction layer. Think about moving it to actions layer
+                //TODO: looks like this is not needed any more since we extract connection nin MessageListener and provide it in message context
                 val ourConnection = walletConnector.walletHolder.getConnectionRecordById(ourConnectionId)
 
                 println("Existing connection record $ourConnection")
@@ -79,6 +81,7 @@ class DidExchangeProcessorImpl(
                             transport,
                             connectionInitiatorController!!,
                             connectionResponseMesage,
+                            messageContext,
                             ourConnection
                         ).perform()
 
@@ -103,10 +106,10 @@ class DidExchangeProcessorImpl(
         CONNECTION_RESPONSE
     }
 
-    private fun getMessageType(message: Message): DidExchangeMessageType {
+    private fun getMessageType(message: String): DidExchangeMessageType {
 
         val typeAttribute =
-            Json { ignoreUnknownKeys = true }.decodeFromString<BasicMessageWithTypeOnly>(message.payload).type
+            Json { ignoreUnknownKeys = true }.decodeFromString<BasicMessageWithTypeOnly>(message).type
 
         //TODO: change to regexp to allow more strict matching
         val messageType = when {

@@ -5,15 +5,22 @@ import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
+import com.dxc.ssi.agent.utils.JsonUtils.extractValue
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
+import com.dxc.ssi.agent.wallet.indy.model.RetrievedWalletRecords
+import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
+import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import com.dxc.ssi.agent.wallet.indy.utils.SerializationUtils
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.hyperledger.indy.sdk.crypto.Crypto
 import org.hyperledger.indy.sdk.did.Did
 import org.hyperledger.indy.sdk.non_secrets.WalletRecord
+import org.hyperledger.indy.sdk.non_secrets.WalletSearch
 import org.hyperledger.indy.sdk.wallet.Wallet
 import org.hyperledger.indy.sdk.wallet.WalletItemNotFoundException
 import java.util.concurrent.ExecutionException
-import java.util.regex.Pattern
+
 
 actual open class IndyWalletHolder : WalletHolder {
     //TODO: think where do we need to store did
@@ -23,12 +30,7 @@ actual open class IndyWalletHolder : WalletHolder {
     private var verkey: String? = null
 
     //TODO: think if it is posible to make val lateinit or something like that
-    private var wallet: Wallet? = null
-    private val type = "ConnectionRecord"
-
-
-
-
+    var wallet: Wallet? = null
 
     actual override fun createSessionDid(identityRecord: IdentityDetails): String {
         TODO("Not yet implemented")
@@ -52,20 +54,26 @@ actual open class IndyWalletHolder : WalletHolder {
 
         val existingConnection = getConnectionRecordById(connection.id)
 
+        val tagsJson = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${connection.peerVerkey}\"}"
+
+
+
         if (existingConnection == null) {
-
             val value = connection.toJson()
-            //TODO: think what tags do we need here
-            val tagsJson = null
 
-            WalletRecord.add(wallet, type, connection.id, value, tagsJson).get()
+            println("Storing connection $connection")
+
+            WalletRecord.add(wallet, WalletRecordType.ConnectionRecord.name, connection.id, value, tagsJson).get()
 
         } else {
 
-            //TODO: see if we also need to update tags
-
             val value = connection.toJson()
-            WalletRecord.updateValue(wallet, type, connection.id, value)
+
+            println("Updating connection $connection")
+
+            WalletRecord.updateValue(wallet, WalletRecordType.ConnectionRecord.name, connection.id, value).get()
+            //TODO: check if there are cases when we really need to update tags
+            WalletRecord.updateTags(wallet, WalletRecordType.ConnectionRecord.name, connection.id, tagsJson).get()
 
 
         }
@@ -84,10 +92,10 @@ actual open class IndyWalletHolder : WalletHolder {
         *
         * */
 
-
         //TODO: find out better solution of looking up for connection
         return try {
-            val retrievedValue = WalletRecord.get(wallet, type, connectionId, options).get()
+            val retrievedValue =
+                WalletRecord.get(wallet, WalletRecordType.ConnectionRecord.name, connectionId, options).get()
             Connection.fromJson(extractValue(retrievedValue))
         } catch (e: ExecutionException) {
             if (e.cause is WalletItemNotFoundException)
@@ -96,16 +104,35 @@ actual open class IndyWalletHolder : WalletHolder {
                 throw e
         }
 
-
     }
 
-    private fun extractValue(retrievedValue: String?): String {
-        val matcher = Pattern.compile("value\":\"(.*})\",").matcher(retrievedValue)
-        matcher.find()
-        val group = matcher.group(1).replace("\\", "")
+    actual override fun findConnectionByVerKey(verKey: String): Connection? {
 
-        println(group)
-        return group
+        val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"
+        val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
+
+        println("Searching connections using query: $query")
+
+        val search = WalletSearch.open(wallet, WalletRecordType.ConnectionRecord.name, query, options).get()
+        //TODO: make proper fetch in batches insetad of just fetching 100 records
+        val foundRecordsJson = WalletSearch.searchFetchNextRecords(wallet, search, 100).get()
+        WalletSearch.closeSearch(search).get()
+
+        println("Fetched connections json = $foundRecordsJson")
+
+        val retrievedWalletRecords = Json {}.decodeFromString<RetrievedWalletRecords>(foundRecordsJson)
+
+        if(retrievedWalletRecords.totalCount == null || retrievedWalletRecords.totalCount == 0)
+            return null
+
+        //TODO: consider case when we received several records. Is it ok? What do do in this case? Need to make some robust solution instead of taking first one
+        return retrievedWalletRecords.records!!
+            .map {
+                println(it.value)
+                it.value
+            }.map<String, Connection> { Json.decodeFromString(it) }
+            .firstOrNull()
+
     }
 
     actual override fun openOrCreateWallet() {
@@ -125,16 +152,23 @@ actual open class IndyWalletHolder : WalletHolder {
         verkey = didResult.verkey
     }
 
+    //TODO: think how to return wallet instead of Any
+    override fun getWallet(): Any {
+        //TODO: check here if wallet is opened or not. Throw exception or open it
+        return wallet as Any
+    }
+
+
     //TODO: remove all unnecessary code and beautify this function
     actual override fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
         val byteArrayMessage = message.payload.toByteArray()
-        val recipientVk = recipientKeys.joinToString(separator = "\",\"",prefix = "[\"", postfix = "\"]")
+        val recipientVk = recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
         //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
         println("recipientKeys = $recipientVk")
 
-        val senderVk = if(useAnonCrypt)  null else verkey
+        val senderVk = if (useAnonCrypt) null else verkey
 
-        val byteArrayPackedMessage =  Crypto.packMessage(wallet, recipientVk, senderVk, byteArrayMessage).get()
+        val byteArrayPackedMessage = Crypto.packMessage(wallet, recipientVk, senderVk, byteArrayMessage).get()
 
         val decodedString = String(byteArrayPackedMessage)
 
@@ -148,7 +182,7 @@ actual open class IndyWalletHolder : WalletHolder {
 
         val byteArrayMessage = packedMessage.payload.toByteArray()
 
-        val byteArrayUnpackedMessage =  Crypto.unpackMessage(wallet, byteArrayMessage).get()
+        val byteArrayUnpackedMessage = Crypto.unpackMessage(wallet, byteArrayMessage).get()
 
         val decodedString = String(byteArrayUnpackedMessage)
 

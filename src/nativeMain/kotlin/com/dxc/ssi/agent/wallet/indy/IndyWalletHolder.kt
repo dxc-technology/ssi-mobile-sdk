@@ -30,6 +30,10 @@ actual open class IndyWalletHolder : WalletHolder {
     actual override fun openOrCreateWallet() {
     }
 
+    override fun getWallet(): Any {
+        TODO("Not yet implemented")
+    }
+
     actual override fun getConnectionRecordById(connectionId: String): Connection? {
         TODO("Not yet implemented")
     }
@@ -43,6 +47,10 @@ actual open class IndyWalletHolder : WalletHolder {
     }
 
     actual override fun unPackMessage(packedMessage: Message): Message {
+        TODO("Not yet implemented")
+    }
+
+    actual override fun findConnectionByVerKey(verKey: String): Connection? {
         TODO("Not yet implemented")
     }
 }

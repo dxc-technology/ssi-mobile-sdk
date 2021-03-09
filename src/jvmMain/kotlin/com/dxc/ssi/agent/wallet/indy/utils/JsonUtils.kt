@@ -12,6 +12,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
  * Object that makes serialization simplier
  */
 //TODO: think if this object can be moved to common layer
+//TODO: try to remove it at all and replace with kotlinx.serializatiion
 object SerializationUtils {
     val mapper: ObjectMapper = jacksonObjectMapper()
 
