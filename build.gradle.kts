@@ -15,6 +15,7 @@ plugins {
     id("kotlin-android-extensions")
     kotlin("plugin.serialization") version kotlinVersion
     kotlin("native.cocoapods") version kotlinVersion
+    id("maven-publish")
 }
 
 group = "com.dxc"
