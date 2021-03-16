@@ -1,9 +1,10 @@
 package com.dxc.ssi.agent.config
+
 //TODO: think if it is appropriate to move some configuration here
 class Configuration() {
     companion object {
         //TODO: see where those configs should be located
-        val genesisFilePath: String = "/home/ifedyanin/source/github/fedyiv/ssi-mobile-sdk-lumedic/files/docker_pool_transactions_genesis.txt"
+        var genesisFilePath: String = "/home/ifedyanin/source/github/fedyiv/ssi-mobile-sdk-lumedic/files/docker_pool_transactions_genesis.txt"
 
 
         //TODO: see where those configs should be located
