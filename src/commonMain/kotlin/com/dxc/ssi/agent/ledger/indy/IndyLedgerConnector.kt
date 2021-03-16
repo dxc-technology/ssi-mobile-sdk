@@ -4,7 +4,7 @@ import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialDefinition
 import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialDefinitionId
 
-expect class IndyLedgerConnector() : LedgerConnector {
+expect class IndyLedgerConnector(indyLedgerConnectorConfiguration: IndyLedgerConnectorConfiguration) : LedgerConnector {
 
     override fun retrieveCredentialDefinition(
         id: CredentialDefinitionId,

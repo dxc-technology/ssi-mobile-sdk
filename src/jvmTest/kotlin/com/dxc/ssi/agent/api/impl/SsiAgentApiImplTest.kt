@@ -9,10 +9,12 @@ import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.transport.Sleeper
-import org.junit.Ignore
 import org.junit.Test
+
 class SsiAgentApiImplTest {
 
     @Test
@@ -23,6 +25,7 @@ class SsiAgentApiImplTest {
         val ssiAgentApi = SsiAgentBuilderImpl()
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())
+            .withLedgerConnector(IndyLedgerConnector(IndyLedgerConnectorConfiguration(genesisFilePath = "<path to my genesis file>")))
             .build()
 
         ssiAgentApi.init()
