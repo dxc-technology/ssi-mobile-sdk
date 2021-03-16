@@ -50,6 +50,7 @@ kotlin {
 
     ios()
     cocoapods {
+        ios.deploymentTarget = "8.0"
         // Configure fields required by CocoaPods.
         summary = "Some description for a Kotlin/Native module"
         homepage = "Link to a Kotlin/Native module homepage"
@@ -58,9 +59,9 @@ kotlin {
         // By default, it is the name of the Gradle project.
         frameworkName = "my_framework"
 
-        pod("AFNetworking") {
-            version = "~> 4.0.1"
-        }
+//        pod("AFNetworking") {
+//            version = "~> 4.0.1"
+//        }
     }
 
     val hostOs = System.getProperty("os.name")
