@@ -12,7 +12,7 @@ import org.hyperledger.indy.sdk.ledger.Ledger
 import org.hyperledger.indy.sdk.pool.Pool
 import java.io.File
 
-actual class IndyLedgerConnector : LedgerConnector {
+actual class IndyLedgerConnector actual constructor(indyLedgerConnectorConfiguration: IndyLedgerConnectorConfiguration) : LedgerConnector {
     //TODO: decide if this is proper place for storing did or it should be somewhere in common module and probably out of ledger connector at all , since our did is more than about ledger
     override var did: String = ""
 
@@ -20,7 +20,7 @@ actual class IndyLedgerConnector : LedgerConnector {
 
     init {
         //TODO: think where to store and initialize pool variable
-        val genesisFile = File(Configuration.genesisFilePath)
+        val genesisFile = File(indyLedgerConnectorConfiguration.genesisFilePath)
         pool = PoolHelper.openOrCreate(genesisFile)
     }
 
