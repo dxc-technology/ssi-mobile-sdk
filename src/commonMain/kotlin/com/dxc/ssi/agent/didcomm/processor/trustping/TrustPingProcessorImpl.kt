@@ -9,6 +9,7 @@ import com.dxc.ssi.agent.didcomm.states.didexchange.DidExchangeStateMachine
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
 import com.dxc.ssi.agent.model.messages.Message
+import com.dxc.ssi.agent.model.messages.MessageContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -39,7 +40,7 @@ class TrustPingProcessorImpl(
     }
 
     //TODO: see if it is possible to generalize this function in order to go back to AbstractProcessor
-    override fun processMessage(message: Message) {
+    override fun processMessage(messageContext: MessageContext) {
         //TODO: implement this
 /*
         println("Started processing message $message")

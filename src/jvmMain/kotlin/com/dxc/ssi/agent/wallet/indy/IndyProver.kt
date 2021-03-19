@@ -1,30 +1,44 @@
 package com.dxc.ssi.agent.wallet.indy
 
+import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.wallet.Prover
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
+import com.dxc.ssi.agent.config.Configuration
+import com.dxc.ssi.agent.didcomm.model.common.Data
 import com.dxc.ssi.agent.didcomm.model.common.Thread
-import com.dxc.ssi.agent.didcomm.model.issue.container.Data
 import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
+import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
+import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
+import com.dxc.ssi.agent.ledger.indy.helpers.TailsHelper
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 import com.dxc.ssi.agent.utils.JsonUtils.extractValue
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils.jsonProcessor
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import com.dxc.ssi.agent.wallet.indy.model.issue.*
+import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefinitionId
+import com.dxc.ssi.agent.wallet.indy.model.revoke.IndyRevocationRegistryDefinition
+import com.dxc.ssi.agent.wallet.indy.model.revoke.RevocationState
+import com.dxc.ssi.agent.wallet.indy.model.verify.*
 import com.fasterxml.jackson.databind.util.ClassUtil.getRootCause
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import org.hyperledger.indy.sdk.LibIndy
 import org.hyperledger.indy.sdk.anoncreds.Anoncreds
+import org.hyperledger.indy.sdk.anoncreds.CredentialsSearchForProofReq
 import org.hyperledger.indy.sdk.anoncreds.DuplicateMasterSecretNameException
 import org.hyperledger.indy.sdk.non_secrets.WalletRecord
 import org.hyperledger.indy.sdk.wallet.Wallet
 import org.hyperledger.indy.sdk.wallet.WalletItemNotFoundException
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ExecutionException
 
 actual class IndyProver actual constructor(private val walletHolder: WalletHolder) : Prover {
 
     private var masterSecretId: String? = null
+
+    private val tailsPath = Configuration.tailsPath
 
     actual override fun createCredentialRequest(
         proverDid: String,
@@ -200,6 +214,11 @@ actual class IndyProver actual constructor(private val walletHolder: WalletHolde
             else
                 jsonProcessor.encodeToString(revocationRegistryDefinition)
 
+        println("receiveCredential: credentialRequestMetadataJson -> $credentialRequestMetadataJson")
+        println("receiveCredential: credentialJson -> $credentialJson")
+        println("receiveCredential: credDefJson -> $credDefJson")
+        println("receiveCredential: revRegDefJson -> $revRegDefJson")
+
         return Anoncreds.proverStoreCredential(
             walletHolder.getWallet() as Wallet,
             null,
@@ -209,6 +228,36 @@ actual class IndyProver actual constructor(private val walletHolder: WalletHolde
             revRegDefJson
         ).get()
 
+    }
+
+    override fun createRevocationState(
+        revocationRegistryDefinition: RevocationRegistryDefinition,
+        revocationRegistryEntry: RevocationRegistryEntry,
+        credentialRevocationId: String,
+        timestamp: Long
+    ): RevocationState {
+
+        val indyRevocationRegistryDefinition = revocationRegistryDefinition as IndyRevocationRegistryDefinition
+
+        val tailsReaderHandle = TailsHelper.getTailsHandler(tailsPath).reader.blobStorageReaderHandle
+
+        val revRegDefJson = jsonProcessor.encodeToString(revocationRegistryDefinition)
+
+        val revRegDeltaJson = jsonProcessor.encodeToString(revocationRegistryEntry)
+
+
+        val revStateJson = Anoncreds.createRevocationState(
+            tailsReaderHandle,
+            revRegDefJson,
+            revRegDeltaJson,
+            timestamp,
+            credentialRevocationId
+        ).get()
+
+        val revocationState = jsonProcessor.decodeFromString<RevocationState>(revStateJson)
+        revocationState.revocationRegistryIdRaw = indyRevocationRegistryDefinition.id
+
+        return revocationState
     }
 
     actual override fun buildCredentialObjectFromRawData(data: Data): Credential {
@@ -247,6 +296,224 @@ actual class IndyProver actual constructor(private val walletHolder: WalletHolde
             WalletRecordType.CredentialExchangeRecord.name,
             thread.thid
         ).get()
+    }
+
+    actual override fun buildPresentationRequestObjectFromRawData(data: Data): PresentationRequest {
+        val indyPresentationRequestJson = String(Base64.getMimeDecoder().decode(data.base64))
+
+        println("Received JSON PresentationRequest: $indyPresentationRequestJson")
+
+        val indyPresentationReuqest =
+            jsonProcessor.decodeFromString<IndyPresentationRequest>(indyPresentationRequestJson)
+
+        return indyPresentationReuqest
+    }
+
+    actual override fun createPresentation(
+        presentationRequest: PresentationRequest,
+        ledgerConnector: LedgerConnector,
+        /* TODO: add extra query parameter
+        extraQuery: Map<String, Map<String, Any>>?*/
+    ): Presentation {
+
+        val indyPresentationRequest = presentationRequest as IndyPresentationRequest
+
+        val proofRequestJson = jsonProcessor.encodeToString(presentationRequest)
+
+        println("In createPresentation function: proofRequestJson = $proofRequestJson")
+
+        //TODO: deal with extra query. Understand what it is and how to use it. See cordentity
+        val extraQueryJson = null
+
+        val searchObj =
+            CredentialsSearchForProofReq.open(walletHolder.getWallet() as Wallet, proofRequestJson, extraQueryJson)
+                .get()
+
+        val allSchemaIds = mutableListOf<IndySchemaId>()
+        val allCredentialDefinitionIds = mutableListOf<IndyCredentialDefinitionId>()
+        val allRevStates = mutableListOf<RevocationState>()
+
+        //TODO: remove copypaste code from requestedAttributes and requestedPredicates
+        val requestedAttributes = indyPresentationRequest.requestedAttributes.keys.associate { key ->
+
+            val credentialJson = searchObj.fetchNextCredentials(key, 1).get()
+
+            println("Retrieved for key = $key  -> credentialJson: $credentialJson")
+
+            val credentialForTheRequest =
+                jsonProcessor.decodeFromString<List<IndyCredentialForTheRequest>>(credentialJson)
+                    .firstOrNull()
+                    ?: throw RuntimeException("Unable to find attribute $key that satisfies proof request: ${indyPresentationRequest.requestedAttributes[key]}")
+
+            allSchemaIds.add(IndySchemaId.fromString(credentialForTheRequest.credInfo.schemaId))
+            allCredentialDefinitionIds.add(IndyCredentialDefinitionId.fromString(credentialForTheRequest.credInfo.credDefId))
+
+
+            val revStateAlreadyDone =
+                allRevStates.find { it.revocationRegistryIdRaw == credentialForTheRequest.credInfo.revRegId }
+
+            if (revStateAlreadyDone != null)
+                return@associate key to RequestedAttributeInfo(
+                    credentialForTheRequest.credInfo.referent,
+                    timestamp = revStateAlreadyDone.timestamp
+                )
+
+            if ((credentialForTheRequest.credInfo.credRevId == null) xor (indyPresentationRequest.nonRevoked == null))
+                throw RuntimeException("If credential is issued using some revocation registry, it should be proved to be non-revoked")
+
+            // if everything is ok and rev state is needed - pull it from ledger
+            val requestedAttributeInfo = if (
+                credentialForTheRequest.credInfo.credRevId != null &&
+                credentialForTheRequest.credInfo.revRegId != null &&
+                indyPresentationRequest.nonRevoked != null
+            ) {
+                val revocationState = provideRevocationState(
+                    RevocationRegistryDefinitionId.fromString(credentialForTheRequest.credInfo.revRegId),
+                    credentialForTheRequest.credInfo.credRevId,
+                    indyPresentationRequest.nonRevoked,
+                    ledgerConnector
+                )
+
+                allRevStates.add(revocationState)
+
+                RequestedAttributeInfo(
+                    credentialForTheRequest.credInfo.referent,
+                    timestamp = revocationState.timestamp
+                )
+            } else { // else just give up
+                RequestedAttributeInfo(credentialForTheRequest.credInfo.referent)
+            }
+
+            //key to requestedAttributeInfo
+            key to requestedAttributeInfo
+        }
+
+        val requestedPredicates = indyPresentationRequest.requestedPredicates.keys.associate { key ->
+            val credentialJson = searchObj.fetchNextCredentials(key, 1).get()
+
+            println("Retrieved for key = $key  -> credentialJson: $credentialJson")
+
+            val credentialForTheRequest =
+                jsonProcessor.decodeFromString<List<IndyCredentialForTheRequest>>(credentialJson)
+                    .firstOrNull()
+                    ?: throw RuntimeException("Unable to find attribute $key that satisfies proof request: ${indyPresentationRequest.requestedAttributes[key]}")
+
+            allSchemaIds.add(IndySchemaId.fromString(credentialForTheRequest.credInfo.schemaId))
+            allCredentialDefinitionIds.add(IndyCredentialDefinitionId.fromString(credentialForTheRequest.credInfo.credDefId))
+
+            val revStateAlreadyDone =
+                allRevStates.find { it.revocationRegistryIdRaw == credentialForTheRequest.credInfo.revRegId }
+
+            if (revStateAlreadyDone != null)
+                return@associate key to RequestedPredicateInfo(
+                    credentialForTheRequest.credInfo.referent,
+                    revStateAlreadyDone.timestamp
+                )
+
+            // if everything is ok and rev state is needed - pull it from ledger
+            val requestedPredicateInfo = if (
+                credentialForTheRequest.credInfo.credRevId != null &&
+                credentialForTheRequest.credInfo.revRegId != null &&
+                presentationRequest.nonRevoked != null
+            ) {
+                val revocationState = provideRevocationState(
+                    RevocationRegistryDefinitionId.fromString(credentialForTheRequest.credInfo.revRegId),
+                    credentialForTheRequest.credInfo.credRevId,
+                    presentationRequest.nonRevoked,
+                    ledgerConnector
+                )
+
+                allRevStates.add(revocationState)
+
+                RequestedPredicateInfo(
+                    credentialForTheRequest.credInfo.referent,
+                    revocationState.timestamp
+                )
+            } else { // else just give up
+                RequestedPredicateInfo(credentialForTheRequest.credInfo.referent, null)
+            }
+
+            key to requestedPredicateInfo
+        }
+
+        searchObj.closeSearch().get()
+
+        val requestedCredentials = RequestedCredentials(requestedAttributes, requestedPredicates, mapOf())
+        val requestedCredentialsJson = jsonProcessor.encodeToString(requestedCredentials)
+
+        val allSchemas = allSchemaIds.distinct().map { ledgerConnector.retrieveSchema(it) as IndySchema }
+        val allCredentialDefs = allCredentialDefinitionIds.distinct()
+            .map { ledgerConnector.retrieveCredentialDefinition(it) as IndyCredentialDefinition }
+
+        val usedSchemas = allSchemas.associate { it.id to it }
+        val usedCredentialDefs = allCredentialDefs.associate { it.id to it }
+
+        val usedRevocationStates = allRevStates
+            .associate {
+                val stateByTimestamp = hashMapOf<Long, RevocationState>()
+                stateByTimestamp[it.timestamp] = it
+
+                it.revocationRegistryIdRaw!! to stateByTimestamp
+            }
+
+        val usedSchemasJson = jsonProcessor.encodeToString(usedSchemas)
+        val usedCredentialDefsJson = jsonProcessor.encodeToString(usedCredentialDefs)
+        val usedRevStatesJson = jsonProcessor.encodeToString(usedRevocationStates)
+
+
+        println("proofRequestJson -> $proofRequestJson")
+        println("requestedCredentialsJson -> $requestedCredentialsJson")
+        println("masterSecretId -> $masterSecretId")
+        println("usedSchemasJson -> $usedSchemasJson")
+        println("usedCredentialDefsJson -> $usedCredentialDefsJson")
+        println("usedRevStatesJson -> $usedRevStatesJson")
+
+        val proverProofJson = Anoncreds.proverCreateProof(
+            walletHolder.getWallet() as Wallet,
+            proofRequestJson,
+            requestedCredentialsJson,
+            masterSecretId,
+            usedSchemasJson,
+            usedCredentialDefsJson,
+            usedRevStatesJson
+        ).get()
+
+        println("Indy proof created: $proverProofJson")
+
+        val presentation = jsonProcessor.decodeFromString<IndyPresentation>(proverProofJson)
+
+        return presentation
+    }
+
+    private fun provideRevocationState(
+        revRegId: RevocationRegistryDefinitionId,
+        credRevId: String,
+        interval: Interval,
+        ledgerConnector: LedgerConnector
+    ): RevocationState {
+        val revocationRegistryDefinition = ledgerConnector.retrieveRevocationRegistryDefinition(revRegId)
+            ?: throw IndyRevRegNotFoundException(revRegId, "Get revocation state has been failed")
+
+        val response = ledgerConnector.retrieveRevocationRegistryDelta(revRegId, Interval(null, interval.to))
+            ?: throw IndyRevDeltaNotFoundException(revRegId, "Interval is $interval")
+        val (timestamp, revRegDelta) = response
+
+        val revocationState = createRevocationState(revocationRegistryDefinition, revRegDelta, credRevId, timestamp)
+
+        return revocationState
+
+    }
+
+    actual override fun extractPresentationDataFromPresentation(presentation: Presentation): Data {
+
+        //TODO: check if this type cast is needed here
+        val presentationJson =
+            jsonProcessor.encodeToString(presentation as IndyPresentation)
+        println("extractPresentationDataFromPresentation: presentationJson = $presentationJson")
+
+
+        return Data(base64 = Base64.getEncoder().encodeToString(presentationJson.toByteArray()))
+
     }
 
 }

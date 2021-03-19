@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.didcomm.model.issue.container
 
+import com.dxc.ssi.agent.didcomm.model.common.Attach
 import com.dxc.ssi.agent.didcomm.model.common.Thread
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

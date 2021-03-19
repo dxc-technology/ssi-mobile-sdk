@@ -1,4 +1,4 @@
-package com.dxc.ssi.agent.didcomm.model.issue.container
+package com.dxc.ssi.agent.didcomm.model.common
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

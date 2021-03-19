@@ -1,11 +1,16 @@
 package com.dxc.ssi.agent.api.pluggable.wallet
 
+import com.dxc.ssi.agent.api.pluggable.LedgerConnector
+import com.dxc.ssi.agent.didcomm.model.common.Data
 import com.dxc.ssi.agent.didcomm.model.common.Thread
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
-import com.dxc.ssi.agent.didcomm.model.issue.container.Data
 import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
+import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
+import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
+import com.dxc.ssi.agent.wallet.indy.model.revoke.RevocationState
+import com.dxc.ssi.agent.wallet.indy.model.verify.RevocationRegistryEntry
 
 /**
  * This entity is able to receive credentials and create proofs about them.
@@ -106,13 +111,13 @@ interface Prover {
      *
      * @return [RevocationState]
      */
-    /*   fun createRevocationState(
-           revocationRegistryDefinition: RevocationRegistryDefinition,
-           revocationRegistryEntry: RevocationRegistryEntry,
-           credentialRevocationId: String,
-           timestamp: Long
-       ): RevocationState
-   */
+    fun createRevocationState(
+        revocationRegistryDefinition: RevocationRegistryDefinition,
+        revocationRegistryEntry: RevocationRegistryEntry,
+        credentialRevocationId: String,
+        timestamp: Long
+    ): RevocationState
+
     /**
      * Creates master secret by id
      *
@@ -123,6 +128,13 @@ interface Prover {
     fun buildCredentialObjectFromRawData(data: Data): Credential
     fun buildCredentialOfferObjectFromRawData(data: Data): CredentialOffer
     fun removeCredentialExchangeRecordByThread(thread: Thread)
+    fun buildPresentationRequestObjectFromRawData(data: Data): PresentationRequest
+    fun createPresentation(
+        presentationRequest: PresentationRequest,
+        ledgerConnector: LedgerConnector,
+    ): Presentation
+
+    fun extractPresentationDataFromPresentation(presentation: Presentation): Data
 
 
 }

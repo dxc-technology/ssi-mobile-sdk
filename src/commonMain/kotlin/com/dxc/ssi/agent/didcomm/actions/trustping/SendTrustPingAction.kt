@@ -4,12 +4,11 @@ import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
-import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
+import com.dxc.ssi.agent.didcomm.commoon.MessagePacker
 import com.dxc.ssi.agent.didcomm.model.trustping.TrustPingRequest
 import com.dxc.ssi.agent.didcomm.model.trustping.TrustPingResponse
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.messages.Message
-import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import com.dxc.ssi.agent.model.messages.ReceivedUnpackedMessage
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -35,25 +34,18 @@ class SendTrustPingAction(
                 responseRequested = true
             )
 
-        val trustPingRequestJson = Json.encodeToString(trustPingRequest)
 
-        val messageEnvelop =
-            MessageEnvelop(
-                payload = walletConnector.walletHolder.packMessage(
-                    Message(trustPingRequestJson),
-                    connection.peerRecipientKeys
-                )
+        val messageToSend =
+            MessagePacker.packAndPrepareForwardMessage(
+                Message(Json.encodeToString(trustPingRequest)),
+                connection,
+                walletConnector
             )
-
-        println("Packed message: ${messageEnvelop.payload}")
 
         // 2. Send TrustPingRequestMessage
 
         //TODO: ensure that transport function is synchronous here because we will save new status to wallet only after actual message was sent
-        transport.sendMessage(
-            connection,
-            messageEnvelop
-        )
+        transport.sendMessage(connection, messageToSend)
 
         // 3. Block and wait for trust ping result for specific timeout
         //TODO: this is not scalable and not allowing parallel connections, only for POC purpose. Needs to be reworked
@@ -70,6 +62,7 @@ class SendTrustPingAction(
         *
         * */
 
+        //TODO: there is a problem here if we have to parallel connections at the same time
         val receivedMessage = transport.receiveNextMessage()
 
         val unpackedMessage = walletConnector.walletHolder.unPackMessage(Message(receivedMessage.payload))
@@ -79,7 +72,7 @@ class SendTrustPingAction(
         val trustPingResponse =
             Json { ignoreUnknownKeys = true }.decodeFromString<TrustPingResponse>(receivedUnpackedMessage.message)
 
-        if(trustPingResponse.thread.thid == requestId)
+        if (trustPingResponse.thread.thid == requestId)
             return ActionResult(trustPingSuccessful = true)
 
         return ActionResult(trustPingSuccessful = false)

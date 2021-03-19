@@ -28,17 +28,6 @@ class DidExchangeProcessorImpl(
     val connectionResponderController: ConnectionResponderController?
 ) : DidExchangeProcessor {
 
-    private val stateMachine = DidExchangeStateMachine()
-
-    //TODO: reuse kotlin possibility to override states to make abstract property instead of abstract method if possible
-    fun getStateMachine(): StateMachine {
-        return stateMachine
-    }
-
-    fun getCurrentState(): State {
-        // walletConnector.walletHolder.getConnectionRecordById()
-        TODO("Not implemented")
-    }
 
     override fun initiateConnectionByInvitation(invitation: String): Connection {
 

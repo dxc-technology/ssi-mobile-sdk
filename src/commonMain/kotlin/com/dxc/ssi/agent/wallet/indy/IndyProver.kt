@@ -1,11 +1,14 @@
 package com.dxc.ssi.agent.wallet.indy
 
+import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.wallet.Prover
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
+import com.dxc.ssi.agent.didcomm.model.common.Data
 import com.dxc.ssi.agent.didcomm.model.common.Thread
-import com.dxc.ssi.agent.didcomm.model.issue.container.Data
 import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
+import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
+import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 
 //TODO: consider going deeper and expect not our classes but underlying library instead. I.e. make this class common  but implement Wallet, WalletRecord etc, classes from the library
@@ -35,5 +38,12 @@ expect class IndyProver(walletHolder: WalletHolder) : Prover {
     override fun buildCredentialObjectFromRawData(data: Data): Credential
     override fun buildCredentialOfferObjectFromRawData(data: Data): CredentialOffer
     override fun removeCredentialExchangeRecordByThread(thread: Thread)
+    override fun buildPresentationRequestObjectFromRawData(data: Data): PresentationRequest
+    override fun createPresentation(
+        presentationRequest: PresentationRequest,
+        ledgerConnector: LedgerConnector,
+    ): Presentation
+
+    override fun extractPresentationDataFromPresentation(presentation: Presentation): Data
 
 }

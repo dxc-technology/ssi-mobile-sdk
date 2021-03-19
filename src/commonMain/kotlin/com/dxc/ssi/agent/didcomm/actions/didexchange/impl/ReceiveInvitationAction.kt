@@ -6,13 +6,11 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
+import com.dxc.ssi.agent.didcomm.commoon.MessagePacker
 import com.dxc.ssi.agent.didcomm.model.common.Service
 import com.dxc.ssi.agent.didcomm.model.didexchange.*
-import com.dxc.ssi.agent.didcomm.model.envelop.EncryptedEnvelop
-import com.dxc.ssi.agent.didcomm.model.other.Forward
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.messages.Message
-import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import io.ktor.util.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -69,34 +67,12 @@ class ReceiveInvitationAction(
             //send request
             //TODO: introduce message packing/unpacking here
 
-            val messageEnvelop =
-                MessageEnvelop(
-                    payload = walletConnector.walletHolder.packMessage(
-                        Message(connectionRequestJson),
-                        connection.peerRecipientKeys
-                    )
-                )
+            val messageToSend =
+                MessagePacker.packAndPrepareForwardMessage(Message(connectionRequestJson), connection, walletConnector)
 
-            println("Packed message: ${messageEnvelop.payload}")
-
-            val forwardMessage = buildForwardMessage(messageEnvelop, inviterDid)
-
-
-            val outerMessageEnvelop = MessageEnvelop(
-                payload = walletConnector.walletHolder.packMessage(
-                    Message(Json.encodeToString(forwardMessage)),
-                    connection.peerRecipientKeys,
-                    useAnonCrypt = true
-                )
-            )
-
-            println("Packed forward message: ${outerMessageEnvelop.payload}")
 
             //TODO: ensure that transport function is synchronous here because we will save new status to wallet only after actual message was sent
-            transport.sendMessage(
-                connection,
-                outerMessageEnvelop
-            )
+            transport.sendMessage(connection, messageToSend)
 
             //TODO: set proper state here
             val updatedConnection = connection.copy(state = "RequestSent")
@@ -120,20 +96,6 @@ class ReceiveInvitationAction(
         //
         //val connection2 = walletConnector.walletHolder.getConnectionRecordById(connection.id)
 
-
-    }
-
-
-    private fun buildForwardMessage(messageEnvelop: MessageEnvelop, inviterDid: String): Forward {
-
-        return Forward(
-            //TODO: decide where this type should be located or whether it needs to be concatenetad
-            type = "https://didcomm.org/routing/1.0/forward",
-            //TODO: check what the id should be
-            id = "test_id",
-            to = inviterDid,
-            msg = Json { ignoreUnknownKeys = true }.decodeFromString<EncryptedEnvelop>(messageEnvelop.payload)
-        )
 
     }
 

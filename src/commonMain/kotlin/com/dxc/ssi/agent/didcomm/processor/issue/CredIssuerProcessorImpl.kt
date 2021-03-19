@@ -33,7 +33,9 @@ class CredIssuerProcessorImpl(
             CredIssueMessageType.CREDENTIAL_PROPOSAL -> TODO("Not implemented")
             CredIssueMessageType.CREDENTIAL_OFFER -> {
                 val credentialOfferMessage =
-                    Json { ignoreUnknownKeys = true }.decodeFromString<CredentialOfferContainer>(messageContext.receivedUnpackedMessage.message)
+                    Json {
+                        ignoreUnknownKeys = true
+                    }.decodeFromString<CredentialOfferContainer>(messageContext.receivedUnpackedMessage.message)
                 ReceiveCredentialOfferAction(
                     walletConnector, ledgerConnector,
                     //TODO: make proper check of connection here to avoid null-pointer and generate Problem Report
@@ -43,16 +45,17 @@ class CredIssuerProcessorImpl(
             CredIssueMessageType.CREDENTIAL_REQUEST -> TODO("Not implemented")
             CredIssueMessageType.CREDENTIAL -> {
                 val credentialMessage =
-                    Json { ignoreUnknownKeys = true }.decodeFromString<CredentialContainer>(messageContext.receivedUnpackedMessage.message)
+                    Json {
+                        ignoreUnknownKeys = true
+                    }.decodeFromString<CredentialContainer>(messageContext.receivedUnpackedMessage.message)
                 ReceiveCredentialAction(
                     walletConnector,
-                    transport, credReceiverController!!, credentialMessage,connection = messageContext.connection!!
+                    transport, credReceiverController!!, credentialMessage, connection = messageContext.connection!!
                 ).perform()
             }
             CredIssueMessageType.CREDENTIAL_ACK -> TODO("Not implemented")
             CredIssueMessageType.CREDENTIAL_REJECT -> TODO("Not implemented")
         }
-
 
     }
 

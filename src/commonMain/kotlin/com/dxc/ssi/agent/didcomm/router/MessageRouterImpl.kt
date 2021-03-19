@@ -39,7 +39,13 @@ class MessageRouterImpl(
         callbacks.credIssuerController,
         callbacks.credReceiverController
     )
-    private val credVerifierProcessor: CredVerifierProcessor = CredVerifierProcessorImpl(walletConnector, transport)
+    private val credVerifierProcessor: CredVerifierProcessor = CredVerifierProcessorImpl(
+        walletConnector,
+        ledgerConnector,
+        transport,
+        callbacks.credVerifierController,
+        callbacks.credPresenterController
+    )
 
     //TODO: check connection in message context and throw exception if it is not null if it is expected to be non-null
     override fun routeAndProcessMessage(messageContext: MessageContext) {
@@ -53,6 +59,7 @@ class MessageRouterImpl(
             Route.DidExchange -> didExchangeProcessor.processMessage(messageContext)
             Route.CredIssuer -> credIssuerProcessor.processMessage(messageContext)
             Route.CredVerifier -> credVerifierProcessor.processMessage(messageContext)
+            Route.TrustPing -> trustPingProcessor.processMessage(messageContext)
         }
 
     }
@@ -60,11 +67,15 @@ class MessageRouterImpl(
     fun determineRoute(messageContext: MessageContext): Route {
         //TODO: unify this extraction of type from message. Currently it is used in sevral places
         val typeAttribute =
-            Json { ignoreUnknownKeys = true }.decodeFromString<BasicMessageWithTypeOnly>(messageContext.receivedUnpackedMessage.message).type
+            Json {
+                ignoreUnknownKeys = true
+            }.decodeFromString<BasicMessageWithTypeOnly>(messageContext.receivedUnpackedMessage.message).type
 
         val route = when {
             typeAttribute.contains("/issue-credential/1") -> Route.CredIssuer
             typeAttribute.contains("/connections/1") -> Route.DidExchange
+            typeAttribute.contains("/present-proof/1") -> Route.CredVerifier
+            typeAttribute.contains("/trust_ping/1") -> Route.TrustPing
             else -> throw IllegalArgumentException("Unknown message type: $typeAttribute")
         }
 
@@ -77,6 +88,7 @@ class MessageRouterImpl(
     enum class Route {
         DidExchange,
         CredIssuer,
-        CredVerifier
+        CredVerifier,
+        TrustPing
     }
 }

@@ -3,6 +3,12 @@ package com.dxc.ssi.agent.api.pluggable
 import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialDefinition
 import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialDefinitionId
+import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
+import com.dxc.ssi.agent.didcomm.model.verify.data.Schema
+import com.dxc.ssi.agent.didcomm.model.verify.data.SchemaId
+import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefinitionId
+import com.dxc.ssi.agent.wallet.indy.model.verify.Interval
+import com.dxc.ssi.agent.wallet.indy.model.verify.RevocationRegistryEntry
 
 
 /**
@@ -95,12 +101,12 @@ interface LedgerConnector {
      *
      * @return [Schema] or [null] if none exists on ledger
      */
-    /*   fun retrieveSchema(
-           id: SchemaId,
-           delayMs: Long = RETRY_DELAY_MS,
-           retryTimes: Int = RETRY_TIMES
-       ): Schema?
-   */
+    fun retrieveSchema(
+        id: SchemaId,
+        delayMs: Long = Configuration.RETRY_DELAY_MS,
+        retryTimes: Int = Configuration.RETRY_TIMES
+    ): Schema?
+
     /**
      * Retrieves credential definition from ledger
      *
@@ -142,12 +148,12 @@ interface LedgerConnector {
      *
      * @return [RevocationRegistryDefinition] or [null] if none exists on ledger
      */
-/*    fun retrieveRevocationRegistryDefinition(
+    fun retrieveRevocationRegistryDefinition(
         id: RevocationRegistryDefinitionId,
-        delayMs: Long = RETRY_DELAY_MS,
-        retryTimes: Int = RETRY_TIMES
+        delayMs: Long = Configuration.RETRY_DELAY_MS,
+        retryTimes: Int = Configuration.RETRY_TIMES
     ): RevocationRegistryDefinition?
-*/
+
     /**
      * Retrieves revocation registry entry from ledger
      *
@@ -177,13 +183,14 @@ interface LedgerConnector {
      *
      * @return ([Pair] of [Long] (timestamp) and [RevocationRegistryEntry]) or [null] if none exists on ledger
      */
-    /*  fun retrieveRevocationRegistryDelta(
-          id: RevocationRegistryDefinitionId,
-          interval: Interval,
-          delayMs: Long = RETRY_DELAY_MS,
-          retryTimes: Int = RETRY_TIMES
-      ): Pair<Long, RevocationRegistryEntry>?
-  */
+    //TODO: replace indy specifics data model to general data model
+    fun retrieveRevocationRegistryDelta(
+        id: RevocationRegistryDefinitionId,
+        interval: Interval,
+        delayMs: Long = Configuration.RETRY_DELAY_MS,
+        retryTimes: Int = Configuration.RETRY_TIMES
+    ): Pair<Long, RevocationRegistryEntry>?
+
     /**
      * Gets from ledger all data needed to verify proof. When prover creates proof he also uses this public data.
      * So prover and verifier are using the same public immutable data to generate cryptographic objects.

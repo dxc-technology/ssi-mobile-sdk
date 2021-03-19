@@ -26,8 +26,6 @@ object AnyToStringSerializer : KSerializer<String> {
         val jsonEncoder = encoder as? JsonEncoder ?: error("Can be deserialized only by JSON")
         jsonEncoder.encodeJsonElement(jsonElement)
 
-
-        // encoder.encodeString(value)
     }
 
 }
