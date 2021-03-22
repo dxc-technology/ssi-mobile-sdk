@@ -3,6 +3,7 @@ package com.dxc.ssi.agent.wallet.indy
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -13,7 +14,8 @@ class LibIndyAccessTest {
     fun simpleLibIndyCall() {
 
 
-        val ledgerConnector = IndyLedgerConnector()
+        val ledgerConnector =
+            IndyLedgerConnector(IndyLedgerConnectorConfiguration("/home/ifedyanin/source/github/fedyiv/ssi-mobile-sdk-lumedic/files/docker_pool_transactions_genesis.txt"))
         val walletHolder = IndyWalletHolder()
         val issuer = IndyIssuer(walletHolder!!)
         val verifier = IndyVerifier(walletHolder!!)
