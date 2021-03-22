@@ -4,6 +4,7 @@ import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
+import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
@@ -34,16 +35,16 @@ class SsiAgentApiImplTest {
 
 
         val issuerInvitationUrl =
-            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkdaa202ajJMc2RVYXl4NHRia3B0TTRDQlp0SnhSc2VkdHhwTlQ2N3l6enBKIl0sInJlY2lwaWVudEtleXMiOlsiQWRqSzRiOWR3RFJoZ3ZHR2I5TG5hekxDRjNkQ1JqRmVpMm5SbWlFQXNacTUiXSwiQGlkIjoiZmEwZGVhNTItMWNmMy00YzZhLWJkMWMtYjFhODVkNjI4MTM2IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkhFTjl1c3RkYlZiTHUyMXBkd0xLTEZlQmJzaVM4NnB3dUZHM0gxZEZrNVJXIl0sInJlY2lwaWVudEtleXMiOlsiQmJZdWRKeUR6aXRYcmtxdFdZTWZHTWtLZ3ZZMkVYc0tjMUExQ1NERXA5aFEiXSwiQGlkIjoiNmYwNmFiOTItMjdkYy00NmUxLWExNzMtYmFiNmY2MGI5MTI2IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
         val verifierInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiOVJncHpheVRGTTNjTFdTODRDNUNGaWNvSGpzcVBnTmZCUTJqNW85aWlocUMiXSwicmVjaXBpZW50S2V5cyI6WyJIcDlxZHczY29VR2U5RXFiV2syc1ZHUEFCOVhaTG0zNW1RQ1dYbkpUTkFiNCJdLCJAaWQiOiI2Yzk5NDdlZC0zOTRlLTQ5ZWYtYjliMS04NDM1MWUyNjZhYTAiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiQnJYUWVLUkpnR3hlRDNOYmthZVJzVnhnTHFLcktQaG1mMW9zMUdxMVlramUiXSwicmVjaXBpZW50S2V5cyI6WyJISzl3WmFlS2VjWDNNTkhiaEVNRUVZVEozZkFUWDFUVWl0dWo3MXlmSmRwSyJdLCJAaWQiOiIxNDBiZjAzMC03NDZhLTQwN2ItOTlkOC1lOTVhYjliM2M4NmUiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
         println("Connecting to issuer")
         ssiAgentApi.connect(issuerInvitationUrl)
 
         //TODO: ensure that connection can be established without delay between two connections
-        Sleeper().sleep(4000)
+        //Sleeper().sleep(4000)
 
         println("Connecting to verifier")
         ssiAgentApi.connect(verifierInvitationUrl)
@@ -116,6 +117,11 @@ class SsiAgentApiImplTest {
 
         override fun onCompleted(connection: Connection): CallbackResult {
             println("Connection completed : $connection")
+            return CallbackResult(true)
+        }
+
+        override fun onAbandoned(connection: Connection, problemReport: ProblemReport): CallbackResult {
+            println("Connection abandoned : $connection")
             return CallbackResult(true)
         }
 

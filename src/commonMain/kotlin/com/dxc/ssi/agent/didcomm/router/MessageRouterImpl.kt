@@ -11,6 +11,7 @@ import com.dxc.ssi.agent.didcomm.processor.issue.CredIssuerProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.verify.CredVerifierProcessor
 import com.dxc.ssi.agent.didcomm.processor.verify.CredVerifierProcessorImpl
+import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
 import com.dxc.ssi.agent.model.messages.MessageContext
 import kotlinx.serialization.decodeFromString
@@ -19,12 +20,13 @@ import kotlinx.serialization.json.Json
 class MessageRouterImpl(
     private val walletConnector: WalletConnector,
     private val ledgerConnector: LedgerConnector,
+    private val trustPingTrackerService: TrustPingTrackerService,
     private val transport: Transport,
     private val callbacks: Callbacks
 ) :
     MessageRouter {
 
-    override val trustPingProcessor = TrustPingProcessorImpl(walletConnector, transport)
+    override val trustPingProcessor = TrustPingProcessorImpl(walletConnector, transport, trustPingTrackerService)
     override val didExchangeProcessor: DidExchangeProcessor = DidExchangeProcessorImpl(
         walletConnector,
         transport,

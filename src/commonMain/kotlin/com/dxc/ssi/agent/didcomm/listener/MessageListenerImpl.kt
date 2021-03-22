@@ -6,6 +6,7 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.router.MessageRouter
 import com.dxc.ssi.agent.didcomm.router.MessageRouterImpl
+import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.MessageContext
@@ -18,12 +19,14 @@ class MessageListenerImpl(
     private val transport: Transport,
     private val walletConnector: WalletConnector,
     private val ledgerConnector: LedgerConnector,
+    private val trustPingTrackerService: TrustPingTrackerService,
     callbacks: Callbacks
 ) :
     MessageListener {
 
     private var isShutdown: Boolean = false
-    override val messageRouter: MessageRouter = MessageRouterImpl(walletConnector, ledgerConnector, transport, callbacks)
+    override val messageRouter: MessageRouter =
+        MessageRouterImpl(walletConnector, ledgerConnector, trustPingTrackerService, transport, callbacks)
 
     override fun shutdown() {
         isShutdown = true
@@ -55,8 +58,10 @@ class MessageListenerImpl(
         val receivedUnpackedMessage = Json.decodeFromString<ReceivedUnpackedMessage>(unpackedMessage.payload)
         println("Received Unpacked message: $receivedUnpackedMessage")
 
-        println("sender verkey = ${receivedUnpackedMessage.senderVerKey}" +
-                "receiver_verkey = ${receivedUnpackedMessage.recipientVerKey}")
+        println(
+            "sender verkey = ${receivedUnpackedMessage.senderVerKey}" +
+                    "receiver_verkey = ${receivedUnpackedMessage.recipientVerKey}"
+        )
         val connection = getConnectionByVerkey(receivedUnpackedMessage.senderVerKey)
 
         return MessageContext(connection, receivedUnpackedMessage)

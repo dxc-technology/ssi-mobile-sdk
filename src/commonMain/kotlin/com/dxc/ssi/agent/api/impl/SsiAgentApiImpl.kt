@@ -8,6 +8,7 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
+import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.Connection
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -18,8 +19,12 @@ class SsiAgentApiImpl(
     private val ledgerConnector: LedgerConnector,
     private val callbacks: Callbacks
 ) : SsiAgentApi {
+    private val trustPingTrackerService =
+        TrustPingTrackerService(walletConnector, callbacks.connectionInitiatorController!!)
+
     private val messageListener: MessageListener =
-        MessageListenerImpl(transport, walletConnector, ledgerConnector, callbacks)
+        MessageListenerImpl(transport, walletConnector, ledgerConnector, trustPingTrackerService, callbacks)
+
 
     //TODO: add callback controllers here
 
@@ -32,8 +37,10 @@ class SsiAgentApiImpl(
             walletConnector.prover!!.createMasterSecret(Configuration.masterSecretId)
         }
 
-//TODO: design proper concurrency there
+        //TODO: design proper concurrency there
         GlobalScope.launch { messageListener.listen() }
+
+        GlobalScope.launch { trustPingTrackerService.track() }
 
     }
 

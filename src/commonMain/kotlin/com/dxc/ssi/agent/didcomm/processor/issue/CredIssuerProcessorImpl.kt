@@ -22,7 +22,6 @@ class CredIssuerProcessorImpl(
     val credIssuerController: CredIssuerController?,
     val credReceiverController: CredReceiverController?
 ) : CredIssuerProcessor {
-    private val stateMachine = CredentialIssuenceStateMachine()
 
     // TODO: complete processing other message types
     //TODO: see if it can be unified with DidExcange Processor
