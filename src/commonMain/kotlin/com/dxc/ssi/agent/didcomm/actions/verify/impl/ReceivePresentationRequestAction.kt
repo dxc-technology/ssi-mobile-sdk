@@ -5,6 +5,7 @@ import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.verify.CredentialVerificationAction
 import com.dxc.ssi.agent.didcomm.commoon.MessagePacker
@@ -15,17 +16,25 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestConta
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils.jsonProcessor
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class ReceivePresentationRequestAction(
-    private val walletConnector: WalletConnector,
-    private val ledgerConnector: LedgerConnector,
-    private val transport: Transport,
-    private val credPresenterController: CredPresenterController,
-    private val presentationRequestMessage: PresentationRequestContainer,
-    private val connection: Connection
+    private val actionParams: ActionParams
 ) : CredentialVerificationAction {
     override fun perform(): ActionResult {
+
+        val messageContext = actionParams.messageContext
+        val credPresenterController = actionParams.callbacks.credPresenterController!!
+        val connection = actionParams.messageContext.connection!!
+        val walletConnector = actionParams.walletConnector
+        val ledgerConnector = actionParams.ledgerConnector
+        val transport = actionParams.transport
+
+        val presentationRequestMessage = Json {
+            ignoreUnknownKeys = true
+        }.decodeFromString<PresentationRequestContainer>(messageContext.receivedUnpackedMessage.message)
 
         if (credPresenterController
                 .onRequestReceived(connection, presentationRequestMessage).canProceedFurther

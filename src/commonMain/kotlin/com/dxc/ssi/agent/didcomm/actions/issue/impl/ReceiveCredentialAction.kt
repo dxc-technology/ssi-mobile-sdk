@@ -1,21 +1,26 @@
 package com.dxc.ssi.agent.didcomm.actions.issue.impl
 
-import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
-import com.dxc.ssi.agent.api.pluggable.Transport
-import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.issue.CredentialIssuenceAction
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
-import com.dxc.ssi.agent.model.Connection
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 class ReceiveCredentialAction(
-    private val walletConnector: WalletConnector,
-    private val transport: Transport,
-    private val credReceiverController: CredReceiverController,
-    private val credentialContainerMessage: CredentialContainer,
-    private val connection: Connection
+    private val actionParams: ActionParams
 ) : CredentialIssuenceAction {
     override fun perform(): ActionResult {
+
+        val walletConnector = actionParams.walletConnector
+        val credReceiverController = actionParams.callbacks.credReceiverController!!
+        val connection = actionParams.messageContext.connection!!
+
+        val credentialContainerMessage =
+            Json {
+                ignoreUnknownKeys = true
+            }.decodeFromString<CredentialContainer>(actionParams.messageContext.receivedUnpackedMessage.message)
+
 
         // 1. Check current state
 

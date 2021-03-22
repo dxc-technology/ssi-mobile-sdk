@@ -16,12 +16,13 @@ import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.transport.Sleeper
+import org.junit.Ignore
 import org.junit.Test
 
 class SsiAgentApiImplTest {
 
     @Test
-    //@Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -38,10 +39,10 @@ class SsiAgentApiImplTest {
 
 
         val issuerInvitationUrl =
-            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkhQSzZSQVkyYmcxZTRiY3dnUGJkTnc5UEVUb3JlTnQ4SzZoNkVoSHBTc2RtIl0sInJlY2lwaWVudEtleXMiOlsiM01Qdk5iZ3B0OXI5WTZjV1o4MXdkVTNVVmNvaktSRGZZMWtDRVFGUk53MmsiXSwiQGlkIjoiOWJiOGQzZTItY2U2Mi00YjhmLWJiNzgtYjg3ZTczZDkzZmQ4IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjVKYU5uNlpYSzRXS1JLd1pMNUdaMmF0OGg5NEpRWDQ5SzNaTlI4V3BoU1M0Il0sInJlY2lwaWVudEtleXMiOlsiQmU2N1g1TDNKcHFTdFZyZ2J5dW1EaWZhaU5DZ1Bzd2t5OTlObkNHUjN6UEoiXSwiQGlkIjoiZWU5MmIxNDQtODZlMi00MzVkLWJmY2EtOTk4MGVhZDVkYjgyIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
         val verifierInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiN0RncmlRVG9FNVpnQXFZdk1CQ2dtZlZLRk1IcGdEV1FnWWZwOURDRzhkM0QiXSwicmVjaXBpZW50S2V5cyI6WyI4cWFucXhpTlgycnR5QTJZQ3E2U1Q2b2RhSERQRlJXdlJSdUN6bXViOTZmQSJdLCJAaWQiOiJmNTQ5NjdiOS0yMDQ3LTQzOWUtYjI3Ny03ZDI2ZjY0MzFmYzUiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiSkJSbjV5UWNCejN6WmJIZnBBVUtOZmh1SzJwN2NoeGVMZDRTTnJMNWNLS2giXSwicmVjaXBpZW50S2V5cyI6WyI4SmhGVXV6bm93QjdFakRFWFF0YnhZWW9nQ3ZuUEtiNkZOM2NQV3BucWczVSJdLCJAaWQiOiIxNjFlYTM4Yy1iNTQzLTRjNmMtODUzZi1iMzUzMDE5ZjE3MjkiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
         println("Connecting to issuer")
         ssiAgentApi.connect(issuerInvitationUrl)

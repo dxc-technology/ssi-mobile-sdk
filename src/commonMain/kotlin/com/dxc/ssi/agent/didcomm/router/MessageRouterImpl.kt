@@ -26,27 +26,37 @@ class MessageRouterImpl(
 ) :
     MessageRouter {
 
-    override val trustPingProcessor = TrustPingProcessorImpl(walletConnector, transport, trustPingTrackerService)
+    override val trustPingProcessor = TrustPingProcessorImpl(
+        walletConnector,
+        ledgerConnector,
+        transport,
+        callbacks,
+        null,
+        trustPingTrackerService
+    )
     override val didExchangeProcessor: DidExchangeProcessor = DidExchangeProcessorImpl(
         walletConnector,
+        ledgerConnector,
         transport,
+        callbacks,
         trustPingProcessor,
-        callbacks.connectionInitiatorController,
-        callbacks.connectionResponderController
+        trustPingTrackerService
     )
     private val credIssuerProcessor: CredIssuerProcessor = CredIssuerProcessorImpl(
         walletConnector,
         ledgerConnector,
         transport,
-        callbacks.credIssuerController,
-        callbacks.credReceiverController
+        callbacks,
+        trustPingProcessor,
+        trustPingTrackerService
     )
     private val credVerifierProcessor: CredVerifierProcessor = CredVerifierProcessorImpl(
         walletConnector,
         ledgerConnector,
         transport,
-        callbacks.credVerifierController,
-        callbacks.credPresenterController
+        callbacks,
+        trustPingProcessor,
+        trustPingTrackerService
     )
 
     //TODO: check connection in message context and throw exception if it is not null if it is expected to be non-null

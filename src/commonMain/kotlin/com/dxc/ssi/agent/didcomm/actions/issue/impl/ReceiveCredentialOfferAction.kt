@@ -1,11 +1,8 @@
 package com.dxc.ssi.agent.didcomm.actions.issue.impl
 
 import com.benasher44.uuid.uuid4
-import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
-import com.dxc.ssi.agent.api.pluggable.LedgerConnector
-import com.dxc.ssi.agent.api.pluggable.Transport
-import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.config.Configuration
+import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.issue.CredentialIssuenceAction
 import com.dxc.ssi.agent.didcomm.commoon.MessagePacker
@@ -13,21 +10,27 @@ import com.dxc.ssi.agent.didcomm.model.common.Attach
 import com.dxc.ssi.agent.didcomm.model.common.Thread
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
-import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 import com.dxc.ssi.agent.model.messages.Message
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class ReceiveCredentialOfferAction(
-    private val walletConnector: WalletConnector,
-    private val ledgerConnector: LedgerConnector,
-    private val transport: Transport,
-    private val credReceiverController: CredReceiverController,
-    private val credentialOfferContainerMessage: CredentialOfferContainer,
-    private val connection: Connection
+    private val actionParams: ActionParams
 ) : CredentialIssuenceAction {
     override fun perform(): ActionResult {
+
+        val walletConnector = actionParams.walletConnector
+        val ledgerConnector = actionParams.ledgerConnector
+        val transport = actionParams.transport
+        val credReceiverController = actionParams.callbacks.credReceiverController!!
+        val credentialOfferContainerMessage =
+            Json {
+                ignoreUnknownKeys = true
+            }.decodeFromString<CredentialOfferContainer>(actionParams.messageContext.receivedUnpackedMessage.message)
+        val connection = actionParams.messageContext.connection!!
+
 
         // TODO: Check current state (if there is existing record in a wallet for previous proposals/offers)
         // TODO: Improve: This is rudimentory validation check. Just checking that there is no such record in a wallet
