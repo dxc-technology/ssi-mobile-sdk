@@ -13,6 +13,7 @@ import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.*
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.transport.WebSocketTransportImpl
 import com.dxc.ssi.agent.wallet.indy.*
 
@@ -39,7 +40,7 @@ class SsiAgentBuilderImpl : SsiAgentBuilder {
         }
 
         if (ledgerConnector == null)
-            ledgerConnector = IndyLedgerConnector()
+            ledgerConnector = IndyLedgerConnector( IndyLedgerConnectorConfiguration())
 
         //TODO: it seems that all wallet-related entities must be assigned at once. It can not be the case that issuer is indy and verifier is some non-indy...
         //TODO: combine all of those classes into IndyWalletConnector implementation
@@ -110,7 +111,7 @@ class SsiAgentBuilderImpl : SsiAgentBuilder {
         return this
     }
 
-    override fun withWalletHolder(trustee: WalletHolder): SsiAgentBuilder {
+    override fun withWalletHolder(walletHolder: WalletHolder): SsiAgentBuilder {
         this.walletHolder = walletHolder
         return this
     }

@@ -10,7 +10,7 @@ import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefiniti
 import com.dxc.ssi.agent.wallet.indy.model.verify.Interval
 import com.dxc.ssi.agent.wallet.indy.model.verify.RevocationRegistryEntry
 
-actual class IndyLedgerConnector : LedgerConnector {
+actual class IndyLedgerConnector actual constructor(indyLedgerConnectorConfiguration: IndyLedgerConnectorConfiguration) : LedgerConnector {
     override var did: String
         get() = TODO("Not yet implemented")
         set(value) {}

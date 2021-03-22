@@ -10,7 +10,7 @@ import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefiniti
 import com.dxc.ssi.agent.wallet.indy.model.verify.Interval
 import com.dxc.ssi.agent.wallet.indy.model.verify.RevocationRegistryEntry
 
-expect class IndyLedgerConnector() : LedgerConnector {
+expect class IndyLedgerConnector(indyLedgerConnectorConfiguration: IndyLedgerConnectorConfiguration) : LedgerConnector {
 
     override fun retrieveCredentialDefinition(
         id: CredentialDefinitionId,

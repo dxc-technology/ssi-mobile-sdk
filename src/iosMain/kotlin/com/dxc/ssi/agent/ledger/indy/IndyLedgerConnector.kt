@@ -4,7 +4,7 @@ import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialDefinition
 import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialDefinitionId
 
-actual class IndyLedgerConnector : LedgerConnector {
+actual class IndyLedgerConnector actual constructor(indyLedgerConnectorConfiguration: IndyLedgerConnectorConfiguration) : LedgerConnector {
     override val did: String
         get() = TODO("Not yet implemented")
 

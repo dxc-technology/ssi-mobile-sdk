@@ -11,15 +11,18 @@ import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.transport.Sleeper
 import org.junit.Ignore
 import org.junit.Test
+
 class SsiAgentApiImplTest {
 
     @Test
-    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+    //@Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -29,6 +32,7 @@ class SsiAgentApiImplTest {
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())
             .withCredPresenterController(CredPresenterControllerImpl())
+            .withLedgerConnector(IndyLedgerConnector(IndyLedgerConnectorConfiguration(genesisFilePath = "<path to my genesis file>")))
             .build()
 
         ssiAgentApi.init()
