@@ -26,8 +26,72 @@ By open sourcing this project, under the Apache 2.0 license, Luxoft & DXC encour
 
 SSI mobile SDK provides features of [Cordentity](https://github.com/hyperledger-labs/cordentity) for mobile Operating Systems.
 
+#IOS_connection branch:
+
+## Setup libindy example project on Xcode
+
+* Go to libindy-pod directory, to create xcworkspace file run commands:
+```console
+pod setup
+```
+```console
+pod install
+```
+Remember to resolve issues, take a look at lindy-sdk documentation.
+
+* It will download pods and prepare project.
+* You can run Xcode from there and run tests, almost all should pass.
+
+## For Kotlin Muliplatform application
+
+* Take libs from pods after build on Xcode and add them to indlylib folder.
+* In repo copy file libindy.a is bigger than 100MB (almost 200MB), I wasn't able to push it to github.
+
+## To make c-interop manually run this cmd:
+
+```console
+cinterop -def indylib.def -o indylib
+```
+
+* Inside the indylib folder.
+
+## Description of indylib.def 
+
+A Brief look:
+```console
+package = com.indylib
+headers = indy_core.h
+depends = Foundation
+linkerOpts =-framework Security
+compilerOpts =-std=c99 -I/Users/kkamyczek/ssi-mobile_final/ssi-mobile-sdk/indylib
+staticLibraries = libindy.a liblibzmq.a libssl.a libcrypto.a liblibsodium.a
+libraryPaths = /Users/kkamyczek/ssi-mobile_final/ssi-mobile-sdk/indylib
+```
+Remember to setup your directory structure.
+```java
+ios {  
+    compilations.getByName("main") {
+        val indylib by cinterops.creating {
+            defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+            }
+        }
+    }
+```
+and source set implementation:
+```java
+sourcesets {
+    val iosTest by getting{
+        dependencies{
+            implementation(files("indylib.klib"))
+                }
+            }
+         }
+```
+
+
 # License and Copyright
 All the original code is licensed under the Apache 2.0 License. Please find a copy of the license in the repo.
 
-SPDX-FileCopyrightText: Copyright © 2020 Luxoft
+SPDX-FileCopyrightText: Copyright © 2021 Luxoft
+
 
