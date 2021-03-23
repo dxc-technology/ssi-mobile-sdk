@@ -23,14 +23,12 @@ import com.dxc.ssi.agent.wallet.indy.model.verify.*
 import com.fasterxml.jackson.databind.util.ClassUtil.getRootCause
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import org.hyperledger.indy.sdk.LibIndy
 import org.hyperledger.indy.sdk.anoncreds.Anoncreds
 import org.hyperledger.indy.sdk.anoncreds.CredentialsSearchForProofReq
 import org.hyperledger.indy.sdk.anoncreds.DuplicateMasterSecretNameException
 import org.hyperledger.indy.sdk.non_secrets.WalletRecord
 import org.hyperledger.indy.sdk.wallet.Wallet
 import org.hyperledger.indy.sdk.wallet.WalletItemNotFoundException
-import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ExecutionException
 

@@ -69,9 +69,6 @@ actual class IndyLedgerConnector actual constructor(indyLedgerConnectorConfigura
                 //TODO: see if "isLenient" is needed here. Maybe instead we can just improve model?
                 return jsonProcessor.decodeFromString<IndyCredentialDefinition>(credDefIdInfo.objectJson)
 
-                /*return SerializationUtils.jSONToAny<CredentialDefinition>(
-                    credDefIdInfo.objectJson
-                )*/
             } catch (e: Exception) {
                 //TODO: make retry only ledger related operations, there is no point to retry deserialization
                 println("Exception $e")

@@ -4,7 +4,8 @@ import com.dxc.ssi.agent.ledger.indy.helpers.model.BlobStorageHandler
 import com.dxc.ssi.agent.ledger.indy.helpers.model.TailsConfig
 import com.dxc.ssi.agent.ledger.indy.helpers.model.TailsRequest
 import com.dxc.ssi.agent.ledger.indy.helpers.model.TailsResponse
-import com.dxc.ssi.agent.wallet.indy.utils.SerializationUtils
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.hyperledger.indy.sdk.blob_storage.BlobStorageReader
 import org.hyperledger.indy.sdk.blob_storage.BlobStorageWriter
 import java.io.File
@@ -23,7 +24,7 @@ object TailsHelper {
      * @return: [BlobStorageHandler]
      */
     fun getTailsHandler(tailsPath: String): BlobStorageHandler {
-        val tailsConfig = SerializationUtils.anyToJSON(TailsConfig(tailsPath))
+        val tailsConfig =  Json.encodeToString(TailsConfig(tailsPath))
 
         File(tailsPath).mkdirs()
 

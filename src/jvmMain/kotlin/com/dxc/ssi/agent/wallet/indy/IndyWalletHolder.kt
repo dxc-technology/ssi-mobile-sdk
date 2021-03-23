@@ -10,6 +10,7 @@ import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.model.RetrievedWalletRecords
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.hyperledger.indy.sdk.crypto.Crypto
