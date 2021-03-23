@@ -1,7 +1,5 @@
 val serializationVersion: String = "1.0.1"
-//val indyVersion: String = "1.8.2"
 val indyVersion: String = "1.16.0"
-val jacksonVersion: String= "2.9.7"
 val ktorVersion: String = "1.5.1"
 val okhttpVersion: String = "3.5.0"
 val kotlinxCourutinesVersion = "1.4.2"
@@ -96,8 +94,7 @@ kotlin {
                     exclude(group = "org.slf4j", module = "slf4j-api")
                 }
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
-                implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+
 
                 //TODO: this is temporal logging addition. Check idiomatic way to log in multiplatform env
                 implementation("org.slf4j:slf4j-api:1.7.30")
@@ -132,8 +129,7 @@ kotlin {
                     exclude(group = "org.slf4j", module = "slf4j-api")
                 }
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
-                implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+
             }
         }
         val androidTest by getting {

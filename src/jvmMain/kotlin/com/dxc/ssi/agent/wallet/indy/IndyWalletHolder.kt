@@ -10,7 +10,6 @@ import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.model.RetrievedWalletRecords
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
-import com.dxc.ssi.agent.wallet.indy.utils.SerializationUtils
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.hyperledger.indy.sdk.crypto.Crypto
@@ -147,7 +146,9 @@ actual open class IndyWalletHolder : WalletHolder {
 
         //TODO: do not recreate did each time on wallet opening
         //TODO: alow to provide specific DID config
-        val didResult = Did.createAndStoreMyDid(wallet, SerializationUtils.anyToJSON(DidConfig())).get()
+
+        val didConfigJson = Json.encodeToString(DidConfig())
+        val didResult = Did.createAndStoreMyDid(wallet, didConfigJson).get()
         did = didResult.did
         verkey = didResult.verkey
     }
