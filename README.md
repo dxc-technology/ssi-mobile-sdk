@@ -26,7 +26,7 @@ By open sourcing this project, under the Apache 2.0 license, Luxoft & DXC encour
 
 SSI mobile SDK provides features of [Cordentity](https://github.com/hyperledger-labs/cordentity) for mobile Operating Systems.
 
-#IOS_connection branch:
+# IOS_connection branch:
 
 ## Setup libindy example project on Xcode
 
@@ -44,9 +44,9 @@ Remember to resolve issues, take a look at lindy-sdk documentation.
 
 ## For Kotlin Muliplatform application
 
-* Take libs from pods after build on Xcode and add them to indlylib folder.
+* Take libs from Pods after build on Xcode and add them to indlylib folder.
 * In repo copy file libindy.a is bigger than 100MB (almost 200MB), I wasn't able to push it to github.
-
+* or do from terminal: after Pods folder will be created please add this file ssi-mobile-sdk/libindy-pod/Pods/libindy.a to indylib folder
 ## To make c-interop manually run this cmd:
 
 ```console
