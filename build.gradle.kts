@@ -7,6 +7,7 @@ val kotlinxCourutinesVersion = "1.4.2"
 val uuidVersion = "0.2.3"
 val junitVersion = "4.13"
 
+
 plugins {
     val kotlinVersion = "1.4.30"
     kotlin("multiplatform") version kotlinVersion
@@ -14,7 +15,7 @@ plugins {
     /* TODO: Deal with : The 'kotlin-android-extensions' Gradle plugin is deprecated. Please use this migration guide (https://goo.gle/kotlin-android-extensions-deprecation) to start working with View Binding (https://developer.android.com/topic/libraries/view-binding) and the 'kotlin-parcelize' plugin.*/
     id("kotlin-android-extensions")
     kotlin("plugin.serialization") version kotlinVersion
-    kotlin("native.cocoapods") version kotlinVersion
+    kotlin("native.cocoapods") version "1.4.31"
 }
 
 group = "com.dxc"
@@ -25,6 +26,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven(url = "https://repo.sovrin.org/repository/maven-releases")
+    maven { setUrl("https://dl.bintray.com/kotlin/kotlinx.html/") }
 }
 
 kotlin {
@@ -37,32 +39,20 @@ kotlin {
         }
     }
     android()
-    /*
-    iosX64("ios") {
-        binaries {
-            framework {
-                baseName = "library"
+
+    ios {  // Replace with a target you need.
+        compilations.getByName("main") {
+            val indylib by cinterops.creating {
+                defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
             }
         }
     }
-    */
-
-
-    ios()
     cocoapods {
-        ios.deploymentTarget = "8.0"
-        // Configure fields required by CocoaPods.
-        summary = "Some description for a Kotlin/Native module"
-        homepage = "Link to a Kotlin/Native module homepage"
-
-        // You can change the name of the produced framework.
-        // By default, it is the name of the Gradle project.
-        frameworkName = "my_framework"
-
-//        pod("AFNetworking") {
-//            version = "~> 4.0.1"
-//        }
+        summary = "Kotlin sample project with CocoaPods dependencies"
+        homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
+        ios.deploymentTarget = "13.5"
     }
+
 
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
@@ -79,7 +69,7 @@ kotlin {
                 implementation("io.ktor:ktor-utils:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
                 implementation ("com.benasher44:uuid:$uuidVersion")
-
+                implementation(kotlin("stdlib-jdk8"))
             }
         }
         val commonTest by getting {
@@ -126,9 +116,14 @@ kotlin {
         }
         val iosMain by getting {
             dependencies {
+                implementation(files("indylib.klib"))
             }
         }
-        val iosTest by getting
+        val iosTest by getting {
+            dependencies {
+                implementation(files("indylib.klib"))
+            }
+        }
     }
 }
 

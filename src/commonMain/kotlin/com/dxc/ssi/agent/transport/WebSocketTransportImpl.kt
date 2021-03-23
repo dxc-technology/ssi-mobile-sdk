@@ -39,7 +39,11 @@ class WebSocketTransportImpl : Transport {
 
         println("Synthesized url: $url")
         val appSocket = openOrGetExistingConnection(url)
-        appSocket.send(message.payload)
+
+        println("$message.payload")
+
+        //appSocket.send(message.payload)
+
     }
 
     private fun openConnection(endpoint: String): AppSocket {

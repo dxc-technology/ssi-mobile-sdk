@@ -1,0 +1,7 @@
+package = com.indylib
+headers = indy_core.h
+depends = Foundation
+linkerOpts =-framework Security
+compilerOpts =-std=c99 -I/Users/kkamyczek/ssi-mobile_final/ssi-mobile-sdk/indylib
+staticLibraries = libindy.a liblibzmq.a libssl.a libcrypto.a liblibsodium.a
+libraryPaths = /Users/kkamyczek/ssi-mobile_final/ssi-mobile-sdk/indylib

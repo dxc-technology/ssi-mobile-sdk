@@ -7,14 +7,12 @@ import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.transport.Sleeper
-import org.junit.Ignore
+
 import org.junit.Test
 
 class SsiAgentApiImplTest {
 
-
     @Test
-    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -25,13 +23,9 @@ class SsiAgentApiImplTest {
         ssiAgentApi.init()
 
         val invitationUrl =
-            "ws://localhost:7000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vbG9jYWxob3N0OjcwMDAvd3MiLCJyb3V0aW5nS2V5cyI6WyIycFg0TGZ6dWNUc3pjeEh0d0FVN3FpcUZCMjZvQ2J2ZHdRYmROVXVMUG1xYSJdLCJyZWNpcGllbnRLZXlzIjpbIkg2YWo0VkRGS2UxVDdNQjlNanBpWlA1N0NWWjJtVzZMa29CRU1uNWRjNEJFIl0sIkBpZCI6ImI1NWM5MzliLTg5ZDctNDEyMS1hYWIyLWQwNDRjZGJlZGI2NSIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
-
-
+            "ws://192.168.0.104:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjEwNDo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiR0ZXNkJGalFNc1FXTFFHMzFGNjh2Uzk5TVg5UUtSV1pFZGZQNmJRaHEzNlgiXSwicmVjaXBpZW50S2V5cyI6WyJIY0ZFVllkc3JwaVJpaXVMcXlrTTNWSFRaUlBXSmJwTWt3RlRpWVhMTndROSJdLCJAaWQiOiI0NWY5ZDAyOC1mMjg0LTRkN2MtYTYwYy0yODkwNWVjOTk4MmMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
         ssiAgentApi.connect(invitationUrl)
-
         Sleeper().sleep(100000)
-
     }
 
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
@@ -57,6 +51,5 @@ class SsiAgentApiImplTest {
             println("Connection completed : $connection")
             return CallbackResult(true)
         }
-
     }
 }
