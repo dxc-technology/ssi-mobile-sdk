@@ -5,6 +5,7 @@ expect class WalletRecord {
         fun get(wallet: Wallet, type: String, id: String, optionsJson: String): String
         fun add(wallet: Wallet, type: String, id: String, value: String, tagsJson: String?)
         fun updateValue(wallet: Wallet, type: String, id: String, value: String)
+        fun updateTags(wallet: Wallet, type: String, id: String, tagsJson: String)
     }
 
 }

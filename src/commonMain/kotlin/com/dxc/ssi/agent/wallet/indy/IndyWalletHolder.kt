@@ -7,7 +7,11 @@ import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.*
+import com.dxc.ssi.agent.wallet.indy.model.RetrievedWalletRecords
+import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
+import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import io.ktor.utils.io.core.*
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -20,8 +24,7 @@ open class IndyWalletHolder : WalletHolder {
     private var verkey: String? = null
 
     //TODO: think if it is posible to make val lateinit or something like that
-    private var wallet: Wallet? = null
-    private val type = "ConnectionRecord"
+    var wallet: Wallet? = null
 
 
     override fun createSessionDid(identityRecord: IdentityDetails): String {
@@ -46,20 +49,27 @@ open class IndyWalletHolder : WalletHolder {
 
         val existingConnection = getConnectionRecordById(connection.id)
 
+        val tagsJson = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${connection.peerVerkey}\"}"
+
+
+
         if (existingConnection == null) {
 
             val value = connection.toJson()
-            //TODO: think what tags do we need here
-            val tagsJson:String? = null
 
-            WalletRecord.add(wallet!!, type, connection.id, value, tagsJson)
+            println("Storing connection $connection")
+
+            WalletRecord.add(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value, tagsJson)
 
         } else {
 
-            //TODO: see if we also need to update tags
-
             val value = connection.toJson()
-            WalletRecord.updateValue(wallet!!, type, connection.id, value)
+
+            println("Updating connection $connection")
+
+            WalletRecord.updateValue(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value)
+            //TODO: check if there are cases when we really need to update tags
+            WalletRecord.updateTags(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, tagsJson)
 
 
         }
@@ -81,12 +91,13 @@ open class IndyWalletHolder : WalletHolder {
 
         //TODO: find out better solution of looking up for connection
         return try {
-            val retrievedValue = WalletRecord.get(wallet!!, type, connectionId, options)
+            val retrievedValue =
+                WalletRecord.get(wallet!!, WalletRecordType.ConnectionRecord.name, connectionId, options)
             Connection.fromJson(extractValue(retrievedValue))
         } catch (e: Exception) {
             //TODO: understand what ExecutionException in java implementation corresponds to in kotlin code
             //TODO: check how to compare exact exception class rather than message contains string
-            if (e.message!!.contains("WalletItemNotFoundException") )
+            if (e.message!!.contains("WalletItemNotFoundException"))
                 null
             else
                 throw e
@@ -96,6 +107,32 @@ open class IndyWalletHolder : WalletHolder {
     }
 
     override fun findConnectionByVerKey(verKey: String): Connection? {
+
+        val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"
+        val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
+
+        println("Searching connections using query: $query")
+
+        val search = WalletSearch()
+        search.open(wallet!!, WalletRecordType.ConnectionRecord.name, query, options)
+        //TODO: make proper fetch in batches insetad of just fetching 100 records
+        val foundRecordsJson = search.searchFetchNextRecords(wallet!!, 100)
+        search.closeSearch()
+
+        println("Fetched connections json = $foundRecordsJson")
+
+        val retrievedWalletRecords = Json {}.decodeFromString<RetrievedWalletRecords>(foundRecordsJson)
+
+        if (retrievedWalletRecords.totalCount == null || retrievedWalletRecords.totalCount == 0)
+            return null
+
+        //TODO: consider case when we received several records. Is it ok? What do do in this case? Need to make some robust solution instead of taking first one
+        return retrievedWalletRecords.records!!
+            .map {
+                println(it.value)
+                it.value
+            }.map<String, Connection> { Json.decodeFromString(it) }
+            .firstOrNull()
 
     }
 
@@ -125,6 +162,13 @@ open class IndyWalletHolder : WalletHolder {
         did = didResult.getDid()
         verkey = didResult.getVerkey()
     }
+
+    //TODO: think how to return wallet instead of Any
+    override fun getWallet(): Any {
+        //TODO: check here if wallet is opened or not. Throw exception or open it
+        return wallet as Any
+    }
+
 
     //TODO: remove all unnecessary code and beautify this function
     override fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {

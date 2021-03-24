@@ -13,7 +13,11 @@ actual class WalletRecord {
         }
 
         actual fun updateValue(wallet: Wallet, type: String, id: String, value: String) {
-            WalletRecord.updateValue(wallet, type, id, value)
+            WalletRecord.updateValue(wallet, type, id, value).get()
+        }
+
+        actual fun updateTags(wallet: Wallet, type: String, id: String, tagsJson: String) {
+            WalletRecord.updateTags(wallet, type, id, tagsJson).get()
         }
     }
 

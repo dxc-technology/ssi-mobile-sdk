@@ -22,7 +22,7 @@ import org.junit.Test
 class SsiAgentApiImplTest {
 
     @Test
-    //@Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -39,10 +39,10 @@ class SsiAgentApiImplTest {
 
 
         val issuerInvitationUrl =
-            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjNVWmNBekVBU1JoNkRiaHhxU2U1Y1ZDRFlpUGFHZ2hCNmVMdzFVWmhjZXM0Il0sInJlY2lwaWVudEtleXMiOlsiQk03UDJibjRIbmdWWVNCNkJNSGJaR0RFUmJYNEFXdFVTR2thbWNna3pYVUwiXSwiQGlkIjoiYTRiMjU5MzEtYjJjMy00Y2Y1LWE0NjMtNmMyMjk5MWYyMzIwIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkNQWmJXTEo0RVYzajZ5QjlGR3BXSjZYTHJrRDNMemJmcWhpRDVxQjFkVjl4Il0sInJlY2lwaWVudEtleXMiOlsiNGd3aldGZ0tUUGZ3d1pXQVhjZjYzam02aDZ3NFlBQ2s0SGM5YTZlM2kxVGgiXSwiQGlkIjoiZjZlNzQ4OTUtMjFjMS00NWM2LTk3YzMtN2NjYmVmOGFhMDU5IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
         val verifierInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRUhoY1RkRE4xdFhlb0x2TTFGbXEzbkNjZmd0ZjZ4b3J2djJlbmJuVWd5NXgiXSwicmVjaXBpZW50S2V5cyI6WyJCak5VRTE0SzlIV3pkWVpSRWFjaTd5VEE4c3RqWmJxVm92cFpIZGh6Nm10QSJdLCJAaWQiOiIyZjI5Nzg4OC1mOTczLTRlYzEtOTEyMy02ZmFjZTg1ODkwZWEiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiQnQ5MnNhTHVlVTc1Ukt5TDQ5V3lmZTZMTW5pNDRrMm9vbm9yOEpHNFA4Qm4iXSwicmVjaXBpZW50S2V5cyI6WyI0aEhtOGtFYlJDb3ZzVlBpSDhGVVB1UGlUbjJyWWs4eVoxczM1QzdydTVhViJdLCJAaWQiOiI0MTU5YmFmMi02Mzg3LTQ5M2UtODA1ZC00MzExYWIxNDNhMTYiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
         println("Connecting to issuer")
         ssiAgentApi.connect(issuerInvitationUrl)

@@ -27,6 +27,14 @@ actual class WalletRecord {
             value: String
         ) {
         }
+
+        actual fun updateTags(
+            wallet: Wallet,
+            type: String,
+            id: String,
+            tagsJson: String
+        ) {
+        }
     }
 
 }
