@@ -31,7 +31,7 @@ actual open class IndyWalletHolder: WalletHolder {
         TODO("Not yet implemented")
     }
 
-    actual override fun openOrCreateWallet() : Int{
+    actual override fun openOrCreateWallet() {
         TODO("Not yet implemented")
     }
 

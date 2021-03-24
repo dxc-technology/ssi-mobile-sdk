@@ -10,8 +10,8 @@ import kotlinx.cinterop.staticCFunction
 /**
  * High level wrapper for wallet SDK functions.
  */
-typealias MyCallbackWallet = kotlinx.cinterop.CPointer<kotlinx.cinterop.CFunction<(com.indylib.indy_handle_t /* = kotlin.Int */, com.indylib.indy_error_t /* = kotlin.UInt */) -> kotlin.Unit>>?
-typealias MyCallbackWalletOpen = kotlinx.cinterop.CPointer<kotlinx.cinterop.CFunction<(com.indylib.indy_handle_t /* = kotlin.Int */, com.indylib.indy_error_t /* = kotlin.UInt */, com.indylib.indy_handle_t /* = kotlin.Int */) -> kotlin.Unit>>?
+typealias MyCallbackWallet = kotlinx.cinterop.CPointer<kotlinx.cinterop.CFunction<(indy_handle_t /* = kotlin.Int */, indy_error_t /* = kotlin.UInt */) -> Unit>>?
+typealias MyCallbackWalletOpen = kotlinx.cinterop.CPointer<kotlinx.cinterop.CFunction<(indy_handle_t /* = kotlin.Int */, indy_error_t /* = kotlin.UInt */, indy_handle_t /* = kotlin.Int */) -> Unit>>?
 
 
 open class Wallet private constructor(val walletHandle: Int) {
@@ -20,7 +20,6 @@ open class Wallet private constructor(val walletHandle: Int) {
             config: String?,
             credentials: String?
         ): indy_error_t {
-            val config2 = "{\"id\":\"wallet_1\", \"storage_type\":\"unknown_type\"}"
             //val future: CompletableFuture<Void> = CompletableFuture<Void>()
             val commandHandle: Int = 1 //= addFuture(future)
             val myExit_cb: MyCallbackWallet = staticCFunction(fun(
@@ -34,7 +33,7 @@ open class Wallet private constructor(val walletHandle: Int) {
             })
             val result: indy_error_t = com.indylib.indy_create_wallet(
                 commandHandle,
-                config2,
+                config,
                 credentials,
                 myExit_cb
             )

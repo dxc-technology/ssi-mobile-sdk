@@ -1,8 +1,10 @@
 package com.dxc.ssi.agent.api.impl
 
-import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.MyCallback
-import com.indylib.*
+import com.indylib.indy_create_and_store_my_did
+import com.indylib.indy_create_wallet
+import com.indylib.indy_error_t
+import com.indylib.indy_handle_t
 import kotlinx.cinterop.ByteVar
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.staticCFunction
@@ -15,11 +17,11 @@ typealias MyCallbackWallet = CPointer<kotlinx.cinterop.CFunction<(indy_handle_t,
 class IosIndyTest {
 
     @Test
-    fun run() {
+    fun test_indy_create_wallet() {
 
         val command = 4
-        val config = "{\"id\":\"testWalletName\",\"storage_type\":\"default\"}"
-        val credentials = "{\"key\":\"testWalletPassword\"}"
+        val config = "{\"id\":\"testWalletName2\",\"storage_type\":\"default\"}"
+        val credentials = "{\"key\":\"testWalletPassword2\"}"
         val myExit_cb: MyCallbackWallet = staticCFunction(fun(
             xcommand_handle: indy_handle_t,
             err: indy_error_t,
@@ -36,10 +38,15 @@ class IosIndyTest {
             myExit_cb
         )
         println(result)
+        assert(result.toInt().equals(0))
         sleep(4)
+    }
 
-        val commandHandle: Int = 4 //= addFuture(future)
-        val walletHandle: Int = result.toInt() //wallet.getWalletHandle()
+    @Test
+    fun test_indy_create_and_store_my_did() {
+
+        val commandHandle = 4
+        val walletHandle = 1
         val didJson = "{}"
         val myExit_cb2: MyCallback = staticCFunction(fun(
             xcommand_handle: indy_handle_t,
@@ -61,15 +68,8 @@ class IosIndyTest {
             didJson,
             myExit_cb2
         )
+        assert(result2.toInt().equals(0))
         println(result2)
         sleep(4)
     }
-
-
-   @Test
-   fun run2() {
-       val ih = IndyWalletHolder()
-
-       ih.openOrCreateWallet()
-   }
 }

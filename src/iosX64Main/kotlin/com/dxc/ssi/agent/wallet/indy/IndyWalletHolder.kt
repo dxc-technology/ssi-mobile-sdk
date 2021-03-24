@@ -36,21 +36,20 @@ actual open class IndyWalletHolder: WalletHolder {
         TODO("Not yet implemented")
     }
 
-    actual override fun openOrCreateWallet():Int {
+    actual override fun openOrCreateWallet() {
         //TODO: think where to store name and password and how to pass it properly
         val walletName = "testWalletName"
         val walletPassword = "testWalletPassword"
 
 //        //TODO: remove this line in order to not clear wallet each time
 //        WalletHelper.createOrTrunc(walletName = walletName, walletPassword = walletPassword)
-        val wallet = WalletHelper.openOrCreate(walletName = walletName, walletPassword = walletPassword)
+        var wallet = WalletHelper.openOrCreate(walletName = walletName, walletPassword = walletPassword)
 
-//        //TODO: do not recreate did each time on wallet opening
-//        //TODO: alow to provide specific DID config
+        //TODO: do not recreate did each time on wallet opening
+        //TODO: alow to provide specific DID config
         val didResult = Did.createAndStoreMyDid(2, "{}") // SerializationUtils.anyToJSON(DidConfig())).get()
-//        //did = didResult.did
+        //did = didResult.did
         //verkey = didResult.verkey
-        return didResult.toInt()
     }
 
     actual override fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {

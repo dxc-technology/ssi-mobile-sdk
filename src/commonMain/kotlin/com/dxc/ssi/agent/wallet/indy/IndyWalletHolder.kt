@@ -20,7 +20,7 @@ expect open class IndyWalletHolder(): WalletHolder {
 
     override fun getConnectionRecordById(connectionId: String): Connection?
 
-    override fun openOrCreateWallet():Int
+    override fun openOrCreateWallet()
 
     override fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean) : String
 
