@@ -121,6 +121,9 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation("junit:junit:$junitVersion")
+                implementation ("androidx.test:runner:1.1.0")
+                implementation("androidx.test:rules:1.1.0")
+
             }
         }
         val iosMain by getting {
@@ -137,6 +140,8 @@ android {
     defaultConfig {
         minSdkVersion(24)
         targetSdkVersion(29)
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
     }
 }
 //TODO: check if this section is needed at all or it should be moved to JVM and Android packages
