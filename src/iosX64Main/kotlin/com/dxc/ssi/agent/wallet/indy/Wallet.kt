@@ -20,6 +20,7 @@ open class Wallet private constructor(val walletHandle: Int) {
             config: String?,
             credentials: String?
         ): indy_error_t {
+            val config2 = "{\"id\":\"wallet_1\", \"storage_type\":\"unknown_type\"}"
             //val future: CompletableFuture<Void> = CompletableFuture<Void>()
             val commandHandle: Int = 1 //= addFuture(future)
             val myExit_cb: MyCallbackWallet = staticCFunction(fun(
@@ -33,7 +34,7 @@ open class Wallet private constructor(val walletHandle: Int) {
             })
             val result: indy_error_t = com.indylib.indy_create_wallet(
                 commandHandle,
-                config,
+                config2,
                 credentials,
                 myExit_cb
             )

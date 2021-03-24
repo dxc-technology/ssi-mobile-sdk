@@ -108,7 +108,7 @@ actual open class IndyWalletHolder : WalletHolder {
         return group
     }
 
-    actual override fun openOrCreateWallet() {
+    actual override fun openOrCreateWallet(): Int {
 
         //TODO: think where to store name and password and how to pass it properly
         val walletName = "testWalletName"
@@ -123,6 +123,7 @@ actual open class IndyWalletHolder : WalletHolder {
         val didResult = Did.createAndStoreMyDid(wallet, SerializationUtils.anyToJSON(DidConfig())).get()
         did = didResult.did
         verkey = didResult.verkey
+        return 1
     }
 
     //TODO: remove all unnecessary code and beautify this function

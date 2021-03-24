@@ -24,12 +24,12 @@ object WalletHelper {
         //    throw FileNotFoundException("Wallet ${EnvironmentUtils.getIndyWalletPath(config.id)} doesn't exist")
         val walletConfigJson = "{}" //SerializationUtils.anyToJSON(config)
         val walletPasswordJson = "{}"//SerializationUtils.anyToJSON(password)
-        return (Wallet.openWallet(walletConfigJson, walletPasswordJson)).toInt() // .get()
+        return (Wallet.createWallet(walletConfigJson, walletPasswordJson)).toInt() // .get()
     }
 
     fun openOrCreate(config: WalletConfig, password: WalletPassword): Int {
         //if (!exists(config.id))
-        createNonExisting(config, password)
+        //createNonExisting(config, password)
 
         return openExisting(config, password)
     }

@@ -66,7 +66,7 @@ interface WalletHolder {
      *
      * @return Connection object
      */
-    fun openOrCreateWallet()
+    fun openOrCreateWallet():Int
 
     /**
      * Packs message

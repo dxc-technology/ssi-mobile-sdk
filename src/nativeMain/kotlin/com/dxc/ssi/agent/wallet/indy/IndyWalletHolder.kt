@@ -27,7 +27,8 @@ actual open class IndyWalletHolder : WalletHolder {
     }
 
 
-    actual override fun openOrCreateWallet() {
+    actual override fun openOrCreateWallet():Int {
+        return 1
     }
 
     actual override fun getConnectionRecordById(connectionId: String): Connection? {

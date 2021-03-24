@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.api.impl
 
+import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.MyCallback
 import com.indylib.*
 import kotlinx.cinterop.ByteVar
@@ -64,14 +65,11 @@ class IosIndyTest {
         sleep(4)
     }
 
-//    @Test
-//    fun run2() {
-//        val command_handle = 1
-//        val wallet_handle = 1
-//        val did_json = "{}"
-//        println(command_handle)
-//        val elem = null
-//        var indyCreateAndStoreMyDid = indy_create_and_store_my_did(command_handle, wallet_handle, did_json, elem)
-//        println(indyCreateAndStoreMyDid)
-//    }
+
+   @Test
+   fun run2() {
+       val ih = IndyWalletHolder()
+
+       ih.openOrCreateWallet()
+   }
 }

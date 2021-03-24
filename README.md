@@ -45,8 +45,19 @@ Remember to resolve issues, take a look at lindy-sdk documentation.
 ## For Kotlin Muliplatform application
 
 * Take libs from Pods after build on Xcode and add them to indlylib folder.
+
 * In repo copy file libindy.a is bigger than 100MB (almost 200MB), I wasn't able to push it to github.
+
 * or do from terminal: after Pods folder will be created please add this file ssi-mobile-sdk/libindy-pod/Pods/libindy.a to indylib folder
+
+  
+
+  <img src="screenshot1.png" alt="screenshot1" style="zoom:50%;" />
+
+  
+
+  <img src="screenshot2.png" alt="screenshot2" style="zoom:50%;" />
+
 ## To make c-interop manually run this cmd:
 
 ```console
