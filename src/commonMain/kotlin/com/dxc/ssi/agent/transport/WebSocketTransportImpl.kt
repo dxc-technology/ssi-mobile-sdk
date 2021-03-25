@@ -3,6 +3,7 @@ package com.dxc.ssi.agent.transport
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
+import com.dxc.utils.Sleeper
 import io.ktor.util.*
 
 //TODO: handle closing websocket correctly

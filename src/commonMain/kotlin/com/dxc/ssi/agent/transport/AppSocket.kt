@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.transport
 
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
+import com.dxc.utils.Sleeper
 
 //Common
 class AppSocket(url: String, incomingMessagesQueue: MutableList<MessageEnvelop>) {

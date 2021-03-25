@@ -9,7 +9,7 @@ import com.dxc.ssi.agent.didcomm.model.verify.data.SchemaId
 import com.dxc.ssi.agent.ledger.indy.helpers.PoolHelper
 import com.dxc.ssi.agent.ledger.indy.libindy.Ledger
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool
-import com.dxc.ssi.agent.transport.Sleeper
+import com.dxc.utils.Sleeper
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
 import com.dxc.ssi.agent.wallet.indy.model.issue.IndyCredentialDefinition
 import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefinitionId
