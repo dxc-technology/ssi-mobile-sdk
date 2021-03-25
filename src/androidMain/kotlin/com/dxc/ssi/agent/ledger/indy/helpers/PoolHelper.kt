@@ -3,15 +3,15 @@ package com.dxc.ssi.agent.ledger.indy.helpers
 import com.dxc.ssi.agent.wallet.indy.utils.EnvironmentUtils
 import org.hyperledger.indy.sdk.pool.Pool
 import org.hyperledger.indy.sdk.pool.PoolJSONParameters
-import org.hyperledger.indy.sdk.pool.PoolLedgerConfigExistsException
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.concurrent.ExecutionException
+import kotlin.jvm.Throws
 
 /**
  * Helps to manage ledger pool
  */
-object PoolHelper {
+actual object PoolHelper {
 
     const val DEFAULT_POOL_NAME = "TestPool"
 
@@ -88,5 +88,10 @@ object PoolHelper {
             createNonExisting(genesisFile, poolName)
 
         return openExisting(poolName, poolConfig)
+    }
+
+    actual fun openOrCreateFromFilename(filename: String): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
+        val genesisFile = File(filename)
+        return openOrCreate(genesisFile)
     }
 }
