@@ -19,6 +19,10 @@ actual class WalletRecord {
         actual fun updateTags(wallet: Wallet, type: String, id: String, tagsJson: String) {
             WalletRecord.updateTags(wallet, type, id, tagsJson).get()
         }
+
+        actual fun delete(wallet: Wallet, type: String, id: String) {
+            WalletRecord.delete(wallet, type, id).get()
+        }
     }
 
 }

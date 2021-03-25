@@ -35,6 +35,13 @@ actual class WalletRecord {
             tagsJson: String
         ) {
         }
+
+        actual fun delete(
+            wallet: Wallet,
+            type: String,
+            id: String
+        ) {
+        }
     }
 
 }

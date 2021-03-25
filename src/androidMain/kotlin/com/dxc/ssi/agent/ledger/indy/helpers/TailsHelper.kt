@@ -14,7 +14,7 @@ import java.nio.file.Paths
 /**
  * Helps to manage tails file
  */
-object TailsHelper {
+actual object TailsHelper {
     /**
      * Returns [BlobStorageHandler] for some [tailsPath]
      *
@@ -62,5 +62,9 @@ object TailsHelper {
             else
                 TailsResponse(tailsRequest.tailsHash, mapOf(tailsRequest.tailsHash to file.readBytes()))
         }
+    }
+
+    actual fun getTailsReaderHandler(tailsPath: String): Int {
+        return getTailsHandler(tailsPath).reader.blobStorageReaderHandle
     }
 }
