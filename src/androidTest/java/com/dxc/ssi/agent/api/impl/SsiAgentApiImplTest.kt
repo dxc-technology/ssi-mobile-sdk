@@ -10,11 +10,12 @@ import com.dxc.ssi.agent.transport.Sleeper
 import org.junit.Ignore
 import org.junit.Test
 
+//TODO: if we can use some common kotlin tests to have common tests for all platforms
 class SsiAgentApiImplTest {
 
 
     @Test
-   // @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
