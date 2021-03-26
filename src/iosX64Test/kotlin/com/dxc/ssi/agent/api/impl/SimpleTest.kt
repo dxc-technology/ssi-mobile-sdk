@@ -1,27 +1,49 @@
 package com.dxc.ssi.agent.api.impl
 
-import com.dxc.ssi.agent.wallet.indy.MyCallback
-import com.indylib.indy_create_and_store_my_did
-import com.indylib.indy_create_wallet
-import com.indylib.indy_error_t
-import com.indylib.indy_handle_t
-import kotlinx.cinterop.ByteVar
-import kotlinx.cinterop.CPointer
-import kotlinx.cinterop.staticCFunction
-import kotlinx.cinterop.toKString
+import com.indylib.*
+import kotlinx.cinterop.*
 import platform.posix.sleep
 import kotlin.test.Test
 
-typealias MyCallbackWallet = CPointer<kotlinx.cinterop.CFunction<(indy_handle_t, indy_error_t) -> Unit>>?
+typealias MyCallbackWallet = CPointer<CFunction<(indy_handle_t, indy_error_t) -> Unit>>?
+typealias MyCallback = CPointer<CFunction<(indy_handle_t, indy_error_t, CPointer<ByteVar>?, CPointer<ByteVar>?) -> Unit>>
+typealias MyCallbackWallet2 = CPointer<CFunction<(indy_handle_t, indy_error_t, indy_handle_t) -> Unit>>
+
 
 class IosIndyTest {
 
     @Test
-    fun test_indy_create_wallet() {
+    fun run() {
+        val didJson = "{}"
+        val commandHandle = 0
+        val walletHandle = 0
+        val callback: MyCallback = staticCFunction(fun(
+            xcommand_handle: indy_handle_t,
+            err: indy_error_t,
+            did: CPointer<ByteVar>?,
+            verkey: CPointer<ByteVar>?
+        ) {
+            println(did?.toKString())
+            println(verkey?.toKString())
+            println(xcommand_handle)
+            println(err)
+            return
+        })
+        val exitCode: indy_error_t = indy_create_and_store_my_did(
+            commandHandle,
+            walletHandle,
+            didJson,
+            callback
+        )
+        println(exitCode)
+        sleep(5)
+    }
 
-        val command = 4
-        val config = "{\"id\":\"testWalletName2\",\"storage_type\":\"default\"}"
-        val credentials = "{\"key\":\"testWalletPassword2\"}"
+    @Test
+    fun test_indy_create_wallet() {
+        val command = 1
+        val config = "{\"id\":\"testWalletName14\",\"storage_type\":\"default\"}"
+        val credentials = "{\"key\":\"testWalletPassword14\"}"
         val myExit_cb: MyCallbackWallet = staticCFunction(fun(
             xcommand_handle: indy_handle_t,
             err: indy_error_t,
@@ -37,14 +59,56 @@ class IosIndyTest {
             credentials,
             myExit_cb
         )
-        println(result)
-        assert(result.toInt().equals(0))
-        sleep(4)
+        println("indy_create_wallet " + result)
+        sleep(10)
+
+        val myExit_cb2: MyCallbackWallet2 = staticCFunction(fun(
+            command: indy_handle_t,
+            err: indy_error_t,
+            handle: indy_handle_t
+        ) {
+            println("wallet")
+            println(command)
+            println(handle)
+            println(err)
+            return
+        })
+        val result2: indy_error_t = indy_open_wallet(
+            command,
+            config,
+            credentials,
+            myExit_cb2
+        )
+        println("indy_open_wallet " + result2)
+        sleep(10)
+        val didJson = "{}"
+        val commandHandle = 1
+        val wallethandle = 3
+        val callback: MyCallback = staticCFunction(fun(
+            xcommand_handle: indy_handle_t,
+            err: indy_error_t,
+            did: CPointer<ByteVar>?,
+            verkey: CPointer<ByteVar>?
+        ) {
+            println("did")
+            println(did?.toKString())
+            println(verkey?.toKString())
+            println(xcommand_handle)
+            println(err)
+            return
+        })
+        val exitCode: indy_error_t = indy_create_and_store_my_did(
+            commandHandle,
+            wallethandle,
+            didJson,
+            callback
+        )
+        sleep(10)
+        println("indy_create_and_store_my_did " + exitCode)
     }
 
     @Test
     fun test_indy_create_and_store_my_did() {
-
         val commandHandle = 4
         val walletHandle = 1
         val didJson = "{}"
@@ -61,7 +125,6 @@ class IosIndyTest {
             println(verkey?.toKString())
             return
         })
-
         val result2: indy_error_t = indy_create_and_store_my_did(
             commandHandle,
             walletHandle,
