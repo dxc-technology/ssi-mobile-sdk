@@ -9,7 +9,7 @@ val junitVersion = "4.13"
 
 
 plugins {
-    val kotlinVersion = "1.4.30"
+    val kotlinVersion = "1.4.30-M1"
     kotlin("multiplatform") version kotlinVersion
     id("com.android.library")
     /* TODO: Deal with : The 'kotlin-android-extensions' Gradle plugin is deprecated. Please use this migration guide (https://goo.gle/kotlin-android-extensions-deprecation) to start working with View Binding (https://developer.android.com/topic/libraries/view-binding) and the 'kotlin-parcelize' plugin.*/
