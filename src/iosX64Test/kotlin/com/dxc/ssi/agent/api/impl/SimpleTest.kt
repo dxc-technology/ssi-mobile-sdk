@@ -28,6 +28,53 @@ fun print(): String? {
 }
 
 class IosIndyTest {
+
+    // #define levelMappings @{@"1": @"Error", @"2": @"Warning", @"3": @"Info", @"4": @"Debug", @"5": @"Trace"}
+    //    [IndyLogger setLogger:^(NSObject *context, NSNumber *level, NSString *target, NSString *message, NSString *modulePath, NSString *file, NSNumber *line) {
+    //    NSLog(@"%@    %@:%@ | %@", [levelMappings valueForKey:[NSString stringWithFormat:@"%@", level]], file, line, message);
+    //}];
+    @Test
+    fun test_indy_log() {
+
+        val context: CValuesRef<*>? = null
+        val enabledFn: CPointer<CFunction<(
+            COpaquePointer?, indy_u32_t,
+            CPointer<ByteVar>?
+        ) -> indy_bool_t>>? = null
+        val flushFn: CPointer<CFunction<(COpaquePointer?) -> Unit>>? = null
+        val myExitCallback = staticCFunction(fun(
+            log: CPointer<out CPointed>?,
+            elem: indy_u32_t,
+            pointer: CPointer<ByteVarOf<Byte>>?,
+            val1: CPointer<ByteVar>?,
+            val2: CPointer<ByteVar>?,
+            val3: CPointer<ByteVar>?,
+            number: indy_u32_t, /* = UInt */
+        ) {
+            println("log $log")
+            println("elem $elem")
+            println("pointer $pointer")
+            println("val1 " + val1?.toKString())
+            println("val2 " + val2?.toKString())
+            println("val3 " + val3?.toKString())
+            println("number $number")
+            return
+        })
+        val result = indy_set_logger(
+            context,
+            enabledFn,
+            myExitCallback,
+            flushFn
+        )
+        println("indy_log $result")
+        sleep(10)
+    }
+    // #define levelMappings @{@"1": @"Error", @"2": @"Warning", @"3": @"Info", @"4": @"Debug", @"5": @"Trace"}
+
+    //    [IndyLogger setLogger:^(NSObject *context, NSNumber *level, NSString *target, NSString *message, NSString *modulePath, NSString *file, NSNumber *line) {
+//        NSLog(@"%@    %@:%@ | %@", [levelMappings valueForKey:[NSString stringWithFormat:@"%@", level]], file, line, message);
+//    }];
+//
 //    @Test
 //    fun test_indy_log() {
 //        val pointer = "119"
@@ -90,7 +137,7 @@ class IosIndyTest {
     @Test
     fun test_indy_create_wallet() {
         val command = 1
-        val pointer = "119"
+        val pointer = "121"
         val config = "{\"id\":\"testWalletName${pointer}\",\"storage_type\":\"default\"}"
         val credentials = "{\"key\":\"testWalletPassword${pointer}\"}"
         val myExit_cb: MyCallbackWallet = staticCFunction(fun(
@@ -157,7 +204,9 @@ class IosIndyTest {
         sleep(10)
         println(print())
         println("indy_create_and_store_my_did " + exitCode)
+        test_indy_log()
     }
+
     @Test
     fun test_indy_create_and_store_my_did() {
 
