@@ -1,10 +1,12 @@
 package com.dxc.ssi.agent.ledger.indy.helpers
 
+import com.dxc.ssi.agent.ledger.indy.genesis.GenesisGenerator
 import com.dxc.ssi.agent.wallet.indy.utils.EnvironmentUtils
 import org.hyperledger.indy.sdk.pool.Pool
 import org.hyperledger.indy.sdk.pool.PoolJSONParameters
 import java.io.File
 import java.io.FileNotFoundException
+import java.net.InetAddress
 import java.util.concurrent.ExecutionException
 import kotlin.jvm.Throws
 
@@ -93,5 +95,15 @@ actual object PoolHelper {
     actual fun openOrCreateFromFilename(filename: String): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
         val genesisFile = File(filename)
         return openOrCreate(genesisFile)
+    }
+
+    actual fun openOrCreateFromIp(ipAddress: String, dir: String): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
+
+        val indyPoolIp = InetAddress.getByName(ipAddress)
+
+        val genesysGenerator = GenesisGenerator(indyPoolIp,dir)
+        val filename = genesysGenerator.initGenesisFile()
+
+        return openOrCreateFromFilename(filename)
     }
 }

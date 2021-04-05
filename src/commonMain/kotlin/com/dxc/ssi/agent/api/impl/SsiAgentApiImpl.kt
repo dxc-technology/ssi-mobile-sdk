@@ -34,6 +34,7 @@ class SsiAgentApiImpl(
 
         val platformInit = PlatformInit()
         platformInit.init()
+        ledgerConnector.init()
         walletConnector.walletHolder.openOrCreateWallet()
         ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
 

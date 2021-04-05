@@ -93,4 +93,11 @@ actual object PoolHelper {
         val genesisFile = File(filename)
         return openOrCreate(genesisFile)
     }
+
+    actual fun openOrCreateFromIp(
+        ipAddress: String,
+        dir: String
+    ): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
+        TODO("Not yet implemented")
+    }
 }

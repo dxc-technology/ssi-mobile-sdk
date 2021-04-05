@@ -6,4 +6,11 @@ actual object PoolHelper {
     actual fun openOrCreateFromFilename(filename: String): Pool {
         TODO("Not yet implemented")
     }
+
+    actual fun openOrCreateFromIp(
+        ipAddress: String,
+        dir: String
+    ): Pool {
+        TODO("Not yet implemented")
+    }
 }

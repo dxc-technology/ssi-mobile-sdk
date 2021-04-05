@@ -9,24 +9,33 @@ import com.dxc.ssi.agent.didcomm.model.verify.data.SchemaId
 import com.dxc.ssi.agent.ledger.indy.helpers.PoolHelper
 import com.dxc.ssi.agent.ledger.indy.libindy.Ledger
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool
-import com.dxc.utils.Sleeper
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
 import com.dxc.ssi.agent.wallet.indy.model.issue.IndyCredentialDefinition
 import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefinitionId
 import com.dxc.ssi.agent.wallet.indy.model.verify.IndySchema
 import com.dxc.ssi.agent.wallet.indy.model.verify.Interval
 import com.dxc.ssi.agent.wallet.indy.model.verify.RevocationRegistryEntry
+import com.dxc.utils.Sleeper
 import kotlinx.serialization.decodeFromString
 
-class IndyLedgerConnector(indyLedgerConnectorConfiguration: IndyLedgerConnectorConfiguration) : LedgerConnector {
+class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnectorConfiguration) : LedgerConnector {
     //TODO: decide if this is proper place for storing did or it should be somewhere in common module and probably out of ledger connector at all , since our did is more than about ledger
     override var did: String = ""
-    private val pool: Pool
+    private lateinit var pool: Pool
 
-    init {
+    override fun init() {
         //TODO: think where to store and initialize pool variable
-        pool = PoolHelper.openOrCreateFromFilename(indyLedgerConnectorConfiguration.genesisFilePath)
+
+        pool = if (indyLedgerConnectorConfiguration.genesisMode == IndyLedgerConnectorConfiguration.GenesisMode.FILE) {
+            PoolHelper.openOrCreateFromFilename(indyLedgerConnectorConfiguration.genesisFilePath)
+        } else {
+            PoolHelper.openOrCreateFromIp(
+                indyLedgerConnectorConfiguration.ipAddress,
+                indyLedgerConnectorConfiguration.dirForGeneratedGenesis
+            )
+        }
     }
+
 
     override fun retrieveSchema(id: SchemaId, delayMs: Long, retryTimes: Int): Schema? {
         repeat(retryTimes) {
@@ -118,7 +127,8 @@ class IndyLedgerConnector(indyLedgerConnectorConfiguration: IndyLedgerConnectorC
                 val revRegDeltaJson = Ledger.parseGetRevocRegDeltaResponse(response)
 
                 val timestamp = revRegDeltaJson.timestamp
-                val revRegDelta = IndySerializationUtils.jsonProcessor.decodeFromString<RevocationRegistryEntry>(revRegDeltaJson.objectJson)
+                val revRegDelta =
+                    IndySerializationUtils.jsonProcessor.decodeFromString<RevocationRegistryEntry>(revRegDeltaJson.objectJson)
 
                 return Pair(timestamp, revRegDelta)
             } catch (e: Exception) {

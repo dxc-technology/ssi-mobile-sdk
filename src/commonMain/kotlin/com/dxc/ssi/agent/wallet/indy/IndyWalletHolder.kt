@@ -5,6 +5,7 @@ import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
+import com.dxc.ssi.agent.utils.JsonUtils.extractValue
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.*
 import com.dxc.ssi.agent.wallet.indy.model.RetrievedWalletRecords
@@ -102,8 +103,6 @@ open class IndyWalletHolder : WalletHolder {
             else
                 throw e
         }
-
-
     }
 
     override fun findConnectionByVerKey(verKey: String): Connection? {
@@ -134,14 +133,6 @@ open class IndyWalletHolder : WalletHolder {
             }.map<String, Connection> { Json.decodeFromString(it) }
             .firstOrNull()
 
-    }
-
-    private fun extractValue(retrievedValue: String?): String {
-
-        val group = Regex("value\":\"(.*\\})\",").find(retrievedValue!!)!!.groups[1]!!.value.replace("\\", "")
-        println(group)
-
-        return group
     }
 
     override fun openOrCreateWallet() {
