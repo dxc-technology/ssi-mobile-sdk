@@ -8,6 +8,7 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.utils.PlatformInit
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -23,6 +24,9 @@ class SsiAgentApiImpl(
 
 
     override fun init() {
+
+        val platformInit = PlatformInit()
+        platformInit.init()
         walletConnector.walletHolder.openOrCreateWallet()
 
 //TODO: design proper concurrency there
