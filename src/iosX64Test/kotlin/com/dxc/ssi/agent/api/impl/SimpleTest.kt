@@ -2,30 +2,32 @@ package com.dxc.ssi.agent.api.impl
 
 import com.indylib.*
 import kotlinx.cinterop.*
-import platform.Foundation.NSString
-import platform.Foundation.NSUTF8StringEncoding
-import platform.Foundation.stringWithContentsOfFile
-import platform.Foundation.writeToFile
+import platform.Foundation.*
 import platform.posix.sleep
+import kotlin.native.concurrent.AtomicReference
 import kotlin.test.Test
 
-class ReadWriteFile {
-    fun read(): String {
-        return NSString.stringWithContentsOfFile("../log.txt", NSUTF8StringEncoding, null) ?: return ""
-    }
+@SharedImmutable
+val rw = ReadWrite()
 
+class ReadWrite {
+    fun String.nsdata(): NSData? =
+        NSString.create(string = this).dataUsingEncoding(NSUTF8StringEncoding)
+
+    fun NSData.string(): String? =
+        NSString.create(data = this, encoding = NSUTF8StringEncoding)?.toString()
+
+    var atomic: AtomicReference<NSData?> = AtomicReference("".nsdata())
+    fun read(): String {
+        return atomic.value?.string()!!
+    }
     fun save(text: String) {
-        (text as NSString).apply {
-            writeToFile("../log.txt", true, NSUTF8StringEncoding, null)
-        }
+        atomic.value = text.nsdata()
     }
 }
 typealias MyCallbackWallet = CPointer<CFunction<(indy_handle_t, indy_error_t) -> Unit>>?
 typealias MyCallback = CPointer<CFunction<(indy_handle_t, indy_error_t, CPointer<ByteVar>?, CPointer<ByteVar>?) -> Unit>>
 typealias MyCallbackWallet2 = CPointer<CFunction<(indy_handle_t, indy_error_t, indy_handle_t) -> Unit>>
-
-@SharedImmutable
-val rw = ReadWriteFile()
 
 class IosIndyTest {
 
@@ -97,68 +99,68 @@ class IosIndyTest {
     @Test
     fun test_indy_create_wallet() {
 
-            val command = 1
-            val pointer = "167"
-            val context: CValuesRef<*>? = null
-            val enabledFn: CPointer<CFunction<(
-                COpaquePointer?, indy_u32_t,
-                CPointer<ByteVar>?
-            ) -> indy_bool_t>>? = null
-            val flushFn: CPointer<CFunction<(COpaquePointer?) -> Unit>>? = null
-            val myExitCallback = staticCFunction(fun(
-                log: CPointer<out CPointed>?,
-                elem: indy_u32_t,
-                pointer: CPointer<ByteVar>?,
-                val1: CPointer<ByteVar>?,
-                val2: CPointer<ByteVar>?,
-                val3: CPointer<ByteVar>?,
-                number: indy_u32_t,
-            ) {
-                initRuntimeIfNeeded()
-                return
-            })
-            indy_set_logger(
-                context,
-                enabledFn,
-                myExitCallback,
-                flushFn
-            )
-            sleep(5)
-            val config = "{\"id\":\"testWalletName${pointer}\",\"storage_type\":\"default\"}"
-            val credentials = "{\"key\":\"testWalletPassword${pointer}\"}"
-            val myExit_cb: MyCallbackWallet = staticCFunction(fun(
-                xcommand_handle: indy_handle_t,
-                err: indy_error_t,
-            ) {
-                initRuntimeIfNeeded()
-                return
-            })
-            indy_create_wallet(
-                command,
-                config,
-                credentials,
-                myExit_cb
-            )
-            sleep(5)
-            val myExit_cb2: MyCallbackWallet2 = staticCFunction(fun(
-                command: indy_handle_t,
-                err: indy_error_t,
-                handle: indy_handle_t
-            ) {
-                initRuntimeIfNeeded()
-                return
-            })
-            indy_open_wallet(
-                command,
-                config,
-                credentials,
-                myExit_cb2
-            )
+        val command = 1
+        val pointer = "167"
+        val context: CValuesRef<*>? = null
+        val enabledFn: CPointer<CFunction<(
+            COpaquePointer?, indy_u32_t,
+            CPointer<ByteVar>?
+        ) -> indy_bool_t>>? = null
+        val flushFn: CPointer<CFunction<(COpaquePointer?) -> Unit>>? = null
+        val myExitCallback = staticCFunction(fun(
+            log: CPointer<out CPointed>?,
+            elem: indy_u32_t,
+            pointer: CPointer<ByteVar>?,
+            val1: CPointer<ByteVar>?,
+            val2: CPointer<ByteVar>?,
+            val3: CPointer<ByteVar>?,
+            number: indy_u32_t,
+        ) {
+            initRuntimeIfNeeded()
+            return
+        })
+        indy_set_logger(
+            context,
+            enabledFn,
+            myExitCallback,
+            flushFn
+        )
+        sleep(8)
+        val config = "{\"id\":\"testWalletName${pointer}\",\"storage_type\":\"default\"}"
+        val credentials = "{\"key\":\"testWalletPassword${pointer}\"}"
+        val myExit_cb: MyCallbackWallet = staticCFunction(fun(
+            xcommand_handle: indy_handle_t,
+            err: indy_error_t,
+        ) {
+            initRuntimeIfNeeded()
+            return
+        })
+        indy_create_wallet(
+            command,
+            config,
+            credentials,
+            myExit_cb
+        )
+        sleep(8)
+        val myExit_cb2: MyCallbackWallet2 = staticCFunction(fun(
+            command: indy_handle_t,
+            err: indy_error_t,
+            handle: indy_handle_t
+        ) {
+            initRuntimeIfNeeded()
+            return
+        })
+        indy_open_wallet(
+            command,
+            config,
+            credentials,
+            myExit_cb2
+        )
 
-            sleep(5)
-            val didJson = "{}"
-            val commandHandle = 1
-            val wallethandle = 3
+        sleep(8)
+        val didJson = "{}"
+        val commandHandle = 1
+        val wallethandle = 3
         memScoped {
             val callback: MyCallback = staticCFunction(fun(
                 xcommand_handle: indy_handle_t,
@@ -179,7 +181,7 @@ class IosIndyTest {
                 didJson,
                 callback
             )
-            sleep(5)
+            sleep(8)
             println(rw.read())
         }
     }
