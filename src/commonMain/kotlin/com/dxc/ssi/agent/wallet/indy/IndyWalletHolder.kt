@@ -138,7 +138,7 @@ open class IndyWalletHolder : WalletHolder {
 
     private fun extractValue(retrievedValue: String?): String {
 
-        val group = Regex("value\":\"(.*})\",").find(retrievedValue!!)!!.groups[1]!!.value.replace("\\", "")
+        val group = Regex("value\":\"(.*\\})\",").find(retrievedValue!!)!!.groups[1]!!.value.replace("\\", "")
         println(group)
 
         return group

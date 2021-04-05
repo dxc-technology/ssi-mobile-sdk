@@ -2,3 +2,4 @@
 /.idea/
 /build/
 /kotlin_multiplatform_agent.podspec
+/local.properties

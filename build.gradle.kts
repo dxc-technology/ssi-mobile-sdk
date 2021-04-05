@@ -21,6 +21,11 @@ plugins {
 group = "com.dxc"
 version = "1.0-SNAPSHOT"
 
+publishing {
+    repositories {
+        mavenLocal()
+    }
+}
 repositories {
     google()
     jcenter()
@@ -37,7 +42,10 @@ kotlin {
             useJUnit()
         }
     }
-    android()
+    android {
+        publishAllLibraryVariants()
+        publishLibraryVariantsGroupedByFlavor = true // This line
+    }
     /*
     iosX64("ios") {
         binaries {
@@ -78,7 +86,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 implementation("io.ktor:ktor-utils:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
-                implementation ("com.benasher44:uuid:$uuidVersion")
+                implementation("com.benasher44:uuid:$uuidVersion")
 
             }
         }
@@ -94,6 +102,7 @@ kotlin {
                     exclude(group = "net.java.dev.jna", module = "jna")
                     exclude(group = "org.slf4j", module = "slf4j-api")
                 }
+                implementation("net.java.dev.jna:jna:5.8.0")
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
                 //TODO: find out a way to get rid of faster xml completely as it is not usable outside of JVM
                 implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
@@ -116,12 +125,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
-                implementation("net.java.dev.jna:jna:4.5.1")
                 implementation("org.slf4j:slf4j-simple:1.7.26")
-/*
-                implementation("org.slf4j:slf4j-api:1.7.30")
-                implementation ("org.slf4j:slf4j-log4j12:1.8.0-alpha2")
-                implementation ("log4j:log4j:1.2.17")*/
             }
         }
         val androidMain by getting {
@@ -132,6 +136,8 @@ kotlin {
                     exclude(group = "org.slf4j", module = "slf4j-api")
                 }
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
+                implementation("org.slf4j:slf4j-simple:1.7.26")
+                implementation("net.java.dev.jna:jna:5.8.0@aar")
                 implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
             }
@@ -139,10 +145,10 @@ kotlin {
         val androidTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
+                implementation("org.slf4j:slf4j-simple:1.7.26")
                 implementation("junit:junit:$junitVersion")
-                implementation ("androidx.test:runner:1.1.0")
+                implementation("androidx.test:runner:1.1.0")
                 implementation("androidx.test:rules:1.1.0")
-
             }
         }
         val iosMain by getting {
@@ -158,9 +164,36 @@ android {
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
         minSdkVersion(24)
-        targetSdkVersion(29)
+        //TODO: understand why websockets stop working when changing targetSDKVersion above 27
+        targetSdkVersion(27)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        //TODO: check which options below are really needed as they were added during development when doing some try and error
+        ndk {
+            moduleName = "indy"
+            abiFilters("x86", "arm64-v8a", "armeabi-v7a")
+        }
+
+        compileOptions {
+            sourceCompatibility = JavaVersion.VERSION_1_8
+            targetCompatibility = JavaVersion.VERSION_1_8
+        }
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath = false
+            }
+        }
+
+        packagingOptions {
+            pickFirst("lib/arm64-v8a/libjnidispatch.so")
+            pickFirst("lib/armeabi-v7a/libjnidispatch.so")
+            pickFirst("lib/x86/libjnidispatch.so")
+            exclude("META-INF/AL2.0")
+            exclude("META-INF/LGPL2.1")
+        }
+        //TODO: see if it is needed
+        multiDexEnabled = true
     }
 }
 //TODO: check if this section is needed at all or it should be moved to JVM and Android packages
