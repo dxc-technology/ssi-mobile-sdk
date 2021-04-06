@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutionException
  * Helps to manage wallets
  */
 //TODO: review this functionality and decide if it can be moved to common layer
-object WalletHelper {
+actual object WalletHelper {
     /**
      * Checks if wallet with [walletName] exists
      */
@@ -74,7 +74,7 @@ object WalletHelper {
      * @param walletName: [String]
      * @param walletPassword: [String]
      */
-    fun createOrTrunc(walletName: String, walletPassword: String) {
+    actual fun createOrTrunc(walletName: String, walletPassword: String) {
         createOrTrunc(WalletConfig(walletName), WalletPassword(walletPassword))
     }
 
@@ -132,7 +132,7 @@ object WalletHelper {
      *
      * @throws ExecutionException with cause [WalletAlreadyOpenedException]
      */
-    fun openOrCreate(walletName: String, walletPassword: String): Wallet
-        = openOrCreate(WalletConfig(walletName), WalletPassword(walletPassword))
+    actual fun openOrCreate(walletName: String, walletPassword: String): Wallet
+            = openOrCreate(WalletConfig(walletName), WalletPassword(walletPassword))
 }
 
