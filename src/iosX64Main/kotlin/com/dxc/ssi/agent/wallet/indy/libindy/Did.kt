@@ -6,6 +6,7 @@ import com.indylib.indy_handle_t
 import kotlinx.cinterop.*
 import platform.Foundation.*
 import platform.posix.sleep
+import kotlin.native.concurrent.AtomicInt
 import kotlin.native.concurrent.AtomicReference
 
 @SharedImmutable
@@ -22,12 +23,15 @@ class ReadWrite {
     fun read(): String {
         return atomic.value?.string()!!
     }
+
     fun save(text: String) {
         atomic.value = text.nsdata()
     }
 }
 
 typealias MyCallback = CPointer<CFunction<(indy_handle_t, indy_error_t, CPointer<ByteVar>?, CPointer<ByteVar>?) -> Unit>>
+@ThreadLocal
+private var atomicInteger: AtomicInt = AtomicInt(1)
 
 actual class Did {
     actual companion object {
@@ -37,7 +41,7 @@ actual class Did {
         ): CreateAndStoreMyDidResult {
 
 		val walletHandle = wallet.getWalletHandle()
-            val commandHandle = 1
+            val commandHandle = atomicInteger.value++
             memScoped {
                 val callback: MyCallback = staticCFunction(fun(
                     xcommand_handle: indy_handle_t,
@@ -59,7 +63,6 @@ actual class Did {
                     callback
                 )
                 sleep(8)
-                //println(rw.read())
 
                 return CreateAndStoreMyDidResult(rw.read(),rw.read())
             }
