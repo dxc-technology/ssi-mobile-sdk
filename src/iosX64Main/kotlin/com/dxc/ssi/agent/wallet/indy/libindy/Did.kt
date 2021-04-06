@@ -13,8 +13,8 @@ import kotlin.native.concurrent.AtomicReference
 val rw = ReadWrite()
 
 class ReadWrite {
-    var atomicVk: AtomicReference<NSData?> = AtomicReference("".nsdata())
-    var atomicDid: AtomicReference<NSData?> = AtomicReference("".nsdata())
+    private var atomicVk: AtomicReference<NSData?> = AtomicReference("".nsdata())
+    private var atomicDid: AtomicReference<NSData?> = AtomicReference("".nsdata())
 
     fun String.nsdata(): NSData? =
         NSString.create(string = this).dataUsingEncoding(NSUTF8StringEncoding)
