@@ -1,12 +1,10 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
+import com.dxc.ssi.agent.wallet.indy.libindy.Api.Companion.atomicInteger
 import com.indylib.indy_add_wallet_record
+import com.indylib.indy_error_t
 import com.indylib.indy_get_wallet_record
 import com.indylib.indy_update_wallet_record_value
-import kotlin.native.concurrent.AtomicInt
-
-@ThreadLocal
-private var atomicInteger: AtomicInt = AtomicInt(1)
 
 actual class WalletRecord {
     actual companion object {
@@ -19,14 +17,18 @@ actual class WalletRecord {
             val walletHandle = wallet.getWalletHandle()
             val commandHandle = atomicInteger.value++
             val stringCb = null
-            val result = indy_get_wallet_record(
-                    commandHandle,
-            walletHandle,
-            type,
-            id,
-            optionsJson,
-            stringCb)
-            return ""
+            val result: indy_error_t = indy_get_wallet_record(
+                commandHandle,
+                walletHandle,
+                type,
+                id,
+                optionsJson,
+                stringCb
+            )
+            if (result.toInt() != 0)
+                throw WalletItemNotFoundException()
+            else
+                return ""
         }
 
         actual fun add(
@@ -48,7 +50,12 @@ actual class WalletRecord {
                 tagsJson,
                 voidCb
             )
+            if (result.toInt() != 0)
+                throw WalletItemNotFoundException()
+            else
+                return
         }
+
         actual fun updateValue(
             wallet: Wallet,
             type: String,
@@ -66,6 +73,10 @@ actual class WalletRecord {
                 value,
                 voidCb
             )
+            if (result.toInt() != 0)
+                throw WalletItemNotFoundException()
+            else
+                return
         }
     }
 }

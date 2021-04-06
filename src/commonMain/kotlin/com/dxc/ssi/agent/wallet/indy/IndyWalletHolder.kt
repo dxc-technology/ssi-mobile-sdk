@@ -118,8 +118,11 @@ open class IndyWalletHolder : WalletHolder {
 
         val didConfigJson = Json.encodeToString(DidConfig())
         val didResult = Did.createAndStoreMyDid(wallet!!, didConfigJson)
-        did = didResult.getDid()
-        verkey = didResult.getVerkey()
+        val didElem = didResult.getDid()
+        val verkeyElem = didResult.getVerkey()
+
+        did = didElem
+        verkey = verkeyElem
     }
 
     //TODO: remove all unnecessary code and beautify this function
