@@ -8,13 +8,7 @@ actual class Wallet {
         this.walletHandle = walletHandle
     }
 
-    /**
-     * Gets the handle for the wallet.
-     *
-     * @return The handle for the wallet.
-     */
     fun getWalletHandle(): Int {
         return walletHandle
     }
-
 }
