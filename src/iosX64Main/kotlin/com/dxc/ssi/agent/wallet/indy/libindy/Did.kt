@@ -13,23 +13,31 @@ import kotlin.native.concurrent.AtomicReference
 val rw = ReadWrite()
 
 class ReadWrite {
+    var atomicVk: AtomicReference<NSData?> = AtomicReference("".nsdata())
+    var atomicDid: AtomicReference<NSData?> = AtomicReference("".nsdata())
+
     fun String.nsdata(): NSData? =
         NSString.create(string = this).dataUsingEncoding(NSUTF8StringEncoding)
 
     fun NSData.string(): String? =
         NSString.create(data = this, encoding = NSUTF8StringEncoding)?.toString()
 
-    var atomic: AtomicReference<NSData?> = AtomicReference("".nsdata())
-    fun read(): String {
-        return atomic.value?.string()!!
+    fun readDid(): String {
+        return atomicDid.value?.string()!!
     }
 
-    fun save(text: String) {
-        atomic.value = text.nsdata()
+    fun readVk(): String {
+        return atomicVk.value?.string()!!
+    }
+
+    fun save(did: String?, vk: String?) {
+        atomicDid.value = did?.nsdata()
+        atomicVk.value = vk?.nsdata()
     }
 }
 
 typealias MyCallback = CPointer<CFunction<(indy_handle_t, indy_error_t, CPointer<ByteVar>?, CPointer<ByteVar>?) -> Unit>>
+
 @ThreadLocal
 private var atomicInteger: AtomicInt = AtomicInt(1)
 
@@ -40,7 +48,7 @@ actual class Did {
             didJson: String
         ): CreateAndStoreMyDidResult {
 
-		val walletHandle = wallet.getWalletHandle()
+            val walletHandle = wallet.getWalletHandle()
             val commandHandle = atomicInteger.value++
             memScoped {
                 val callback: MyCallback = staticCFunction(fun(
@@ -53,7 +61,7 @@ actual class Did {
                     val didData: String? = did?.toKString()
                     val verkeyData: String? = verkey?.toKString()
                     println("Print:Did:${didData} VerKey:${verkeyData}")
-                    rw.save("Did:${didData} VerKey:${verkeyData}")
+                    rw.save(didData, verkeyData)
                     return
                 })
                 indy_create_and_store_my_did(
@@ -64,7 +72,7 @@ actual class Did {
                 )
                 sleep(8)
 
-                return CreateAndStoreMyDidResult(rw.read(),rw.read())
+                return CreateAndStoreMyDidResult(rw.readDid(), rw.readVk())
             }
         }
     }
