@@ -1,9 +1,8 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
 import com.indylib.*
-import kotlinx.cinterop.CFunction
-import kotlinx.cinterop.CPointer
-import kotlinx.cinterop.CValuesRef
+import kotlinx.cinterop.*
+import platform.posix.sleep
 
 actual class Crypto {
     actual companion object {
@@ -15,16 +14,29 @@ actual class Crypto {
         ): ByteArray {
             val walletHandle = wallet.getWalletHandle()
             val commandHandle = Api.atomicInteger.value++
-            val packMessageCb: Any? = null
+            val packMessageCb: CPointer<CFunction<(indy_handle_t, indy_error_t,CPointer<indy_u8_tVar>?, indy_u32_t ) -> Unit>>? =
+                staticCFunction(fun(
+                    _: indy_handle_t,
+                    _: indy_error_t,
+                    data: CPointer<indy_u8_tVar>?,
+                    unsigned: indy_u32_t
+                ) {
+                    initRuntimeIfNeeded()
+                    val data: String? = data.toString()
+                    return
+                })
             val result = indy_pack_message(
                 commandHandle,
                 walletHandle,
-                message  as CValuesRef<indy_u8_tVar>,
-                10000,
+                message as CValuesRef<indy_u8_tVar>,
+                message.size as indy_u32_t,
                 recipientVk,
                 senderVk,
-                packMessageCb as CPointer<CFunction<(indy_handle_t, indy_error_t, CPointer<indy_u8_tVar>?, indy_u32_t) -> Unit>>?
+                packMessageCb
             )
+            sleep(8)
+            if (result.toInt() != 0 || readwriter.read() != null)
+                throw Exception("PackException")
             return ByteArray(0)
         }
         actual fun unpackMessage(
@@ -33,14 +45,27 @@ actual class Crypto {
         ): ByteArray {
             val walletHandle = wallet.getWalletHandle()
             val commandHandle = Api.atomicInteger.value++
-            val authCrypCb = null
+            val authCrypCb: CPointer<CFunction<(indy_handle_t, indy_error_t,CPointer<indy_u8_tVar>?, indy_u32_t ) -> Unit>>? =
+                staticCFunction(fun(
+                    _: indy_handle_t,
+                    _: indy_error_t,
+                    data: CPointer<indy_u8_tVar>?,
+                    unsigned: indy_u32_t
+                ) {
+                    initRuntimeIfNeeded()
+                    val data: String? = data.toString()
+                    return
+                })
             val result = indy_unpack_message(
                 commandHandle,
                 walletHandle,
                 jwe_data as CValuesRef<indy_u8_tVar>,
-                10000,
+                jwe_data.size as indy_u32_t,
                 authCrypCb
             )
+            sleep(8)
+            if (result.toInt() != 0 || readwriter.read() != null)
+                throw Exception("UnPackException")
             return ByteArray(0)
         }
     }
