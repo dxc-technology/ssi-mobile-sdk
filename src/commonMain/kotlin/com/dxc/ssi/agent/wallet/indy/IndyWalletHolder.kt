@@ -110,6 +110,7 @@ open class IndyWalletHolder : WalletHolder {
         val walletPassword = "testWalletPassword"
 
         //TODO: remove this line in order to not clear wallet each time
+
         WalletHelper.createOrTrunc(walletName = walletName, walletPassword = walletPassword)
         wallet = WalletHelper.openOrCreate(walletName = walletName, walletPassword = walletPassword)
 
