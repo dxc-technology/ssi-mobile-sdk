@@ -7,6 +7,7 @@ import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.*
+import io.ktor.utils.io.charsets.*
 import io.ktor.utils.io.core.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -128,7 +129,7 @@ open class IndyWalletHolder : WalletHolder {
 
     //TODO: remove all unnecessary code and beautify this function
     override fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
-        val byteArrayMessage = message.payload.toByteArray()
+        val byteArrayMessage = message.payload.toByteArray()   //Maybe Charset UTF8
         val recipientVk = recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
         //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
         println("recipientKeys = $recipientVk")

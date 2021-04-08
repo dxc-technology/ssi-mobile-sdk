@@ -42,7 +42,7 @@ actual class WalletRecord {
                 val myExitCallbackOpen: CPointer<CFunction<(indy_handle_t, indy_error_t, CPointer<ByteVar>?) -> Unit>> =
                     staticCFunction(fun(
                         _: indy_handle_t,
-                        _: indy_error_t,
+                        error: indy_error_t,
                         data: CPointer<ByteVar>?
                     ) {
                         initRuntimeIfNeeded()
@@ -76,7 +76,7 @@ actual class WalletRecord {
             val myExitCallbackAdd: CPointer<CFunction<(indy_handle_t, indy_error_t) -> Unit>>? =
                 staticCFunction(fun(
                     _: indy_handle_t,
-                    _: indy_error_t
+                    error: indy_error_t
                 ) {
                     return
                 })
@@ -108,7 +108,7 @@ actual class WalletRecord {
             val myExitCallbackUpdate: CPointer<CFunction<(indy_handle_t, indy_error_t) -> Unit>>? =
                 staticCFunction(fun(
                     _: indy_handle_t,
-                    _: indy_error_t
+                    error: indy_error_t
                 ) {
                     return
                 })
