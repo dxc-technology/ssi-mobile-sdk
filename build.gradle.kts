@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 val serializationVersion: String = "1.0.1"
 val indyVersion: String = "1.16.0"
 val ktorVersion: String = "1.5.1"
@@ -7,13 +8,13 @@ val uuidVersion = "0.2.3"
 val junitVersion = "4.13"
 
 plugins {
-    val kotlinVersion = "1.4.30"
+    val kotlinVersion = "1.4.30-M1"
     kotlin("multiplatform") version kotlinVersion
     id("com.android.library")
     /* TODO: Deal with : The 'kotlin-android-extensions' Gradle plugin is deprecated. Please use this migration guide (https://goo.gle/kotlin-android-extensions-deprecation) to start working with View Binding (https://developer.android.com/topic/libraries/view-binding) and the 'kotlin-parcelize' plugin.*/
     id("kotlin-android-extensions")
     kotlin("plugin.serialization") version kotlinVersion
-    kotlin("native.cocoapods") version kotlinVersion
+    kotlin("native.cocoapods") version "1.4.31"
     id("maven-publish")
 }
 
@@ -30,6 +31,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven(url = "https://repo.sovrin.org/repository/maven-releases")
+    maven { setUrl("https://dl.bintray.com/kotlin/kotlinx.html/") }
 }
 
 kotlin {
@@ -45,30 +47,18 @@ kotlin {
         publishAllLibraryVariants()
         publishLibraryVariantsGroupedByFlavor = true // This line
     }
-    /*
-    iosX64("ios") {
-        binaries {
-            framework {
-                baseName = "library"
+
+    ios {  // Replace with a target you need.
+        compilations.getByName("main") {
+            val indylib by cinterops.creating {
+                defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
             }
         }
     }
-    */
-
-
-    ios()
     cocoapods {
-        // Configure fields required by CocoaPods.
-        summary = "Some description for a Kotlin/Native module"
-        homepage = "Link to a Kotlin/Native module homepage"
-
-        // You can change the name of the produced framework.
-        // By default, it is the name of the Gradle project.
-        frameworkName = "my_framework"
-
-        pod("AFNetworking") {
-            version = "~> 4.0.1"
-        }
+        summary = "Kotlin sample project with CocoaPods dependencies"
+        homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
+        ios.deploymentTarget = "13.5"
     }
 
     val hostOs = System.getProperty("os.name")
@@ -85,7 +75,9 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 implementation("io.ktor:ktor-utils:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
-                implementation("com.benasher44:uuid:$uuidVersion")
+                implementation ("com.benasher44:uuid:$uuidVersion")
+                //TODO: check why jdk dependency is added in common module
+                implementation(kotlin("stdlib-jdk8"))
 
             }
         }
@@ -137,9 +129,14 @@ kotlin {
         }
         val iosMain by getting {
             dependencies {
+                implementation(files("indylib.klib"))
             }
         }
-        val iosTest by getting
+        val iosTest by getting {
+            dependencies {
+                implementation(files("indylib.klib"))
+            }
+        }
     }
 }
 
@@ -184,3 +181,16 @@ android {
 dependencies {
     implementation("junit:junit:$junitVersion")
 }
+val packForXcode by tasks.creating(Sync::class) {
+    group = "build"
+    val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
+    val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
+    val targetName = "ios" + if (sdkName.startsWith("iphoneos")) "Arm64" else "X64"
+    val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
+    inputs.property("mode", mode)
+    dependsOn(framework.linkTask)
+    val targetDir = File(buildDir, "KotlinShared")
+    from({ framework.outputDirectory })
+    into(targetDir)
+}
+tasks.getByName("build").dependsOn(packForXcode)

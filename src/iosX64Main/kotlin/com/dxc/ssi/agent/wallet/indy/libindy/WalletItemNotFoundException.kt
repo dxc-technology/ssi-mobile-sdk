@@ -1,5 +1,5 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
-actual class WalletItemNotFoundException {
+actual class WalletItemNotFoundException : Throwable() {
 
 }
