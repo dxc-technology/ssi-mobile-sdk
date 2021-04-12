@@ -298,8 +298,28 @@ class IosIndyTest {
 
     @Test
     fun test_indy_base58() {
-        var data = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-        println(convertToBase58(data))
+        val data = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+        for (r in convertToBase58(data)) {
+            println("$r ")
+        }
+    }
+
+
+    private val HEX_CHARS = "0123456789ABCDEF".toCharArray()
+
+
+    fun ByteArray.toHex(): String {
+        val result = StringBuilder()
+
+        forEach {
+            val octet = it.toInt()
+            val firstIndex = (octet and 0xF0).ushr(4)
+            val secondIndex = octet and 0x0F
+            result.append(HEX_CHARS[firstIndex])
+            result.append(HEX_CHARS[secondIndex])
+        }
+
+        return result.toString()
     }
 
     @ExperimentalUnsignedTypes
@@ -327,6 +347,7 @@ class IosIndyTest {
                 number: indy_u32_t,
             ) {
                 initRuntimeIfNeeded()
+                println(pointer?.toKString())
                 println(val1?.toKString())
                 println(val2?.toKString())
                 println(val3?.toKString())
@@ -338,7 +359,24 @@ class IosIndyTest {
                 myExitCallback,
                 flushFn
             )
-            sleep(8)
+            sleep(6)
+
+            val myExit_cb1del: CPointer<CFunction<(indy_handle_t, indy_error_t) -> Unit>> = staticCFunction(fun(
+                xcommand_handle: indy_handle_t,
+                err: indy_error_t,
+            ) {
+                initRuntimeIfNeeded()
+                println(xcommand_handle)
+                println(err)
+                return
+            })
+            indy_delete_wallet(
+                2,
+                config1,
+                credentials1,
+                myExit_cb1del
+            )
+            sleep(6)
             val myExit_cb1: CPointer<CFunction<(indy_handle_t, indy_error_t) -> Unit>> = staticCFunction(fun(
                 xcommand_handle: indy_handle_t,
                 err: indy_error_t,
@@ -354,7 +392,7 @@ class IosIndyTest {
                 credentials1,
                 myExit_cb1
             )
-            sleep(10)
+            sleep(6)
 
             val myExit_cbo1: MyCallbackWallet2 = staticCFunction(fun(
                 command: indy_handle_t,
@@ -375,7 +413,7 @@ class IosIndyTest {
                 credentials1,
                 myExit_cbo1
             )
-            sleep(10)
+            sleep(6)
             val walletId = rw1.read().toInt()
             println(walletId)
             val myExit_cbk1: CPointer<CFunction<(indy_handle_t /* = Int */, indy_error_t /* = UInt */, CPointer<ByteVar /* = ByteVarOf<Byte> */>?) -> Unit>>? =
@@ -400,7 +438,7 @@ class IosIndyTest {
                 myExit_cbk1
             )
 
-            sleep(10)
+            sleep(6)
             val key2 = rw2.read()
             println(key2)
 
@@ -408,6 +446,22 @@ class IosIndyTest {
             val config2 = "{\"id\":\"testWalletName${pointer2}\",\"storage_type\":\"default\"}"
             val credentials2 = "{\"key\":\"testWalletPassword${pointer2}\"}"
 
+            val myExit_cb2del: CPointer<CFunction<(indy_handle_t, indy_error_t) -> Unit>> = staticCFunction(fun(
+                xcommand_handle: indy_handle_t,
+                err: indy_error_t,
+            ) {
+                initRuntimeIfNeeded()
+                println(xcommand_handle)
+                println(err)
+                return
+            })
+            indy_delete_wallet(
+                2,
+                config2,
+                credentials2,
+                myExit_cb2del
+            )
+            sleep(6)
             val myExit_cb2: CPointer<CFunction<(indy_handle_t, indy_error_t) -> Unit>> = staticCFunction(fun(
                 xcommand_handle: indy_handle_t,
                 err: indy_error_t,
@@ -423,7 +477,7 @@ class IosIndyTest {
                 credentials2,
                 myExit_cb2
             )
-            sleep(10)
+            sleep(6)
 
             val myExit_cbo2: MyCallbackWallet2 = staticCFunction(fun(
                 command: indy_handle_t,
@@ -445,7 +499,7 @@ class IosIndyTest {
                 credentials2,
                 myExit_cbo2
             )
-            sleep(10)
+            sleep(6)
             val walletId2 = rw3.read().toInt()
             println(walletId)
             val myExit_cbk2: CPointer<CFunction<(indy_handle_t /* = Int */, indy_error_t /* = UInt */, CPointer<ByteVar /* = ByteVarOf<Byte> */>?) -> Unit>>? =
@@ -470,40 +524,27 @@ class IosIndyTest {
                 myExit_cbk2
             )
 
-            sleep(10)
+            sleep(6)
             val key4 = rw4.read()
             println(key4)
             println("w1= " + walletId + " k2= " + walletId2)
             println("k1= " + key2 + " k2= " + key4)
 
             val senderVk = "${key2}"
+            var recipientVk = "[\"GJ1SzoWzavQYfNL9XkaJdrQejfztN4XqdsiV4ct3LXKL\",\"${key4}\"]"
+            println(recipientVk)
 
-            val recipientVk =
-                "${key4}"
-
-            var ff = "1496822211362017764"
+            var hex = "{}".toByteArray().toHex()
+            println(hex)
+            var ff = "{\"reqId\":1496822211362017764}"
             var s = ff.cstr
 
             println(senderVk)
             println(recipientVk)
-            //val data = "{\"reqId\":1496822211362017764}"
-//            val data = ubyteArrayOf(
-//                0x1A.toUByte(),
-//                0x1B.toUByte()
-//            )
 
-            val data = byteArrayOf(
-                0x22.toByte(),
-                0x3A.toByte(), 0x31.toByte(), 0x34.toByte(), 0x39.toByte(),
-                0x36.toByte(), 0x38.toByte(), 0x32.toByte(), 0x32.toByte(),
-                0x32.toByte(), 0x31.toByte(), 0x31.toByte(), 0x33.toByte(),
-                0x36.toByte(), 0x32.toByte(), 0x30.toByte(), 0x31.toByte(),
-                0x37.toByte(), 0x37.toByte(), 0x36.toByte(), 0x34.toByte(),
-            )
+            var transf = s as CValuesRef<indy_u8_tVar /* = UByteVarOf<UByte> */>?
 
-            var transf = data.refTo(0) as CValuesRef<indy_u8_tVar /* = UByteVarOf<UByte> */>?
-
-            var size = data.size.toUInt() as indy_u32_t //29
+            var size = ff.length.toUInt() as indy_u32_t //29
             println(transf.toString())
 
             println(size.toString())
@@ -520,21 +561,22 @@ class IosIndyTest {
                     //rw2.save(data as ByteArray)
                     println(er)
                     println(un)
-                    var d = data?.readBytes(un.toInt())
-                    println(d)
+                    //println(data)
+                    //var d = data?.readBytes(un.toInt())
+                    //println(d)
                     return
                 })
-            val result = indy_crypto_auth_crypt(
+            val result = indy_pack_message(
                 9,
-                walletId2,
-                senderVk,
-                recipientVk,
+                walletId,
                 transf,
                 size,
+                recipientVk,
+                senderVk,
                 packMessageCb
             )
             // rw2.read()
-            sleep(12)
+            sleep(8)
             println(result.toInt())
 
         }
