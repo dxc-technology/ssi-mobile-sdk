@@ -9,10 +9,12 @@ import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.transport.Sleeper
 
 import kotlin.test.Test
+import kotlin.test.Ignore
 
 class SsiAgentApiImplTest {
 
     @Test
+    //@Ignore
     fun basicTest() {
 
         val ssiAgentApi = SsiAgentBuilderImpl()
@@ -22,7 +24,7 @@ class SsiAgentApiImplTest {
         ssiAgentApi.init()
 
         val invitationUrl =
-            "ws://192.168.0.104:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjEwNDo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiQXRYUW5IZUxEclV6dUgxTlpwV0VNUFYzaUM0ek0xZ0VhZllRa3cxTXpyeHUiXSwicmVjaXBpZW50S2V5cyI6WyJBVkdHcTVSUlBrRjd2TXFENW5pSnpicjV5OWN3V2RHR1BZZnlnSnNvMTNHVCJdLCJAaWQiOiJhN2FkZTgyOC1mMjU5LTQyMzctOTMyMy04MWFmY2Y2NGQwZGQiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkhyWGJ5bTRXc2o1cktvb3RUUDRNa1hxWkV2dnR3ZVJ5WEtYNFRuOHdYcFZNIl0sInJlY2lwaWVudEtleXMiOlsiR1JjcTRiWmd0QWRadXhDUEJ0SERCZ2duUXdKTk1MY1EzVHFydTF6dXRZWE0iXSwiQGlkIjoiMDcwZmI2ZmEtZTE1ZC00MjA4LTlmNWItNmYxNjllODYyNzg2IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
          // "ws://192.168.0.104:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjEwNDo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiR0ZXNkJGalFNc1FXTFFHMzFGNjh2Uzk5TVg5UUtSV1pFZGZQNmJRaHEzNlgiXSwicmVjaXBpZW50S2V5cyI6WyJIY0ZFVllkc3JwaVJpaXVMcXlrTTNWSFRaUlBXSmJwTWt3RlRpWVhMTndROSJdLCJAaWQiOiI0NWY5ZDAyOC1mMjg0LTRkN2MtYTYwYy0yODkwNWVjOTk4MmMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
         ssiAgentApi.connect(invitationUrl)
 
