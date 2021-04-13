@@ -2,9 +2,10 @@ package com.dxc.ssi.agent.wallet.indy.libindy
 
 import com.dxc.ssi.agent.transport.Sleeper
 import com.indylib.*
-import io.ktor.utils.io.charsets.*
 import io.ktor.utils.io.core.*
 import kotlinx.cinterop.*
+import platform.Foundation.*
+import platform.posix.memcpy
 import platform.posix.sleep
 import kotlin.native.concurrent.AtomicInt
 import kotlin.native.concurrent.AtomicReference
@@ -58,6 +59,25 @@ class Workaround() {
 @SharedImmutable
 val workaround = Workaround()
 
+class SimpleReadWrite {
+    fun String.nsdata(): NSData? =
+        NSString.create(string = this).dataUsingEncoding(NSUTF8StringEncoding)
+
+    fun NSData.string(): String? =
+        NSString.create(data = this, encoding = NSUTF8StringEncoding)?.toString()
+
+    var atomic: AtomicReference<NSData?> = AtomicReference("".nsdata())
+    fun read(): String {
+        return atomic.value?.string()!!
+    }
+
+    fun save(text: String) {
+        atomic.value = text.nsdata()
+    }
+}
+
+@SharedImmutable
+val rwStringUnPack = SimpleReadWrite()
 
 actual class Crypto {
     actual companion object {
@@ -70,12 +90,11 @@ actual class Crypto {
             senderVk: String?,
             message: ByteArray
         ): ByteArray {
-
             memScoped {
 
                 // enableIndyLog()
 
-                val thisCommandHandle = 1111
+                val thisCommandHandle = Api.atomicInteger.value++
 
                 val uByteMessage = message.toUByteArray()
 
@@ -182,8 +201,36 @@ actual class Crypto {
             wallet: Wallet,
             jwe_data: ByteArray
         ): ByteArray {
-
-            TODO("Not implemented")
+            val walletHandle = wallet.getWalletHandle()
+            val commandHandle = Api.atomicInteger.value++
+            val authCrypCb: CPointer<CFunction<(indy_handle_t, indy_error_t, CPointer<indy_u8_tVar>?, indy_u32_t) -> Unit>>? =
+                staticCFunction(fun(
+                    _: indy_handle_t,
+                    _: indy_error_t,
+                    data: CPointer<indy_u8_tVar>?,
+                    size: indy_u32_t
+                ) {
+                    initRuntimeIfNeeded()
+                    val byte: ByteArray = ByteArray(size.toInt()).apply {
+                        usePinned {
+                            memcpy(it.addressOf(0), data, size.toULong())
+                        }
+                    }
+                    rwStringUnPack.save(String(byte))
+                    return
+                })
+            val result = indy_unpack_message(
+                commandHandle,
+                walletHandle,
+                jwe_data as CValuesRef<indy_u8_tVar>,
+                jwe_data.size as indy_u32_t,
+                authCrypCb
+            )
+            sleep(8)
+            if (result.toInt() != 0)
+                throw Exception("UnPackException")
+            var stringResult = rwStringUnPack.read()
+            return stringResult.toByteArray()
         }
     }
 }
