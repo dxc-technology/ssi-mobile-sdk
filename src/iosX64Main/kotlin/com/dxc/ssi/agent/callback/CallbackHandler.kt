@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.callback
 
 import co.touchlab.stately.collections.sharedMutableMapOf
+import com.dxc.ssi.agent.exceptions.indy.IndyException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 import kotlin.native.concurrent.AtomicInt
@@ -65,6 +66,7 @@ class CallbackHandler() {
 
         val callbackData = activeCallbackDataMap[commandHandle]!!
 
+        //TODO: before throwing exception ensure to clear cache
         validateCallbackResult(callbackData.errorCode)
 
         activeCallbackDataMap.remove(commandHandle)
@@ -75,8 +77,8 @@ class CallbackHandler() {
 
     private fun validateCallbackResult(errorCode: UInt) {
         if(errorCode != 0U) {
+            throw IndyException.fromSdkError(errorCode.toInt())
 
-            throw IndyErrorDecoder.decodeErrorToException(errorCode)
         }
     }
 

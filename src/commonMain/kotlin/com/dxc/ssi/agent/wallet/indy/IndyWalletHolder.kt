@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.wallet.indy
 
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
+import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.IdentityDetails
@@ -83,7 +84,10 @@ open class IndyWalletHolder : WalletHolder {
         return try {
             val retrievedValue = WalletRecord.get(wallet!!, type, connectionId, options)
             Connection.fromJson(extractValue(retrievedValue))
-        } catch (e: Exception) {
+        } catch(e: WalletItemNotFoundException) {
+            null
+        }
+        catch (e: Exception) {
             //TODO: understand what ExecutionException in java implementation corresponds to in kotlin code
                 //TODO: check how to compare exact exception class rather than message contains string
             if (e.message!!.contains("WalletItemNotFoundException") )
@@ -106,7 +110,7 @@ open class IndyWalletHolder : WalletHolder {
     override fun openOrCreateWallet() {
 
         //TODO: think where to store name and password and how to pass it properly
-        val walletName = "testWalletName"
+        val walletName = "testWalletName4"
         val walletPassword = "testWalletPassword"
 
         //TODO: remove this line in order to not clear wallet each time
