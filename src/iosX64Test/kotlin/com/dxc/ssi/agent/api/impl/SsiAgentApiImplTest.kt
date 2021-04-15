@@ -14,7 +14,7 @@ import kotlin.test.Ignore
 class SsiAgentApiImplTest {
 
     @Test
-    //@Ignore
+    @Ignore
     fun basicTest() {
 
         val ssiAgentApi = SsiAgentBuilderImpl()

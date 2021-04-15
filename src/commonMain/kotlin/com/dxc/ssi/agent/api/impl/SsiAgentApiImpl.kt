@@ -30,7 +30,7 @@ class SsiAgentApiImpl(
         walletConnector.walletHolder.openOrCreateWallet()
 
 //TODO: design proper concurrency there
-      //  GlobalScope.launch { messageListener.listen() }
+        GlobalScope.launch { messageListener.listen() }
 
     }
 

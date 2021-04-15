@@ -1,34 +1,30 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
-import com.dxc.ssi.agent.wallet.indy.libindy.Api.Companion.atomicInteger
+import com.dxc.ssi.agent.callback.CallbackData
+import com.dxc.ssi.agent.callback.callbackHandler
 import com.indylib.*
 import kotlinx.cinterop.*
 import platform.Foundation.*
 import platform.posix.sleep
-import kotlin.native.concurrent.AtomicReference
 
-class ReadWriteData {
-    private var atomic: AtomicReference<NSData?> = AtomicReference("".nsdata())
-
-    fun String.nsdata(): NSData? =
-        NSString.create(string = this).dataUsingEncoding(NSUTF8StringEncoding)
-
-    fun NSData.string(): String? =
-        NSString.create(data = this, encoding = NSUTF8StringEncoding)?.toString()
-
-    fun read(): String {
-        return atomic.value?.string()!!
-    }
-
-    fun write(text:String?) {
-        atomic.value = text?.nsdata()
-    }
-}
-
-@SharedImmutable
-val readwriter = ReadWriteData()
 
 actual class WalletRecord {
+    data class GetWalletRecordCallbackResult(
+        override val commandHandle: Int,
+        override val errorCode: UInt,
+        val walletRecord: String?
+        ) : CallbackData
+    //TODO: create generic data class for cases when we do not need any customization
+    data class AddWalletRecordCallbackResult(
+        override val commandHandle: Int,
+        override val errorCode: UInt
+        ) : CallbackData
+    //TODO: create generic data class for cases when we do not need any customization
+    data class UpdateWalletRecordCallbackResult(
+        override val commandHandle: Int,
+        override val errorCode: UInt
+    ) : CallbackData
+
     actual companion object {
         actual fun get(
             wallet: Wallet,
@@ -36,33 +32,37 @@ actual class WalletRecord {
             id: String,
             optionsJson: String
         ): String {
+            //TODO: check if we need memScoped here and everywhere
             memScoped {
                 val walletHandle = wallet.getWalletHandle()
-                val commandHandle = atomicInteger.value++
-                val myExitCallbackOpen: CPointer<CFunction<(indy_handle_t, indy_error_t, CPointer<ByteVar>?) -> Unit>> =
-                    staticCFunction(fun(
-                        _: indy_handle_t,
-                        error: indy_error_t,
-                        data: CPointer<ByteVar>?
-                    ) {
-                        initRuntimeIfNeeded()
-                        val didData: String? = data?.toKString()
-                        readwriter.write(didData)
-                        return
-                    })
+                val commandHandle = callbackHandler.prepareCallback()
+
+                val callback =
+                staticCFunction() { commandHandle: Int, errorCode: UInt, walletRecordData: CPointer<ByteVar>?
+                    ->
+                    initRuntimeIfNeeded()
+                    callbackHandler.setCallbackResult(
+                        GetWalletRecordCallbackResult(
+                            commandHandle, errorCode,
+                            walletRecordData?.toKString(),
+
+                        )
+                    )
+                }
+
                 val result: indy_error_t = indy_get_wallet_record(
                     commandHandle,
                     walletHandle,
                     type,
                     id,
                     optionsJson,
-                    myExitCallbackOpen
+                    callback
                 )
 
-                sleep(8)
-                if (result.toInt() != 0 || readwriter.read() != null)
-                    throw Exception("WalletItemNotFoundException")
-                return readwriter.read()
+                val recordData = callbackHandler.waitForCallbackResult(commandHandle) as GetWalletRecordCallbackResult
+
+
+                return recordData.walletRecord!!
             }
         }
 
@@ -73,28 +73,31 @@ actual class WalletRecord {
             value: String,
             tagsJson: String?
         ) {
-            val myExitCallbackAdd: CPointer<CFunction<(indy_handle_t, indy_error_t) -> Unit>>? =
-                staticCFunction(fun(
-                    _: indy_handle_t,
-                    error: indy_error_t
-                ) {
-                    return
-                })
+
+            val commandHandle = callbackHandler.prepareCallback()
+            val callback =
+                staticCFunction() { commandHandle: Int, errorCode: UInt
+                    ->
+                    initRuntimeIfNeeded()
+                    callbackHandler.setCallbackResult(
+                        AddWalletRecordCallbackResult(
+                            commandHandle, errorCode)
+                    )
+                }
+
             val walletHandle = wallet.getWalletHandle()
-            val commandHandle = atomicInteger.value++
-            val result = indy_add_wallet_record(
+
+            indy_add_wallet_record(
                 commandHandle,
                 walletHandle,
                 type,
                 id,
                 value,
                 tagsJson,
-                myExitCallbackAdd
+                callback
             )
-            sleep(8)
-            if (result.toInt() != 0)
-                throw Exception("WalletAddException")
-            return
+
+            callbackHandler.waitForCallbackResult(commandHandle)
         }
 
         actual fun updateValue(
@@ -104,26 +107,27 @@ actual class WalletRecord {
             value: String
         ) {
             val walletHandle = wallet.getWalletHandle()
-            val commandHandle = atomicInteger.value++
-            val myExitCallbackUpdate: CPointer<CFunction<(indy_handle_t, indy_error_t) -> Unit>>? =
-                staticCFunction(fun(
-                    _: indy_handle_t,
-                    error: indy_error_t
-                ) {
-                    return
-                })
-            val result = indy_update_wallet_record_value(
+            val commandHandle = callbackHandler.prepareCallback()
+            val callback =
+                staticCFunction { commandHandle: Int, errorCode: UInt
+                    ->
+                    initRuntimeIfNeeded()
+                    callbackHandler.setCallbackResult(
+                        UpdateWalletRecordCallbackResult(
+                            commandHandle, errorCode)
+                    )
+                }
+
+            indy_update_wallet_record_value(
                 commandHandle,
                 walletHandle,
                 type,
                 id,
                 value,
-                myExitCallbackUpdate
+                callback
             )
-            sleep(8)
-            if (result.toInt() != 0)
-                throw Exception("WalletUpdateException")
-            return
+
+            callbackHandler.waitForCallbackResult(commandHandle)
         }
     }
 }
