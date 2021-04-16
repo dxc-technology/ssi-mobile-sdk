@@ -11,6 +11,11 @@ actual open class IndyException(override val message:String, val sdkErrorCode: I
         sdkBackTrace = errorDetails.backtrace
     }
 
+    override fun toString(): String {
+        return "${super.toString()} " +
+                "\n sdkMessage = $sdkMessage" +
+                "\n sdkBacktrace = $sdkBackTrace"
+    }
 
     companion object {
 
@@ -23,7 +28,7 @@ actual open class IndyException(override val message:String, val sdkErrorCode: I
          */
         fun fromSdkError(sdkErrorCode: Int): IndyException {
             val errorCode = ErrorCode.valueOf(sdkErrorCode)
-            val errorDetails = ErrorDetails.getErrorDetailsFromIndy()
+         //   val errorDetails = ErrorDetails.getErrorDetailsFromIndy()
             return when (errorCode) {
                 ErrorCode.CommonInvalidParam1,
                 ErrorCode.CommonInvalidParam2,
@@ -48,7 +53,9 @@ actual open class IndyException(override val message:String, val sdkErrorCode: I
                 ErrorCode.WalletInvalidHandle -> InvalidWalletException()
                 ErrorCode.WalletUnknownTypeError -> UnknownWalletTypeException()
                 ErrorCode.WalletTypeAlreadyRegisteredError -> DuplicateWalletTypeException()
+                */
                 ErrorCode.WalletAlreadyExistsError -> WalletExistsException()
+                /*
                 ErrorCode.WalletNotFoundError -> WalletNotFoundException()
                 ErrorCode.WalletInputError -> WalletInputException()
                 ErrorCode.WalletDecodingError -> WalletDecodingException()

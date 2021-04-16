@@ -21,8 +21,9 @@ class CallbackHandler() {
         val commandHandleCounter: AtomicInt = AtomicInt(1)
     }
 
+    //TODO: see if it is possible to avoid having two maps and put all results into CompletableDeferred
     private val activeCallbackDataMap = sharedMutableMapOf<Int, CallbackData>()
-    private val activeCallbackStatusMap = sharedMutableMapOf<Int, CompletableDeferred<Unit>>()
+    private val activeCallbackStatusMap = sharedMutableMapOf<Int, CompletableDeferred<IndyException?>>()
 
     fun prepareCallback(): Int {
         val commandHandle = commandHandleCounter.value++
@@ -44,22 +45,30 @@ class CallbackHandler() {
         if (activeCallbackDataMap[commandHandle] != null)
             throw IllegalStateException("Messed up state between StatusMap and DataMap for commandHandle $commandHandle")
 
-        activeCallbackDataMap[commandHandle] = callbackData
-        activeCallbackStatusMap[commandHandle]!!.complete(Unit)
 
+        activeCallbackDataMap[commandHandle] = callbackData
+        activeCallbackStatusMap[commandHandle]!!.complete(
+            if (callbackData.errorCode == 0U) {
+                null
+            } else {
+                //ErrorDetailsWithCode(callbackData.errorCode.toInt())
+                IndyException.fromSdkError(callbackData.errorCode.toInt())
+            }
+        )
     }
 
     fun waitForCallbackResult(commandHandle: Int): CallbackData {
 
+        //TODO: before throwing exception ensure to clear cache
         if (activeCallbackStatusMap[commandHandle] == null)
             throw IllegalStateException("Attempt to get callback result for unprepared callback $commandHandle")
 
         //TODO: think if we need introduce timeout here
 
-        runBlocking {
+        val indyException = runBlocking {
             activeCallbackStatusMap[commandHandle]!!.await()
         }
-
+        //TODO: before throwing exception ensure to clear cache
         if (activeCallbackDataMap[commandHandle] == null)
             throw IllegalStateException("Messed up state between StatusMap and DataMap for commandHandle $commandHandle")
 
@@ -67,16 +76,21 @@ class CallbackHandler() {
         val callbackData = activeCallbackDataMap[commandHandle]!!
 
         //TODO: before throwing exception ensure to clear cache
-        validateCallbackResult(callbackData.errorCode)
+        //  validateCallbackResult(callbackData.errorCode)
 
         activeCallbackDataMap.remove(commandHandle)
         activeCallbackStatusMap.remove(commandHandle)
+
+        indyException?.let { e ->
+            println("Received IndyException $e")
+            throw e }
+
         return callbackData!!
 
     }
 
     private fun validateCallbackResult(errorCode: UInt) {
-        if(errorCode != 0U) {
+        if (errorCode != 0U) {
             throw IndyException.fromSdkError(errorCode.toInt())
 
         }
