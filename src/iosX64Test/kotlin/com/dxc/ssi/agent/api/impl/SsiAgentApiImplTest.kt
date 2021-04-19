@@ -7,6 +7,7 @@ import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.transport.Sleeper
+import com.dxc.ssi.agent.utils.ToBeReworked
 
 import kotlin.test.Test
 import kotlin.test.Ignore
@@ -16,6 +17,8 @@ class SsiAgentApiImplTest {
     @Test
     @Ignore
     fun basicTest() {
+
+       // ToBeReworked.enableIndyLog()
 
         val ssiAgentApi = SsiAgentBuilderImpl()
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())

@@ -110,7 +110,7 @@ open class IndyWalletHolder : WalletHolder {
     override fun openOrCreateWallet() {
 
         //TODO: think where to store name and password and how to pass it properly
-        val walletName = "testWalletName4"
+        val walletName = "testWalletName"
         val walletPassword = "testWalletPassword"
 
         //TODO: remove this line in order to not clear wallet each time

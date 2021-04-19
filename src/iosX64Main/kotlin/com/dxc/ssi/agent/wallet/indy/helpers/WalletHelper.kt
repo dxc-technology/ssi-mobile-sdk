@@ -1,84 +1,130 @@
 package com.dxc.ssi.agent.wallet.indy.helpers
 
-import com.dxc.ssi.agent.callback.CallbackData
-import com.dxc.ssi.agent.callback.callbackHandler
 import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
 import com.dxc.ssi.agent.wallet.indy.model.WalletConfig
 import com.dxc.ssi.agent.wallet.indy.model.WalletPassword
-import com.indylib.indy_create_wallet
-import com.indylib.indy_open_wallet
-import kotlinx.cinterop.staticCFunction
+import com.dxc.ssi.agent.wallet.indy.utils.EnvironmentUtils
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.ObjCObjectVar
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-
+import platform.Foundation.NSError
+import platform.Foundation.NSFileManager
 
 actual object WalletHelper {
+    /**
+     * Checks if wallet with [walletName] exists
+     */
+    fun exists(walletName: String): Boolean {
+        val walletDir = EnvironmentUtils.getIndyWalletPath(walletName)
+        return NSFileManager().fileExistsAtPath(walletDir)
+    }
 
-    data class OpenWalletResult(
-        override val commandHandle: Int,
-        override val errorCode: UInt,
-        val walletHandle: Int
-    ) : CallbackData
+    /**
+     * Creates wallet with [config] and [password]
+     *
+     * @param config: [WalletConfig] - wallet configuration
+     * @param password: [WalletPassword] - wallet credentials
+     *
+     * @throws ExecutionException with cause [WalletExistsException]
+     */
+    fun createNonExisting(config: WalletConfig, password: WalletPassword) {
+        val walletConfigJson = Json.encodeToString(config)
+        val walletPasswordJson = Json.encodeToString(password)
 
-    data class CreateWalletResult(
-        override val commandHandle: Int,
-        override val errorCode: UInt
-    ) : CallbackData
+        Wallet.createWallet(walletConfigJson, walletPasswordJson)
+    }
 
+    /**
+     * Shortcut to [createNonExisting]
+     *
+     * @param walletName: [String]
+     * @param walletPassword: [String]
+     *
+     * @throws ExecutionException with cause [WalletExistsException]
+     */
+    fun createNonExisting(walletName: String, walletPassword: String) {
+        createNonExisting(WalletConfig(walletName), WalletPassword(walletPassword))
+    }
+
+    /**
+     * Creates new or recreates existing wallet with [config] and [password].
+     *
+     * @param config: [WalletConfig] - wallet configuration
+     * @param password: [WalletPassword] - wallet credentials
+     */
+    fun createOrTrunc(config: WalletConfig, password: WalletPassword) {
+        if (exists(config.id)) {
+            //TODO: add error handling and wrap error object into kotlin exception
+            val error: CPointer<ObjCObjectVar<NSError?>>? = null
+            NSFileManager().removeItemAtPath(EnvironmentUtils.getIndyWalletPath(config.id), error)
+        }
+        createNonExisting(config, password)
+    }
+
+    /**
+     * Shortcut to [createOrTrunc]
+     *
+     * @param walletName: [String]
+     * @param walletPassword: [String]
+     */
     actual fun createOrTrunc(walletName: String, walletPassword: String) {
-//TODO: implement this
+        createOrTrunc(WalletConfig(walletName), WalletPassword(walletPassword))
     }
 
-    private fun openWallet(walletName: String, walletPassword: String): Wallet {
-        val config = WalletConfig(walletName)
-        val password = WalletPassword(walletPassword)
-        val walletConfigJson = Json.encodeToString(config)
-        val walletPasswordJson = Json.encodeToString(password)
-        val commandHandle = callbackHandler.prepareCallback()
+    /**
+     * Opens existing wallet with [config] and [password]
+     *
+     * @param config: [WalletConfig] - wallet configuration
+     * @param password: [WalletPassword] - wallet credentials
+     *
+     * @throws ExecutionException with cause [WalletAlreadyOpenedException]
+     */
+    fun openExisting(config: WalletConfig, password: WalletPassword): Wallet {
+        if (!exists(config.id))
+            throw RuntimeException("Wallet ${EnvironmentUtils.getIndyWalletPath(config.id)} doesn't exist")
 
-        val callback = staticCFunction { commandHandle: Int, errorCode: UInt, walletHandle: Int
-            ->
-            initRuntimeIfNeeded()
-            callbackHandler.setCallbackResult(OpenWalletResult(commandHandle, errorCode, walletHandle))
-        }
-
-        indy_open_wallet(
-            commandHandle,
-            walletConfigJson,
-            walletPasswordJson,
-            callback
-        )
-
-        val callbackResult = callbackHandler.waitForCallbackResult(commandHandle) as OpenWalletResult
-        return Wallet(callbackResult.walletHandle)
-
-    }
-
-    actual fun openOrCreate(
-        walletName: String,
-        walletPassword: String
-    ): Wallet {
-        val config = WalletConfig(walletName)
-        val password = WalletPassword(walletPassword)
         val walletConfigJson = Json.encodeToString(config)
         val walletPasswordJson = Json.encodeToString(password)
 
-        val commandHandle = callbackHandler.prepareCallback()
-        val callback = staticCFunction { commandHandle: Int, errorCode: UInt
-            ->
-            initRuntimeIfNeeded()
-            callbackHandler.setCallbackResult(CreateWalletResult(commandHandle, errorCode))
-        }
-
-        indy_create_wallet(
-            commandHandle,
-            walletConfigJson,
-            walletPasswordJson,
-            callback
-        )
-
-        callbackHandler.waitForCallbackResult(commandHandle)
-
-        return openWallet(walletName, walletPassword)
+        return Wallet.openWallet(walletConfigJson, walletPasswordJson)
     }
+
+    /**
+     * Shortcut to [openExisting]
+     *
+     * @param walletName: [String]
+     * @param walletPassword: [String]
+     *
+     * @throws ExecutionException with cause [WalletAlreadyOpenedException]
+     */
+    fun openExisting(walletName: String, walletPassword: String): Wallet =
+        openExisting(WalletConfig(walletName), WalletPassword(walletPassword))
+
+    /**
+     * Opens existing wallet or creates new then opens it using [config] and [password]
+     *
+     * @param config: [WalletConfig] - wallet configuration
+     * @param password: [WalletPassword] - wallet credentials
+     *
+     * @throws ExecutionException with cause [WalletAlreadyOpenedException]
+     */
+    fun openOrCreate(config: WalletConfig, password: WalletPassword): Wallet {
+        if (!exists(config.id))
+            createNonExisting(config, password)
+
+        return openExisting(config, password)
+    }
+
+    /**
+     * Shortcut to [openOrCreate]
+     *
+     * @param walletName: [String]
+     * @param walletPassword: [String]
+     *
+     * @throws ExecutionException with cause [WalletAlreadyOpenedException]
+     */
+    actual fun openOrCreate(walletName: String, walletPassword: String): Wallet
+    = openOrCreate(WalletConfig(walletName), WalletPassword(walletPassword))
 }
+
