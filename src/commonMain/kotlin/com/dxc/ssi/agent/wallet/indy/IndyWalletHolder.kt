@@ -41,7 +41,7 @@ open class IndyWalletHolder : WalletHolder {
         TODO("Not yet implemented")
     }
 
-    override fun storeConnectionRecord(connection: Connection) {
+    override suspend fun storeConnectionRecord(connection: Connection) {
 
         //TODO: check if we need to check wallet health status before using it
 
@@ -68,7 +68,7 @@ open class IndyWalletHolder : WalletHolder {
 
     }
 
-    override fun getConnectionRecordById(connectionId: String): Connection? {
+    override suspend fun getConnectionRecordById(connectionId: String): Connection? {
 
         //TODO: use some serializable data structure
         val options = "{\"retrieveType\" : true}"
@@ -88,6 +88,7 @@ open class IndyWalletHolder : WalletHolder {
             null
         }
         catch (e: Exception) {
+            println("Caught exception $e, causedBy ${e.printStackTrace()}")
             //TODO: understand what ExecutionException in java implementation corresponds to in kotlin code
                 //TODO: check how to compare exact exception class rather than message contains string
             if (e.message!!.contains("WalletItemNotFoundException") )
@@ -107,7 +108,7 @@ open class IndyWalletHolder : WalletHolder {
         return group
     }
 
-    override fun openOrCreateWallet() {
+    override suspend fun openOrCreateWallet() {
 
         //TODO: think where to store name and password and how to pass it properly
         val walletName = "testWalletName"
@@ -127,7 +128,7 @@ open class IndyWalletHolder : WalletHolder {
     }
 
     //TODO: remove all unnecessary code and beautify this function
-    override fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
+    override suspend fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
         val byteArrayMessage = message.payload.toByteArray()
         val recipientVk = recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
         //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
@@ -145,7 +146,7 @@ open class IndyWalletHolder : WalletHolder {
     }
 
     //TODO: remove all unnecessary code and beautify this function
-    override fun unPackMessage(packedMessage: Message): Message {
+    override suspend fun unPackMessage(packedMessage: Message): Message {
 
         val byteArrayMessage = packedMessage.payload.toByteArray()
 

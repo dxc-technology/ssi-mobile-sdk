@@ -25,7 +25,7 @@ actual class Crypto {
 
         //@ExperimentalUnsignedTypes
         @OptIn(ExperimentalUnsignedTypes::class)
-        actual fun packMessage(
+        actual suspend fun packMessage(
             wallet: Wallet,
             recipientVk: String,
             senderVk: String?,
@@ -67,7 +67,7 @@ actual class Crypto {
         }
 
 
-        actual fun unpackMessage(
+        actual suspend fun unpackMessage(
             wallet: Wallet,
             jwe_data: ByteArray
         ): ByteArray {

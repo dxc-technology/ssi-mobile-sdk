@@ -52,21 +52,21 @@ interface WalletHolder {
      * Stores Connection object in Non Secret space of wallet
 
      */
-    fun storeConnectionRecord(connection: Connection)
+    suspend fun storeConnectionRecord(connection: Connection)
 
     /**
      * Gets connection record from wallet by id
      *
      * @return Connection object
      */
-    fun getConnectionRecordById(connectionId: String): Connection?
+    suspend fun getConnectionRecordById(connectionId: String): Connection?
 
     /**
      * Gets connection record from wallet by id
      *
      * @return Connection object
      */
-    fun openOrCreateWallet()
+    suspend fun openOrCreateWallet()
 
     /**
      * Packs message
@@ -74,7 +74,7 @@ interface WalletHolder {
      * @return Connection object
      */
     //TODO: Support both Authcrypt and Anoncrypt modes
-    fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean = false) : String
+    suspend fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean = false) : String
 
     /**
      * Unpacks message
@@ -82,7 +82,7 @@ interface WalletHolder {
      * @return Connection object
      */
     //TODO: Support both Authcrypt and Anoncrypt modes
-    fun unPackMessage(packedMessage: Message) : Message
+    suspend fun unPackMessage(packedMessage: Message) : Message
 
 
 }

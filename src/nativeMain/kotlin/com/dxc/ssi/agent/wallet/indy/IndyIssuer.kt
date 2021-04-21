@@ -26,15 +26,15 @@ actual class IndyIssuer : IndyWalletHolder(), Issuer {
         TODO("Not yet implemented")
     }
 
-    override fun getConnectionRecordById(connectionId: String): Connection? {
+    override suspend fun getConnectionRecordById(connectionId: String): Connection? {
         TODO("Not yet implemented")
     }
 
-    override fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
+    override suspend fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
         TODO("Not yet implemented")
     }
 
-    override fun unPackMessage(packedMessage: Message): Message {
+    override suspend fun unPackMessage(packedMessage: Message): Message {
         TODO("Not yet implemented")
     }
 

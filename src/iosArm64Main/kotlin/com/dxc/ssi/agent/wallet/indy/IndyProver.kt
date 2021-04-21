@@ -9,7 +9,7 @@ actual class IndyProver : IndyWalletHolder(), Prover {
         TODO("Not yet implemented")
     }
 
-    override fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
+    override suspend fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
         TODO("Not yet implemented")
     }
 

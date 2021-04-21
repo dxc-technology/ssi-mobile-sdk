@@ -25,7 +25,7 @@ class MessageListenerImpl(
         isShutdown = true
     }
 
-    override fun listen() {
+    override suspend fun listen() {
 
         println("Started listener")
 

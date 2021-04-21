@@ -31,7 +31,7 @@ class TrustPingProcessorImpl(
         TODO("Not implemented")
     }
 
-    override fun sendTrustPingOverConnection(connection: Connection): Boolean {
+    override suspend fun sendTrustPingOverConnection(connection: Connection): Boolean {
         val sendTrustPingAction = SendTrustPingAction(walletConnector, transport, connection)
         val actionResult = sendTrustPingAction.perform()
 

@@ -9,7 +9,10 @@ import okhttp3.WebSocket
 internal actual class PlatformSocket actual constructor(url: String) {
     private val socketEndpoint = url
     private var webSocket: WebSocket? = null
-    actual fun openSocket(listener: PlatformSocketListener) {
+    actual fun openSocket(
+        listener: PlatformSocketListener,
+        socketOpenedChannel: kotlinx.coroutines.channels.Channel<Unit>
+    ) {
         val socketRequest = Request.Builder().url(socketEndpoint).build()
         val webClient = OkHttpClient().newBuilder().build()
         webSocket = webClient.newWebSocket(

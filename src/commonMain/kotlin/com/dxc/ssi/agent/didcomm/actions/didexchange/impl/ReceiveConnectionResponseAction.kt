@@ -17,7 +17,7 @@ class ReceiveConnectionResponseAction(
     private val connectionResponse: ConnectionResponse,
     private val connection: Connection
 ) : DidExchangeAction {
-    override fun perform(): ActionResult {
+    override suspend fun perform(): ActionResult {
         connectionInitiatorController.onResponseReceived(connection,connectionResponse)
         val updatedConnection = connection.copy(state = "Complete")
         walletConnector.walletHolder.storeConnectionRecord(updatedConnection)

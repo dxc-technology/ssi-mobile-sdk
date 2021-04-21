@@ -14,7 +14,7 @@ abstract class AbstractMessageProcessor(
     abstract fun getStateMachine(): StateMachine
     abstract fun getCurrentState(): State
 
-    override fun processMessage(message: Message) {
+    override suspend fun processMessage(message: Message) {
         // 1. Get current state from wallet for this connection
         println("Started processing message $message")
         val currentState = getCurrentState()

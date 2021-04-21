@@ -9,8 +9,7 @@ import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.utils.PlatformInit
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class SsiAgentApiImpl(
     private val transport: Transport,
@@ -27,15 +26,35 @@ class SsiAgentApiImpl(
 
         val platformInit = PlatformInit()
         platformInit.init()
-        walletConnector.walletHolder.openOrCreateWallet()
+
+        runBlocking {
+            walletConnector.walletHolder.openOrCreateWallet()
+        }
 
 //TODO: design proper concurrency there
-        GlobalScope.launch { messageListener.listen() }
+        GlobalScope.launch {
+            //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
+            withContext(newSingleThreadContext("Listener thread")) {
+
+                messageListener.listen()
+            }
+        }
+
 
     }
 
     override fun connect(url: String): Connection {
-        return messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
+
+        var connection: Connection? = null
+        runBlocking {
+            connection = GlobalScope.async {
+
+                messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
+
+            }.await()
+
+        }
+        return connection!!
     }
 
     override fun disconnect(connection: Connection) {
@@ -44,7 +63,17 @@ class SsiAgentApiImpl(
 
     //TODO: current function is synchronous with hardcoded timeout, generalize it
     override fun sendTrustPing(connection: Connection): Boolean {
-        return messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
+        var pingStatus: Boolean? = null
+        runBlocking {
+            pingStatus = GlobalScope.async {
+
+                messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
+
+            }.await()
+
+        }
+        return pingStatus!!
+
     }
 
     override fun issueCredentialOverConnection(connection: Connection) {

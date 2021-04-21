@@ -1,12 +1,25 @@
 package com.dxc.ssi.agent.transport
 
+import co.touchlab.stately.freeze
+import co.touchlab.stately.isolate.IsolateState
+import kotlinx.coroutines.runBlocking
 import platform.Foundation.*
 import platform.darwin.NSObject
+import kotlin.native.concurrent.isFrozen
 
+
+//import Starscream
+
+
+data class WebSocketWrapper(var websocket: NSURLSessionWebSocketTask? = null)
 internal actual class PlatformSocket actual constructor(url: String) {
     private val socketEndpoint = NSURL.URLWithString(url)!!
-    private var webSocket: NSURLSessionWebSocketTask? = null
-    actual fun openSocket(listener: PlatformSocketListener) {
+
+    // private var webSocket: NSURLSessionWebSocketTask? = null
+    private val isolatedWebSocket = IsolateState { WebSocketWrapper() }
+
+    //: IsolateState<NSURLSessionWebSocketTask> = IsolateState(null)
+    actual fun openSocket(/*listener: PlatformSocketListener, */socketListenerLoosingAdapter: SocketListenerLoosingAdapter) {
         val urlSession = NSURLSession.sessionWithConfiguration(
             configuration = NSURLSessionConfiguration.defaultSessionConfiguration(),
             delegate = object : NSObject(), NSURLSessionWebSocketDelegateProtocol {
@@ -15,44 +28,91 @@ internal actual class PlatformSocket actual constructor(url: String) {
                     webSocketTask: NSURLSessionWebSocketTask,
                     didOpenWithProtocol: String?
                 ) {
-                    listener.onOpen()
+                    runBlocking {
+                        socketListenerLoosingAdapter.socketOpenedChannel.send(Unit)
+                    }
                 }
+
                 override fun URLSession(
                     session: NSURLSession,
                     webSocketTask: NSURLSessionWebSocketTask,
                     didCloseWithCode: NSURLSessionWebSocketCloseCode,
                     reason: NSData?
                 ) {
-                    listener.onClosed(didCloseWithCode.toInt(), reason.toString())
+                    runBlocking {
+                        println("Socket closed")
+                        socketListenerLoosingAdapter.socketClosedChannel.send(
+                            SocketClosureDetails(
+                                didCloseWithCode.toInt(),
+                                reason.toString()
+                            )
+                        )
+                    }
+
                 }
-            },
+            }.freeze(),
             delegateQueue = NSOperationQueue.currentQueue()
         )
-        webSocket = urlSession.webSocketTaskWithURL(socketEndpoint)
-        listenMessages(listener)
-        webSocket?.resume()
+
+        println("PlatformSocket.isFrozen = ${this.isFrozen}")
+
+
+        isolatedWebSocket.access {
+            it.websocket = urlSession.webSocketTaskWithURL(socketEndpoint)
+            //  listenMessages(socketListenerLoosingAdapter)
+            // it.websocket?.resume()
+
+        }
+
+        listenMessages(socketListenerLoosingAdapter)
+        isolatedWebSocket.access { it.websocket?.resume() }
+
     }
-    private fun listenMessages(listener: PlatformSocketListener) {
-        webSocket?.receiveMessageWithCompletionHandler { message, nsError ->
-            when {
-                nsError != null -> {
-                    listener.onFailure(Throwable(nsError.description))
+
+    private fun listenMessages(socketListenerLoosingAdapter: SocketListenerLoosingAdapter) {
+        isolatedWebSocket.access {
+
+
+            val receiverHandler = { message: NSURLSessionWebSocketMessage?, nsError: NSError? ->
+                when {
+                    nsError != null -> {
+                        runBlocking {
+                            println("Encountered socket error")
+                            socketListenerLoosingAdapter.socketFailureChannel.send(Throwable(nsError.description))
+                        }
+
+                    }
+                    message != null -> {
+                        message.string?.let {
+                            println("received message: $it")
+                            runBlocking {
+                                socketListenerLoosingAdapter.socketReceivedMessageChannel.send(it)
+                            }
+                        }
+                    }
                 }
-                message != null -> {
-                    message.string?.let { listener.onMessage(it) }
-                }
+                listenMessages(socketListenerLoosingAdapter)
             }
-            listenMessages(listener)
+
+
+
+            it.websocket?.receiveMessageWithCompletionHandler(receiverHandler.freeze())
         }
     }
+
     actual fun closeSocket(code: Int, reason: String) {
-        webSocket?.cancelWithCloseCode(code.toLong(), null)
-        webSocket = null
+        isolatedWebSocket.access { it.websocket?.cancelWithCloseCode(code.toLong(), null) }
+        isolatedWebSocket.access { it.websocket = null }
     }
+
     actual fun sendMessage(msg: String) {
         val message = NSURLSessionWebSocketMessage(msg)
-        webSocket?.sendMessage(message) { err ->
+
+        val completionHandler: (platform.Foundation.NSError?) -> kotlin.Unit = { err: NSError? ->
             err?.let { println("send $msg error: $it") }
         }
+
+        println("In platform sendMessage")
+        isolatedWebSocket.access { it.websocket!!.sendMessage(message, completionHandler.freeze()) }
     }
 }

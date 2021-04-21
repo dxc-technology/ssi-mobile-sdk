@@ -15,7 +15,7 @@ actual class Did {
     ) : CallbackData
 
     actual companion object {
-        actual fun createAndStoreMyDid(
+        actual suspend fun createAndStoreMyDid(
             wallet: Wallet,
             didJson: String
         ): CreateAndStoreMyDidResult {

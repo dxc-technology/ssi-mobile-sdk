@@ -1,12 +1,13 @@
 package com.dxc.ssi.agent.transport
 
+import kotlinx.coroutines.channels.Channel
 import platform.Foundation.*
 import platform.darwin.NSObject
 
 internal actual class PlatformSocket actual constructor(url: String) {
     private val socketEndpoint = NSURL.URLWithString(url)!!
     private var webSocket: NSURLSessionWebSocketTask? = null
-    actual fun openSocket(listener: PlatformSocketListener) {
+    actual fun openSocket(listener: PlatformSocketListener, socketOpenedChannel: Channel<Unit>) {
         val urlSession = NSURLSession.sessionWithConfiguration(
             configuration = NSURLSessionConfiguration.defaultSessionConfiguration(),
             delegate = object : NSObject(), NSURLSessionWebSocketDelegateProtocol {

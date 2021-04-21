@@ -26,12 +26,13 @@ actual class WalletRecord {
     ) : CallbackData
 
     actual companion object {
-        actual fun get(
+        actual suspend fun get(
             wallet: Wallet,
             type: String,
             id: String,
             optionsJson: String
         ): String {
+            println("Entered WalletRecord.get")
             //TODO: check if we need memScoped here and everywhere
             memScoped {
                 val walletHandle = wallet.getWalletHandle()
@@ -66,7 +67,7 @@ actual class WalletRecord {
             }
         }
 
-        actual fun add(
+        actual suspend fun add(
             wallet: Wallet,
             type: String,
             id: String,
@@ -100,7 +101,7 @@ actual class WalletRecord {
             callbackHandler.waitForCallbackResult(commandHandle)
         }
 
-        actual fun updateValue(
+        actual suspend fun updateValue(
             wallet: Wallet,
             type: String,
             id: String,
