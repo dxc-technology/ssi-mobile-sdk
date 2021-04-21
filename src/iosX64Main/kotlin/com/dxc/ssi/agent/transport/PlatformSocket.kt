@@ -19,7 +19,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
     private val isolatedWebSocket = IsolateState { WebSocketWrapper() }
 
     //: IsolateState<NSURLSessionWebSocketTask> = IsolateState(null)
-    actual fun openSocket(/*listener: PlatformSocketListener, */socketListenerLoosingAdapter: SocketListenerLoosingAdapter) {
+    actual fun openSocket(socketListenerAdapter: SocketListenerAdapter) {
         val urlSession = NSURLSession.sessionWithConfiguration(
             configuration = NSURLSessionConfiguration.defaultSessionConfiguration(),
             delegate = object : NSObject(), NSURLSessionWebSocketDelegateProtocol {
@@ -28,9 +28,9 @@ internal actual class PlatformSocket actual constructor(url: String) {
                     webSocketTask: NSURLSessionWebSocketTask,
                     didOpenWithProtocol: String?
                 ) {
-                    runBlocking {
-                        socketListenerLoosingAdapter.socketOpenedChannel.send(Unit)
-                    }
+                    socketListenerAdapter.onOpened()
+
+
                 }
 
                 override fun URLSession(
@@ -39,15 +39,14 @@ internal actual class PlatformSocket actual constructor(url: String) {
                     didCloseWithCode: NSURLSessionWebSocketCloseCode,
                     reason: NSData?
                 ) {
-                    runBlocking {
-                        println("Socket closed")
-                        socketListenerLoosingAdapter.socketClosedChannel.send(
-                            SocketClosureDetails(
-                                didCloseWithCode.toInt(),
-                                reason.toString()
-                            )
+
+                    socketListenerAdapter.onClosed(
+                        SocketClosureDetails(
+                            didCloseWithCode.toInt(),
+                            reason.toString()
                         )
-                    }
+                    )
+
 
                 }
             }.freeze(),
@@ -59,39 +58,33 @@ internal actual class PlatformSocket actual constructor(url: String) {
 
         isolatedWebSocket.access {
             it.websocket = urlSession.webSocketTaskWithURL(socketEndpoint)
-            //  listenMessages(socketListenerLoosingAdapter)
-            // it.websocket?.resume()
+
 
         }
 
-        listenMessages(socketListenerLoosingAdapter)
+        listenMessages(socketListenerAdapter)
         isolatedWebSocket.access { it.websocket?.resume() }
 
     }
 
-    private fun listenMessages(socketListenerLoosingAdapter: SocketListenerLoosingAdapter) {
+    private fun listenMessages(socketListenerAdapter: SocketListenerAdapter) {
         isolatedWebSocket.access {
 
 
             val receiverHandler = { message: NSURLSessionWebSocketMessage?, nsError: NSError? ->
                 when {
                     nsError != null -> {
-                        runBlocking {
-                            println("Encountered socket error")
-                            socketListenerLoosingAdapter.socketFailureChannel.send(Throwable(nsError.description))
-                        }
 
+                        socketListenerAdapter.onFailure(Throwable(nsError.description))
                     }
                     message != null -> {
                         message.string?.let {
-                            println("received message: $it")
-                            runBlocking {
-                                socketListenerLoosingAdapter.socketReceivedMessageChannel.send(it)
-                            }
+
+                            socketListenerAdapter.onMessageReceived(it)
                         }
                     }
                 }
-                listenMessages(socketListenerLoosingAdapter)
+                listenMessages(socketListenerAdapter)
             }
 
 

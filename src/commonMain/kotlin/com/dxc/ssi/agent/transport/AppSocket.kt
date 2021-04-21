@@ -10,7 +10,7 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
     private val ws = PlatformSocket(url)
     private val job: CompletableJob = Job()
 
-    private val socketListenerLoosingAdapter = SocketListenerLoosingAdapter()
+    private val socketListenerAdapter = SocketListenerAdapter()
 
 
     // private val isolatedWs = IsolateState {}
@@ -43,10 +43,10 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
         listenForMessages()
         listenForFailures()
 
-        ws.openSocket(socketListenerLoosingAdapter)
+        ws.openSocket(socketListenerAdapter)
         println("awaiting while websocket is opened")
 
-        socketListenerLoosingAdapter.socketOpenedChannel.receive()
+        socketListenerAdapter.socketOpenedChannel.receive()
         socketListener.onOpen()
         println("After socketListener.onOpen")
 
@@ -77,7 +77,7 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
 
         //TODO: check that is is working as expected. I presume that once job is completed on socket disconnect them this coroutine willbe cancelled
         CoroutineScope(Dispatchers.Default + job).async {
-            val receivedMessage = socketListenerLoosingAdapter.socketReceivedMessageChannel.receive()
+            val receivedMessage = socketListenerAdapter.socketReceivedMessageChannel.receive()
             socketListener.onMessage(receivedMessage)
 
             listenForMessages()
@@ -90,7 +90,7 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
 
         //TODO: check that is is working as expected. I presume that once job is completed on socket disconnect them this coroutine willbe cancelled
         CoroutineScope(Dispatchers.Default + job).async {
-            val closureDetails = socketListenerLoosingAdapter.socketClosedChannel.receive()
+            val closureDetails = socketListenerAdapter.socketClosedChannel.receive()
             socketListener.onClosed(closureDetails.code, closureDetails.reason)
 
             listenForMessages()
@@ -102,7 +102,7 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
     private suspend fun listenForFailures() {
         println("IN listenForFailures function")
         CoroutineScope(Dispatchers.Default + job).async {
-            val receivedThrowable = socketListenerLoosingAdapter.socketFailureChannel.receive()
+            val receivedThrowable = socketListenerAdapter.socketFailureChannel.receive()
             socketListener.onFailure(receivedThrowable)
 
             listenForFailures()
