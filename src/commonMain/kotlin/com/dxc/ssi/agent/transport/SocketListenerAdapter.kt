@@ -1,7 +1,8 @@
 package com.dxc.ssi.agent.transport
 
+import com.dxc.ssi.agent.utils.CoroutineHelper
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.runBlocking
 
 //TODO: see if we can avoid this adapter or join it with PlatformSocketListener somehow
 class SocketListenerAdapter(
@@ -12,35 +13,22 @@ class SocketListenerAdapter(
     val socketClosedChannel: Channel<SocketClosureDetails> = Channel()
 ) {
     fun onOpened() {
-        runBlocking {
-            socketOpenedChannel.send(Unit)
-        }
-
+        CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketOpenedChannel.send(Unit) })
     }
 
-    fun onMessageReceived(message: String)  {
+    fun onMessageReceived(message: String) {
         println("received message: $message")
-        runBlocking {
-            socketReceivedMessageChannel.send(message)
-        }
+        CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketReceivedMessageChannel.send(message) })
     }
 
     fun onFailure(throwable: Throwable) {
-        runBlocking {
-            println("Encountered socket error")
-
-            socketFailureChannel.send(throwable)
-        }
+        println("Encountered socket error")
+        CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketFailureChannel.send(throwable) })
     }
 
     fun onClosed(socketClosureDetails: SocketClosureDetails) {
-        runBlocking {
-            println("Socket closed")
-            socketClosedChannel.send(
-                socketClosureDetails
-            )
-        }
-
+        println("Socket closed")
+        CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketClosedChannel.send(socketClosureDetails) })
     }
 
 }

@@ -9,7 +9,7 @@ import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.utils.PlatformInit
-import com.dxc.ssi.agent.utils.Waiter
+import com.dxc.ssi.agent.utils.CoroutineHelper
 import kotlinx.coroutines.*
 
 class SsiAgentApiImpl(
@@ -29,7 +29,7 @@ class SsiAgentApiImpl(
         val platformInit = PlatformInit()
         platformInit.init()
 
-        Waiter.waitForCompletion(GlobalScope.async {
+        CoroutineHelper.waitForCompletion(GlobalScope.async {
             walletConnector.walletHolder.openOrCreateWallet()
         })
 
@@ -37,7 +37,7 @@ class SsiAgentApiImpl(
 //TODO: design proper concurrency there
         GlobalScope.launch {
             //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
-            withContext(newSingleThreadContext("Listener thread")) {
+            withContext(CoroutineHelper.singleThreadCoroutineContext("Listener thread")) {
                 messageListener.listen()
             }
         }
@@ -46,7 +46,7 @@ class SsiAgentApiImpl(
     }
 
     override fun connect(url: String): Connection {
-        return Waiter.waitForCompletion(
+        return CoroutineHelper.waitForCompletion(
             GlobalScope.async {
                 messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
             })
@@ -58,7 +58,7 @@ class SsiAgentApiImpl(
 
     //TODO: current function is synchronous with hardcoded timeout, generalize it
     override fun sendTrustPing(connection: Connection): Boolean {
-        return Waiter.waitForCompletion(
+        return CoroutineHelper.waitForCompletion(
             GlobalScope.async {
                 messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
             })

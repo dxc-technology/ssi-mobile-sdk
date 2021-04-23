@@ -1,5 +1,7 @@
 package com.dxc.ssi.agent.wallet.indy
 
+import co.touchlab.stately.isolate.IsolateState
+import co.touchlab.stately.isolate.StateHolder
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import com.dxc.ssi.agent.model.Connection
@@ -12,16 +14,20 @@ import io.ktor.utils.io.core.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+//TODO: move this class to separate file
+data class ObjectHolder<T>(var obj: T? = null)
 
 open class IndyWalletHolder : WalletHolder {
     //TODO: think where do we need to store did
     //TODO: think how to avoid optionals here
     //understand what is the proper place for storing did
-    private var did: String? = null
-    private var verkey: String? = null
+    private var isoDid = IsolateState {ObjectHolder<String?>()}
+    private var isoVerkey = IsolateState {ObjectHolder<String?>()}
+
 
     //TODO: think if it is posible to make val lateinit or something like that
-    private var wallet: Wallet? = null
+    // private var wallet: Wallet? = null
+    private var isoWallet = IsolateState {ObjectHolder<Wallet>()}
     private val type = "ConnectionRecord"
 
 
@@ -30,7 +36,7 @@ open class IndyWalletHolder : WalletHolder {
     }
 
     override fun getIdentityDetails(): IdentityDetails {
-        return IdentityDetails(did!!, verkey!!, null, null)
+        return IdentityDetails(isoDid.access { it.obj }!!, isoVerkey.access { it.obj }!!, null, null)
     }
 
     override fun getIdentityDetails(did: String): IdentityDetails {
@@ -51,15 +57,18 @@ open class IndyWalletHolder : WalletHolder {
 
             val value = connection.toJson()
             //TODO: think what tags do we need here
-            val tagsJson:String? = null
+            val tagsJson: String? = null
 
+            val wallet = isoWallet.access { it.obj }
             WalletRecord.add(wallet!!, type, connection.id, value, tagsJson)
+
 
         } else {
 
             //TODO: see if we also need to update tags
 
             val value = connection.toJson()
+            val wallet = isoWallet.access { it.obj }
             WalletRecord.updateValue(wallet!!, type, connection.id, value)
 
 
@@ -82,15 +91,15 @@ open class IndyWalletHolder : WalletHolder {
 
         //TODO: find out better solution of looking up for connection
         return try {
+            val wallet = isoWallet.access { it.obj }
             val retrievedValue = WalletRecord.get(wallet!!, type, connectionId, options)
             Connection.fromJson(extractValue(retrievedValue))
-        } catch(e: WalletItemNotFoundException) {
+        } catch (e: WalletItemNotFoundException) {
             null
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             //TODO: understand what ExecutionException in java implementation corresponds to in kotlin code
-                //TODO: check how to compare exact exception class rather than message contains string
-            if (e.message!!.contains("WalletItemNotFoundException") )
+            //TODO: check how to compare exact exception class rather than message contains string
+            if (e.message!!.contains("WalletItemNotFoundException"))
                 null
             else
                 throw e
@@ -115,15 +124,17 @@ open class IndyWalletHolder : WalletHolder {
 
         //TODO: remove this line in order to not clear wallet each time
         WalletHelper.createOrTrunc(walletName = walletName, walletPassword = walletPassword)
-        wallet = WalletHelper.openOrCreate(walletName = walletName, walletPassword = walletPassword)
+        val wallet = WalletHelper.openOrCreate(walletName = walletName, walletPassword = walletPassword)
+        isoWallet.access { it.obj = wallet }
 
         //TODO: do not recreate did each time on wallet opening
         //TODO: alow to provide specific DID config
 
         val didConfigJson = Json.encodeToString(DidConfig())
         val didResult = Did.createAndStoreMyDid(wallet!!, didConfigJson)
-        did = didResult.getDid()
-        verkey = didResult.getVerkey()
+        isoDid.access { it.obj = didResult.getDid() }
+        isoVerkey.access { it.obj = didResult.getVerkey() }
+
     }
 
     //TODO: remove all unnecessary code and beautify this function
@@ -133,8 +144,8 @@ open class IndyWalletHolder : WalletHolder {
         //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
         println("recipientKeys = $recipientVk")
 
-        val senderVk = if (useAnonCrypt) null else verkey
-
+        val senderVk = if (useAnonCrypt) null else isoVerkey.access { it.obj }
+        val wallet = isoWallet.access { it.obj }
         val byteArrayPackedMessage = Crypto.packMessage(wallet!!, recipientVk, senderVk, byteArrayMessage)
 
         val decodedString = String(byteArrayPackedMessage)
@@ -149,6 +160,7 @@ open class IndyWalletHolder : WalletHolder {
 
         val byteArrayMessage = packedMessage.payload.toByteArray()
 
+        val wallet = isoWallet.access { it.obj }
         val byteArrayUnpackedMessage = Crypto.unpackMessage(wallet!!, byteArrayMessage)
 
         val decodedString = String(byteArrayUnpackedMessage)
