@@ -4,7 +4,7 @@ import org.hyperledger.indy.sdk.did.Did
 
 actual class Did {
     actual companion object {
-        actual fun createAndStoreMyDid(
+        actual suspend fun createAndStoreMyDid(
             wallet: Wallet,
             didJson: String
         ): CreateAndStoreMyDidResult {

@@ -88,7 +88,6 @@ open class IndyWalletHolder : WalletHolder {
             null
         }
         catch (e: Exception) {
-            println("Caught exception $e, causedBy ${e.printStackTrace()}")
             //TODO: understand what ExecutionException in java implementation corresponds to in kotlin code
                 //TODO: check how to compare exact exception class rather than message contains string
             if (e.message!!.contains("WalletItemNotFoundException") )

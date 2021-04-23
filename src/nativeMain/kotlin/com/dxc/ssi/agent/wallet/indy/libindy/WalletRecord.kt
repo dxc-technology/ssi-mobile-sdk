@@ -2,7 +2,7 @@ package com.dxc.ssi.agent.wallet.indy.libindy
 
 actual class WalletRecord {
     actual companion object {
-        actual fun get(
+        actual suspend fun get(
             wallet: Wallet,
             type: String,
             id: String,
@@ -11,7 +11,7 @@ actual class WalletRecord {
             TODO("Not yet implemented")
         }
 
-        actual fun add(
+        actual suspend fun add(
             wallet: Wallet,
             type: String,
             id: String,
@@ -20,7 +20,7 @@ actual class WalletRecord {
         ) {
         }
 
-        actual fun updateValue(
+        actual suspend fun updateValue(
             wallet: Wallet,
             type: String,
             id: String,

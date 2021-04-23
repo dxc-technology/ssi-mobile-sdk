@@ -9,6 +9,7 @@ import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.utils.PlatformInit
+import com.dxc.ssi.agent.utils.Waiter
 import kotlinx.coroutines.*
 
 class SsiAgentApiImpl(
@@ -22,20 +23,21 @@ class SsiAgentApiImpl(
     //TODO: add callback controllers here
 
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun init() {
 
         val platformInit = PlatformInit()
         platformInit.init()
 
-        runBlocking {
+        Waiter.waitForCompletion(GlobalScope.async {
             walletConnector.walletHolder.openOrCreateWallet()
-        }
+        })
+
 
 //TODO: design proper concurrency there
         GlobalScope.launch {
             //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
             withContext(newSingleThreadContext("Listener thread")) {
-
                 messageListener.listen()
             }
         }
@@ -44,17 +46,10 @@ class SsiAgentApiImpl(
     }
 
     override fun connect(url: String): Connection {
-
-        var connection: Connection? = null
-        runBlocking {
-            connection = GlobalScope.async {
-
+        return Waiter.waitForCompletion(
+            GlobalScope.async {
                 messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
-
-            }.await()
-
-        }
-        return connection!!
+            })
     }
 
     override fun disconnect(connection: Connection) {
@@ -63,17 +58,10 @@ class SsiAgentApiImpl(
 
     //TODO: current function is synchronous with hardcoded timeout, generalize it
     override fun sendTrustPing(connection: Connection): Boolean {
-        var pingStatus: Boolean? = null
-        runBlocking {
-            pingStatus = GlobalScope.async {
-
+        return Waiter.waitForCompletion(
+            GlobalScope.async {
                 messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
-
-            }.await()
-
-        }
-        return pingStatus!!
-
+            })
     }
 
     override fun issueCredentialOverConnection(connection: Connection) {

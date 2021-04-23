@@ -19,7 +19,7 @@ class SsiAgentApiImplTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    //@Ignore
+    @Ignore
     fun basicTest() {
 
         // ToBeReworked.enableIndyLog()

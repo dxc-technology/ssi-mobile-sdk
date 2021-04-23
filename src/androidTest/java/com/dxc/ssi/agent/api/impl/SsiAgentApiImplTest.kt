@@ -27,7 +27,7 @@ class SsiAgentApiImplTest {
     )
 
     @Test
-    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+    //@Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -38,7 +38,7 @@ class SsiAgentApiImplTest {
         ssiAgentApi.init()
 
         val invitationUrl =
-            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjZpekJUZ0g4aHhyQnFpU2I2NnprclZydFJCZ2FMa2JrUjdoY2YzTXVDUUU3Il0sInJlY2lwaWVudEtleXMiOlsiQ1JaUmI4SkZDdkxSSE5Cd29rVUhaQzh1U0V4QjNrMzJTUXlSMWpVb1B0RTYiXSwiQGlkIjoiNjBjODViZTQtNDMyMy00MWU4LWFkNDMtNGExM2UzZDExNjdiIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkVGQ3FVZUJNSDhZeVdYWWtWWGlBNUV6OHNaY1h0S2Z0a2JqRUJmWkhqWDRjIl0sInJlY2lwaWVudEtleXMiOlsiNEpQWUNlZkc5eTR4a0plWjVlU1VlcjVNTlJ2Z0NHenJpR2docHFkWVpiYTkiXSwiQGlkIjoiMjE1MzMzMmUtZjIxYS00ZGZiLWE5NjEtNjg4NjZiZDQyZmFjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
         ssiAgentApi.connect(invitationUrl)
 
