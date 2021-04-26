@@ -21,7 +21,7 @@ actual class Wallet(private var walletHandle: Int) {
     ) : CallbackData
 
     companion object {
-        fun createWallet(config:String, credentials:String) {
+        suspend fun createWallet(config:String, credentials:String) {
             val commandHandle = callbackHandler.prepareCallback()
             val callback = staticCFunction { commandHandle: Int, errorCode: UInt
                 ->
@@ -40,7 +40,7 @@ actual class Wallet(private var walletHandle: Int) {
 
         }
 
-        fun openWallet(config:String, credentials:String) : Wallet {
+        suspend fun openWallet(config:String, credentials:String) : Wallet {
             val commandHandle = callbackHandler.prepareCallback()
 
             val callback = staticCFunction { commandHandle: Int, errorCode: UInt, walletHandle: Int

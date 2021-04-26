@@ -5,7 +5,7 @@ import com.dxc.ssi.agent.model.messages.MessageEnvelop
 
 interface Transport {
     //TODO: find proper URL class
-    fun sendMessage(connection: Connection, message: MessageEnvelop)
-    fun receiveNextMessage(): MessageEnvelop
+    suspend fun sendMessage(connection: Connection, message: MessageEnvelop)
+    suspend fun receiveNextMessage(): MessageEnvelop
 
 }

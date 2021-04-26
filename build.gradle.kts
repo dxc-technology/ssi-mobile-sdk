@@ -76,6 +76,9 @@ kotlin {
                 implementation("io.ktor:ktor-utils:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
                 implementation ("co.touchlab:stately-iso-collections:1.1.4-a1")
+                //TODO: check if two stately dependencies below are needed, considering that they should be included in the dependency above
+                implementation ("co.touchlab:stately-isolate:1.1.4-a1")
+                implementation ("co.touchlab:stately-common:1.1.4")
                 implementation ("com.benasher44:uuid:$uuidVersion")
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))

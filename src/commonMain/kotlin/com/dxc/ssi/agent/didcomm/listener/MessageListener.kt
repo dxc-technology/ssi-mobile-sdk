@@ -5,6 +5,6 @@ import com.dxc.ssi.agent.didcomm.router.MessageRouter
 interface MessageListener {
     val messageRouter: MessageRouter
     fun shutdown()
-    fun listen()
+    suspend fun listen()
 
 }

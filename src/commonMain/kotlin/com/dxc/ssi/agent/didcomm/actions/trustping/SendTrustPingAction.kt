@@ -21,7 +21,7 @@ class SendTrustPingAction(
     private val connection: Connection
 ) {
 
-    fun perform(): ActionResult {
+    suspend fun perform(): ActionResult {
         //TODO: make TrustPing Stateless
 
         // 1. Form TrustPingRequestMessage

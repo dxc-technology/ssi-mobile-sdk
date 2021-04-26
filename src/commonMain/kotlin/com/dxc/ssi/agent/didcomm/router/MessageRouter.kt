@@ -8,6 +8,6 @@ import com.dxc.ssi.agent.model.messages.ReceivedUnpackedMessage
 interface MessageRouter {
     val didExchangeProcessor: DidExchangeProcessor
     val trustPingProcessor: TrustPingProcessor
-    fun routeAndProcessMessage(receivedUnpackedMessage: ReceivedUnpackedMessage)
+    suspend fun routeAndProcessMessage(receivedUnpackedMessage: ReceivedUnpackedMessage)
 
 }

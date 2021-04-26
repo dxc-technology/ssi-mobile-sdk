@@ -28,7 +28,7 @@ actual object WalletHelper {
      *
      * @throws ExecutionException with cause [WalletExistsException]
      */
-    fun createNonExisting(config: WalletConfig, password: WalletPassword) {
+    suspend fun createNonExisting(config: WalletConfig, password: WalletPassword) {
         val walletConfigJson = Json.encodeToString(config)
         val walletPasswordJson = Json.encodeToString(password)
 
@@ -43,7 +43,7 @@ actual object WalletHelper {
      *
      * @throws ExecutionException with cause [WalletExistsException]
      */
-    fun createNonExisting(walletName: String, walletPassword: String) {
+    suspend fun createNonExisting(walletName: String, walletPassword: String) {
         createNonExisting(WalletConfig(walletName), WalletPassword(walletPassword))
     }
 
@@ -53,7 +53,7 @@ actual object WalletHelper {
      * @param config: [WalletConfig] - wallet configuration
      * @param password: [WalletPassword] - wallet credentials
      */
-    fun createOrTrunc(config: WalletConfig, password: WalletPassword) {
+    suspend fun createOrTrunc(config: WalletConfig, password: WalletPassword) {
         if (exists(config.id)) {
             //TODO: add error handling and wrap error object into kotlin exception
             val error: CPointer<ObjCObjectVar<NSError?>>? = null
@@ -68,7 +68,7 @@ actual object WalletHelper {
      * @param walletName: [String]
      * @param walletPassword: [String]
      */
-    actual fun createOrTrunc(walletName: String, walletPassword: String) {
+    actual suspend fun createOrTrunc(walletName: String, walletPassword: String) {
         createOrTrunc(WalletConfig(walletName), WalletPassword(walletPassword))
     }
 
@@ -80,7 +80,7 @@ actual object WalletHelper {
      *
      * @throws ExecutionException with cause [WalletAlreadyOpenedException]
      */
-    fun openExisting(config: WalletConfig, password: WalletPassword): Wallet {
+    suspend fun openExisting(config: WalletConfig, password: WalletPassword): Wallet {
         if (!exists(config.id))
             throw RuntimeException("Wallet ${EnvironmentUtils.getIndyWalletPath(config.id)} doesn't exist")
 
@@ -98,7 +98,7 @@ actual object WalletHelper {
      *
      * @throws ExecutionException with cause [WalletAlreadyOpenedException]
      */
-    fun openExisting(walletName: String, walletPassword: String): Wallet =
+    suspend fun openExisting(walletName: String, walletPassword: String): Wallet =
         openExisting(WalletConfig(walletName), WalletPassword(walletPassword))
 
     /**
@@ -109,7 +109,7 @@ actual object WalletHelper {
      *
      * @throws ExecutionException with cause [WalletAlreadyOpenedException]
      */
-    fun openOrCreate(config: WalletConfig, password: WalletPassword): Wallet {
+    suspend fun openOrCreate(config: WalletConfig, password: WalletPassword): Wallet {
         if (!exists(config.id))
             createNonExisting(config, password)
 
@@ -124,7 +124,7 @@ actual object WalletHelper {
      *
      * @throws ExecutionException with cause [WalletAlreadyOpenedException]
      */
-    actual fun openOrCreate(walletName: String, walletPassword: String): Wallet
+    actual suspend fun openOrCreate(walletName: String, walletPassword: String): Wallet
     = openOrCreate(WalletConfig(walletName), WalletPassword(walletPassword))
 }
 

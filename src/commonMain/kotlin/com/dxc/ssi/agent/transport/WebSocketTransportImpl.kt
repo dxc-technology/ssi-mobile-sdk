@@ -4,6 +4,10 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import io.ktor.util.*
+import kotlinx.coroutines.delay
+import co.touchlab.stately.collections.sharedMutableMapOf
+import co.touchlab.stately.collections.sharedMutableListOf
+
 
 //TODO: handle closing websocket correctly
 //TODO: cleanup websockets cache with time to avoid memory leak
@@ -12,9 +16,11 @@ class WebSocketTransportImpl : Transport {
 
     //TODO: temporarily using it instead of queue. Need to understand how to use queues/channels?
     //TODO: understand how will it work with concurrency
-    private val incomingMessagesQueue = mutableListOf<MessageEnvelop>()
+    private val incomingMessagesQueue = sharedMutableListOf<MessageEnvelop>()
     //TODO: deal with proper closing of sockets
-    private val appSocketsMap = mutableMapOf<String, AppSocket>()
+    //private val appSocketsMap = mutableMapOf<String, AppSocket>()
+
+    private val appSocketsMap = sharedMutableMapOf<String, AppSocket>()
 
     fun init() {
 
@@ -22,7 +28,7 @@ class WebSocketTransportImpl : Transport {
     }
 
     @OptIn(InternalAPI::class)
-    override fun sendMessage(connection: Connection, message: MessageEnvelop) {
+    override suspend fun sendMessage(connection: Connection, message: MessageEnvelop) {
 
         //TODO: properly parse host
         //val host = "localhost"
@@ -43,7 +49,7 @@ class WebSocketTransportImpl : Transport {
         appSocket.send(message.payload)
     }
 
-    private fun openConnection(endpoint: String): AppSocket {
+    private suspend fun openConnection(endpoint: String): AppSocket {
         val appSocket = AppSocket(endpoint, incomingMessagesQueue)
         appSocket.connect()
 
@@ -51,7 +57,7 @@ class WebSocketTransportImpl : Transport {
     }
 
     //TODO: make it thread safe
-    private fun openOrGetExistingConnection(endpoint: String): AppSocket {
+    private suspend fun openOrGetExistingConnection(endpoint: String): AppSocket {
 
         if (appSocketsMap[endpoint] != null)
             return appSocketsMap[endpoint]!!
@@ -84,10 +90,12 @@ class WebSocketTransportImpl : Transport {
 
 
     //TODO: decide if we need to leave this call blocking
-    override fun receiveNextMessage(): MessageEnvelop {
+    override suspend fun receiveNextMessage(): MessageEnvelop {
+        //TODO: ensure that all suspend functions are not blocking. For that use withContext block in the begining of each suspend fun
 
         while (incomingMessagesQueue.size == 0) {
-            Sleeper().sleep(1000)
+           // Sleeper().sleep(1000)
+            delay(1000)
         }
 
         val message = incomingMessagesQueue[0]

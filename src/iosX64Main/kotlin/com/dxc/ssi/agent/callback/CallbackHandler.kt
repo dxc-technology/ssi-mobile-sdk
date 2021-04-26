@@ -3,7 +3,6 @@ package com.dxc.ssi.agent.callback
 import co.touchlab.stately.collections.sharedMutableMapOf
 import com.dxc.ssi.agent.exceptions.indy.IndyException
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.runBlocking
 import kotlin.native.concurrent.AtomicInt
 
 @SharedImmutable
@@ -46,15 +45,15 @@ class CallbackHandler() {
                  else IndyException.fromSdkError(callbackData.errorCode.toInt())))
     }
 
-    fun waitForCallbackResult(commandHandle: Int): CallbackData {
+    suspend fun waitForCallbackResult(commandHandle: Int): CallbackData {
 
         if (activeCallbacksMap[commandHandle] == null)
             throw IllegalStateException("Attempt to get callback result for unprepared callback $commandHandle")
 
         //TODO: think if we need introduce timeout here
-        val callbackDataWrapper = runBlocking {
+        val callbackDataWrapper =
             activeCallbacksMap[commandHandle]!!.await()
-        }
+
 
         activeCallbacksMap.remove(commandHandle)
 

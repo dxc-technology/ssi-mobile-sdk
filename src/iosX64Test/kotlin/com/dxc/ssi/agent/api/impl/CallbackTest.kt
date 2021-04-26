@@ -6,6 +6,7 @@ import com.dxc.ssi.agent.wallet.indy.model.WalletConfig
 import com.dxc.ssi.agent.wallet.indy.model.WalletPassword
 import com.indylib.indy_create_wallet
 import kotlinx.cinterop.staticCFunction
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -13,7 +14,8 @@ import kotlin.test.Test
 
 data class CreateWalletResult(
     override val commandHandle: Int,
-    override val errorCode: UInt) : CallbackData
+    override val errorCode: UInt
+) : CallbackData
 
 
 class CallbackTest {
@@ -41,9 +43,9 @@ class CallbackTest {
 
         indy_create_wallet(commandHandle, walletConfigJson, walletPasswordJson, callback)
 
-
-       callbackHandler.waitForCallbackResult(commandHandle)
-
+        runBlocking {
+            callbackHandler.waitForCallbackResult(commandHandle)
+        }
 
         println("Test finished")
     }

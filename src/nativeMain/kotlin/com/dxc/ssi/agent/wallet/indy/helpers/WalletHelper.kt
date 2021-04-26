@@ -3,10 +3,10 @@ package com.dxc.ssi.agent.wallet.indy.helpers
 import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
 
 actual object WalletHelper {
-    actual fun createOrTrunc(walletName: String, walletPassword: String) {
+    actual suspend fun createOrTrunc(walletName: String, walletPassword: String) {
     }
 
-    actual fun openOrCreate(
+    actual suspend fun openOrCreate(
         walletName: String,
         walletPassword: String
     ): Wallet {

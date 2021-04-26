@@ -5,7 +5,7 @@ import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
 
 actual class IndyTrustee :IndyWalletHolder(), Trustee {
-    override fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
+    override suspend fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
         TODO("Not yet implemented")
     }
 
