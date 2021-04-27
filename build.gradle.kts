@@ -55,10 +55,13 @@ kotlin {
             }
         }
     }
+
     cocoapods {
         summary = "Kotlin sample project with CocoaPods dependencies"
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
-        ios.deploymentTarget = "13.5"
+        ios.deploymentTarget = "10.2"
+        frameworkName = "ssi_agent"
+        podfile = project.file("./SwiftApp3/Podfile")
     }
 
     val hostOs = System.getProperty("os.name")
@@ -185,6 +188,7 @@ android {
 dependencies {
     implementation("junit:junit:$junitVersion")
 }
+/*
 val packForXcode by tasks.creating(Sync::class) {
     group = "build"
     val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
@@ -198,3 +202,4 @@ val packForXcode by tasks.creating(Sync::class) {
     into(targetDir)
 }
 tasks.getByName("build").dependsOn(packForXcode)
+*/

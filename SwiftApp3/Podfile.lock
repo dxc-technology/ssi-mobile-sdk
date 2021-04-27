@@ -1,0 +1,36 @@
+PODS:
+  - kotlin_multiplatform_agent (1.0-SNAPSHOT)
+  - libindy (1.15.0)
+  - libsodium (1.0.12)
+  - libzmq-pw (4.2.2)
+  - OpenSSL-Universal (1.1.1100)
+
+DEPENDENCIES:
+  - kotlin_multiplatform_agent (from `../`)
+  - libindy (= 1.15.0)
+  - libsodium (~> 1.0.12)
+  - libzmq-pw (= 4.2.2)
+  - OpenSSL-Universal (~> 1.0)
+
+SPEC REPOS:
+  https://github.com/hyperledger/indy-sdk.git:
+    - libindy
+    - libzmq-pw
+  trunk:
+    - libsodium
+    - OpenSSL-Universal
+
+EXTERNAL SOURCES:
+  kotlin_multiplatform_agent:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  kotlin_multiplatform_agent: 56a46b6cda4935027d29fc249f68140d3bd06620
+  libindy: 11318335b528494a6155943c4cc6579926cee7e3
+  libsodium: 9a8faa5ef2fa0d2d57bd7f7d79bf8fb7c1a9f0ea
+  libzmq-pw: 493d316cf7f91117bce03df7588b3a7ff0f4a797
+  OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
+
+PODFILE CHECKSUM: 131c9dadd0e36f615e20a830c58a1511ec5189f7
+
+COCOAPODS: 1.10.1
