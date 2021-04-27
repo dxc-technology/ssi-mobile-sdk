@@ -61,7 +61,7 @@ kotlin {
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
         ios.deploymentTarget = "10.2"
         frameworkName = "ssi_agent"
-        podfile = project.file("./SwiftApp3/Podfile")
+        podfile = project.file("./samples/swiftIosApp/Podfile")
     }
 
     val hostOs = System.getProperty("os.name")

@@ -6,8 +6,8 @@ workspace 'Indy.xcworkspace'
 
 def appPods
     pod 'libsodium', '~> 1.0.12'
-    pod 'libzmq', "4.0.4"
-    pod 'OpenSSL-Universal', '~> 1.0'
+    pod 'libzmq-pw', "4.2.2"
+    pod 'OpenSSL-XM'
     pod 'libindy', "1.15.0"
 end
 
@@ -31,7 +31,7 @@ end
 
 post_install do |installer|
     installer.pods_project.targets.each do |target|
-      if target.name == 'libzmq'
+      if target.name == 'libzmq-pw'
         target.build_configurations.each do |config|
             config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', 'ZMQ_BUILD_DRAFT_API=1']
         end
