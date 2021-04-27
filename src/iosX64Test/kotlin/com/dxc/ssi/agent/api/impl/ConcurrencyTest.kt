@@ -3,10 +3,12 @@ package com.dxc.ssi.agent.api.impl
 import com.dxc.ssi.agent.transport.Sleeper
 import kotlinx.coroutines.*
 import kotlin.test.Test
+import kotlin.test.Ignore
 
 class ConcurrencyTest {
 
     @Test
+    @Ignore
     fun test() {
 
         runBlocking {
