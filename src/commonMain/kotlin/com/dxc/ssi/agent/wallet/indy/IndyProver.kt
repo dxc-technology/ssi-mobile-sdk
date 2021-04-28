@@ -110,7 +110,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun storeCredentialExchangeRecord(credentialExchangeRecord: CredentialExchangeRecord) {
+    override suspend fun storeCredentialExchangeRecord(credentialExchangeRecord: CredentialExchangeRecord) {
         //TODO: check if we need to check wallet health status before using it
 
         //TODO:Understand what id to use for uniquely identifying proper record
@@ -149,7 +149,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         }
     }
 
-    override fun getCredentialExchangeRecordByThread(thread: Thread): CredentialExchangeRecord? {
+    override suspend fun getCredentialExchangeRecordByThread(thread: Thread): CredentialExchangeRecord? {
 
         //TODO: use some serializable data structure
         val options = "{\"retrieveType\" : true}"
@@ -287,7 +287,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun removeCredentialExchangeRecordByThread(thread: Thread) {
+    override suspend fun removeCredentialExchangeRecordByThread(thread: Thread) {
 
         WalletRecord.delete(
             walletHolder.getWallet() as Wallet,

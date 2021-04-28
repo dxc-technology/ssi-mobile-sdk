@@ -4,14 +4,16 @@ actual class CredentialsSearchForProofReq actual constructor() {
     actual fun open(
         wallet: Wallet,
         proofReqJson: String,
-        extraQueryJson: String
+        extraQueryJson: String?
     ) {
     }
 
-    actual fun fetchNextCredentials(itemRef: String, count: Int) {
+    actual fun fetchNextCredentials(itemRef: String, count: Int): String {
+        TODO("Not yet implemented")
     }
 
     actual fun closeSearch() {
     }
+
 
 }

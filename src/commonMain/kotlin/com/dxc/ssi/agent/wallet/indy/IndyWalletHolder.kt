@@ -52,12 +52,6 @@ open class IndyWalletHolder : WalletHolder {
         TODO("Not yet implemented")
     }
 
-    override fun findConnectionByVerKey(verKey: String): Connection? {
-        //TODO: make common implementation here. Copy it from  poc_cred_verify branch and adopt
-        TODO("Not implemented")
-    }
-
-
     override suspend fun storeConnectionRecord(connection: Connection) {
 
         //TODO: check if we need to check wallet health status before using it
@@ -127,12 +121,15 @@ open class IndyWalletHolder : WalletHolder {
 
     override fun findConnectionByVerKey(verKey: String): Connection? {
 
+
         val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"
         val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
 
         println("Searching connections using query: $query")
 
         val search = WalletSearch()
+
+        val wallet = isoWallet.access { it.obj }
         search.open(wallet!!, WalletRecordType.ConnectionRecord.name, query, options)
         //TODO: make proper fetch in batches insetad of just fetching 100 records
         val foundRecordsJson = search.searchFetchNextRecords(wallet!!, 100)
@@ -181,13 +178,6 @@ open class IndyWalletHolder : WalletHolder {
         val wallet = isoWallet.access { it.obj }
         return wallet as Any
     }
-
-    //TODO: think how to return wallet instead of Any
-    override fun getWallet(): Any {
-        //TODO: check here if wallet is opened or not. Throw exception or open it
-        return wallet as Any
-    }
-
 
     //TODO: remove all unnecessary code and beautify this function
     override suspend fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {

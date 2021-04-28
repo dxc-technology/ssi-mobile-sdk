@@ -40,7 +40,7 @@ interface Prover {
      *
      * @param credentialExchangeRecord [CredentialExchangeRecord] - credentialExchangeRecord to store
      */
-    fun storeCredentialExchangeRecord(credentialExchangeRecord: CredentialExchangeRecord)
+    suspend fun storeCredentialExchangeRecord(credentialExchangeRecord: CredentialExchangeRecord)
 
     /**
      * Retrieves [CredentialExchangeRecord] from wallet
@@ -48,7 +48,7 @@ interface Prover {
      * @param thread [Thread]
      * @return [CredentialExchangeRecord?]
      */
-    fun getCredentialExchangeRecordByThread(thread: Thread): CredentialExchangeRecord?
+    suspend fun getCredentialExchangeRecordByThread(thread: Thread): CredentialExchangeRecord?
 
     /**
      * Gets credential definition id from offer data
@@ -127,7 +127,7 @@ interface Prover {
     fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): Data
     fun buildCredentialObjectFromRawData(data: Data): Credential
     fun buildCredentialOfferObjectFromRawData(data: Data): CredentialOffer
-    fun removeCredentialExchangeRecordByThread(thread: Thread)
+    suspend fun removeCredentialExchangeRecordByThread(thread: Thread)
     fun buildPresentationRequestObjectFromRawData(data: Data): PresentationRequest
     fun createPresentation(
         presentationRequest: PresentationRequest,

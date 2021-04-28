@@ -1,6 +1,6 @@
 package com.dxc.ssi.agent.api.impl
 
-import com.dxc.ssi.agent.transport.Sleeper
+import com.dxc.utils.Sleeper
 import kotlinx.coroutines.*
 import kotlin.test.Test
 import kotlin.test.Ignore

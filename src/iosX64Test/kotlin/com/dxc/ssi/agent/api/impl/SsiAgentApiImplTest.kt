@@ -15,7 +15,7 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestConta
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.model.Connection
-import com.dxc.ssi.agent.transport.Sleeper
+import com.dxc.utils.Sleeper
 import kotlinx.coroutines.*
 
 import kotlin.test.Test
@@ -25,7 +25,7 @@ class SsiAgentApiImplTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-   // @Ignore
+    @Ignore
     fun basicTest() {
 
         // ToBeReworked.enableIndyLog()
