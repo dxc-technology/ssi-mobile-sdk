@@ -47,6 +47,11 @@ open class IndyWalletHolder : WalletHolder {
         TODO("Not yet implemented")
     }
 
+    override fun findConnectionByVerKey(verKey: String): Connection? {
+        //TODO: make common implementation here. Copy it from  poc_cred_verify branch and adopt
+    }
+
+
     override suspend fun storeConnectionRecord(connection: Connection) {
 
         //TODO: check if we need to check wallet health status before using it
