@@ -37,6 +37,7 @@ class SsiAgentApiImpl(
         platformInit.init()
 
         CoroutineHelper.waitForCompletion(GlobalScope.async {
+            ledgerConnector.init()
             walletConnector.walletHolder.openOrCreateWallet()
             //TODO: lloks like here we need to make ledgerCOnnector.did to be IsoSatte
             ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did

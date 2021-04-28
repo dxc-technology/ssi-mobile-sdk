@@ -4,7 +4,7 @@ import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.didexchange.impl.AbortConnection
 import com.dxc.ssi.agent.model.Connection
-import com.dxc.ssi.agent.transport.Sleeper
+import com.dxc.utils.Sleeper
 import com.dxc.utils.System
 
 //TODO: rewrite this class to be stateless and take infor from wallet. This is not needed for mobile library, but will be needed for scalable server-side library

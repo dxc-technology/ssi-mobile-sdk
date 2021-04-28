@@ -209,4 +209,6 @@ interface LedgerConnector {
           retryTimes: Int = RETRY_TIMES
       ): DataUsedInProofJson
   */
+
+    fun init()
 }

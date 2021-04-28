@@ -27,6 +27,21 @@ actual class WalletRecord {
             value: String
         ) {
         }
+
+        actual fun updateTags(
+            wallet: Wallet,
+            type: String,
+            id: String,
+            tagsJson: String
+        ) {
+        }
+
+        actual fun delete(
+            wallet: Wallet,
+            type: String,
+            id: String
+        ) {
+        }
     }
 
 }

@@ -125,10 +125,6 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation("org.slf4j:slf4j-simple:1.7.26")
-/*
-                implementation("org.slf4j:slf4j-api:1.7.30")
-                implementation ("org.slf4j:slf4j-log4j12:1.8.0-alpha2")
-                implementation ("log4j:log4j:1.2.17")*/
             }
         }
         val androidMain by getting {
@@ -141,8 +137,6 @@ kotlin {
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
                 implementation("org.slf4j:slf4j-simple:1.7.26")
                 implementation("net.java.dev.jna:jna:5.8.0@aar")
-
-
                 implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
             }

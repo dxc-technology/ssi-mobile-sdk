@@ -13,7 +13,15 @@ actual class WalletRecord {
         }
 
         actual suspend fun updateValue(wallet: Wallet, type: String, id: String, value: String) {
-            WalletRecord.updateValue(wallet, type, id, value)
+            WalletRecord.updateValue(wallet, type, id, value).get()
+        }
+
+        actual suspend fun updateTags(wallet: Wallet, type: String, id: String, tagsJson: String) {
+            WalletRecord.updateTags(wallet, type, id, tagsJson).get()
+        }
+
+        actual suspend fun delete(wallet: Wallet, type: String, id: String) {
+            WalletRecord.delete(wallet, type, id).get()
         }
     }
 
