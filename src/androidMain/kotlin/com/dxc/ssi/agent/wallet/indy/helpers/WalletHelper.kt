@@ -74,7 +74,7 @@ actual object WalletHelper {
      * @param walletName: [String]
      * @param walletPassword: [String]
      */
-    actual fun createOrTrunc(walletName: String, walletPassword: String) {
+    actual suspend fun createOrTrunc(walletName: String, walletPassword: String) {
         createOrTrunc(WalletConfig(walletName), WalletPassword(walletPassword))
     }
 
@@ -132,7 +132,7 @@ actual object WalletHelper {
      *
      * @throws ExecutionException with cause [WalletAlreadyOpenedException]
      */
-    actual fun openOrCreate(walletName: String, walletPassword: String): Wallet
+    actual suspend fun openOrCreate(walletName: String, walletPassword: String): Wallet
             = openOrCreate(WalletConfig(walletName), WalletPassword(walletPassword))
 }
 

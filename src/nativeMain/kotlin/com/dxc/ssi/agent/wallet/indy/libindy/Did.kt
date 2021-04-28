@@ -2,7 +2,7 @@ package com.dxc.ssi.agent.wallet.indy.libindy
 
 actual class Did {
     actual companion object {
-        actual fun createAndStoreMyDid(
+        actual suspend fun createAndStoreMyDid(
             wallet: Wallet,
             didJson: String
         ): CreateAndStoreMyDidResult {

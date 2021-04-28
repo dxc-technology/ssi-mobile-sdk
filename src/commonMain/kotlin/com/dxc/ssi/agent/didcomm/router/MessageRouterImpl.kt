@@ -31,7 +31,7 @@ class MessageRouterImpl(
     private val credIssuerProcessor: CredIssuerProcessor = CredIssuerProcessorImpl(walletConnector, transport)
     private val credVerifierProcessor: CredVerifierProcessor = CredVerifierProcessorImpl(walletConnector, transport)
 
-    override fun routeAndProcessMessage(receivedUnpackedMessage: ReceivedUnpackedMessage) {
+    override suspend fun routeAndProcessMessage(receivedUnpackedMessage: ReceivedUnpackedMessage) {
 
         val message = Message(receivedUnpackedMessage.message)
 

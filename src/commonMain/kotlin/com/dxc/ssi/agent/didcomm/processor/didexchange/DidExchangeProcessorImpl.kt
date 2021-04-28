@@ -39,7 +39,7 @@ class DidExchangeProcessorImpl(
         TODO("Not implemented")
     }
 
-    override fun initiateConnectionByInvitation(invitation: String): Connection {
+    override suspend fun initiateConnectionByInvitation(invitation: String): Connection {
 
         //TODO: think how to avoid NPE here
         val receiveInvitationAction =
@@ -48,7 +48,7 @@ class DidExchangeProcessorImpl(
     }
 
     //TODO: see if it is possible to generalize this function in order to go back to AbstractProcessor
-    override fun processMessage(message: Message) {
+    override suspend fun processMessage(message: Message) {
 
         println("Started processing message $message")
 
