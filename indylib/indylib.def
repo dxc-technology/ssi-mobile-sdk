@@ -3,6 +3,6 @@ headers = indy_core.h
 depends = Foundation
 linkerOpts =-framework Security
 compilerOpts =-std=c99 -Iindylib
-staticLibraries = libindy.a liblibzmq.a libssl.a libcrypto.a liblibsodium.a
+staticLibraries = libindy.a liblibzmq-pw.a libssl.a libcrypto.a liblibsodium.a
 #TODO: check this solution https://github.com/JetBrains/kotlin-native/issues/2314 in order to use relative path
 libraryPaths = /Users/ifedyanin/IdeaProjects/ssi-mobile-sdk/indylib

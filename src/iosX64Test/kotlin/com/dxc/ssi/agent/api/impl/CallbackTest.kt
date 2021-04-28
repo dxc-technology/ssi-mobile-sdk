@@ -10,6 +10,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
+import kotlin.test.Ignore
 
 
 data class CreateWalletResult(
@@ -22,6 +23,7 @@ class CallbackTest {
 
     @Test
     @OptIn(ExperimentalStdlibApi::class)
+    @Ignore
     fun callbackTest() {
 
 
