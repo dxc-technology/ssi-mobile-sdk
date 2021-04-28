@@ -10,7 +10,7 @@ import kotlinx.serialization.json.Json
 
 object MessagePacker {
     //TODO: uunderstand what Message models we need and unify them
-    fun packAndPrepareForwardMessage(
+    suspend fun packAndPrepareForwardMessage(
         message: Message,
         connection: Connection,
         walletConnector: WalletConnector

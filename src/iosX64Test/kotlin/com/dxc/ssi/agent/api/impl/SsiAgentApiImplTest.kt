@@ -2,6 +2,7 @@ package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
+import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
@@ -62,6 +63,10 @@ class SsiAgentApiImplTest {
         override fun onCompleted(connection: Connection): CallbackResult {
             println("Connection completed : $connection")
             return CallbackResult(true)
+        }
+
+        override fun onAbandoned(connection: Connection, problemReport: ProblemReport): CallbackResult {
+            TODO("Not yet implemented")
         }
 
     }

@@ -9,7 +9,7 @@ import kotlinx.serialization.json.Json
 
 
 class ReceiveTrustPingResponseAction(private val actionParams: ActionParams): Action {
-    override fun perform(): ActionResult {
+    override suspend fun perform(): ActionResult {
         val messageContext = actionParams.messageContext
         val connection = messageContext.connection!!
         val trustPingTrackerService = actionParams.trustPingTrackerService!!

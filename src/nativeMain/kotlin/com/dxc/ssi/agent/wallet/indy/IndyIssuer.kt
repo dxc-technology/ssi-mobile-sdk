@@ -11,32 +11,4 @@ actual class IndyIssuer actual constructor(walletHolder: WalletHolder) : IndyWal
         TODO("Not yet implemented")
     }
 
-    actual override fun createSessionDid(identityRecord: IdentityDetails): String {
-        TODO("Not yet implemented")
-    }
-
-    actual override fun getIdentityDetails(): IdentityDetails {
-        TODO("Not yet implemented")
-    }
-
-    actual override fun getIdentityDetails(did: String): IdentityDetails {
-        TODO("Not yet implemented")
-    }
-
-    actual override fun getTailsPath(): String {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getConnectionRecordById(connectionId: String): Connection? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun unPackMessage(packedMessage: Message): Message {
-        TODO("Not yet implemented")
-    }
-
 }

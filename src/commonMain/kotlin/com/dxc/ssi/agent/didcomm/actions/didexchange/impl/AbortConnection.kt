@@ -13,7 +13,7 @@ class AbortConnection(
     private val connectionInitiatorController: ConnectionInitiatorController,
     private val connectionId: String
 ) : DidExchangeAction {
-    override fun perform(): ActionResult {
+    override suspend fun perform(): ActionResult {
         //TODO: think how to avoid NPE here
         val connection = walletConnector.walletHolder.getConnectionRecordById(connectionId)!!
         val updatedConnection = connection.copy(state = "Abandoned")

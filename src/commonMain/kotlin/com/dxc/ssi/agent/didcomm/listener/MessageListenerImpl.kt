@@ -52,7 +52,7 @@ class MessageListenerImpl(
     }
 
 
-    fun unpackAndBuildMesageContext(receivedMessage: MessageEnvelop): MessageContext {
+    suspend fun unpackAndBuildMesageContext(receivedMessage: MessageEnvelop): MessageContext {
 
         val unpackedMessage = walletConnector.walletHolder.unPackMessage(Message(receivedMessage.payload))
         val receivedUnpackedMessage = Json.decodeFromString<ReceivedUnpackedMessage>(unpackedMessage.payload)

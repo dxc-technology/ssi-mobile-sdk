@@ -49,6 +49,7 @@ open class IndyWalletHolder : WalletHolder {
 
     override fun findConnectionByVerKey(verKey: String): Connection? {
         //TODO: make common implementation here. Copy it from  poc_cred_verify branch and adopt
+        TODO("Not implemented")
     }
 
 
@@ -140,6 +141,12 @@ open class IndyWalletHolder : WalletHolder {
         isoDid.access { it.obj = didResult.getDid() }
         isoVerkey.access { it.obj = didResult.getVerkey() }
 
+    }
+
+    override fun getWallet(): Any {
+        //TODO: see if it is possible to return common Wallet instead of Any
+        val wallet = isoWallet.access { it.obj }
+        return wallet as Any
     }
 
     //TODO: remove all unnecessary code and beautify this function

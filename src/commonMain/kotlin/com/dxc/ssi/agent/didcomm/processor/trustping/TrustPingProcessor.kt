@@ -9,6 +9,6 @@ import com.dxc.ssi.agent.model.messages.MessageContext
 interface TrustPingProcessor {
     //TODO: think about special data structure Invitation instead of String
     suspend fun sendTrustPingOverConnection(connection: Connection): Boolean
-    fun processMessage(messageContext: MessageContext)
+    suspend fun processMessage(messageContext: MessageContext)
 
 }

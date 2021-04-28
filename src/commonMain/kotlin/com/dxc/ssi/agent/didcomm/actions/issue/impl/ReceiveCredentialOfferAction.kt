@@ -19,7 +19,7 @@ import kotlinx.serialization.json.Json
 class ReceiveCredentialOfferAction(
     private val actionParams: ActionParams
 ) : CredentialIssuenceAction {
-    override fun perform(): ActionResult {
+    override suspend fun perform(): ActionResult {
 
         val walletConnector = actionParams.walletConnector
         val ledgerConnector = actionParams.ledgerConnector

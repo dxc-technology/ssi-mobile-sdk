@@ -23,7 +23,7 @@ import kotlinx.serialization.json.Json
 class ReceivePresentationRequestAction(
     private val actionParams: ActionParams
 ) : CredentialVerificationAction {
-    override fun perform(): ActionResult {
+    override suspend fun  perform(): ActionResult {
 
         val messageContext = actionParams.messageContext
         val credPresenterController = actionParams.callbacks.credPresenterController!!

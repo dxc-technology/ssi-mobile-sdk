@@ -19,7 +19,7 @@ class TrustPingTrackerService(
 
     val sentPingsMap = mutableMapOf<String/*ConnectionId*/, Long /*Timestamp when ping was sent*/>()
 
-    fun track() {
+    suspend fun track() {
         println("Started listener")
 
         while (!isShutdown) {
@@ -41,7 +41,7 @@ class TrustPingTrackerService(
         return sentPingsMap.filter { entry -> currentTimestamp - entry.value > maxTimeoutForTrustPingResponseMs }.keys
     }
 
-    private fun abortDeadConnections(deadConnections: Set<String>) {
+    private suspend fun abortDeadConnections(deadConnections: Set<String>) {
         deadConnections.forEach { connectionId ->
             AbortConnection(
                 walletConnector,

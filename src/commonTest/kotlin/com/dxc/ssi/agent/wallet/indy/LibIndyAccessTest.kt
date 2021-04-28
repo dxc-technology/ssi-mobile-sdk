@@ -4,6 +4,7 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -30,8 +31,10 @@ class LibIndyAccessTest {
             walletHolder = walletHolder!!
         )
 
+        runBlocking {
 
-        walletConnector.walletHolder.openOrCreateWallet()
+            walletConnector.walletHolder.openOrCreateWallet()
+        }
         ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
 
 
