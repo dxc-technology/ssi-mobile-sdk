@@ -8,8 +8,9 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.model.Connection
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.dxc.ssi.agent.utils.PlatformInit
+import com.dxc.ssi.agent.utils.CoroutineHelper
+import kotlinx.coroutines.*
 
 class SsiAgentApiImpl(
     private val transport: Transport,
@@ -22,16 +23,33 @@ class SsiAgentApiImpl(
     //TODO: add callback controllers here
 
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun init() {
-        walletConnector.walletHolder.openOrCreateWallet()
+
+        val platformInit = PlatformInit()
+        platformInit.init()
+
+        CoroutineHelper.waitForCompletion(GlobalScope.async {
+            walletConnector.walletHolder.openOrCreateWallet()
+        })
+
 
 //TODO: design proper concurrency there
-        GlobalScope.launch { messageListener.listen() }
+        GlobalScope.launch {
+            //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
+            withContext(CoroutineHelper.singleThreadCoroutineContext("Listener thread")) {
+                messageListener.listen()
+            }
+        }
+
 
     }
 
     override fun connect(url: String): Connection {
-        return messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
+        return CoroutineHelper.waitForCompletion(
+            GlobalScope.async {
+                messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
+            })
     }
 
     override fun disconnect(connection: Connection) {
@@ -40,7 +58,10 @@ class SsiAgentApiImpl(
 
     //TODO: current function is synchronous with hardcoded timeout, generalize it
     override fun sendTrustPing(connection: Connection): Boolean {
-        return messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
+        return CoroutineHelper.waitForCompletion(
+            GlobalScope.async {
+                messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
+            })
     }
 
     override fun issueCredentialOverConnection(connection: Connection) {

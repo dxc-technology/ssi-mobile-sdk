@@ -26,7 +26,7 @@ class ReceiveInvitationAction(
     val connectionInitiatorController: ConnectionInitiatorController,
     private val invitationUrl: String
 ) : DidExchangeAction {
-    override fun perform(): ActionResult {
+    override suspend fun perform(): ActionResult {
         // TODO: think to only form special message here and pass it to message processor
         // Create connection and store it in wallet // Create separate action for this?
         // Send Connection Request

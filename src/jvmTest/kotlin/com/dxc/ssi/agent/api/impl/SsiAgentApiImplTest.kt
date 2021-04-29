@@ -25,7 +25,7 @@ class SsiAgentApiImplTest {
         ssiAgentApi.init()
 
         val invitationUrl =
-            "ws://localhost:7000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vbG9jYWxob3N0OjcwMDAvd3MiLCJyb3V0aW5nS2V5cyI6WyIycFg0TGZ6dWNUc3pjeEh0d0FVN3FpcUZCMjZvQ2J2ZHdRYmROVXVMUG1xYSJdLCJyZWNpcGllbnRLZXlzIjpbIkg2YWo0VkRGS2UxVDdNQjlNanBpWlA1N0NWWjJtVzZMa29CRU1uNWRjNEJFIl0sIkBpZCI6ImI1NWM5MzliLTg5ZDctNDEyMS1hYWIyLWQwNDRjZGJlZGI2NSIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
+            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkVGQ3FVZUJNSDhZeVdYWWtWWGlBNUV6OHNaY1h0S2Z0a2JqRUJmWkhqWDRjIl0sInJlY2lwaWVudEtleXMiOlsiRWVNNmYxUTdvZUdWU2RmYllhRGN3NENnZlJSTW9oZlIyOTNxa1FqU1lDaTIiXSwiQGlkIjoiY2UyM2Y4NWEtZWJlZC00ZTc3LTlhNWEtNzNhMTAwYjMwY2ZkIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
         ssiAgentApi.connect(invitationUrl)
