@@ -52,6 +52,8 @@ kotlin {
         compilations.getByName("main") {
             val indylib by cinterops.creating {
                 defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+                extraOpts("-libraryPath", "$projectDir/indylib")
+                extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
             }
         }
     }
