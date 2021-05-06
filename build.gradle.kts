@@ -50,6 +50,8 @@ kotlin {
         publishLibraryVariantsGroupedByFlavor = true // This line
     }
 
+    //make symbolic links to use one source set for two targets
+    //ln -s iosMain iosArm64Main && ln -s iosMain iosX64Main
     iosArm64 {
         compilations.getByName("main") {
             val indylib by cinterops.creating {
