@@ -7,12 +7,15 @@ import kotlin.coroutines.CoroutineContext
 
 actual class CoroutineHelper {
     actual companion object {
-        actual fun <T> waitForCompletion(deferred: Deferred<T>):T {
-            return  runBlocking {
+        actual fun <T> waitForCompletion(deferred: Deferred<T>): T {
+            return runBlocking {
                 deferred.await()
             }
         }
+
         actual fun singleThreadCoroutineContext(threadName: String): CoroutineContext =
             newSingleThreadContext(threadName)
+
+
     }
 }

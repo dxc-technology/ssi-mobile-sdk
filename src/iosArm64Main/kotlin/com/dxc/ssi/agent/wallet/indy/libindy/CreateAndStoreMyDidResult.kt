@@ -1,11 +1,11 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
-actual class CreateAndStoreMyDidResult {
+actual class CreateAndStoreMyDidResult(private var Did: String = "", private var VerKey: String = "") {
     actual fun getDid(): String {
-        TODO("Not yet implemented")
+        return Did
     }
 
     actual fun getVerkey(): String {
-        TODO("Not yet implemented")
+        return VerKey
     }
 }

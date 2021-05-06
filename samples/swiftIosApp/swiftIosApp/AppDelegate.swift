@@ -39,7 +39,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let cic = ConnectionInitiatorControllerImpl()
                let ssiAgentApi = SsiAgentBuilderImpl().withConnectionInitiatorController(connectionInitiatorController: cic).build()
                ssiAgentApi.doInit()
-               let invitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkRtMkhFRWNlWXo4cnJ1QTVMQWh0Y3B0WVFYVmN0N3V2NUVpNUxHTjdoY2h1Il0sInJlY2lwaWVudEtleXMiOlsiRWVNOHlRWjJUd3ZwWWVGTEt0NHdod1VIQWhMcDhqTVhqQkVqNWNMb3pDN2MiXSwiQGlkIjoiOTNjOTY1ODctZTYzOC00ZDgwLWJkMDgtNGE5M2I1NDdlZGMxIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+               let invitation =
+                "ws://192.168.0.104:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjEwNDo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRDJFVVVvNkJlYUIyWkZQSFpDdjdad2Rjc2RCNG5jY2lVOFl3eE5Ralh3d20iXSwicmVjaXBpZW50S2V5cyI6WyJEaHZnWmhNbWRWYk1xWVY5c0tjNDI5cHA5U2NWWUpqdGptSjNLMnBaRDR4ZCJdLCJAaWQiOiJkOTc1ZjRkZC01ZjdiLTRmM2UtODg2NC0xMTYyODI1NGNmZmMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
                
                ssiAgentApi.connect(url: invitation)
                sleep(10000)

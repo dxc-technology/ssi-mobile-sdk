@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 val serializationVersion: String = "1.0.1"
 val indyVersion: String = "1.16.0"
 val ktorVersion: String = "1.5.1"
@@ -48,7 +47,7 @@ kotlin {
         publishLibraryVariantsGroupedByFlavor = true // This line
     }
 
-    ios {  // Replace with a target you need.
+    iosArm64 {
         compilations.getByName("main") {
             val indylib by cinterops.creating {
                 defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
@@ -64,6 +63,7 @@ kotlin {
         ios.deploymentTarget = "10.2"
         frameworkName = "ssi_agent"
         podfile = project.file("./samples/swiftIosApp/Podfile")
+
     }
 
     val hostOs = System.getProperty("os.name")
@@ -80,11 +80,11 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 implementation("io.ktor:ktor-utils:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
-                implementation ("co.touchlab:stately-iso-collections:1.1.4-a1")
+                implementation("co.touchlab:stately-iso-collections:1.1.4-a1")
                 //TODO: check if two stately dependencies below are needed, considering that they should be included in the dependency above
-                implementation ("co.touchlab:stately-isolate:1.1.4-a1")
-                implementation ("co.touchlab:stately-common:1.1.4")
-                implementation ("com.benasher44:uuid:$uuidVersion")
+                implementation("co.touchlab:stately-isolate:1.1.4-a1")
+                implementation("co.touchlab:stately-common:1.1.4")
+                implementation("com.benasher44:uuid:$uuidVersion")
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))
 
@@ -136,12 +136,12 @@ kotlin {
                 implementation("androidx.test:rules:1.1.0")
             }
         }
-        val iosMain by getting {
+        val iosArm64Main by getting {
             dependencies {
                 implementation(files("indylib.klib"))
             }
         }
-        val iosTest by getting {
+        val iosArm64Test by getting {
             dependencies {
                 implementation(files("indylib.klib"))
             }
@@ -190,18 +190,3 @@ android {
 dependencies {
     implementation("junit:junit:$junitVersion")
 }
-/*
-val packForXcode by tasks.creating(Sync::class) {
-    group = "build"
-    val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
-    val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
-    val targetName = "ios" + if (sdkName.startsWith("iphoneos")) "Arm64" else "X64"
-    val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
-    inputs.property("mode", mode)
-    dependsOn(framework.linkTask)
-    val targetDir = File(buildDir, "KotlinShared")
-    from({ framework.outputDirectory })
-    into(targetDir)
-}
-tasks.getByName("build").dependsOn(packForXcode)
-*/
