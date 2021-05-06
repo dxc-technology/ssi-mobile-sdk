@@ -33,7 +33,10 @@ repositories {
     maven { setUrl("https://dl.bintray.com/kotlin/kotlinx.html/") }
 }
 
+
+
 kotlin {
+
     jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "1.8"
@@ -48,6 +51,15 @@ kotlin {
     }
 
     iosArm64 {
+        compilations.getByName("main") {
+            val indylib by cinterops.creating {
+                defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+                extraOpts("-libraryPath", "$projectDir/indylib")
+                extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+            }
+        }
+    }
+    iosX64 {
         compilations.getByName("main") {
             val indylib by cinterops.creating {
                 defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
@@ -87,7 +99,6 @@ kotlin {
                 implementation("com.benasher44:uuid:$uuidVersion")
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))
-
             }
         }
         val commonTest by getting {
@@ -104,7 +115,6 @@ kotlin {
                 }
                 implementation("net.java.dev.jna:jna:5.8.0")
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
-
             }
         }
         val jvmTest by getting {
@@ -123,8 +133,6 @@ kotlin {
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
                 implementation("org.slf4j:slf4j-simple:1.7.26")
                 implementation("net.java.dev.jna:jna:5.8.0@aar")
-
-
             }
         }
         val androidTest by getting {
@@ -136,12 +144,13 @@ kotlin {
                 implementation("androidx.test:rules:1.1.0")
             }
         }
-        val iosArm64Main by getting {
+
+        val iosX64Main by getting {
             dependencies {
                 implementation(files("indylib.klib"))
             }
         }
-        val iosArm64Test by getting {
+        val iosArm64Main by getting {
             dependencies {
                 implementation(files("indylib.klib"))
             }
