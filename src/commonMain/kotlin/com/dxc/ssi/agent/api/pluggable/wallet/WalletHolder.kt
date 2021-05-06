@@ -67,7 +67,7 @@ interface WalletHolder {
      *
      * @return Connection object
      */
-    fun findConnectionByVerKey(verKey: String): Connection?
+    suspend fun findConnectionByVerKey(verKey: String): Connection?
 
     /**
      * Opens or creates wallet

@@ -2,7 +2,7 @@ package com.dxc.ssi.agent.wallet.indy.libindy
 
 expect class Anoncreds {
     companion object {
-        fun proverCreateCredentialReq(
+        suspend fun proverCreateCredentialReq(
             wallet: Wallet,
             proverDid: String,
             credentialOfferJson: String,
@@ -10,10 +10,10 @@ expect class Anoncreds {
             masterSecretId: String
         ): ProverCreateCredentialRequestResult
 
-        fun proverCreateMasterSecret(wallet: Wallet, masterSecretId: String): String
+        suspend fun proverCreateMasterSecret(wallet: Wallet, masterSecretId: String): String
 
 
-        fun proverStoreCredential(
+        suspend fun proverStoreCredential(
             wallet: Wallet,
             credId: String?,
             credReqMetadataJson: String,

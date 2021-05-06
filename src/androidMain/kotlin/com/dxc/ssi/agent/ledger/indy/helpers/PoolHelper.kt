@@ -92,12 +92,12 @@ actual object PoolHelper {
         return openExisting(poolName, poolConfig)
     }
 
-    actual fun openOrCreateFromFilename(filename: String): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
+    actual suspend fun openOrCreateFromFilename(filename: String): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
         val genesisFile = File(filename)
         return openOrCreate(genesisFile)
     }
 
-    actual fun openOrCreateFromIp(ipAddress: String, dir: String): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
+    actual suspend fun openOrCreateFromIp(ipAddress: String, dir: String): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
 
         val indyPoolIp = InetAddress.getByName(ipAddress)
 

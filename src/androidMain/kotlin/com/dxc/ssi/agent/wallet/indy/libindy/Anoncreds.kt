@@ -26,14 +26,14 @@ actual class Anoncreds {
 
         }
 
-        actual fun proverCreateMasterSecret(
+        actual suspend fun proverCreateMasterSecret(
             wallet: Wallet,
             masterSecretId: String
         ): String {
             return Anoncreds.proverCreateMasterSecret(wallet, masterSecretId).get()
         }
 
-        actual fun proverStoreCredential(
+        actual  suspend fun proverStoreCredential(
             wallet: Wallet,
             credId: String?,
             credReqMetadataJson: String,

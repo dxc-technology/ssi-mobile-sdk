@@ -6,7 +6,7 @@ actual class Ledger {
             TODO("Not yet implemented")
         }
 
-        actual fun buildGetCredDefRequest(submitterDid: String, id: String): String {
+        actual suspend fun buildGetCredDefRequest(submitterDid: String, id: String): String {
             TODO("Not yet implemented")
         }
 
@@ -23,7 +23,7 @@ actual class Ledger {
             TODO("Not yet implemented")
         }
 
-        actual fun submitRequest(
+        actual suspend fun submitRequest(
             pool: Pool,
             requestJson: String
         ): String {
@@ -34,7 +34,7 @@ actual class Ledger {
             TODO("Not yet implemented")
         }
 
-        actual fun parseGetCredDefResponse(getCredDefResponse: String): ParseResponseResult {
+        actual suspend fun parseGetCredDefResponse(getCredDefResponse: String): ParseResponseResult {
             TODO("Not yet implemented")
         }
 

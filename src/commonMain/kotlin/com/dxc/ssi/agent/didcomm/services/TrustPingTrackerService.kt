@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.didcomm.services
 
+import co.touchlab.stately.collections.IsoMutableMap
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.didexchange.impl.AbortConnection
@@ -15,9 +16,8 @@ class TrustPingTrackerService(
 
     private var isShutdown = false
 
-    val maxTimeoutForTrustPingResponseMs = 20000
-
-    val sentPingsMap = mutableMapOf<String/*ConnectionId*/, Long /*Timestamp when ping was sent*/>()
+    private val maxTimeoutForTrustPingResponseMs = 20000
+    private val sentPingsMap = IsoMutableMap<String/*ConnectionId*/, Long /*Timestamp when ping was sent*/>()
 
     suspend fun track() {
         println("Started listener")
@@ -37,8 +37,9 @@ class TrustPingTrackerService(
     private fun getDeadConnections(): Set<String> {
 
         val currentTimestamp = System.currentTimeMillis()
+        return sentPingsMap.keys.filter { key -> currentTimestamp - sentPingsMap[key]!! > maxTimeoutForTrustPingResponseMs }
+            .toSet()
 
-        return sentPingsMap.filter { entry -> currentTimestamp - entry.value > maxTimeoutForTrustPingResponseMs }.keys
     }
 
     private suspend fun abortDeadConnections(deadConnections: Set<String>) {

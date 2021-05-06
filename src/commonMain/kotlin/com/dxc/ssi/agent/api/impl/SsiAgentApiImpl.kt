@@ -37,16 +37,22 @@ class SsiAgentApiImpl(
         platformInit.init()
 
         CoroutineHelper.waitForCompletion(GlobalScope.async {
+            println("Before initializing ledgerConnector")
             ledgerConnector.init()
+            println("After initializing ledgerConnector")
+            println("Before initializing walletConnector")
             walletConnector.walletHolder.openOrCreateWallet()
+            println("After initializing walletConnector")
             //TODO: lloks like here we need to make ledgerCOnnector.did to be IsoSatte
             ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
+            println("Set ledgerConnectorDid")
 
             if (walletConnector.prover != null) {
                 walletConnector.prover!!.createMasterSecret(Configuration.masterSecretId)
             }
         })
 
+        println("Before running listener in GlobalScope")
 //TODO: design proper concurrency there
         GlobalScope.launch {
             //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO

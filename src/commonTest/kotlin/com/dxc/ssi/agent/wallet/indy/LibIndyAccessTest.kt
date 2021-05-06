@@ -34,11 +34,12 @@ class LibIndyAccessTest {
         runBlocking {
 
             walletConnector.walletHolder.openOrCreateWallet()
+            ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
+
+
+            walletConnector.prover!!.createMasterSecret(Configuration.masterSecretId)
         }
-        ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
 
-
-        walletConnector.prover!!.createMasterSecret(Configuration.masterSecretId)
 
 
     }

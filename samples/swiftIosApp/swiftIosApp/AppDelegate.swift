@@ -8,26 +8,6 @@
 import UIKit
 import ssi_agent
 
-class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
-{
-    func onCompleted(connection: Connection_) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-    func onInvitationReceived(connection: Connection_, endpoint: String, invitation: Invitation) -> CallbackResult {
-    
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-    func onRequestSent(connection: Connection_, request: ConnectionRequest) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-    func onResponseReceived(connection: Connection_, response: ConnectionResponse) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-}
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -37,9 +17,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         let cic = ConnectionInitiatorControllerImpl()
-               let ssiAgentApi = SsiAgentBuilderImpl().withConnectionInitiatorController(connectionInitiatorController: cic).build()
+        let crc = CredentialReceiverControllerImpl()
+        let cpc = CredPresenterControllerImpl()
+        
+        let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
+            genesisFilePath: "./docker_pool_transactions_genesis.txt",
+            ipAddress: "192.168.0.117",
+            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
+            dirForGeneratedGenesis: NSHomeDirectory())
+        
+               let ssiAgentApi = SsiAgentBuilderImpl()
+                .withConnectionInitiatorController(connectionInitiatorController: cic)
+                .withCredReceiverController(credReceiverController: crc)
+                .withCredPresenterController(credPresenterController: cpc)
+                .withLedgerConnector(ledgerConnector: IndyLedgerConnector(indyLedgerConnectorConfiguration: indyLedgerConnectorConfiguration))
+                .build()
+        
                ssiAgentApi.doInit()
-               let invitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkRtMkhFRWNlWXo4cnJ1QTVMQWh0Y3B0WVFYVmN0N3V2NUVpNUxHTjdoY2h1Il0sInJlY2lwaWVudEtleXMiOlsiRWVNOHlRWjJUd3ZwWWVGTEt0NHdod1VIQWhMcDhqTVhqQkVqNWNMb3pDN2MiXSwiQGlkIjoiOTNjOTY1ODctZTYzOC00ZDgwLWJkMDgtNGE5M2I1NDdlZGMxIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+               let invitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjQ0QU5Gbnk1TThTdjRVcEhHVTVuOXF3Z0VTdzhyc3NNdHpyTVFKTmVrQ0xqIl0sInJlY2lwaWVudEtleXMiOlsiSGNXVWR4MU1iSmp5Y3ljMUhHWEZMcDdXRm9wTEhFZGprcUx6QjhldjVuWTciXSwiQGlkIjoiN2M3MTUzNWMtYzkwNS00Yjc3LWFmMjgtN2E5Mzk2ODM3NGE1IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
                
                ssiAgentApi.connect(url: invitation)
                sleep(10000)
@@ -64,3 +59,62 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
+{
+    func onCompleted(connection: Connection) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onInvitationReceived(connection: Connection, endpoint: String, invitation: Invitation) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+   
+    
+    func onRequestSent(connection: Connection, request: ConnectionRequest) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onResponseReceived(connection: Connection, response: ConnectionResponse) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onAbandoned(connection: Connection, problemReport: ProblemReport) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+        
+    }
+    
+}
+
+
+class CredentialReceiverControllerImpl: CredReceiverController {
+    func onCredentialReceived(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onDone(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onOfferReceived(connection: Connection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onRequestSent(connection: Connection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+}
+
+
+class CredPresenterControllerImpl: CredPresenterController {
+    func onDone(connection: Connection) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onRequestReceived(connection: Connection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    
+}

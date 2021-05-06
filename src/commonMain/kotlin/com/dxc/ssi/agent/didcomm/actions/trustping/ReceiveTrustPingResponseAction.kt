@@ -10,16 +10,23 @@ import kotlinx.serialization.json.Json
 
 class ReceiveTrustPingResponseAction(private val actionParams: ActionParams): Action {
     override suspend fun perform(): ActionResult {
+        println("Entered perform fun")
         val messageContext = actionParams.messageContext
+        println("Got messageContext")
         val connection = messageContext.connection!!
+        println("Got connection")
         val trustPingTrackerService = actionParams.trustPingTrackerService!!
+        println("Got trustPingService")
 
         val trustPingResponseMessage =
             Json {
                 ignoreUnknownKeys = true
             }.decodeFromString<TrustPingResponse>(messageContext.receivedUnpackedMessage.message)
 
+        println("Decoded trustPingResponseMessage")
+
         trustPingTrackerService.trustPingResponseReceivedEvent(connection)
+        println("Marked ping message as received")
         return ActionResult()
     }
 }

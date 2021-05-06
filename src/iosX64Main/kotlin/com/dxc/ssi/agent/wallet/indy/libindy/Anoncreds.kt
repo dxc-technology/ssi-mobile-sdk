@@ -1,25 +1,85 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
+import com.dxc.ssi.agent.callback.CallbackData
+import com.dxc.ssi.agent.callback.callbackHandler
+import com.dxc.ssi.agent.callback.impl.StringCallback
+import com.indylib.*
+import kotlinx.cinterop.ByteVarOf
+import kotlinx.cinterop.CPointer
+import kotlinx.cinterop.staticCFunction
+import kotlinx.cinterop.toKString
+
 actual class Anoncreds {
+
+    data class ProverCreateCredentialReqCallbackResult(
+        override val commandHandle: Int,
+        override val errorCode: UInt,
+        val credReqJson: String,
+        val credReqMetadataJson: String
+    ) : CallbackData
+
     actual companion object {
-        actual fun proverCreateCredentialReq(
+        actual suspend fun proverCreateCredentialReq(
             wallet: Wallet,
             proverDid: String,
             credentialOfferJson: String,
             credentialDefJson: String,
             masterSecretId: String
         ): ProverCreateCredentialRequestResult {
-            TODO("Not yet implemented")
+
+            val commandHandle = callbackHandler.prepareCallback()
+
+            val callback =
+                staticCFunction { commandHandle: Int, errorCode: UInt, credReqJson: CPointer<ByteVarOf<Byte>>?, credReqMetadataJson: CPointer<ByteVarOf<Byte>>?
+                    ->
+                    initRuntimeIfNeeded()
+                    callbackHandler.setCallbackResult(
+                        ProverCreateCredentialReqCallbackResult(
+                            commandHandle,
+                            errorCode,
+                            credReqJson!!.toKString(),
+                            credReqMetadataJson!!.toKString()
+                        )
+                    )
+                }
+
+            indy_prover_create_credential_req(
+                commandHandle,
+                wallet.getWalletHandle(),
+                proverDid,
+                credentialOfferJson,
+                credentialDefJson,
+                masterSecretId,
+                callback
+            )
+
+            val result = callbackHandler.waitForCallbackResult(commandHandle) as ProverCreateCredentialReqCallbackResult
+            return ProverCreateCredentialRequestResult(result.credReqJson, result.credReqMetadataJson)
+
+
         }
 
-        actual fun proverCreateMasterSecret(
+        actual suspend fun proverCreateMasterSecret(
             wallet: Wallet,
             masterSecretId: String
         ): String {
-            TODO("Not yet implemented")
+
+            val commandHandle = callbackHandler.prepareCallback()
+
+            indy_prover_create_master_secret(
+                commandHandle,
+                wallet.getWalletHandle(),
+                masterSecretId,
+                StringCallback.callback
+            )
+
+            val callbackResult = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
+
+            return callbackResult.stringResult
+
         }
 
-        actual fun proverStoreCredential(
+        actual suspend fun proverStoreCredential(
             wallet: Wallet,
             credId: String?,
             credReqMetadataJson: String,
@@ -27,7 +87,25 @@ actual class Anoncreds {
             credDefJson: String,
             revRegDefJson: String?
         ): String {
-            TODO("Not yet implemented")
+
+            val commandHandle = callbackHandler.prepareCallback()
+
+            indy_prover_store_credential(
+                commandHandle,
+                wallet.getWalletHandle(),
+                credId,
+                credReqMetadataJson,
+                credJson,
+                credDefJson,
+                revRegDefJson,
+                StringCallback.callback
+            )
+
+            println("Pool -> Before waiting for callback")
+
+            val result = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
+            return result.stringResult
+
         }
 
         actual fun createRevocationState(

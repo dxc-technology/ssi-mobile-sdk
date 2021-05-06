@@ -24,6 +24,7 @@ class ReceiveCredentialOfferAction(
         val walletConnector = actionParams.walletConnector
         val ledgerConnector = actionParams.ledgerConnector
         val transport = actionParams.transport
+        //TODO: here and in all related places instead of NPE print relevant log message
         val credReceiverController = actionParams.callbacks.credReceiverController!!
         val credentialOfferContainerMessage =
             Json {

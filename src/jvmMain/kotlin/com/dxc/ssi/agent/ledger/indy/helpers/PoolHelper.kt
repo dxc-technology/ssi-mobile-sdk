@@ -14,9 +14,6 @@ actual object PoolHelper {
 
     const val DEFAULT_POOL_NAME = "TestPool"
 
-    init {
-        Pool.setProtocolVersion(2).get()
-    }
 
     /**
      * Checks if pool ledger with [poolName] exists
@@ -89,15 +86,18 @@ actual object PoolHelper {
         return openExisting(poolName, poolConfig)
     }
 
-    actual fun openOrCreateFromFilename(filename: String): com.dxc.ssi.agent.ledger.indy.libindy.Pool {        
+    actual suspend fun openOrCreateFromFilename(filename: String): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
+       //TODO: seems that JVM version does not work on Mac OS. Ensure that it works on Ubuntu. Prepare instructions to setup macos env
+        Pool.setProtocolVersion(2).get()
         val genesisFile = File(filename)
         return openOrCreate(genesisFile)
     }
 
-    actual fun openOrCreateFromIp(
+    actual suspend fun openOrCreateFromIp(
         ipAddress: String,
         dir: String
     ): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
+        Pool.setProtocolVersion(2).get()
         TODO("Not yet implemented")
     }
 }

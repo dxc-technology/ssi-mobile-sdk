@@ -28,7 +28,7 @@ interface Prover {
      *
      * @return [CredentialRequestInfo] - credential request and all reliable data
      */
-    fun createCredentialRequest(
+    suspend fun createCredentialRequest(
         proverDid: String,
         credentialDefinition: CredentialDefinition,
         credentialOffer: CredentialOffer,
@@ -74,7 +74,7 @@ interface Prover {
      * @return local UUID of the stored credential in the prover's wallet
      */
     //TODO: fix javadoc above
-    fun receiveCredential(
+    suspend fun receiveCredential(
         credential: Credential,
         credentialRequestInfo: CredentialRequestInfo,
         credentialDefinition: CredentialDefinition,
@@ -123,13 +123,13 @@ interface Prover {
      *
      * @param id [String]
      */
-    fun createMasterSecret(id: String)
+    suspend fun createMasterSecret(id: String)
     fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): Data
     fun buildCredentialObjectFromRawData(data: Data): Credential
     fun buildCredentialOfferObjectFromRawData(data: Data): CredentialOffer
     suspend fun removeCredentialExchangeRecordByThread(thread: Thread)
     fun buildPresentationRequestObjectFromRawData(data: Data): PresentationRequest
-    fun createPresentation(
+    suspend fun createPresentation(
         presentationRequest: PresentationRequest,
         ledgerConnector: LedgerConnector,
     ): Presentation

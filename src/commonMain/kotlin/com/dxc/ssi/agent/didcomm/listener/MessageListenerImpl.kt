@@ -68,7 +68,7 @@ class MessageListenerImpl(
 
     }
 
-    private fun getConnectionByVerkey(senderVerKey: String): Connection? {
+    private suspend fun getConnectionByVerkey(senderVerKey: String): Connection? {
         return walletConnector.walletHolder.findConnectionByVerKey(senderVerKey)
     }
 

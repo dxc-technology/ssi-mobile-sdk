@@ -2,17 +2,12 @@ package com.dxc.ssi.agent.wallet.indy.libindy
 
 import com.dxc.ssi.agent.callback.CallbackData
 import com.dxc.ssi.agent.callback.callbackHandler
-import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
+import com.dxc.ssi.agent.callback.impl.SimpleCallback
 import com.indylib.indy_create_wallet
 import com.indylib.indy_open_wallet
 import kotlinx.cinterop.staticCFunction
 
 actual class Wallet(private var walletHandle: Int) {
-
-    data class CreateWalletResult(
-        override val commandHandle: Int,
-        override val errorCode: UInt
-    ) : CallbackData
 
     data class OpenWalletResult(
         override val commandHandle: Int,
@@ -23,17 +18,12 @@ actual class Wallet(private var walletHandle: Int) {
     companion object {
         suspend fun createWallet(config:String, credentials:String) {
             val commandHandle = callbackHandler.prepareCallback()
-            val callback = staticCFunction { commandHandle: Int, errorCode: UInt
-                ->
-                initRuntimeIfNeeded()
-                callbackHandler.setCallbackResult(CreateWalletResult(commandHandle, errorCode))
-            }
 
             indy_create_wallet(
                 commandHandle,
                 config,
                 credentials,
-                callback
+                SimpleCallback.callback
             )
 
             callbackHandler.waitForCallbackResult(commandHandle)
@@ -61,6 +51,7 @@ actual class Wallet(private var walletHandle: Int) {
         }
     }
 
+    //TODO: replace it with property getter/setter
     fun getWalletHandle(): Int {
         return walletHandle
     }

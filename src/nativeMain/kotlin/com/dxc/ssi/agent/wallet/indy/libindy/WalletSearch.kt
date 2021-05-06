@@ -1,18 +1,20 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
 actual class WalletSearch actual constructor() {
-    actual fun open(
+    actual suspend fun open(
         wallet: Wallet,
         type: String,
         queryJson: String,
         optionsJson: String
     ) {
+        TODO("Not yet implemented")
     }
 
-    actual fun closeSearch() {
+    actual suspend fun closeSearch() {
+        TODO("Not yet implemented")
     }
 
-    actual fun searchFetchNextRecords(
+    actual suspend fun searchFetchNextRecords(
         wallet: Wallet,
         count: Int
     ): String {

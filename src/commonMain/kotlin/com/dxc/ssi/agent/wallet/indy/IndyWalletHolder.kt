@@ -29,11 +29,8 @@ open class IndyWalletHolder : WalletHolder {
     private var isoDid = IsolateState {ObjectHolder<String?>()}
     private var isoVerkey = IsolateState {ObjectHolder<String?>()}
 
-
-    //TODO: think if it is posible to make val lateinit or something like that
-    // private var wallet: Wallet? = null
     private var isoWallet = IsolateState {ObjectHolder<Wallet>()}
-    private val type = "ConnectionRecord"
+
 
 
     override fun createSessionDid(identityRecord: IdentityDetails): String {
@@ -53,40 +50,25 @@ open class IndyWalletHolder : WalletHolder {
     }
 
     override suspend fun storeConnectionRecord(connection: Connection) {
-
         //TODO: check if we need to check wallet health status before using it
-
         val existingConnection = getConnectionRecordById(connection.id)
-
         val tagsJson = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${connection.peerVerkey}\"}"
-
-
 
         if (existingConnection == null) {
 
             val value = connection.toJson()
-            //TODO: think what tags do we need here
-            val tagsJson:String? = null
 
             println("Storing connection $connection")
             val wallet = isoWallet.access { it.obj }
             WalletRecord.add(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value, tagsJson)
-
-
         } else {
-
             val value = connection.toJson()
-
             println("Updating connection $connection")
             val wallet = isoWallet.access { it.obj }
             WalletRecord.updateValue(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value)
             //TODO: check if there are cases when we really need to update tags
             WalletRecord.updateTags(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, tagsJson)
-
-
         }
-
-
     }
 
     override suspend fun getConnectionRecordById(connectionId: String): Connection? {
@@ -119,7 +101,7 @@ open class IndyWalletHolder : WalletHolder {
         }
     }
 
-    override fun findConnectionByVerKey(verKey: String): Connection? {
+    override suspend fun findConnectionByVerKey(verKey: String): Connection? {
 
 
         val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"

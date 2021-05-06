@@ -8,7 +8,7 @@ actual class Ledger {
             return Ledger.buildGetSchemaRequest(submitterDid, id).get()
         }
 
-        actual fun buildGetCredDefRequest(submitterDid: String, id: String): String {
+        actual suspend fun buildGetCredDefRequest(submitterDid: String, id: String): String {
             return Ledger.buildGetCredDefRequest(submitterDid, id).get()
         }
 
@@ -25,7 +25,7 @@ actual class Ledger {
             return Ledger.buildGetRevocRegDeltaRequest(submitterDid, revocRegDefId, from, to).get()
         }
 
-        actual fun submitRequest(pool: Pool, requestJson: String): String {
+        actual suspend fun submitRequest(pool: Pool, requestJson: String): String {
             return Ledger.submitRequest(pool, requestJson).get()
         }
 
@@ -33,7 +33,7 @@ actual class Ledger {
             return ParseResponseResult( Ledger.parseGetSchemaResponse(getSchemaResponse).get().objectJson)
         }
 
-        actual fun parseGetCredDefResponse(getCredDefResponse: String): ParseResponseResult {
+        actual suspend fun parseGetCredDefResponse(getCredDefResponse: String): ParseResponseResult {
             return ParseResponseResult(Ledger.parseGetCredDefResponse(getCredDefResponse).get().objectJson)
         }
 

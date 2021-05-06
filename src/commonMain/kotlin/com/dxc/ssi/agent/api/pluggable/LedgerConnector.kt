@@ -101,7 +101,7 @@ interface LedgerConnector {
      *
      * @return [Schema] or [null] if none exists on ledger
      */
-    fun retrieveSchema(
+    suspend fun retrieveSchema(
         id: SchemaId,
         delayMs: Long = Configuration.RETRY_DELAY_MS,
         retryTimes: Int = Configuration.RETRY_TIMES
@@ -116,7 +116,7 @@ interface LedgerConnector {
      *
      * @return [CredentialDefinition] or [null] if none exists on ledger
      */
-    fun retrieveCredentialDefinition(
+    suspend fun retrieveCredentialDefinition(
         id: CredentialDefinitionId,
         delayMs: Long = Configuration.RETRY_DELAY_MS,
         retryTimes: Int = Configuration.RETRY_TIMES
@@ -148,7 +148,7 @@ interface LedgerConnector {
      *
      * @return [RevocationRegistryDefinition] or [null] if none exists on ledger
      */
-    fun retrieveRevocationRegistryDefinition(
+    suspend fun retrieveRevocationRegistryDefinition(
         id: RevocationRegistryDefinitionId,
         delayMs: Long = Configuration.RETRY_DELAY_MS,
         retryTimes: Int = Configuration.RETRY_TIMES
@@ -184,7 +184,7 @@ interface LedgerConnector {
      * @return ([Pair] of [Long] (timestamp) and [RevocationRegistryEntry]) or [null] if none exists on ledger
      */
     //TODO: replace indy specifics data model to general data model
-    fun retrieveRevocationRegistryDelta(
+    suspend fun retrieveRevocationRegistryDelta(
         id: RevocationRegistryDefinitionId,
         interval: Interval,
         delayMs: Long = Configuration.RETRY_DELAY_MS,
@@ -210,5 +210,5 @@ interface LedgerConnector {
       ): DataUsedInProofJson
   */
 
-    fun init()
+    suspend fun init()
 }

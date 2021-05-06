@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.wallet.indy
 
+import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.wallet.Prover
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
@@ -10,6 +11,7 @@ import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
+import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 import com.dxc.ssi.agent.utils.JsonUtils
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
@@ -25,24 +27,37 @@ import com.dxc.ssi.agent.wallet.indy.model.revoke.IndyRevocationRegistryDefiniti
 import com.dxc.ssi.agent.wallet.indy.model.revoke.RevocationState
 import com.dxc.ssi.agent.wallet.indy.model.verify.*
 import com.dxc.utils.Base64
+import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
 
 class IndyProver(val walletHolder: WalletHolder) : Prover {
-    private var masterSecretId: String? = null
+    private var masterSecretId: String?
+        get() = isoMasterSecret.access { it.obj }!!
+        set(value) {
+            isoMasterSecret.access { it.obj = value }
+        }
+
+    private val isoMasterSecret = IsolateState { ObjectHolder<String>() }
 
     private val tailsPath = Configuration.tailsPath
 
-    override fun createCredentialRequest(
+    override suspend fun createCredentialRequest(
         proverDid: String,
         credentialDefinition: CredentialDefinition,
         credentialOffer: CredentialOffer,
         masterSecretId: String
     ): CredentialRequestInfo {
-        val credentialOfferJson = IndySerializationUtils.jsonProcessor.encodeToString(credentialOffer)
+        val credentialOfferJson = IndySerializationUtils.jsonProcessor.encodeToString(
+            PolymorphicSerializer(CredentialOffer::class),
+            credentialOffer
+        )
 
-        val credDefJson = IndySerializationUtils.jsonProcessor.encodeToString(credentialDefinition)
+        val credDefJson = IndySerializationUtils.jsonProcessor.encodeToString(
+            PolymorphicSerializer(CredentialDefinition::class),
+            credentialDefinition
+        )
 
         println(
             "Before executing Anoncreds.proverCreateCredentialReq " +
@@ -78,8 +93,8 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun createMasterSecret(id: String) {
-        this.masterSecretId = id
+    override suspend fun createMasterSecret(id: String) {
+        masterSecretId = id
         try {
             Anoncreds.proverCreateMasterSecret(walletHolder.getWallet() as Wallet, id)
         } catch (e: Exception) {
@@ -175,7 +190,10 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
                     retrievedValue
                 )
             )
-        } catch (e: Exception) {
+        } catch (w: WalletItemNotFoundException) {
+            null //this will be the case for ios
+        } catch (e: Exception) { //TODO: unify this check with the explicit exception as above. For this we will need to implement exceptions on common level for JVM and android impementations
+//this will be the case for Android and JVM. To be unified
             if (e.message!!.contains("WalletItemNotFoundException"))
                 null
             else
@@ -197,22 +215,32 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
     }
 
 
-    override fun receiveCredential(
+    override suspend fun receiveCredential(
         credential: Credential,
         credentialRequestInfo: CredentialRequestInfo,
         credentialDefinition: CredentialDefinition,
         revocationRegistryDefinition: RevocationRegistryDefinition?
     ): String {
 
-        val credentialJson = IndySerializationUtils.jsonProcessor.encodeToString(credential)
+        val credentialJson =
+            IndySerializationUtils.jsonProcessor.encodeToString(PolymorphicSerializer(Credential::class), credential)
         val credentialRequestMetadataJson =
-            IndySerializationUtils.jsonProcessor.encodeToString(credentialRequestInfo.credentialRequestMetadata)
-        val credDefJson = IndySerializationUtils.jsonProcessor.encodeToString(credentialDefinition)
+            IndySerializationUtils.jsonProcessor.encodeToString(
+                PolymorphicSerializer(CredentialRequestMetadata::class),
+                credentialRequestInfo.credentialRequestMetadata
+            )
+        val credDefJson = IndySerializationUtils.jsonProcessor.encodeToString(
+            PolymorphicSerializer(CredentialDefinition::class),
+            credentialDefinition
+        )
         val revRegDefJson =
             if (revocationRegistryDefinition == null)
                 null
             else
-                IndySerializationUtils.jsonProcessor.encodeToString(revocationRegistryDefinition)
+                IndySerializationUtils.jsonProcessor.encodeToString(
+                    PolymorphicSerializer(RevocationRegistryDefinition::class),
+                    revocationRegistryDefinition
+                )
 
         println("receiveCredential: credentialRequestMetadataJson -> $credentialRequestMetadataJson")
         println("receiveCredential: credentialJson -> $credentialJson")
@@ -307,7 +335,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         return indyPresentationReuqest
     }
 
-    override fun createPresentation(
+    override suspend fun createPresentation(
         presentationRequest: PresentationRequest,
         ledgerConnector: LedgerConnector,
         /* TODO: add extra query parameter
@@ -483,7 +511,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         return presentation
     }
 
-    private fun provideRevocationState(
+    private suspend fun provideRevocationState(
         revRegId: RevocationRegistryDefinitionId,
         credRevId: String,
         interval: Interval,
