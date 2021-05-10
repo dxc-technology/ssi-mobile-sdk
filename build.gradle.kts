@@ -50,21 +50,26 @@ kotlin {
         publishLibraryVariantsGroupedByFlavor = true // This line
     }
 
-    iosArm64 {
-        compilations.getByName("main") {
-            val indylib by cinterops.creating {
-                defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
-                extraOpts("-libraryPath", "$projectDir/indylib")
-                extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+    if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true) {
+        iosArm64("ios") {
+            println("iosArm64")
+            compilations.getByName("main") {
+                val indylib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+                    extraOpts("-libraryPath", "$projectDir/indylib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+                }
             }
         }
-    }
-    iosX64 {
-        compilations.getByName("main") {
-            val indylib by cinterops.creating {
-                defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
-                extraOpts("-libraryPath", "$projectDir/indylib")
-                extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+    } else {
+        iosX64("ios") {
+            println("iosX64")
+            compilations.getByName("main") {
+                val indylib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+                    extraOpts("-libraryPath", "$projectDir/indylib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+                }
             }
         }
     }
@@ -145,12 +150,12 @@ kotlin {
             }
         }
 
-        val iosX64Main by getting {
+        val iosMain by getting {
             dependencies {
                 implementation(files("indylib.klib"))
             }
         }
-        val iosArm64Main by getting {
+        val iosTest by getting {
             dependencies {
                 implementation(files("indylib.klib"))
             }
