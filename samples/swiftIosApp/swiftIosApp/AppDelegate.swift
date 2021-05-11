@@ -34,11 +34,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .build()
         
                ssiAgentApi.doInit()
-               let issuerInvitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkN2RHBlN2Z4VlFzRDE1QjllTjhMcHJOQ1h0U243emZXWDVOQUxwWDNkVmtLIl0sInJlY2lwaWVudEtleXMiOlsiQUQ3ckF0dnZRVll0aTFlYk5xdVhRNFF5S2pTVE4xdktzYVk2R3RrNUFUTlkiXSwiQGlkIjoiODQzYjYyNjQtMDExNS00ZDYyLTk1ZTQtMzkxNWM2MTZjZmM4IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+               let issuerInvitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjMyRnlCeTdhTXdaTkU2YndDeWJ0ZUxvdXhaODMyZzVXWkVrSDcydGV1akdSIl0sInJlY2lwaWVudEtleXMiOlsiSEJXTHFEVVRrSlBhbllZMlFaOHBaRG15Vm1rTmtoSnZKcXd4VWpRdzNwdHMiXSwiQGlkIjoiMTg4Y2RjYTMtNzdlMC00NWZhLWJhODEtZDIwZDdhMWQxMzE5IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
                
                ssiAgentApi.connect(url: issuerInvitation)
         
-        let verifierInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRU1yYkhTUUVGdjlnRGdhZDVMOWZmR3FudG9Cc0J4UHAzWjZFclhZWU55alkiXSwicmVjaXBpZW50S2V5cyI6WyJFYVdZNnZxWTlMY25tNjJiR3U4TVpEaWZQMWh2amVWdVNoNFZLdFpVZ3VkSiJdLCJAaWQiOiJmNWRlMDMyNy1hYTVmLTQ1MjgtYTc3Zi1kYjdhY2Y0OTA4ODciLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+        let verifierInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiOHZDalN3bU12VHVFUHB6QmU3VERjRUFndzRxMnZWa2RUcmpDOEFDYnZKWXQiXSwicmVjaXBpZW50S2V5cyI6WyJRbmsyYXpMWlVLWkpTbmF4MnlaYmR3eXo5VlpDRVo5OHFocFVRNzdtUG9BIl0sIkBpZCI6IjIyNWYwNzVmLTU0MzItNDc0OS1hMGNiLWU4NjNhODZhMTZlMCIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
         
         ssiAgentApi.connect(url: verifierInvitation)
         

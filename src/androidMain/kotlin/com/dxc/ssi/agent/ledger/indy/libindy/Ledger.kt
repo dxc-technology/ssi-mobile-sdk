@@ -26,7 +26,7 @@ actual class Ledger {
         }
 
         actual suspend fun submitRequest(pool: Pool, requestJson: String): String {
-            return Ledger.submitRequest(pool, requestJson).get()
+            return Ledger.submitRequest(pool.pool, requestJson).get()
         }
 
         actual suspend fun parseGetSchemaResponse(getSchemaResponse: String): ParseResponseResult {

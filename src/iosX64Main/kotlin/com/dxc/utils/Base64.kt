@@ -1,6 +1,5 @@
 package com.dxc.utils
 
-import com.dxc.ssi.agent.ledger.indy.genesis.nsdata
 import io.ktor.util.*
 
 

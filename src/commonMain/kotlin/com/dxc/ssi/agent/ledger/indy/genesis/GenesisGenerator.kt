@@ -1,17 +1,7 @@
 package com.dxc.ssi.agent.ledger.indy.genesis
 
-import kotlinx.cinterop.CPointer
-import kotlinx.cinterop.ObjCObjectVar
-import platform.Foundation.*
+import com.dxc.utils.FileUtils
 
-//TODO: find proper place for those functions
-fun String.nsdata(): NSData? =
-    NSString.create(string = this).dataUsingEncoding(NSUTF8StringEncoding)
-
-fun NSData.string(): String? =
-    NSString.create(data = this, encoding = NSUTF8StringEncoding)?.toString()
-
-//TODO: move this class to common module
 class GenesisGenerator(val indyPoolIp: String, val dir: String) {
 
     fun initGenesisFile(): String {
@@ -21,12 +11,10 @@ class GenesisGenerator(val indyPoolIp: String, val dir: String) {
 
         println("Generated genesys: $genesisContent")
         val filePath = "$dir/$filename"
-        if (NSFileManager().fileExistsAtPath(filePath)) {
-            val error: CPointer<ObjCObjectVar<NSError?>>? = null
-            NSFileManager().removeItemAtPath(filePath, error)
+        if(FileUtils.fileExists(filePath)) {
+            FileUtils.deleteRecursively(filePath)
         }
-
-        NSFileManager().createFileAtPath(filePath, genesisContent.nsdata(), null)
+        FileUtils.createFileWithContent(filePath, genesisContent)
 
         return filePath
 

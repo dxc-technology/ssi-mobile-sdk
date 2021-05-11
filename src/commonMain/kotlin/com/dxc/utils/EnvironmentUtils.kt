@@ -9,10 +9,10 @@ internal object EnvironmentUtils {
             return testPoolIp ?: "127.0.0.1"
         }
 
-    private val userHomePath: String get() = System.getProperty("INDY_HOME") ?: System.getEnv("HOME")!!
+    internal val userHomePath: String get() = System.getProperty("INDY_HOME") ?: System.getEnv("HOME")!!
 
     fun getIndyHomePath(): String {
-        return "$userHomePath/.indy_client"
+        return System.getIndyHomePath()
     }
 
     fun getIndyPoolPath(poolName: String) = getIndyHomePath() + "/pool/$poolName"

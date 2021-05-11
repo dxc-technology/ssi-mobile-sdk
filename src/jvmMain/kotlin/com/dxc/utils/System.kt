@@ -16,5 +16,9 @@ actual class System {
         actual fun getProperty(key: String): String? {
             return System.getProperty(key)
         }
+
+        actual fun getIndyHomePath(): String {
+            return "${EnvironmentUtils.userHomePath}/.indy_client"
+        }
     }
 }

@@ -11,5 +11,11 @@ actual class FileUtils {
         actual fun deleteRecursively(filePath: String) {
             File(filePath).deleteRecursively()
         }
+
+        actual fun createFileWithContent(filePath: String, content: String) {
+            val file = File(filePath)
+            file.createNewFile()
+            file.writeText(content)
+        }
     }
 }

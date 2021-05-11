@@ -19,5 +19,9 @@ actual class System {
             //TODO: implement this separately if needed
             return getEnv(key)
         }
+
+        actual fun getIndyHomePath(): String {
+            return "${EnvironmentUtils.userHomePath}/Documents/.indy_client"
+        }
     }
 }

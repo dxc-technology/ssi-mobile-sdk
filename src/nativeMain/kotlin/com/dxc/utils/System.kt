@@ -13,5 +13,9 @@ actual class System {
         actual fun getProperty(key: String): String? {
             TODO("Not yet implemented")
         }
+
+        actual fun getIndyHomePath(): String {
+            TODO("Not yet implemented")
+        }
     }
 }

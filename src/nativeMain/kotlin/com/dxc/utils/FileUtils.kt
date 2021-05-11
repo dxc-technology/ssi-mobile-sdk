@@ -9,5 +9,9 @@ actual class FileUtils {
         actual fun deleteRecursively(filePath: String) {
             TODO("Not yet implemented")
         }
+
+        actual fun createFileWithContent(filePath: String, content: String) {
+            TODO("Not yet implemented")
+        }
     }
 }
