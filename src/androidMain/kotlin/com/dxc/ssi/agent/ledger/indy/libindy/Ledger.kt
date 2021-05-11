@@ -33,7 +33,7 @@ actual class Ledger {
             return ParseResponseResult( Ledger.parseGetSchemaResponse(getSchemaResponse).get().objectJson)
         }
 
-        actual fun parseGetCredDefResponse(getCredDefResponse: String): ParseResponseResult {
+        actual suspend fun parseGetCredDefResponse(getCredDefResponse: String): ParseResponseResult {
             return ParseResponseResult(Ledger.parseGetCredDefResponse(getCredDefResponse).get().objectJson)
         }
 

@@ -4,7 +4,7 @@ import org.hyperledger.indy.sdk.anoncreds.Anoncreds
 
 actual class Anoncreds {
     actual companion object {
-        actual fun proverCreateCredentialReq(
+        actual suspend fun proverCreateCredentialReq(
             wallet: Wallet,
             proverDid: String,
             credentialOfferJson: String,
