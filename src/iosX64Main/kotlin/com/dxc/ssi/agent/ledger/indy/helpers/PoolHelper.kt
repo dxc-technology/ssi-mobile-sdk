@@ -3,7 +3,7 @@ package com.dxc.ssi.agent.ledger.indy.helpers
 import com.dxc.ssi.agent.ledger.indy.genesis.GenesisGenerator
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool
 import com.dxc.ssi.agent.ledger.indy.libindy.PoolJSONParameters
-import com.dxc.ssi.agent.wallet.indy.utils.EnvironmentUtils
+import com.dxc.utils.EnvironmentUtils
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ObjCObjectVar
 import kotlinx.serialization.json.Json

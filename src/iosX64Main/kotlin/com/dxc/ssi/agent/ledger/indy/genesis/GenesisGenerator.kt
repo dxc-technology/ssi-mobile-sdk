@@ -1,6 +1,5 @@
 package com.dxc.ssi.agent.ledger.indy.genesis
 
-import com.dxc.ssi.agent.wallet.indy.utils.EnvironmentUtils
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ObjCObjectVar
 import platform.Foundation.*
