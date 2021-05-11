@@ -108,17 +108,30 @@ actual class Anoncreds {
 
         }
 
-        actual fun createRevocationState(
+        actual suspend fun createRevocationState(
             blobStorageReaderHandle: Int,
             revRegDef: String,
             revRegDelta: String,
             timestamp: Long,
             credRevId: String
         ): String {
-            TODO("Not yet implemented")
+
+            val commandHandle = callbackHandler.prepareCallback()
+
+            indy_create_revocation_state(
+                commandHandle,
+                blobStorageReaderHandle,
+                revRegDef,
+                revRegDelta,
+                timestamp.toULong(),
+                credRevId,
+                StringCallback.callback)
+
+            val result = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
+            return result.stringResult
         }
 
-        actual fun proverCreateProof(
+        actual suspend fun proverCreateProof(
             wallet: Wallet,
             proofRequest: String,
             requestedCredentials: String,
@@ -127,7 +140,22 @@ actual class Anoncreds {
             credentialDefs: String,
             revStates: String
         ): String {
-            TODO("Not yet implemented")
+
+            val commandHandle = callbackHandler.prepareCallback()
+
+            indy_prover_create_proof(
+                commandHandle,
+                wallet.getWalletHandle(),
+                proofRequest,
+                requestedCredentials,
+                masterSecret,
+                schemas,
+                credentialDefs,
+                revStates,
+                StringCallback.callback)
+
+            val result = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
+            return result.stringResult
         }
 
 

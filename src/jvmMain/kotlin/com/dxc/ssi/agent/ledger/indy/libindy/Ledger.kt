@@ -4,7 +4,7 @@ import org.hyperledger.indy.sdk.ledger.Ledger
 
 actual class Ledger {
     actual companion object {
-        actual fun buildGetSchemaRequest(submitterDid: String, id: String): String {
+        actual suspend fun buildGetSchemaRequest(submitterDid: String, id: String): String {
             return Ledger.buildGetSchemaRequest(submitterDid, id).get()
         }
 
@@ -12,11 +12,11 @@ actual class Ledger {
             return Ledger.buildGetCredDefRequest(submitterDid, id).get()
         }
 
-        actual fun buildGetRevocRegDefRequest(submitterDid: String, id: String): String {
+        actual suspend fun buildGetRevocRegDefRequest(submitterDid: String, id: String): String {
             return Ledger.buildGetRevocRegDefRequest(submitterDid, id).get()
         }
 
-        actual fun buildGetRevocRegDeltaRequest(
+        actual suspend fun buildGetRevocRegDeltaRequest(
             submitterDid: String,
             revocRegDefId: String,
             from: Long,
@@ -29,7 +29,7 @@ actual class Ledger {
             return Ledger.submitRequest(pool, requestJson).get()
         }
 
-        actual fun parseGetSchemaResponse(getSchemaResponse: String): ParseResponseResult {
+        actual suspend fun parseGetSchemaResponse(getSchemaResponse: String): ParseResponseResult {
             return ParseResponseResult( Ledger.parseGetSchemaResponse(getSchemaResponse).get().objectJson)
         }
 
@@ -37,11 +37,11 @@ actual class Ledger {
             return ParseResponseResult(Ledger.parseGetCredDefResponse(getCredDefResponse).get().objectJson)
         }
 
-        actual fun parseGetRevocRegDefResponse(getRevocRegDefResponse: String): ParseResponseResult {
+        actual suspend fun parseGetRevocRegDefResponse(getRevocRegDefResponse: String): ParseResponseResult {
             return ParseResponseResult(Ledger.parseGetRevocRegDefResponse(getRevocRegDefResponse).get().objectJson)
         }
 
-        actual fun parseGetRevocRegDeltaResponse(getRevocRegDeltaResponse: String): ParseRegistryResponseResult {
+        actual suspend fun parseGetRevocRegDeltaResponse(getRevocRegDeltaResponse: String): ParseRegistryResponseResult {
             val result = Ledger.parseGetRevocRegDeltaResponse(getRevocRegDeltaResponse).get()
             return ParseRegistryResponseResult(timestamp = result.timestamp, objectJson = result.objectJson)
         }

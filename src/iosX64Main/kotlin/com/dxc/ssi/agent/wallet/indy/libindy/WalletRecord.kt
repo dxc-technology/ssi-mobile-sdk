@@ -3,16 +3,12 @@ package com.dxc.ssi.agent.wallet.indy.libindy
 import com.dxc.ssi.agent.callback.CallbackData
 import com.dxc.ssi.agent.callback.callbackHandler
 import com.dxc.ssi.agent.callback.impl.SimpleCallback
+import com.dxc.ssi.agent.callback.impl.StringCallback
 import com.indylib.*
 import kotlinx.cinterop.*
 
 
 actual class WalletRecord {
-    data class GetWalletRecordCallbackResult(
-        override val commandHandle: Int,
-        override val errorCode: UInt,
-        val walletRecord: String?
-    ) : CallbackData
 
     actual companion object {
         actual suspend fun get(
@@ -27,32 +23,19 @@ actual class WalletRecord {
                 val walletHandle = wallet.getWalletHandle()
                 val commandHandle = callbackHandler.prepareCallback()
 
-                val callback =
-                    staticCFunction() { commandHandle: Int, errorCode: UInt, walletRecordData: CPointer<ByteVar>?
-                        ->
-                        initRuntimeIfNeeded()
-                        callbackHandler.setCallbackResult(
-                            GetWalletRecordCallbackResult(
-                                commandHandle, errorCode,
-                                walletRecordData?.toKString(),
-
-                                )
-                        )
-                    }
-
                 indy_get_wallet_record(
                     commandHandle,
                     walletHandle,
                     type,
                     id,
                     optionsJson,
-                    callback
+                    StringCallback.callback
                 )
 
-                val recordData = callbackHandler.waitForCallbackResult(commandHandle) as GetWalletRecordCallbackResult
+                val recordData = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
 
 
-                return recordData.walletRecord!!
+                return recordData.stringResult
             }
         }
 

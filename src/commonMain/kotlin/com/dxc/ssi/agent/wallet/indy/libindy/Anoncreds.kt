@@ -22,7 +22,7 @@ expect class Anoncreds {
             revRegDefJson: String?
         ): String
 
-        fun createRevocationState(
+        suspend fun createRevocationState(
             blobStorageReaderHandle: Int,
             revRegDef: String,
             revRegDelta: String,
@@ -30,7 +30,7 @@ expect class Anoncreds {
             credRevId: String
         ): String
 
-        fun proverCreateProof(
+        suspend fun proverCreateProof(
             wallet: Wallet,
             proofRequest: String,
             requestedCredentials: String,

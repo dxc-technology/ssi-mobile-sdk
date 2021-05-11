@@ -30,7 +30,7 @@ actual class Anoncreds {
             TODO("Not yet implemented")
         }
 
-        actual fun createRevocationState(
+        actual suspend fun createRevocationState(
             blobStorageReaderHandle: Int,
             revRegDef: String,
             revRegDelta: String,
@@ -40,7 +40,7 @@ actual class Anoncreds {
             TODO("Not yet implemented")
         }
 
-        actual fun proverCreateProof(
+        actual suspend fun proverCreateProof(
             wallet: Wallet,
             proofRequest: String,
             requestedCredentials: String,

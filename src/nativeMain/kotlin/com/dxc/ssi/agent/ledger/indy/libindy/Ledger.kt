@@ -2,7 +2,7 @@ package com.dxc.ssi.agent.ledger.indy.libindy
 
 actual class Ledger {
     actual companion object {
-        actual fun buildGetSchemaRequest(submitterDid: String, id: String): String {
+        actual suspend fun buildGetSchemaRequest(submitterDid: String, id: String): String {
             TODO("Not yet implemented")
         }
 
@@ -10,11 +10,11 @@ actual class Ledger {
             TODO("Not yet implemented")
         }
 
-        actual fun buildGetRevocRegDefRequest(submitterDid: String, id: String): String {
+        actual suspend fun buildGetRevocRegDefRequest(submitterDid: String, id: String): String {
             TODO("Not yet implemented")
         }
 
-        actual fun buildGetRevocRegDeltaRequest(
+        actual suspend fun buildGetRevocRegDeltaRequest(
             submitterDid: String,
             revocRegDefId: String,
             from: Long,
@@ -30,7 +30,7 @@ actual class Ledger {
             TODO("Not yet implemented")
         }
 
-        actual fun parseGetSchemaResponse(getSchemaResponse: String): ParseResponseResult {
+        actual suspend fun parseGetSchemaResponse(getSchemaResponse: String): ParseResponseResult {
             TODO("Not yet implemented")
         }
 
@@ -38,11 +38,11 @@ actual class Ledger {
             TODO("Not yet implemented")
         }
 
-        actual fun parseGetRevocRegDefResponse(getRevocRegDefResponse: String): ParseResponseResult {
+        actual suspend fun parseGetRevocRegDefResponse(getRevocRegDefResponse: String): ParseResponseResult {
             TODO("Not yet implemented")
         }
 
-        actual fun parseGetRevocRegDeltaResponse(getRevocRegDeltaResponse: String): ParseRegistryResponseResult {
+        actual suspend fun parseGetRevocRegDeltaResponse(getRevocRegDeltaResponse: String): ParseRegistryResponseResult {
             TODO("Not yet implemented")
         }
     }

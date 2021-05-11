@@ -51,7 +51,7 @@ actual class Anoncreds {
             ).get()
         }
 
-        actual fun createRevocationState(
+        actual suspend fun createRevocationState(
             blobStorageReaderHandle: Int,
             revRegDef: String,
             revRegDelta: String,
@@ -67,7 +67,7 @@ actual class Anoncreds {
             ).get()
         }
 
-        actual fun proverCreateProof(
+        actual suspend fun proverCreateProof(
             wallet: Wallet,
             proofRequest: String,
             requestedCredentials: String,

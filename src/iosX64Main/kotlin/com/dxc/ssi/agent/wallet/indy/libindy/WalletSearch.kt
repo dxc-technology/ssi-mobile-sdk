@@ -2,6 +2,7 @@ package com.dxc.ssi.agent.wallet.indy.libindy
 
 import com.dxc.ssi.agent.callback.CallbackData
 import com.dxc.ssi.agent.callback.callbackHandler
+import com.dxc.ssi.agent.callback.impl.IntCallback
 import com.dxc.ssi.agent.callback.impl.SimpleCallback
 import com.dxc.ssi.agent.callback.impl.StringCallback
 import com.indylib.indy_close_wallet_search
@@ -17,13 +18,6 @@ actual class WalletSearch actual constructor() {
 
     var searchHandle: Int? = null
 
-    //TODO: replace with some generic callback function
-    data class OpenWalletSearchCallbackResult(
-        override val commandHandle: Int,
-        override val errorCode: UInt,
-        val searchHandle: Int
-    ) : CallbackData
-
     actual suspend fun open(
         wallet: Wallet,
         type: String,
@@ -32,16 +26,6 @@ actual class WalletSearch actual constructor() {
     ) {
         val commandHandle = callbackHandler.prepareCallback()
 
-        val callback =
-            staticCFunction { commandHandle: Int, errorCode: UInt, searchHandle: Int
-                ->
-                initRuntimeIfNeeded()
-                callbackHandler.setCallbackResult(
-                    OpenWalletSearchCallbackResult(
-                        commandHandle, errorCode, searchHandle
-                    )
-                )
-            }
 
         indy_open_wallet_search(
             commandHandle,
@@ -49,12 +33,12 @@ actual class WalletSearch actual constructor() {
             type,
             queryJson,
             optionsJson,
-            callback
+            IntCallback.callback
         )
 
-        val result = callbackHandler.waitForCallbackResult(commandHandle) as OpenWalletSearchCallbackResult
+        val result = callbackHandler.waitForCallbackResult(commandHandle) as IntCallback.Result
 
-        searchHandle = result.searchHandle
+        searchHandle = result.handle
     }
 
     actual suspend fun closeSearch() {

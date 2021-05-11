@@ -111,7 +111,7 @@ interface Prover {
      *
      * @return [RevocationState]
      */
-    fun createRevocationState(
+    suspend fun createRevocationState(
         revocationRegistryDefinition: RevocationRegistryDefinition,
         revocationRegistryEntry: RevocationRegistryEntry,
         credentialRevocationId: String,

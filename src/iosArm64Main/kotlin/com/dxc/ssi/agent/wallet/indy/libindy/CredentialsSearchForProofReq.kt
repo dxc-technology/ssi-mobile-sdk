@@ -1,18 +1,20 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
 actual class CredentialsSearchForProofReq actual constructor() {
-    actual fun open(
+    actual suspend fun open(
         wallet: Wallet,
         proofReqJson: String,
         extraQueryJson: String?
     ) {
-    }
-
-    actual fun fetchNextCredentials(itemRef: String, count: Int): String {
         TODO("Not yet implemented")
     }
 
-    actual fun closeSearch() {
+    actual suspend fun fetchNextCredentials(itemRef: String, count: Int): String {
+        TODO("Not yet implemented")
+    }
+
+    actual suspend fun closeSearch() {
+        TODO("Not yet implemented")
     }
 
 

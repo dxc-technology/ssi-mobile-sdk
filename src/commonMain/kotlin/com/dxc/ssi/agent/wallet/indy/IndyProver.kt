@@ -258,7 +258,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun createRevocationState(
+    override suspend fun createRevocationState(
         revocationRegistryDefinition: RevocationRegistryDefinition,
         revocationRegistryEntry: RevocationRegistryEntry,
         credentialRevocationId: String,

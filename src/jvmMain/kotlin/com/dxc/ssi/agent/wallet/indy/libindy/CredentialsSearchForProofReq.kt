@@ -6,15 +6,15 @@ actual class CredentialsSearchForProofReq actual constructor() {
 
     private lateinit var credentialsSearchForProofReq: CredentialsSearchForProofReq
 
-    actual fun open(wallet: Wallet, proofReqJson: String, extraQueryJson: String?) {
+    actual suspend fun open(wallet: Wallet, proofReqJson: String, extraQueryJson: String?) {
         credentialsSearchForProofReq = CredentialsSearchForProofReq.open(wallet, proofReqJson, extraQueryJson).get()
     }
 
-    actual fun fetchNextCredentials(itemRef: String, count: Int): String {
+    actual suspend fun fetchNextCredentials(itemRef: String, count: Int): String {
         return credentialsSearchForProofReq.fetchNextCredentials(itemRef, count).get()
     }
 
-    actual fun closeSearch() {
+    actual suspend fun closeSearch() {
         credentialsSearchForProofReq.closeSearch().get()
     }
 
