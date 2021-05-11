@@ -5,5 +5,13 @@ actual class System {
         actual fun currentTimeMillis(): Long {
             TODO("Not yet implemented")
         }
+
+        actual fun getEnv(key: String): String? {
+            TODO("Not yet implemented")
+        }
+
+        actual fun getProperty(key: String): String? {
+            TODO("Not yet implemented")
+        }
     }
 }

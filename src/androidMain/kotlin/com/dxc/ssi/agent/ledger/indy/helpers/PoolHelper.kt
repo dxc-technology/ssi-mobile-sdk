@@ -1,7 +1,7 @@
 package com.dxc.ssi.agent.ledger.indy.helpers
 
 import com.dxc.ssi.agent.ledger.indy.genesis.GenesisGenerator
-import com.dxc.ssi.agent.wallet.indy.utils.EnvironmentUtils
+import com.dxc.utils.EnvironmentUtils
 import org.hyperledger.indy.sdk.pool.Pool
 import org.hyperledger.indy.sdk.pool.PoolJSONParameters
 import java.io.File

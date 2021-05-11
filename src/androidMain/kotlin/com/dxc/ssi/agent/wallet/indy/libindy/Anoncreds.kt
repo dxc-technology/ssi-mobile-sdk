@@ -11,8 +11,9 @@ actual class Anoncreds {
             credentialDefJson: String,
             masterSecretId: String
         ): ProverCreateCredentialRequestResult {
+
             val proverCreateCredentialReqResultIndy = Anoncreds.proverCreateCredentialReq(
-                wallet,
+                wallet.wallet,
                 proverDid,
                 credentialOfferJson,
                 credentialDefJson,
@@ -30,7 +31,7 @@ actual class Anoncreds {
             wallet: Wallet,
             masterSecretId: String
         ): String {
-            return Anoncreds.proverCreateMasterSecret(wallet, masterSecretId).get()
+            return Anoncreds.proverCreateMasterSecret(wallet.wallet, masterSecretId).get()
         }
 
         actual  suspend fun proverStoreCredential(
@@ -42,7 +43,7 @@ actual class Anoncreds {
             revRegDefJson: String?
         ): String {
             return Anoncreds.proverStoreCredential(
-                wallet,
+                wallet.wallet,
                 credId,
                 credReqMetadataJson,
                 credJson,
@@ -77,7 +78,7 @@ actual class Anoncreds {
             revStates: String
         ): String {
             return Anoncreds.proverCreateProof(
-                wallet,
+                wallet.wallet,
                 proofRequest,
                 requestedCredentials,
                 masterSecret,

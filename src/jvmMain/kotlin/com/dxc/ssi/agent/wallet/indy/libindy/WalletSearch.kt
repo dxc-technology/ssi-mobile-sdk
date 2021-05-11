@@ -8,7 +8,7 @@ actual class WalletSearch actual constructor() {
 
     actual suspend fun open(wallet: Wallet, type: String, queryJson: String, optionsJson: String) {
         walletSearch =
-            WalletSearch.open(wallet, type, queryJson, optionsJson).get()
+            WalletSearch.open(wallet.wallet, type, queryJson, optionsJson).get()
     }
 
     actual suspend fun closeSearch() {
@@ -16,6 +16,6 @@ actual class WalletSearch actual constructor() {
     }
 
     actual suspend fun searchFetchNextRecords(wallet: Wallet, count: Int): String {
-        return WalletSearch.searchFetchNextRecords(wallet, walletSearch, count).get()
+        return WalletSearch.searchFetchNextRecords(wallet.wallet, walletSearch, count).get()
     }
 }

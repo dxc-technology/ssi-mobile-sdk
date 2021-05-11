@@ -7,7 +7,7 @@ actual class CredentialsSearchForProofReq actual constructor() {
     private lateinit var credentialsSearchForProofReq: CredentialsSearchForProofReq
 
     actual suspend fun open(wallet: Wallet, proofReqJson: String, extraQueryJson: String?) {
-        credentialsSearchForProofReq = CredentialsSearchForProofReq.open(wallet, proofReqJson, extraQueryJson).get()
+        credentialsSearchForProofReq = CredentialsSearchForProofReq.open(wallet.wallet, proofReqJson, extraQueryJson).get()
     }
 
     actual suspend fun fetchNextCredentials(itemRef: String, count: Int): String {

@@ -8,10 +8,10 @@ import com.indylib.indy_create_wallet
 import com.indylib.indy_open_wallet
 import kotlinx.cinterop.staticCFunction
 
-actual class Wallet(private var walletHandle: Int) {
+actual class Wallet actual constructor(private var walletHandle: Int) {
 
-    companion object {
-        suspend fun createWallet(config:String, credentials:String) {
+    actual companion object {
+        actual suspend fun createWallet(config:String, credentials:String) {
             val commandHandle = callbackHandler.prepareCallback()
 
             indy_create_wallet(
@@ -25,7 +25,7 @@ actual class Wallet(private var walletHandle: Int) {
 
         }
 
-        suspend fun openWallet(config:String, credentials:String) : Wallet {
+        actual suspend fun openWallet(config:String, credentials:String) : Wallet {
             val commandHandle = callbackHandler.prepareCallback()
 
             indy_open_wallet(
@@ -41,7 +41,7 @@ actual class Wallet(private var walletHandle: Int) {
     }
 
     //TODO: replace it with property getter/setter
-    fun getWalletHandle(): Int {
+    actual fun getWalletHandle(): Int {
         return walletHandle
     }
 }
