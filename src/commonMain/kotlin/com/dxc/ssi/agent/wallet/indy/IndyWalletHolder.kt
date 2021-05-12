@@ -8,9 +8,14 @@ import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
+import com.dxc.ssi.agent.utils.JsonUtils.extractValue
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.*
+import com.dxc.ssi.agent.wallet.indy.model.RetrievedWalletRecords
+import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
+import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import io.ktor.utils.io.core.*
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -24,11 +29,8 @@ open class IndyWalletHolder : WalletHolder {
     private var isoDid = IsolateState {ObjectHolder<String?>()}
     private var isoVerkey = IsolateState {ObjectHolder<String?>()}
 
-
-    //TODO: think if it is posible to make val lateinit or something like that
-    // private var wallet: Wallet? = null
     private var isoWallet = IsolateState {ObjectHolder<Wallet>()}
-    private val type = "ConnectionRecord"
+
 
 
     override fun createSessionDid(identityRecord: IdentityDetails): String {
@@ -48,33 +50,25 @@ open class IndyWalletHolder : WalletHolder {
     }
 
     override suspend fun storeConnectionRecord(connection: Connection) {
-
         //TODO: check if we need to check wallet health status before using it
-
         val existingConnection = getConnectionRecordById(connection.id)
+        val tagsJson = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${connection.peerVerkey}\"}"
 
         if (existingConnection == null) {
 
             val value = connection.toJson()
-            //TODO: think what tags do we need here
-            val tagsJson: String? = null
 
+            println("Storing connection $connection")
             val wallet = isoWallet.access { it.obj }
-            WalletRecord.add(wallet!!, type, connection.id, value, tagsJson)
-
-
+            WalletRecord.add(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value, tagsJson)
         } else {
-
-            //TODO: see if we also need to update tags
-
             val value = connection.toJson()
+            println("Updating connection $connection")
             val wallet = isoWallet.access { it.obj }
-            WalletRecord.updateValue(wallet!!, type, connection.id, value)
-
-
+            WalletRecord.updateValue(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value)
+            //TODO: check if there are cases when we really need to update tags
+            WalletRecord.updateTags(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, tagsJson)
         }
-
-
     }
 
     override suspend fun getConnectionRecordById(connectionId: String): Connection? {
@@ -92,7 +86,8 @@ open class IndyWalletHolder : WalletHolder {
         //TODO: find out better solution of looking up for connection
         return try {
             val wallet = isoWallet.access { it.obj }
-            val retrievedValue = WalletRecord.get(wallet!!, type, connectionId, options)
+            val retrievedValue =
+                WalletRecord.get(wallet!!, WalletRecordType.ConnectionRecord.name, connectionId, options)
             Connection.fromJson(extractValue(retrievedValue))
         } catch (e: WalletItemNotFoundException) {
             null
@@ -104,16 +99,39 @@ open class IndyWalletHolder : WalletHolder {
             else
                 throw e
         }
-
-
     }
 
-    private fun extractValue(retrievedValue: String?): String {
+    override suspend fun findConnectionByVerKey(verKey: String): Connection? {
 
-        val group = Regex("value\":\"(.*\\})\",").find(retrievedValue!!)!!.groups[1]!!.value.replace("\\", "")
-        println(group)
 
-        return group
+        val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"
+        val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
+
+        println("Searching connections using query: $query")
+
+        val search = WalletSearch()
+
+        val wallet = isoWallet.access { it.obj }
+        search.open(wallet!!, WalletRecordType.ConnectionRecord.name, query, options)
+        //TODO: make proper fetch in batches insetad of just fetching 100 records
+        val foundRecordsJson = search.searchFetchNextRecords(wallet!!, 100)
+        search.closeSearch()
+
+        println("Fetched connections json = $foundRecordsJson")
+
+        val retrievedWalletRecords = Json {}.decodeFromString<RetrievedWalletRecords>(foundRecordsJson)
+
+        if (retrievedWalletRecords.totalCount == null || retrievedWalletRecords.totalCount == 0)
+            return null
+
+        //TODO: consider case when we received several records. Is it ok? What do do in this case? Need to make some robust solution instead of taking first one
+        return retrievedWalletRecords.records!!
+            .map {
+                println(it.value)
+                it.value
+            }.map<String, Connection> { Json.decodeFromString(it) }
+            .firstOrNull()
+
     }
 
     override suspend fun openOrCreateWallet() {
@@ -135,6 +153,12 @@ open class IndyWalletHolder : WalletHolder {
         isoDid.access { it.obj = didResult.getDid() }
         isoVerkey.access { it.obj = didResult.getVerkey() }
 
+    }
+
+    override fun getWallet(): Any {
+        //TODO: see if it is possible to return common Wallet instead of Any
+        val wallet = isoWallet.access { it.obj }
+        return wallet as Any
     }
 
     //TODO: remove all unnecessary code and beautify this function
