@@ -8,26 +8,6 @@
 import UIKit
 import ssi_agent
 
-class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
-{
-    func onCompleted(connection: Connection_) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-    func onInvitationReceived(connection: Connection_, endpoint: String, invitation: Invitation) -> CallbackResult {
-    
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-    func onRequestSent(connection: Connection_, request: ConnectionRequest) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-    func onResponseReceived(connection: Connection_, response: ConnectionResponse) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-}
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -37,11 +17,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         let cic = ConnectionInitiatorControllerImpl()
-               let ssiAgentApi = SsiAgentBuilderImpl().withConnectionInitiatorController(connectionInitiatorController: cic).build()
+        let crc = CredentialReceiverControllerImpl()
+        let cpc = CredPresenterControllerImpl()
+        
+        let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
+            genesisFilePath: "./docker_pool_transactions_genesis.txt",
+            ipAddress: "192.168.0.117",
+            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
+            dirForGeneratedGenesis: NSHomeDirectory())
+        
+               let ssiAgentApi = SsiAgentBuilderImpl()
+                .withConnectionInitiatorController(connectionInitiatorController: cic)
+                .withCredReceiverController(credReceiverController: crc)
+                .withCredPresenterController(credPresenterController: cpc)
+                .withLedgerConnector(ledgerConnector: IndyLedgerConnector(indyLedgerConnectorConfiguration: indyLedgerConnectorConfiguration))
+                .build()
+        
                ssiAgentApi.doInit()
-               let invitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkRtMkhFRWNlWXo4cnJ1QTVMQWh0Y3B0WVFYVmN0N3V2NUVpNUxHTjdoY2h1Il0sInJlY2lwaWVudEtleXMiOlsiRWVNOHlRWjJUd3ZwWWVGTEt0NHdod1VIQWhMcDhqTVhqQkVqNWNMb3pDN2MiXSwiQGlkIjoiOTNjOTY1ODctZTYzOC00ZDgwLWJkMDgtNGE5M2I1NDdlZGMxIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+               let issuerInvitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjMyRnlCeTdhTXdaTkU2YndDeWJ0ZUxvdXhaODMyZzVXWkVrSDcydGV1akdSIl0sInJlY2lwaWVudEtleXMiOlsiSEJXTHFEVVRrSlBhbllZMlFaOHBaRG15Vm1rTmtoSnZKcXd4VWpRdzNwdHMiXSwiQGlkIjoiMTg4Y2RjYTMtNzdlMC00NWZhLWJhODEtZDIwZDdhMWQxMzE5IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
                
-               ssiAgentApi.connect(url: invitation)
+               ssiAgentApi.connect(url: issuerInvitation)
+        
+        let verifierInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiOHZDalN3bU12VHVFUHB6QmU3VERjRUFndzRxMnZWa2RUcmpDOEFDYnZKWXQiXSwicmVjaXBpZW50S2V5cyI6WyJRbmsyYXpMWlVLWkpTbmF4MnlaYmR3eXo5VlpDRVo5OHFocFVRNzdtUG9BIl0sIkBpZCI6IjIyNWYwNzVmLTU0MzItNDc0OS1hMGNiLWU4NjNhODZhMTZlMCIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
+        
+        ssiAgentApi.connect(url: verifierInvitation)
+        
                sleep(10000)
         // Override point for customization after application launch.
         return true
@@ -64,3 +64,62 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
+{
+    func onCompleted(connection: Connection) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onInvitationReceived(connection: Connection, endpoint: String, invitation: Invitation) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+   
+    
+    func onRequestSent(connection: Connection, request: ConnectionRequest) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onResponseReceived(connection: Connection, response: ConnectionResponse) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onAbandoned(connection: Connection, problemReport: ProblemReport) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+        
+    }
+    
+}
+
+
+class CredentialReceiverControllerImpl: CredReceiverController {
+    func onCredentialReceived(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onDone(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onOfferReceived(connection: Connection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onRequestSent(connection: Connection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+}
+
+
+class CredPresenterControllerImpl: CredPresenterController {
+    func onDone(connection: Connection) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onRequestReceived(connection: Connection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    
+}
