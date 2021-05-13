@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 val serializationVersion: String = "1.0.1"
 val indyVersion: String = "1.16.0"
 val jacksonVersion: String= "2.9.7"
@@ -49,12 +48,26 @@ kotlin {
         publishLibraryVariantsGroupedByFlavor = true // This line
     }
 
-    ios {  // Replace with a target you need.
-        compilations.getByName("main") {
-            val indylib by cinterops.creating {
-                defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
-                extraOpts("-libraryPath", "$projectDir/indylib")
-                extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+    if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true) {
+        iosArm64("ios") {
+            println("iosArm64")
+            compilations.getByName("main") {
+                val indylib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+                    extraOpts("-libraryPath", "$projectDir/indylib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+                }
+            }
+        }
+    } else {
+        iosX64("ios") {
+            println("iosX64")
+            compilations.getByName("main") {
+                val indylib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+                    extraOpts("-libraryPath", "$projectDir/indylib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+                }
             }
         }
     }
@@ -88,7 +101,6 @@ kotlin {
                 implementation ("com.benasher44:uuid:$uuidVersion")
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))
-
             }
         }
         val commonTest by getting {
@@ -206,4 +218,3 @@ android {
 dependencies {
     implementation("junit:junit:$junitVersion")
 }
-

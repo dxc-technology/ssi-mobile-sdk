@@ -19,29 +19,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let cic = ConnectionInitiatorControllerImpl()
         let crc = CredentialReceiverControllerImpl()
         let cpc = CredPresenterControllerImpl()
-        
+
         let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisFilePath: "./docker_pool_transactions_genesis.txt",
             ipAddress: "192.168.0.117",
             genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
             dirForGeneratedGenesis: NSHomeDirectory())
-        
+
                let ssiAgentApi = SsiAgentBuilderImpl()
                 .withConnectionInitiatorController(connectionInitiatorController: cic)
                 .withCredReceiverController(credReceiverController: crc)
                 .withCredPresenterController(credPresenterController: cpc)
                 .withLedgerConnector(ledgerConnector: IndyLedgerConnector(indyLedgerConnectorConfiguration: indyLedgerConnectorConfiguration))
                 .build()
-        
+
                ssiAgentApi.doInit()
                let issuerInvitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjMyRnlCeTdhTXdaTkU2YndDeWJ0ZUxvdXhaODMyZzVXWkVrSDcydGV1akdSIl0sInJlY2lwaWVudEtleXMiOlsiSEJXTHFEVVRrSlBhbllZMlFaOHBaRG15Vm1rTmtoSnZKcXd4VWpRdzNwdHMiXSwiQGlkIjoiMTg4Y2RjYTMtNzdlMC00NWZhLWJhODEtZDIwZDdhMWQxMzE5IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
                
                ssiAgentApi.connect(url: issuerInvitation)
-        
+
         let verifierInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiOHZDalN3bU12VHVFUHB6QmU3VERjRUFndzRxMnZWa2RUcmpDOEFDYnZKWXQiXSwicmVjaXBpZW50S2V5cyI6WyJRbmsyYXpMWlVLWkpTbmF4MnlaYmR3eXo5VlpDRVo5OHFocFVRNzdtUG9BIl0sIkBpZCI6IjIyNWYwNzVmLTU0MzItNDc0OS1hMGNiLWU4NjNhODZhMTZlMCIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
-        
+
         ssiAgentApi.connect(url: verifierInvitation)
-        
+
                sleep(10000)
         // Override point for customization after application launch.
         return true
@@ -69,26 +69,26 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
     func onCompleted(connection: Connection) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
-    
+
     func onInvitationReceived(connection: Connection, endpoint: String, invitation: Invitation) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
-    
-   
-    
+
+
+
     func onRequestSent(connection: Connection, request: ConnectionRequest) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
-    
+
     func onResponseReceived(connection: Connection, response: ConnectionResponse) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
-    
+
     func onAbandoned(connection: Connection, problemReport: ProblemReport) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
-        
+
     }
-    
+
 }
 
 
@@ -96,19 +96,19 @@ class CredentialReceiverControllerImpl: CredReceiverController {
     func onCredentialReceived(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
-    
+
     func onDone(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
-    
+
     func onOfferReceived(connection: Connection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
-    
+
     func onRequestSent(connection: Connection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
-    
+
 }
 
 
@@ -116,10 +116,10 @@ class CredPresenterControllerImpl: CredPresenterController {
     func onDone(connection: Connection) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
-    
+
     func onRequestReceived(connection: Connection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
-    
-    
+
+
 }
