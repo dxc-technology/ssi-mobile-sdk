@@ -60,10 +60,10 @@ class SsiAgentApiImplTest {
 
 
         val issuerInvitationUrl =
-            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkdBTGhhOUxIZGs1b1hhRWJab2NDUFhZMnRWaGNnaDZtOE5zdmRCUFp3UjlYIl0sInJlY2lwaWVudEtleXMiOlsiNG14Q3VMSFFmYWg4YXdmMjJld1JLS1dwQTZCUktOQTgzRDVxR1V0UGt4TjUiXSwiQGlkIjoiZDM5OWY2NGMtMGFkNi00MzNiLTk5MTgtZWFiNzAyZGNmNGI0IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjRWMVp1Q1N2VEpDRW01WHY4NmRiaVMzbURKZ0Z6V1RSb2N0QXJlQUVHRTFCIl0sInJlY2lwaWVudEtleXMiOlsiOWdzeUtGZW92Q2c2ZHZXMVhpek5GcmN0S1Z4N3FrV2dpZzZ3V3lmZlVobnAiXSwiQGlkIjoiYzYzYWI3OGQtNzE5NS00Yjg0LTg1YTUtNjI3NDZlYzc4MDNlIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
         val verifierInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiOWpRS2JneFRqUGRYR05EVURqc05UWWY5N2FXUXpGODZGV3NRdDJwTXdITUsiXSwicmVjaXBpZW50S2V5cyI6WyJHb2hpenlTMUNTV0FyeEdIcDc2Q3hNeXZqZmMxVzdVanhGdTdxeEhKSkp3ciJdLCJAaWQiOiI1MTQwNDgyMi0zYmRlLTRmYTEtOWU2Ny03NTAwZTJiZGJlMzEiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiNTVjUjhaaUxSNFJKdVRCZ1NDc2VEVUtlMUE5Nzd0QW9yRXlERXhnNm5GTFgiXSwicmVjaXBpZW50S2V5cyI6WyI3SmM5WFZNbUpNTERTYmFkYkxwNVdQQXVoQmkxRlBEcUh3WVFKRmRwUDFOZSJdLCJAaWQiOiI2N2Y0NjYyNC01ZGM0LTRkYzQtYWRlZS1lZThhYjMzYTc3NmMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
         println("Connecting to issuer")
         ssiAgentApi.connect(issuerInvitationUrl)
@@ -72,7 +72,7 @@ class SsiAgentApiImplTest {
         //Sleeper().sleep(4000)
 
         println("Connecting to verifier")
-     //   ssiAgentApi.connect(verifierInvitationUrl)
+        ssiAgentApi.connect(verifierInvitationUrl)
 
         Sleeper().sleep(500000)
 
