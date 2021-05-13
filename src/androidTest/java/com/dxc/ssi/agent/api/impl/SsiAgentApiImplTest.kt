@@ -72,7 +72,7 @@ class SsiAgentApiImplTest {
         //Sleeper().sleep(4000)
 
         println("Connecting to verifier")
-        ssiAgentApi.connect(verifierInvitationUrl)
+     //   ssiAgentApi.connect(verifierInvitationUrl)
 
         Sleeper().sleep(500000)
 
