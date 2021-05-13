@@ -1,12 +1,9 @@
 package com.dxc.ssi.agent.api.pluggable.wallet
-
-import com.dxc.ssi.agent.model.CredentialExchangeRecord
-
 /**
  * This entity is able to create self-signed credentials.
  * Has read/write access to public ledger.
  */
-interface Issuer  {
+interface Issuer : WalletHolder {
 
     /**
      * Signs something using wallet and did

@@ -2,13 +2,28 @@ package com.dxc.ssi.agent.wallet.indy.libindy
 
 import com.dxc.ssi.agent.callback.CallbackData
 import com.dxc.ssi.agent.callback.callbackHandler
-import com.dxc.ssi.agent.callback.impl.SimpleCallback
-import com.dxc.ssi.agent.callback.impl.StringCallback
 import com.indylib.*
 import kotlinx.cinterop.*
+import platform.Foundation.*
+import platform.posix.sleep
 
 
 actual class WalletRecord {
+    data class GetWalletRecordCallbackResult(
+        override val commandHandle: Int,
+        override val errorCode: UInt,
+        val walletRecord: String?
+        ) : CallbackData
+    //TODO: create generic data class for cases when we do not need any customization
+    data class AddWalletRecordCallbackResult(
+        override val commandHandle: Int,
+        override val errorCode: UInt
+        ) : CallbackData
+    //TODO: create generic data class for cases when we do not need any customization
+    data class UpdateWalletRecordCallbackResult(
+        override val commandHandle: Int,
+        override val errorCode: UInt
+    ) : CallbackData
 
     actual companion object {
         actual suspend fun get(
@@ -23,19 +38,32 @@ actual class WalletRecord {
                 val walletHandle = wallet.getWalletHandle()
                 val commandHandle = callbackHandler.prepareCallback()
 
-                indy_get_wallet_record(
+                val callback =
+                staticCFunction() { commandHandle: Int, errorCode: UInt, walletRecordData: CPointer<ByteVar>?
+                    ->
+                    initRuntimeIfNeeded()
+                    callbackHandler.setCallbackResult(
+                        GetWalletRecordCallbackResult(
+                            commandHandle, errorCode,
+                            walletRecordData?.toKString(),
+
+                        )
+                    )
+                }
+
+                val result: indy_error_t = indy_get_wallet_record(
                     commandHandle,
                     walletHandle,
                     type,
                     id,
                     optionsJson,
-                    StringCallback.callback
+                    callback
                 )
 
-                val recordData = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
+                val recordData = callbackHandler.waitForCallbackResult(commandHandle) as GetWalletRecordCallbackResult
 
 
-                return recordData.stringResult
+                return recordData.walletRecord!!
             }
         }
 
@@ -46,9 +74,17 @@ actual class WalletRecord {
             value: String,
             tagsJson: String?
         ) {
-            println("Adding walletRecord: type=$type, id = $id, value = $value, tagsJson = $tagsJson")
 
             val commandHandle = callbackHandler.prepareCallback()
+            val callback =
+                staticCFunction() { commandHandle: Int, errorCode: UInt
+                    ->
+                    initRuntimeIfNeeded()
+                    callbackHandler.setCallbackResult(
+                        AddWalletRecordCallbackResult(
+                            commandHandle, errorCode)
+                    )
+                }
 
             val walletHandle = wallet.getWalletHandle()
 
@@ -59,7 +95,7 @@ actual class WalletRecord {
                 id,
                 value,
                 tagsJson,
-                SimpleCallback.callback
+                callback
             )
 
             callbackHandler.waitForCallbackResult(commandHandle)
@@ -73,6 +109,15 @@ actual class WalletRecord {
         ) {
             val walletHandle = wallet.getWalletHandle()
             val commandHandle = callbackHandler.prepareCallback()
+            val callback =
+                staticCFunction { commandHandle: Int, errorCode: UInt
+                    ->
+                    initRuntimeIfNeeded()
+                    callbackHandler.setCallbackResult(
+                        UpdateWalletRecordCallbackResult(
+                            commandHandle, errorCode)
+                    )
+                }
 
             indy_update_wallet_record_value(
                 commandHandle,
@@ -80,52 +125,10 @@ actual class WalletRecord {
                 type,
                 id,
                 value,
-                SimpleCallback.callback
+                callback
             )
 
             callbackHandler.waitForCallbackResult(commandHandle)
-        }
-
-        actual suspend fun updateTags(
-            wallet: Wallet,
-            type: String,
-            id: String,
-            tagsJson: String
-        ) {
-
-            val commandHandle = callbackHandler.prepareCallback()
-
-            indy_update_wallet_record_tags(
-                commandHandle,
-                wallet.getWalletHandle(),
-                type,
-                id,
-                tagsJson,
-                SimpleCallback.callback
-            )
-
-            callbackHandler.waitForCallbackResult(commandHandle)
-        }
-
-        actual suspend fun delete(
-            wallet: Wallet,
-            type: String,
-            id: String
-        ) {
-
-            val commandHandle = callbackHandler.prepareCallback()
-
-            indy_delete_wallet_record(
-                commandHandle,
-                wallet.getWalletHandle(),
-                type,
-                id,
-                SimpleCallback.callback)
-
-            callbackHandler.waitForCallbackResult(commandHandle)
-
-
-
         }
     }
 }

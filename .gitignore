@@ -2,6 +2,3 @@
 /.idea/
 /build/
 /local.properties
-/kotlin_multiplatform_agent.podspec
-/samples/swiftIosApp/Pods/
-/indylib/libindy.a

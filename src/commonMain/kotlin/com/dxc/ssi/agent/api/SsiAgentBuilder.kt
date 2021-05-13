@@ -17,7 +17,7 @@ interface SsiAgentBuilder {
     fun withIssuer(issuer: Issuer): SsiAgentBuilder
     fun withVerifier(verifier: Verifier): SsiAgentBuilder
     fun withTrustee(trustee: Trustee): SsiAgentBuilder
-    fun withWalletHolder(walletHolder: WalletHolder): SsiAgentBuilder
+    fun withWalletHolder(trustee: WalletHolder): SsiAgentBuilder
     fun withLedgerConnector(ledgerConnector: LedgerConnector): SsiAgentBuilder
     fun withConnectionInitiatorController(connectionInitiatorController: ConnectionInitiatorController): SsiAgentBuilder
     fun withConnectionResponderController(connectionResponderController: ConnectionResponderController): SsiAgentBuilder

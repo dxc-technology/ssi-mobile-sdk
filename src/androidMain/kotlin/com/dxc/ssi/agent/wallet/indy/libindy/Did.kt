@@ -8,7 +8,7 @@ actual class Did {
             wallet: Wallet,
             didJson: String
         ): CreateAndStoreMyDidResult {
-            return Did.createAndStoreMyDid(wallet.wallet, didJson).get()
+            return Did.createAndStoreMyDid(wallet, didJson).get()
         }
 
     }

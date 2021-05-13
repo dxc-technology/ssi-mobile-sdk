@@ -5,10 +5,8 @@ import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
-import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.utils.PlatformInit
 import com.dxc.ssi.agent.utils.CoroutineHelper
@@ -20,12 +18,7 @@ class SsiAgentApiImpl(
     private val ledgerConnector: LedgerConnector,
     private val callbacks: Callbacks
 ) : SsiAgentApi {
-    private val trustPingTrackerService =
-        TrustPingTrackerService(walletConnector, callbacks.connectionInitiatorController!!)
-
-    private val messageListener: MessageListener =
-        MessageListenerImpl(transport, walletConnector, ledgerConnector, trustPingTrackerService, callbacks)
-
+    private val messageListener: MessageListener = MessageListenerImpl(transport, walletConnector, callbacks)
 
     //TODO: add callback controllers here
 
@@ -37,22 +30,10 @@ class SsiAgentApiImpl(
         platformInit.init()
 
         CoroutineHelper.waitForCompletion(GlobalScope.async {
-            println("Before initializing ledgerConnector")
-            ledgerConnector.init()
-            println("After initializing ledgerConnector")
-            println("Before initializing walletConnector")
             walletConnector.walletHolder.openOrCreateWallet()
-            println("After initializing walletConnector")
-            //TODO: lloks like here we need to make ledgerCOnnector.did to be IsoSatte
-            ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
-            println("Set ledgerConnectorDid")
-
-            if (walletConnector.prover != null) {
-                walletConnector.prover!!.createMasterSecret(Configuration.masterSecretId)
-            }
         })
 
-        println("Before running listener in GlobalScope")
+
 //TODO: design proper concurrency there
         GlobalScope.launch {
             //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
@@ -60,13 +41,7 @@ class SsiAgentApiImpl(
                 messageListener.listen()
             }
         }
-//TODO: design proper concurrency there
-        GlobalScope.launch {
-            //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
-            withContext(CoroutineHelper.singleThreadCoroutineContext("Listener thread")) {
-                trustPingTrackerService.track()
-            }
-        }
+
 
     }
 

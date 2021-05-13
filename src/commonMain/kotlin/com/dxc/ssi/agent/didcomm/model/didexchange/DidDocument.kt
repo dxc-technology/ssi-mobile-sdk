@@ -1,6 +1,5 @@
 package com.dxc.ssi.agent.didcomm.model.didexchange
 
-import com.dxc.ssi.agent.didcomm.model.common.Service
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

@@ -15,8 +15,6 @@ data class Connection(
     val invitation: String,
     val isSelfInitiated: Boolean,
     val peerRecipientKeys: List<String>,
-    val peerVerkey: String? = null,
-    val peerDid: String? = null,
     val endpoint: String
 ) {
     fun toJson(): String = Json.encodeToString(this)

@@ -1,7 +1,5 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 val serializationVersion: String = "1.0.1"
 val indyVersion: String = "1.16.0"
-val jacksonVersion: String= "2.9.7"
 val ktorVersion: String = "1.5.1"
 val okhttpVersion: String = "3.5.0"
 val kotlinxCourutinesVersion = "1.4.2-native-mt"
@@ -35,7 +33,10 @@ repositories {
     maven { setUrl("https://dl.bintray.com/kotlin/kotlinx.html/") }
 }
 
+
+
 kotlin {
+
     jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "1.8"
@@ -79,6 +80,7 @@ kotlin {
         ios.deploymentTarget = "10.2"
         frameworkName = "ssi_agent"
         podfile = project.file("./samples/swiftIosApp/Podfile")
+
     }
 
     val hostOs = System.getProperty("os.name")
@@ -95,14 +97,13 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 implementation("io.ktor:ktor-utils:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
-                implementation ("co.touchlab:stately-iso-collections:1.1.4-a1")
+                implementation("co.touchlab:stately-iso-collections:1.1.4-a1")
                 //TODO: check if two stately dependencies below are needed, considering that they should be included in the dependency above
-                implementation ("co.touchlab:stately-isolate:1.1.4-a1")
-                implementation ("co.touchlab:stately-common:1.1.4")
-                implementation ("com.benasher44:uuid:$uuidVersion")
+                implementation("co.touchlab:stately-isolate:1.1.4-a1")
+                implementation("co.touchlab:stately-common:1.1.4")
+                implementation("com.benasher44:uuid:$uuidVersion")
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))
-
             }
         }
         val commonTest by getting {
@@ -119,22 +120,6 @@ kotlin {
                 }
                 implementation("net.java.dev.jna:jna:5.8.0")
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
-                //TODO: find out a way to get rid of faster xml completely as it is not usable outside of JVM
-                implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-
-                //TODO: this is temporal logging addition. Check idiomatic way to log in multiplatform env
-                implementation("org.slf4j:slf4j-api:1.7.30")
-                implementation ("org.slf4j:slf4j-log4j12:1.8.0-alpha2")
-                implementation ("log4j:log4j:1.2.17")
-
-                //implementation( "com.sun.jna:jna:3.0.9")
-
-                /*
-                implementation("ch.qos.logback:logback-classic:1.2.3")
-                implementation("ch.qos.logback:logback-core:1.2.3")
-                */
-
             }
         }
         val jvmTest by getting {
@@ -153,8 +138,6 @@ kotlin {
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
                 implementation("org.slf4j:slf4j-simple:1.7.26")
                 implementation("net.java.dev.jna:jna:5.8.0@aar")
-                implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
             }
         }
         val androidTest by getting {
@@ -166,6 +149,7 @@ kotlin {
                 implementation("androidx.test:rules:1.1.0")
             }
         }
+
         val iosMain by getting {
             dependencies {
                 implementation(files("indylib.klib"))
@@ -220,4 +204,3 @@ android {
 dependencies {
     implementation("junit:junit:$junitVersion")
 }
-
