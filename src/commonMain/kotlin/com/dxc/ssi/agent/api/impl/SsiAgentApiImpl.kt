@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.Callbacks
+import com.dxc.ssi.agent.api.Environment
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
@@ -10,15 +11,16 @@ import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.Connection
-import com.dxc.ssi.agent.utils.PlatformInit
 import com.dxc.ssi.agent.utils.CoroutineHelper
+import com.dxc.utils.EnvironmentUtils
 import kotlinx.coroutines.*
 
 class SsiAgentApiImpl(
     private val transport: Transport,
     private val walletConnector: WalletConnector,
     private val ledgerConnector: LedgerConnector,
-    private val callbacks: Callbacks
+    private val callbacks: Callbacks,
+    private val environment:Environment
 ) : SsiAgentApi {
     private val trustPingTrackerService =
         TrustPingTrackerService(walletConnector, callbacks.connectionInitiatorController!!)
@@ -33,8 +35,8 @@ class SsiAgentApiImpl(
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun init() {
 
-        val platformInit = PlatformInit()
-        platformInit.init()
+        EnvironmentUtils.initEnvironment(environment)
+
 
         CoroutineHelper.waitForCompletion(GlobalScope.async {
             println("Before initializing ledgerConnector")

@@ -14,8 +14,7 @@ actual class System {
             TODO("Not yet implemented")
         }
 
-        actual fun getIndyHomePath(): String {
-            TODO("Not yet implemented")
+        actual fun setEnv(key: String, value: String) {
         }
     }
 }

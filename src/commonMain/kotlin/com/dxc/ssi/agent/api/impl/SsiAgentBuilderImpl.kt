@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.Callbacks
+import com.dxc.ssi.agent.api.Environment
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.SsiAgentBuilder
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
@@ -17,7 +18,7 @@ import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.transport.WebSocketTransportImpl
 import com.dxc.ssi.agent.wallet.indy.*
 
-class SsiAgentBuilderImpl : SsiAgentBuilder {
+class SsiAgentBuilderImpl() : SsiAgentBuilder {
 
     private var transport: Transport? = null
     private var issuer: Issuer? = null
@@ -32,6 +33,7 @@ class SsiAgentBuilderImpl : SsiAgentBuilder {
     private var credIssuerController: CredIssuerController? = null
     private var credPresenterController: CredPresenterController? = null
     private var credVerifierController: CredVerifierController? = null
+    private var environment: Environment? = null
 
     override fun build(): SsiAgentApi {
 
@@ -54,6 +56,9 @@ class SsiAgentBuilderImpl : SsiAgentBuilder {
             trustee = IndyTrustee(walletHolder!!)
         if (prover == null)
             prover = IndyProver(walletHolder!!)
+        if(environment == null) {
+            throw IllegalArgumentException("Please pass EnvironmentImpl using withEnvironment()")
+        }
 
 
 
@@ -81,9 +86,15 @@ class SsiAgentBuilderImpl : SsiAgentBuilder {
             transport = transport!!,
             walletConnector = walletConnector,
             ledgerConnector = ledgerConnector!!,
-            callbacks = callbacks
+            callbacks = callbacks,
+            environment = environment!!
         )
 
+    }
+
+    override fun withEnvironment(environment: Environment): SsiAgentBuilder {
+        this.environment= environment
+        return this
     }
 
     override fun withTransport(transport: Transport): SsiAgentBuilder {

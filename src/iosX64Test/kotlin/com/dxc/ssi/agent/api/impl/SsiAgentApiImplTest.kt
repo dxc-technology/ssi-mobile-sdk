@@ -18,7 +18,7 @@ import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.utils.ToBeReworked
 import com.dxc.utils.Sleeper
 import kotlinx.coroutines.*
-import platform.Foundation.NSHomeDirectory
+
 
 import kotlin.test.Test
 import kotlin.test.Ignore
@@ -34,11 +34,11 @@ class SsiAgentApiImplTest {
 
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
-            ipAddress = "192.168.0.117",
-            dirForGeneratedGenesis = NSHomeDirectory()
+            ipAddress = "192.168.0.117"
         )
 
         val ssiAgentApi = SsiAgentBuilderImpl()
+            .withEnvironment(EnvironmentImpl())
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())
             .withCredPresenterController(CredPresenterControllerImpl())

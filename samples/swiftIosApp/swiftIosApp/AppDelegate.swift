@@ -23,10 +23,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisFilePath: "./docker_pool_transactions_genesis.txt",
             ipAddress: "192.168.0.117",
-            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
-            dirForGeneratedGenesis: NSHomeDirectory())
+            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip)
         
                let ssiAgentApi = SsiAgentBuilderImpl()
+                .withEnvironment(environment: EnvironmentImpl())
                 .withConnectionInitiatorController(connectionInitiatorController: cic)
                 .withCredReceiverController(credReceiverController: crc)
                 .withCredPresenterController(credPresenterController: cpc)
@@ -34,11 +34,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .build()
         
                ssiAgentApi.doInit()
-               let issuerInvitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjMyRnlCeTdhTXdaTkU2YndDeWJ0ZUxvdXhaODMyZzVXWkVrSDcydGV1akdSIl0sInJlY2lwaWVudEtleXMiOlsiSEJXTHFEVVRrSlBhbllZMlFaOHBaRG15Vm1rTmtoSnZKcXd4VWpRdzNwdHMiXSwiQGlkIjoiMTg4Y2RjYTMtNzdlMC00NWZhLWJhODEtZDIwZDdhMWQxMzE5IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+               let issuerInvitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjNwQUNXdHZMZVZBSlA1bmpGRWlmODRONlBVWEppdzZYNUNZb2VUUEZSMmNoIl0sInJlY2lwaWVudEtleXMiOlsiRUhCWk0xQXNIaVJqVmhjWkJzY2kxdlJpdVoxR2JOakJ4V1FvVjh3OG9GTDkiXSwiQGlkIjoiODAyYWNjYzUtMmVkZC00OTM0LTk0ZTItZDQ3ZmI1NjM0ZGVjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
                
                ssiAgentApi.connect(url: issuerInvitation)
         
-        let verifierInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiOHZDalN3bU12VHVFUHB6QmU3VERjRUFndzRxMnZWa2RUcmpDOEFDYnZKWXQiXSwicmVjaXBpZW50S2V5cyI6WyJRbmsyYXpMWlVLWkpTbmF4MnlaYmR3eXo5VlpDRVo5OHFocFVRNzdtUG9BIl0sIkBpZCI6IjIyNWYwNzVmLTU0MzItNDc0OS1hMGNiLWU4NjNhODZhMTZlMCIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
+        let verifierInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiQ3R4QVZUWTFSY2g0M29jYldBS3NWWk1zTXRkcG5GUXRhVHIyQWVwOXRLUWYiXSwicmVjaXBpZW50S2V5cyI6WyJCcHFRQ0doenNFSnA4alg2czI5QXBDb1h0TWVXYWFqVFdVWXVuZm55NlFBZiJdLCJAaWQiOiI3OTYxNjU1Ni04YzMwLTQ0MTctOGE1Yi02YmNiYmFhOWE3ZGMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
         
         ssiAgentApi.connect(url: verifierInvitation)
         
