@@ -4,6 +4,7 @@ import platform.Foundation.NSDate
 import platform.Foundation.timeIntervalSince1970
 import kotlinx.cinterop.toKString
 import platform.posix.getenv
+import platform.posix.setenv
 
 actual class System {
     actual companion object {
@@ -20,8 +21,8 @@ actual class System {
             return getEnv(key)
         }
 
-        actual fun getIndyHomePath(): String {
-            return "${EnvironmentUtils.userHomePath}/Documents/.indy_client"
+        actual fun setEnv(key: String, value: String) {
+            setenv(key, value, 1)
         }
     }
 }
