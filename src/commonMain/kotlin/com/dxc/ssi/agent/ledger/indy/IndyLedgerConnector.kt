@@ -12,7 +12,6 @@ import com.dxc.ssi.agent.ledger.indy.libindy.Ledger
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
 import com.dxc.ssi.agent.wallet.indy.ObjectHolder
-import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
 import com.dxc.ssi.agent.wallet.indy.model.issue.IndyCredentialDefinition
 import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefinitionId
 import com.dxc.ssi.agent.wallet.indy.model.verify.IndySchema
