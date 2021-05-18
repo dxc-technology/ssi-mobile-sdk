@@ -45,11 +45,10 @@ class SsiAgentApiImplTest {
         println("Starting test")
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
-            ipAddress = "192.168.0.117",
-            dirForGeneratedGenesis = instrumentation.context.filesDir.absolutePath
-        )
+            ipAddress = "192.168.0.117")
 
         val ssiAgentApi = SsiAgentBuilderImpl()
+            .withEnvironment(EnvironmentImpl(instrumentation.context))
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())
             .withCredPresenterController(CredPresenterControllerImpl())
@@ -60,10 +59,10 @@ class SsiAgentApiImplTest {
 
 
         val issuerInvitationUrl =
-            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjRWMVp1Q1N2VEpDRW01WHY4NmRiaVMzbURKZ0Z6V1RSb2N0QXJlQUVHRTFCIl0sInJlY2lwaWVudEtleXMiOlsiOWdzeUtGZW92Q2c2ZHZXMVhpek5GcmN0S1Z4N3FrV2dpZzZ3V3lmZlVobnAiXSwiQGlkIjoiYzYzYWI3OGQtNzE5NS00Yjg0LTg1YTUtNjI3NDZlYzc4MDNlIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkoxRVZQUVg0VzkyRjN0ajhUQVkzSEJGV3Myem85M29uVTliMWZ6OExiSzRhIl0sInJlY2lwaWVudEtleXMiOlsiNDZGdFlaVGRxajIyelNXYlR1WXd3R3U1dkJSWFl5UXR6TEsyUXdiQ2thZUsiXSwiQGlkIjoiZmVlMWIyNzUtNjQ0Ni00YjRlLWEwZjEtZDEyNDI0NzY3ZDYzIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
         val verifierInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiNTVjUjhaaUxSNFJKdVRCZ1NDc2VEVUtlMUE5Nzd0QW9yRXlERXhnNm5GTFgiXSwicmVjaXBpZW50S2V5cyI6WyI3SmM5WFZNbUpNTERTYmFkYkxwNVdQQXVoQmkxRlBEcUh3WVFKRmRwUDFOZSJdLCJAaWQiOiI2N2Y0NjYyNC01ZGM0LTRkYzQtYWRlZS1lZThhYjMzYTc3NmMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRndORkdDOU1YdTNrOXhleFhQaDNOcHZaMkx3VVl2eDU2YnRzd0Z2MU0xc3MiXSwicmVjaXBpZW50S2V5cyI6WyJBc1BLNzZiMW1lWXVqWmI4aHhLdTV6RjlzamlIVE5Sa2tuakFSNnY3WmhFWSJdLCJAaWQiOiI0ZmQzYTBiZi1kZjNjLTQ1MTMtYTljMC05M2JkNmVjMmNlZDkiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
         println("Connecting to issuer")
         ssiAgentApi.connect(issuerInvitationUrl)

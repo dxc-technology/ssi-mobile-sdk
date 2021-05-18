@@ -1,27 +1,31 @@
 package com.dxc.utils
 
+import co.touchlab.stately.isolate.IsolateState
+import com.dxc.ssi.agent.api.Environment
+import com.dxc.ssi.agent.wallet.indy.ObjectHolder
 
-//TODO: think if this object can be moved to common layer
+
+//TODO: Merge with PlatformInit
 internal object EnvironmentUtils {
-    val testPoolIP: String
-        get() {
-            val testPoolIp = System.getEnv("TEST_POOL_IP")
-            return testPoolIp ?: "127.0.0.1"
+
+    private val isoIndyHomePath = IsolateState { ObjectHolder<String>() }
+    private val isoWritableUserHomePath = IsolateState { ObjectHolder<String>() }
+
+    var indyHomePath: String
+        get() = isoIndyHomePath.access { it.obj }!!
+        set(value) {
+            isoIndyHomePath.access { it.obj = value }
         }
 
-    internal val userHomePath: String get() = System.getProperty("INDY_HOME") ?: System.getEnv("HOME")!!
+    var writableUserHomePath: String
+        get() = isoWritableUserHomePath.access { it.obj }!!
+        set(value) {
+            isoWritableUserHomePath.access { it.obj = value }
+        }
 
-    fun getIndyHomePath(): String {
-        return System.getIndyHomePath()
-    }
+    fun getIndyPoolPath(poolName: String) = indyHomePath + "/pool/$poolName"
 
-    fun getIndyPoolPath(poolName: String) = getIndyHomePath() + "/pool/$poolName"
-
-    fun getIndyWalletPath(walletName: String) = getIndyHomePath() + "/wallet/$walletName"
-
-    fun getIndyHomePath(filename: String): String {
-        return "${getIndyHomePath()}/$filename"
-    }
+    fun getIndyWalletPath(walletName: String) = indyHomePath + "/wallet/$walletName"
 
     internal fun getTmpPath(): String {
         return System.getProperty("INDY_TMP") ?: System.getProperty("java.io.tmpdir") + "/indy"
@@ -31,5 +35,9 @@ internal object EnvironmentUtils {
         return "${getTmpPath()}/$filename"
     }
 
-
+    fun initEnvironment(environment: Environment) {
+        writableUserHomePath = environment.getWritableFolderInUserHome()
+        indyHomePath = "$writableUserHomePath/.indy_client"
+        System.setEnv("INDY_HOME", indyHomePath)
+    }
 }

@@ -12,6 +12,7 @@ import com.dxc.ssi.agent.api.pluggable.wallet.*
 
 interface SsiAgentBuilder {
     fun build(): SsiAgentApi
+    fun withEnvironment(environment: Environment): SsiAgentBuilder
     fun withTransport(transport: Transport): SsiAgentBuilder
     fun withProver(prover: Prover): SsiAgentBuilder
     fun withIssuer(issuer: Issuer): SsiAgentBuilder
