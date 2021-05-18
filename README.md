@@ -8,12 +8,13 @@ protocol Currently work is in progress and there are a lot of TODOs in the code.
 Kotlin Multiplatform Agent is a multiplatform library which implements functionality of SSI Agent and intended to be
 compatible with https://github.com/hyperledger/aries-rfcs
 
-Currently it supports following platforms
+Currently it supports following platforms and if necessary can be extended to other platforms.
 
 - JVM -> jar
 - Android -> aar
-- iOS -> cocoapod and if necessary can be extended to other platforms.
-  See https://kotlinlang.org/docs/multiplatform.html for details on how this multiplatform technology works.
+- iOS -> cocoapod 
+
+See https://kotlinlang.org/docs/multiplatform.html for details on how this multiplatform technology works.
 
 A new Kotlin Multiplatform Agent to use with Self Sovereign Identity (SSI) applications is available as an open-source
 project from Luxoft DXC. The SSI Kotlin Multiplatform Agent provides libraries and tools to accelerate integration of
@@ -53,7 +54,7 @@ Diagram below present high-level view on components.
 - **Indy Ledger and Wallet** - Indy Implementation of Ledger and Wallet
 
 <img src="docs/ComponentDiagram.png" alt="docs/ComponentDiagram.png" style="zoom:50%;" />
-<img src="docs/ClassDiagram.png.png" alt="docs/ClassDiagram.png.png" style="zoom:50%;" />
+<img src="docs/ClassDiagram.png" alt="docs/ClassDiagram.png" style="zoom:50%;" />
 
 # Usage
 
