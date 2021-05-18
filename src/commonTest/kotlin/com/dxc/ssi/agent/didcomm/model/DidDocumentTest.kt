@@ -3,7 +3,7 @@ package com.dxc.ssi.agent.didcomm.model
 import com.dxc.ssi.agent.didcomm.model.didexchange.Authentication
 import com.dxc.ssi.agent.didcomm.model.didexchange.DidDocument
 import com.dxc.ssi.agent.didcomm.model.didexchange.PublicKey
-import com.dxc.ssi.agent.didcomm.model.didexchange.Service
+import com.dxc.ssi.agent.didcomm.model.common.Service
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

@@ -8,6 +8,7 @@ import com.dxc.ssi.agent.model.messages.Message
  * Represents basic entity which has a wallet
  */
 interface WalletHolder {
+
     /**
      * Creates temporary did which can be used by identity to perform some any operations
      *
@@ -62,11 +63,26 @@ interface WalletHolder {
     suspend fun getConnectionRecordById(connectionId: String): Connection?
 
     /**
-     * Gets connection record from wallet by id
+     * Find connection record in a wallet by verkey
+     *
+     * @return Connection object
+     */
+    suspend fun findConnectionByVerKey(verKey: String): Connection?
+
+    /**
+     * Opens or creates wallet
      *
      * @return Connection object
      */
     suspend fun openOrCreateWallet()
+
+    /**
+     * Gets open wallet
+     *
+     * @return Any containing wallet
+     */
+    //TODO: rewrite this to return Wallet object instead of Any
+    fun getWallet(): Any
 
     /**
      * Packs message

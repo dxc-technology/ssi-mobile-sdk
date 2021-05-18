@@ -1,6 +1,6 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 val serializationVersion: String = "1.0.1"
 val indyVersion: String = "1.16.0"
+val jacksonVersion: String= "2.9.7"
 val ktorVersion: String = "1.5.1"
 val okhttpVersion: String = "3.5.0"
 val kotlinxCourutinesVersion = "1.4.2-native-mt"
@@ -48,10 +48,26 @@ kotlin {
         publishLibraryVariantsGroupedByFlavor = true // This line
     }
 
-    ios {  // Replace with a target you need.
-        compilations.getByName("main") {
-            val indylib by cinterops.creating {
-                defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+    if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true) {
+        iosArm64("ios") {
+            println("iosArm64")
+            compilations.getByName("main") {
+                val indylib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+                    extraOpts("-libraryPath", "$projectDir/indylib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+                }
+            }
+        }
+    } else {
+        iosX64("ios") {
+            println("iosX64")
+            compilations.getByName("main") {
+                val indylib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+                    extraOpts("-libraryPath", "$projectDir/indylib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+                }
             }
         }
     }
@@ -85,7 +101,6 @@ kotlin {
                 implementation ("com.benasher44:uuid:$uuidVersion")
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))
-
             }
         }
         val commonTest by getting {
@@ -102,6 +117,21 @@ kotlin {
                 }
                 implementation("net.java.dev.jna:jna:5.8.0")
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
+                //TODO: find out a way to get rid of faster xml completely as it is not usable outside of JVM
+                implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+
+                //TODO: this is temporal logging addition. Check idiomatic way to log in multiplatform env
+                implementation("org.slf4j:slf4j-api:1.7.30")
+                implementation ("org.slf4j:slf4j-log4j12:1.8.0-alpha2")
+                implementation ("log4j:log4j:1.2.17")
+
+                //implementation( "com.sun.jna:jna:3.0.9")
+
+                /*
+                implementation("ch.qos.logback:logback-classic:1.2.3")
+                implementation("ch.qos.logback:logback-core:1.2.3")
+                */
 
             }
         }
@@ -121,8 +151,8 @@ kotlin {
                 implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
                 implementation("org.slf4j:slf4j-simple:1.7.26")
                 implementation("net.java.dev.jna:jna:5.8.0@aar")
-
-
+                implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+                implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
             }
         }
         val androidTest by getting {
@@ -188,18 +218,3 @@ android {
 dependencies {
     implementation("junit:junit:$junitVersion")
 }
-/*
-val packForXcode by tasks.creating(Sync::class) {
-    group = "build"
-    val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
-    val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
-    val targetName = "ios" + if (sdkName.startsWith("iphoneos")) "Arm64" else "X64"
-    val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
-    inputs.property("mode", mode)
-    dependsOn(framework.linkTask)
-    val targetDir = File(buildDir, "KotlinShared")
-    from({ framework.outputDirectory })
-    into(targetDir)
-}
-tasks.getByName("build").dependsOn(packForXcode)
-*/
