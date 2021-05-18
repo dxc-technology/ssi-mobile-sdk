@@ -2,7 +2,6 @@ package com.dxc.ssi.agent.transport
 
 import co.touchlab.stately.freeze
 import co.touchlab.stately.isolate.IsolateState
-import kotlinx.coroutines.runBlocking
 import platform.Foundation.*
 import platform.darwin.NSObject
 import kotlin.native.concurrent.isFrozen
