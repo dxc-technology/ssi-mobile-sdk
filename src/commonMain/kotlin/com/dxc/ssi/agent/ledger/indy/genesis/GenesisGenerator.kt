@@ -10,7 +10,7 @@ class GenesisGenerator(val indyPoolIp: String, val dir: String) {
         val genesisContent = buildStandardIndyPoolGenesis(indyPoolIp)
 
         println("Generated genesys: $genesisContent")
-        val filePath = "$dir/Documents/$filename"
+        val filePath = "$dir/$filename"
         if(FileUtils.fileExists(filePath)) {
             FileUtils.deleteRecursively(filePath)
         }
