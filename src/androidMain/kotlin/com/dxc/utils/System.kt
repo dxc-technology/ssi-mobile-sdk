@@ -1,5 +1,6 @@
 package com.dxc.utils
 
+import android.system.Os
 import java.lang.System
 
 
@@ -17,8 +18,12 @@ actual class System {
             return System.getProperty(key)
         }
 
-        actual fun getIndyHomePath(): String {
-            return "${EnvironmentUtils.userHomePath}/.indy_client"
+        actual fun setEnv(key: String, value: String) {
+            //Libcore.
+            Os.setenv(key, value, true)
+            //Libcore.os.setenv("VAR", "value", bOverwrite);
+            //System.setProperty(key, value)
+
         }
     }
 }

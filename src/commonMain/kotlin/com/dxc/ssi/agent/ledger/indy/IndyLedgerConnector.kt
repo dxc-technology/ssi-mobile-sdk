@@ -12,12 +12,12 @@ import com.dxc.ssi.agent.ledger.indy.libindy.Ledger
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
 import com.dxc.ssi.agent.wallet.indy.ObjectHolder
-import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
 import com.dxc.ssi.agent.wallet.indy.model.issue.IndyCredentialDefinition
 import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefinitionId
 import com.dxc.ssi.agent.wallet.indy.model.verify.IndySchema
 import com.dxc.ssi.agent.wallet.indy.model.verify.Interval
 import com.dxc.ssi.agent.wallet.indy.model.verify.RevocationRegistryEntry
+import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
 import kotlinx.serialization.decodeFromString
 
@@ -34,16 +34,12 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
 
     override suspend fun init() {
         //TODO: think where to store and initialize pool variable
-
-
         val pool =
             if (indyLedgerConnectorConfiguration.genesisMode == IndyLedgerConnectorConfiguration.GenesisMode.FILE) {
                 PoolHelper.openOrCreateFromFilename(indyLedgerConnectorConfiguration.genesisFilePath)
             } else {
                 PoolHelper.openOrCreateFromIp(
-                    indyLedgerConnectorConfiguration.ipAddress,
-                    indyLedgerConnectorConfiguration.dirForGeneratedGenesis
-                )
+                    indyLedgerConnectorConfiguration.ipAddress, EnvironmentUtils.writableUserHomePath )
             }
 
         isoPool.access { it.obj = pool }

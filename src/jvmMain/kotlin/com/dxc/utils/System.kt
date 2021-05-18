@@ -17,8 +17,8 @@ actual class System {
             return System.getProperty(key)
         }
 
-        actual fun getIndyHomePath(): String {
-            return "${EnvironmentUtils.userHomePath}/.indy_client"
+        actual fun setEnv(key: String, value: String) {
+            System.setProperty(key, value)
         }
     }
 }
