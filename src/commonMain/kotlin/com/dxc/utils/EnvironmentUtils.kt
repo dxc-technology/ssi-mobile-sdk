@@ -4,8 +4,6 @@ import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.api.Environment
 import com.dxc.ssi.agent.wallet.indy.ObjectHolder
 
-
-//TODO: Merge with PlatformInit
 internal object EnvironmentUtils {
 
     private val isoIndyHomePath = IsolateState { ObjectHolder<String>() }

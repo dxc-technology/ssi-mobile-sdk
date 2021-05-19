@@ -71,16 +71,6 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
             walletHolder.getWallet() as Wallet, proverDid, credentialOfferJson, credDefJson, masterSecretId
         )
 
-        //TODO: see if we need to leave it here for kind of validation purposes...
-        //val indyCredentialRequest = SerializationUtils.jSONToAny<CredentialRequest>(credReq.credentialRequestJson)
-
-        //TODO: see if we need to return this metadata at all
-        /*  val credentialRequestMetadata =
-            SerializationUtils.jSONToAny<CredentialRequestMetadata>(credReq.credentialRequestMetadataJson)
-            */
-
-        //indyCredentialRequest
-
         println("credReq.credentialRequestJson = ${credReq.getCredentialRequestJson()}")
         println("credReq.credentialRequestMetadataJson = ${credReq.getCredentialRequestMetadataJson()}")
 
