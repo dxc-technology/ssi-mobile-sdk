@@ -2,10 +2,14 @@ package com.dxc.ssi.agent.api.impl
 
 import com.dxc.utils.Sleeper
 import kotlinx.coroutines.*
+import platform.posix.sleep
 import kotlin.test.Test
 import kotlin.test.Ignore
 
 class ConcurrencyTest {
+
+    private var job = Job()
+    private val agentScope = CoroutineScope(Dispatchers.Default + job)
 
     @Test
     @Ignore
@@ -13,7 +17,7 @@ class ConcurrencyTest {
 
         runBlocking {
 
-            GlobalScope.async {
+            agentScope.async {
                 println("starting test")
                 async { listenForMessages() }
                 async { listenForFailures() }
@@ -23,6 +27,44 @@ class ConcurrencyTest {
         }
 
 
+    }
+
+    @Test
+    @Ignore
+    fun testCustomCoroutineScope() {
+        println("Test started")
+
+
+        val async = agentScope.async {
+            println("executing agentScope.async")
+        }
+
+        println("Waiting for async result")
+        runBlocking {
+            async.await()
+        }
+        println("Got async result")
+
+        sleep(1000)
+    }
+
+    @Test
+    @Ignore
+    fun testGlobalScope() {
+        println("Test started")
+
+
+        val async = GlobalScope.async {
+            println("executing agentScope.async")
+        }
+
+        println("Waiting for async result")
+        runBlocking {
+            async.await()
+        }
+        println("Got async result")
+
+        sleep(1000)
     }
 
 

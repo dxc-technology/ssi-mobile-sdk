@@ -34,15 +34,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .build()
         
                ssiAgentApi.doInit()
-               let issuerInvitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjNwQUNXdHZMZVZBSlA1bmpGRWlmODRONlBVWEppdzZYNUNZb2VUUEZSMmNoIl0sInJlY2lwaWVudEtleXMiOlsiRUhCWk0xQXNIaVJqVmhjWkJzY2kxdlJpdVoxR2JOakJ4V1FvVjh3OG9GTDkiXSwiQGlkIjoiODAyYWNjYzUtMmVkZC00OTM0LTk0ZTItZDQ3ZmI1NjM0ZGVjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+               let issuerInvitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkZRS1BtVnVOZzJLc1hGWFg3NHJKa1U4NkpzTVVqeno2QlJmalhjWWlFUG9yIl0sInJlY2lwaWVudEtleXMiOlsiOW5qb0pIWFFmVDllWjFRYjRtdnc0WmpTUnZFVWM5Z2ZydHlGUm84dEJnVHIiXSwiQGlkIjoiYjZkMTJmNzAtZTU0ZC00NzZiLTkwN2YtNmE2YzQ3ZGFiYzgzIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
                
                ssiAgentApi.connect(url: issuerInvitation)
         
-        let verifierInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiQ3R4QVZUWTFSY2g0M29jYldBS3NWWk1zTXRkcG5GUXRhVHIyQWVwOXRLUWYiXSwicmVjaXBpZW50S2V5cyI6WyJCcHFRQ0doenNFSnA4alg2czI5QXBDb1h0TWVXYWFqVFdVWXVuZm55NlFBZiJdLCJAaWQiOiI3OTYxNjU1Ni04YzMwLTQ0MTctOGE1Yi02YmNiYmFhOWE3ZGMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+        let verifierInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiOGhGaW1UM0QxQUdHVnpNTXZMVEdQQlFVNGpZQVg3THYzTkZGa3B4V2hYa0ciXSwicmVjaXBpZW50S2V5cyI6WyJEcGNLMkFUQVJ6R3pWRGdYZUhTdUVhbnU2UTE0MnQ1b01GckE4UTFwRmZtWiJdLCJAaWQiOiJlMzY0ZjAyMi02NTZhLTQ3MTgtOTExNy04ODA1NDIyYTg3YTYiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
         
         ssiAgentApi.connect(url: verifierInvitation)
         
-               sleep(10000)
+               sleep(180)
+        ssiAgentApi.shutdown(force: true)
         // Override point for customization after application launch.
         return true
     }

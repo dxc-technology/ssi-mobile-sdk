@@ -36,7 +36,7 @@ class CredVerifierProcessorImpl(
             { actionParams -> ReceivePresentationRequestAction(actionParams) }),
         PRESENTATION("^.*present-proof/1.0/presentation$", { actionParams -> kotlin.TODO("Not implemented") }),
         PRESENTATION_PROPOSAL("^.*present-proof/1.0/propose-presentation$",
-            { actionParams -> kotlin.TODO("Not implemented") }),
+            { actionParams -> TODO("Not implemented") }),
         PROBLEM_REPORT("to be done", { actionParams -> kotlin.TODO("Not implemented") }),
         PRESENTATION_ACK("to be done", { actionParams -> kotlin.TODO("Not implemented") });
 

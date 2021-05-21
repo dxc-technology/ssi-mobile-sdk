@@ -22,6 +22,10 @@ class SsiAgentApiImpl(
     private val callbacks: Callbacks,
     private val environment:Environment
 ) : SsiAgentApi {
+
+    private var job = Job()
+    private val agentScope = CoroutineScope(Dispatchers.Default + job)
+
     private val trustPingTrackerService =
         TrustPingTrackerService(walletConnector, callbacks.connectionInitiatorController!!)
 
@@ -33,8 +37,8 @@ class SsiAgentApiImpl(
 
         EnvironmentUtils.initEnvironment(environment)
 
-
-        CoroutineHelper.waitForCompletion(GlobalScope.async {
+        println("Before running agentScope.async")
+        CoroutineHelper.waitForCompletion(agentScope.async {
             println("Before initializing ledgerConnector")
             ledgerConnector.init()
             println("After initializing ledgerConnector")
@@ -49,16 +53,14 @@ class SsiAgentApiImpl(
             }
         })
 
-        println("Before running listener in GlobalScope")
-//TODO: design proper concurrency there,  think if GlobalScope is appropriate here or some custom job should be used
-        GlobalScope.launch {
+        agentScope.launch {
             //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
             withContext(CoroutineHelper.singleThreadCoroutineContext("Listener thread")) {
                 messageListener.listen()
             }
         }
-//TODO: design proper concurrency there
-        GlobalScope.launch {
+
+        agentScope.launch {
             //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
             withContext(CoroutineHelper.singleThreadCoroutineContext("Listener thread")) {
                 trustPingTrackerService.track()
@@ -69,7 +71,7 @@ class SsiAgentApiImpl(
 
     override fun connect(url: String): Connection {
         return CoroutineHelper.waitForCompletion(
-            GlobalScope.async {
+            agentScope.async {
                 messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
             })
     }
@@ -81,7 +83,7 @@ class SsiAgentApiImpl(
     //TODO: current function is synchronous with hardcoded timeout, generalize it
     override fun sendTrustPing(connection: Connection): Boolean {
         return CoroutineHelper.waitForCompletion(
-            GlobalScope.async {
+            agentScope.async {
                 messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
             })
     }
@@ -103,7 +105,9 @@ class SsiAgentApiImpl(
     }
 
     override fun shutdown(force: Boolean) {
-        TODO("Not yet implemented")
+        //TODO: make some intelligence and control cancellation behaviour. Make cancellation graceful and controllable. Understand what force parameter would mean
+        job.cancel()
+        println("Stopped the agent")
     }
 
     override fun getConnections(): Set<Connection> {
