@@ -218,3 +218,8 @@ android {
 dependencies {
     implementation("junit:junit:$junitVersion")
 }
+
+tasks.register<Copy>("copy") {
+    from(layout.buildDirectory.dir("$projectDir/build/classes/kotlin/ios/main/kotlin-multiplatform-agent-cinterop-indylib.klib"))
+    into(layout.buildDirectory.dir("$projectDir/samples/swiftIosApp/Pods"))
+}
