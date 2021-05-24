@@ -13,6 +13,7 @@ import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.utils.EnvironmentUtils
+import com.dxc.utils.Sleeper
 import kotlinx.coroutines.*
 
 class SsiAgentApiImpl(
@@ -20,11 +21,13 @@ class SsiAgentApiImpl(
     private val walletConnector: WalletConnector,
     private val ledgerConnector: LedgerConnector,
     private val callbacks: Callbacks,
-    private val environment:Environment
+    private val environment: Environment
 ) : SsiAgentApi {
 
     private var job = Job()
     private val agentScope = CoroutineScope(Dispatchers.Default + job)
+    private val mainListenerSingleThreadDispatcher = newSingleThreadContext("Main Listener Thread")
+    private val trustPingListenerSingleThreadDispatcher = newSingleThreadContext("TrustPing Listener Thread")
 
     private val trustPingTrackerService =
         TrustPingTrackerService(walletConnector, callbacks.connectionInitiatorController!!)
@@ -54,24 +57,23 @@ class SsiAgentApiImpl(
         })
 
         agentScope.launch {
-            //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
-            withContext(CoroutineHelper.singleThreadCoroutineContext("Listener thread")) {
+            withContext(mainListenerSingleThreadDispatcher) {
                 messageListener.listen()
             }
         }
 
         agentScope.launch {
-            //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
-            withContext(CoroutineHelper.singleThreadCoroutineContext("Listener thread")) {
+            withContext(trustPingListenerSingleThreadDispatcher) {
                 trustPingTrackerService.track()
             }
         }
-
     }
 
     override fun connect(url: String): Connection {
+        println("Entered connect function")
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
+                println("Entered async connection initiation")
                 messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
             })
     }
@@ -104,9 +106,12 @@ class SsiAgentApiImpl(
         TODO("Not yet implemented")
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun shutdown(force: Boolean) {
         //TODO: make some intelligence and control cancellation behaviour. Make cancellation graceful and controllable. Understand what force parameter would mean
         job.cancel()
+        mainListenerSingleThreadDispatcher.close()
+        trustPingListenerSingleThreadDispatcher.close()
         println("Stopped the agent")
     }
 

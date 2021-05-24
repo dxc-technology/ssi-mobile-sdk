@@ -74,7 +74,9 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
 
     private suspend fun listenForMessages() {
         println("IN listenForMessages function")
-
+//TODO: need to chnage this and all occurences of Dispatchers.Default, it seems on native it is using very limited number of threads and if threads are blocked by some IO they are quickly become exhaustive
+        //TODO: should we use singleThreadPool for each opened websocket?
+        //TODO: looks like we need to implement our own Pool based on singleThreadContext
         //TODO: check that is is working as expected. I presume that once job is completed on socket disconnect them this coroutine willbe cancelled
         CoroutineScope(Dispatchers.Default + job).async {
             val receivedMessage = socketListenerAdapter.socketReceivedMessageChannel.receive()
