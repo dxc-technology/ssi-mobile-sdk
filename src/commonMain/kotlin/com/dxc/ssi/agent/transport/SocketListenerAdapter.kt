@@ -22,7 +22,7 @@ class SocketListenerAdapter(
     }
 
     fun onFailure(throwable: Throwable) {
-        println("Encountered socket error")
+        println("Encountered socket error: $throwable")
         CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketFailureChannel.send(throwable) })
     }
 

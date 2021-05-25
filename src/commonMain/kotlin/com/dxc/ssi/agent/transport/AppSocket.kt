@@ -2,6 +2,7 @@ package com.dxc.ssi.agent.transport
 
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import co.touchlab.stately.collections.IsoMutableList
+import com.dxc.utils.System
 import kotlinx.coroutines.*
 
 //Common
@@ -44,7 +45,7 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
         listenForFailures()
 
         ws.openSocket(socketListenerAdapter)
-        println("awaiting while websocket is opened")
+        println("Thread = ${System.getCurrentThread()} awaiting while websocket is opened")
 
         socketListenerAdapter.socketOpenedChannel.receive()
         socketListener.onOpen()
@@ -114,7 +115,7 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
 
     private val socketListener: PlatformSocketListener = object : PlatformSocketListener {
         override fun onOpen() {
-            println("Opened socket")
+            println("${System.getCurrentThread()} - Opened socket")
 
 
             currentState = State.CONNECTED
@@ -127,7 +128,7 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
         }
 
         override fun onMessage(msg: String) {
-            println("Received message: $msg")
+            println("${System.getCurrentThread()} - Received message: $msg")
             incomingMessagesQueue.add(MessageEnvelop(msg))
 
         }

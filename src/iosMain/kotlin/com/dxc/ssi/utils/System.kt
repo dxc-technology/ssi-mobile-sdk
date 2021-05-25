@@ -1,8 +1,10 @@
 package com.dxc.utils
 
+
 import platform.Foundation.NSDate
 import platform.Foundation.timeIntervalSince1970
 import kotlinx.cinterop.toKString
+import platform.Foundation.NSThread
 import platform.posix.getenv
 import platform.posix.setenv
 
@@ -23,6 +25,10 @@ actual class System {
 
         actual fun setEnv(key: String, value: String) {
             setenv(key, value, 1)
+        }
+
+        actual fun getCurrentThread(): String {
+           return  NSThread.currentThread.toString()
         }
     }
 }
