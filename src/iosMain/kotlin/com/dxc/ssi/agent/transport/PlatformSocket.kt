@@ -67,8 +67,10 @@ internal actual class PlatformSocket actual constructor(url: String) {
     }
 
     private fun listenMessages(socketListenerAdapter: SocketListenerAdapter) {
-        isolatedWebSocket.access {
+        println("PlatformSocket: in listenMessages")
 
+        isolatedWebSocket.access {
+            println("PlatformSocket: accessed isolatedWebsocket")
 
             val receiverHandler = { message: NSURLSessionWebSocketMessage?, nsError: NSError? ->
                 when {
@@ -78,7 +80,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
                     }
                     message != null -> {
                         message.string?.let {
-
+                            println("PlatformSocket: received text message $it")
                             socketListenerAdapter.onMessageReceived(it)
                         }
                     }
@@ -87,7 +89,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
             }
 
 
-
+            println("PlatformSocket: constructed receiverHandler")
             it.websocket?.receiveMessageWithCompletionHandler(receiverHandler.freeze())
         }
     }

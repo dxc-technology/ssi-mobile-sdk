@@ -60,7 +60,7 @@ class WebSocketTransportImpl : Transport {
 
         if (appSocketsMap[endpoint] != null) {
             println("${System.getCurrentThread()} - appSockets contains such socket")
-            appSocketsMapLock.lock()
+            appSocketsMapLock.unlock()
             return appSocketsMap[endpoint]!!
         }
 
@@ -99,8 +99,10 @@ class WebSocketTransportImpl : Transport {
     override suspend fun receiveNextMessage(): MessageEnvelop {
         //TODO: ensure that all suspend functions are not blocking. For that use withContext block in the begininng of each suspend fun
 
+        println("Transport: incomingMessagesQueue.size = ${incomingMessagesQueue.size}")
         while (incomingMessagesQueue.size == 0) {
             // Sleeper().sleep(1000)
+            println("Transport: incomingMessagesQueue.size = ${incomingMessagesQueue.size}")
             delay(1000)
         }
 

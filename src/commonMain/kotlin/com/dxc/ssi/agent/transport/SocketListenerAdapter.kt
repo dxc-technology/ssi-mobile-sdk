@@ -17,8 +17,11 @@ class SocketListenerAdapter(
     }
 
     fun onMessageReceived(message: String) {
-        println("received message: $message")
-        CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketReceivedMessageChannel.send(message) })
+        println("SocketListenerAdapter: received message: $message")
+        CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+            println("SocketListenerAdapter: entered async coroutine to send message: $message")
+            socketReceivedMessageChannel.send(message) })
+        println("SocketListenerAdapter: sent message to internal channel: $message")
     }
 
     fun onFailure(throwable: Throwable) {
