@@ -237,3 +237,11 @@ tasks.register<Exec>("archiveXCF") {
     workingDir("$projectDir/samples/swiftIosApp")
     commandLine("xcodebuild","-create-xcframework -framework archives/ios_devices.xcarchive/Products/Library/Frameworks/MyFramework.framework -framework archives/ios_simulators.xcarchive/Products/Library/Frameworks/MyFramework.framework -output build/MyFramework.xcframework")
 }
+
+tasks.register<Exec>("Pod") {
+    workingDir("$projectDir/samples/swiftIosApp/Pods")
+    commandLine("pwd")
+    commandLine("xcodebuild","-list")
+    commandLine("xcodebuild","-scheme","libzmq-pw")
+    commandLine("xcodebuild","-scheme","libsodium")
+}
