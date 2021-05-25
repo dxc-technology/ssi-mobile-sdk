@@ -1,20 +1,18 @@
 package com.dxc.ssi.agent.transport
 
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
-import co.touchlab.stately.collections.IsoMutableList
 import com.dxc.utils.System
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 
 //Common
 
-class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelop>) {
+class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
     private val ws = PlatformSocket(url)
     private val job: CompletableJob = Job()
 
     private val socketListenerAdapter = SocketListenerAdapter()
 
-
-    // private val isolatedWs = IsolateState {}
 
     var socketError: Throwable? = null
         private set
@@ -129,11 +127,9 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
             println("Socket failure: $t \n ${t.stackTraceToString()}")
         }
 
-        override fun onMessage(msg: String) {
+        override suspend fun onMessage(msg: String) {
             println("${System.getCurrentThread()} - Received message: $msg")
-            //TODO: ensure if addition of message in the "queue" is threadsafe
-            incomingMessagesQueue.add(MessageEnvelop(msg))
-
+            incomingMessagesChannel.send(MessageEnvelop(msg))
         }
 
         override fun onClosing(code: Int, reason: String) {

@@ -9,19 +9,15 @@ import co.touchlab.stately.collections.sharedMutableMapOf
 import co.touchlab.stately.collections.sharedMutableListOf
 import co.touchlab.stately.concurrency.Lock
 import com.dxc.utils.System
+import kotlinx.coroutines.channels.Channel
 
 
 //TODO: handle closing websocket correctly
 //TODO: cleanup websockets cache with time to avoid memory leak
 class WebSocketTransportImpl : Transport {
+    private val incomingMessagesChannel: Channel<MessageEnvelop> = Channel()
 
-
-    //TODO: temporarily using it instead of queue. Need to understand how to use queues/channels?
-    //TODO: understand how will it work with concurrency
-    private val incomingMessagesQueue = sharedMutableListOf<MessageEnvelop>()
     //TODO: deal with proper closing of sockets
-    //private val appSocketsMap = mutableMapOf<String, AppSocket>()
-
     private val appSocketsMap = sharedMutableMapOf<String, AppSocket>()
     private val appSocketsMapLock = Lock()
 
@@ -47,7 +43,7 @@ class WebSocketTransportImpl : Transport {
     }
 
     private suspend fun openConnection(endpoint: String): AppSocket {
-        val appSocket = AppSocket(endpoint, incomingMessagesQueue)
+        val appSocket = AppSocket(endpoint, incomingMessagesChannel)
         appSocket.connect()
 
         return appSocket
@@ -94,25 +90,9 @@ class WebSocketTransportImpl : Transport {
         return Regex("^.*:\\/\\/(.*):.*$").find(endpoint)!!.groups[1]!!.value
     }
 
-
-    //TODO: decide if we need to leave this call blocking
     override suspend fun receiveNextMessage(): MessageEnvelop {
         //TODO: ensure that all suspend functions are not blocking. For that use withContext block in the begininng of each suspend fun
-
-        println("Transport: incomingMessagesQueue.size = ${incomingMessagesQueue.size}")
-        while (incomingMessagesQueue.size == 0) {
-            // Sleeper().sleep(1000)
-            println("Transport: incomingMessagesQueue.size = ${incomingMessagesQueue.size}")
-            delay(1000)
-        }
-
-        val message = incomingMessagesQueue[0]
-        incomingMessagesQueue.removeAt(0)
-
-        println("Received message $message")
-
-        return message
-
+        return incomingMessagesChannel.receive()
     }
 
 }
