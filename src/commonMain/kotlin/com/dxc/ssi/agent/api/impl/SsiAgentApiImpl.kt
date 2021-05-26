@@ -13,7 +13,6 @@ import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.utils.EnvironmentUtils
-import com.dxc.utils.Sleeper
 import kotlinx.coroutines.*
 
 class SsiAgentApiImpl(
@@ -26,8 +25,18 @@ class SsiAgentApiImpl(
 
     private var job = Job()
     private val agentScope = CoroutineScope(Dispatchers.Default + job)
-    private val mainListenerSingleThreadDispatcher = CoroutineHelper.singleThreadCoroutineContext("Main Listener Thread")
-    private val trustPingListenerSingleThreadDispatcher = CoroutineHelper.singleThreadCoroutineContext("TrustPing Listener Thread")
+
+    /*TODO: for mobile application having one thread of listener is enough.
+    for mobile application having one thread of listener is enough.For using on server side we will need to implement Thread Pool ourselves, or wait until it is done in kotlin coroutines
+    The problem is  with IOS Dispatchers.Default having very limited number of threads.
+    Alternative solution to creating our thread pool will be separation of this listener invokation to platform specific implementations.
+    Then for JVM we will use standard thread pool, while for ios it wil be enough to have single listener thread
+     */
+
+    private val mainListenerSingleThreadDispatcher =
+        CoroutineHelper.singleThreadCoroutineContext("Main Listener Thread")
+    private val trustPingListenerSingleThreadDispatcher =
+        CoroutineHelper.singleThreadCoroutineContext("TrustPing Listener Thread")
     private val trustPingTrackerService =
         TrustPingTrackerService(walletConnector, callbacks.connectionInitiatorController!!)
 
