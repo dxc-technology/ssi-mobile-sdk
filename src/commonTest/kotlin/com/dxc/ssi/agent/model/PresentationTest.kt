@@ -4,11 +4,13 @@ import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
 import com.dxc.ssi.agent.wallet.indy.model.verify.IndyPresentation
 import com.dxc.ssi.agent.wallet.indy.model.verify.IndyPresentationRequest
 import kotlinx.serialization.decodeFromString
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 class PresentationTest {
 
     @Test
+    //@Ignore
     fun testPresentationDeserialization() {
 
         val indyPresentation =
