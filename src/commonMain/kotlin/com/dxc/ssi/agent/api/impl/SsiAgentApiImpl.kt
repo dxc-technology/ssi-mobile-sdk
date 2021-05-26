@@ -26,9 +26,8 @@ class SsiAgentApiImpl(
 
     private var job = Job()
     private val agentScope = CoroutineScope(Dispatchers.Default + job)
-    private val mainListenerSingleThreadDispatcher = newSingleThreadContext("Main Listener Thread")
-    private val trustPingListenerSingleThreadDispatcher = newSingleThreadContext("TrustPing Listener Thread")
-
+    private val mainListenerSingleThreadDispatcher = CoroutineHelper.singleThreadCoroutineContext("Main Listener Thread")
+    private val trustPingListenerSingleThreadDispatcher = CoroutineHelper.singleThreadCoroutineContext("TrustPing Listener Thread")
     private val trustPingTrackerService =
         TrustPingTrackerService(walletConnector, callbacks.connectionInitiatorController!!)
 
@@ -57,13 +56,13 @@ class SsiAgentApiImpl(
         })
 
         agentScope.launch {
-            withContext(mainListenerSingleThreadDispatcher) {
+            withContext(mainListenerSingleThreadDispatcher.context) {
                 messageListener.listen()
             }
         }
 
         agentScope.launch {
-            withContext(trustPingListenerSingleThreadDispatcher) {
+            withContext(trustPingListenerSingleThreadDispatcher.context) {
                 trustPingTrackerService.track()
             }
         }
@@ -110,8 +109,8 @@ class SsiAgentApiImpl(
     override fun shutdown(force: Boolean) {
         //TODO: make some intelligence and control cancellation behaviour. Make cancellation graceful and controllable. Understand what force parameter would mean
         job.cancel()
-        mainListenerSingleThreadDispatcher.close()
-        trustPingListenerSingleThreadDispatcher.close()
+        mainListenerSingleThreadDispatcher.closeContext()
+        trustPingListenerSingleThreadDispatcher.closeContext()
         println("Stopped the agent")
     }
 
