@@ -17,9 +17,7 @@ import kotlinx.coroutines.channels.Channel
 class WebSocketTransportImpl : Transport {
     private val incomingMessagesChannel: Channel<MessageEnvelop> = Channel()
 
-    //TODO: deal with proper closing of sockets
-    private val appSocketsMap = sharedMutableMapOf<String, AppSocket>()
-    private val appSocketsMapLock = Lock()
+    val appSocketThreadSafeProvider = AppSocketThreadSafeProvider(incomingMessagesChannel)
 
 
     @OptIn(InternalAPI::class)
@@ -38,38 +36,11 @@ class WebSocketTransportImpl : Transport {
         val url = "$protocol://$host:$port$path"
 
         println("Synthesized url: $url")
-        val appSocket = openOrGetExistingConnection(url)
+        val appSocket = appSocketThreadSafeProvider.provideAppSocket(url)
+
         appSocket.send(message.payload)
     }
 
-    private suspend fun openConnection(endpoint: String): AppSocket {
-        val appSocket = AppSocket(endpoint, incomingMessagesChannel)
-        appSocket.connect()
-
-        return appSocket
-    }
-
-
-    private suspend fun openOrGetExistingConnection(endpoint: String): AppSocket {
-        //TODO: if this locking makes a problem, find better solution here
-        appSocketsMapLock.lock()
-
-        if (appSocketsMap[endpoint] != null) {
-            println("${System.getCurrentThread()} - appSockets contains such socket")
-            appSocketsMapLock.unlock()
-            return appSocketsMap[endpoint]!!
-        }
-
-        println("${System.getCurrentThread()} - opening socket for $endpoint")
-        val appSocket = openConnection(endpoint)
-        println("${System.getCurrentThread()} - opened socket for $endpoint")
-        appSocketsMap[endpoint] = appSocket
-        println("${System.getCurrentThread()} - placed websocket in a map")
-
-        appSocketsMapLock.unlock()
-
-        return appSocket
-    }
 
     //TODO: find some proper URL data model
     //ws://11.0.1.11:7000/ws
