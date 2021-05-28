@@ -3,13 +3,14 @@ package com.dxc.ssi.agent.transport
 import co.touchlab.stately.collections.sharedMutableMapOf
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import com.dxc.utils.System
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
 
 class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<MessageEnvelop>) {
+
+    private var job = Job()
+    private val providerScope = CoroutineScope(Dispatchers.Default + job)
+
     //TODO: looks like we need to deal with handling of closed sockets and with reconnects
     data class GetAppSocketMessage(
         val endpoint: String,
@@ -27,11 +28,9 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
     }
 
     init {
-        //TODO: add cancellation here
-        CoroutineScope(Dispatchers.Default).launch {
+        providerScope.launch {
             processRequests()
         }
-
     }
 
     private suspend fun processRequests() {
@@ -53,6 +52,11 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
         val appSocket = AppSocket(endpoint, incomingMessagesChannel)
         appSocket.connect()
         return appSocket
+    }
+
+    fun shutdown() {
+        //TODO: see what else is needed here
+        job.cancel()
     }
 
 }

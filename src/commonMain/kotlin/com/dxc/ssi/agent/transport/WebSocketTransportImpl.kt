@@ -66,4 +66,9 @@ class WebSocketTransportImpl : Transport {
         return incomingMessagesChannel.receive()
     }
 
+    override fun shutdown() {
+        //TODO: understand what else is needed here
+        appSocketThreadSafeProvider.shutdown()
+    }
+
 }

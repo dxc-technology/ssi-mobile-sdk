@@ -120,6 +120,7 @@ class SsiAgentApiImpl(
         job.cancel()
         mainListenerSingleThreadDispatcher.closeContext()
         trustPingListenerSingleThreadDispatcher.closeContext()
+        transport.shutdown()
         println("Stopped the agent")
     }
 
