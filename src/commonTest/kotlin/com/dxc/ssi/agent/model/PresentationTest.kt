@@ -8,7 +8,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 
 class PresentationTest {
-
+/*
     @Test
     @Ignore
     fun testPresentationDeserialization() {
@@ -335,4 +335,6 @@ class PresentationTest {
             "    }\n" +
             "  ]\n" +
             "}"
+            */
+
 }
