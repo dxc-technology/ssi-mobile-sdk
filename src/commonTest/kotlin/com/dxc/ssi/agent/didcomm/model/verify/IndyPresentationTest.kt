@@ -12,6 +12,7 @@ class IndyPresentationTest {
 
     @Ignore
     @Test
+    @Ignore
     fun testDeserialization() {
 
         val presentationJson =

@@ -10,7 +10,7 @@ import kotlin.test.Test
 class PresentationTest {
 
     @Test
-    //@Ignore
+    @Ignore
     fun testPresentationDeserialization() {
 
         val indyPresentation =
