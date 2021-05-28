@@ -11,7 +11,7 @@ import kotlin.test.Test
 class LibIndyAccessTest {
 
     @Test
-   // @Ignore
+    @Ignore
     fun simpleLibIndyCall() {
 
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
