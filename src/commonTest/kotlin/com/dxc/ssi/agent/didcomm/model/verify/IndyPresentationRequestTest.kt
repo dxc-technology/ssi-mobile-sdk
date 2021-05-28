@@ -5,12 +5,14 @@ import com.dxc.ssi.agent.wallet.indy.model.issue.IndyCredentialDefinition
 import com.dxc.ssi.agent.wallet.indy.model.verify.IndyPresentationRequest
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class IndyPresentationRequestTest {
 
     @Test
+    @Ignore
     fun testDeserialization() {
 
         val presentationRequestJson =
