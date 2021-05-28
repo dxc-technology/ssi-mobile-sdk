@@ -11,12 +11,15 @@ import kotlin.test.Test
 class LibIndyAccessTest {
 
     @Test
-    @Ignore
+   // @Ignore
     fun simpleLibIndyCall() {
 
+        val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
+            genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
+            ipAddress = "192.168.0.117")
 
         val ledgerConnector =
-            IndyLedgerConnector(IndyLedgerConnectorConfiguration("/home/ifedyanin/source/github/fedyiv/ssi-mobile-sdk-lumedic/files/docker_pool_transactions_genesis.txt"))
+            IndyLedgerConnector(indyLedgerConnectorConfiguration)
         val walletHolder = IndyWalletHolder()
         val issuer = IndyIssuer(walletHolder!!)
         val verifier = IndyVerifier(walletHolder!!)
