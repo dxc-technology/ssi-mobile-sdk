@@ -1,6 +1,8 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+
 val serializationVersion: String = "1.0.1"
 val indyVersion: String = "1.16.0"
-val jacksonVersion: String= "2.9.7"
+val jacksonVersion: String = "2.9.7"
 val ktorVersion: String = "1.5.1"
 val okhttpVersion: String = "3.5.0"
 val kotlinxCourutinesVersion = "1.4.2-native-mt"
@@ -94,11 +96,11 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 implementation("io.ktor:ktor-utils:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
-                implementation ("co.touchlab:stately-iso-collections:1.1.4-a1")
+                implementation("co.touchlab:stately-iso-collections:1.1.4-a1")
                 //TODO: check if two stately dependencies below are needed, considering that they should be included in the dependency above
-                implementation ("co.touchlab:stately-isolate:1.1.4-a1")
-                implementation ("co.touchlab:stately-common:1.1.4")
-                implementation ("com.benasher44:uuid:$uuidVersion")
+                implementation("co.touchlab:stately-isolate:1.1.4-a1")
+                implementation("co.touchlab:stately-common:1.1.4")
+                implementation("com.benasher44:uuid:$uuidVersion")
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))
             }
@@ -123,8 +125,8 @@ kotlin {
 
                 //TODO: this is temporal logging addition. Check idiomatic way to log in multiplatform env
                 implementation("org.slf4j:slf4j-api:1.7.30")
-                implementation ("org.slf4j:slf4j-log4j12:1.8.0-alpha2")
-                implementation ("log4j:log4j:1.2.17")
+                implementation("org.slf4j:slf4j-log4j12:1.8.0-alpha2")
+                implementation("log4j:log4j:1.2.17")
 
                 //implementation( "com.sun.jna:jna:3.0.9")
 
@@ -218,30 +220,190 @@ android {
 dependencies {
     implementation("junit:junit:$junitVersion")
 }
+tasks.register<Exec>("0_Build") {
+    commandLine("./gradlew", "build")
+}
+tasks.register<Exec>("1_KMPA_1") {
+    workingDir("$projectDir/samples/swiftIosApp/Pods")
+    commandLine("xcodebuild", "-scheme", "libsodium", "-sdk", "iphonesimulator", "-configuration", "Debug")
+}
+tasks.register<Exec>("1_KMPA_2") {
+    workingDir("$projectDir/samples/swiftIosApp/Pods")
+    commandLine("xcodebuild", "-scheme", "libzmq-pw", "-sdk", "iphonesimulator", "-configuration", "Debug") //iphoneos
+}
+tasks.register<Exec>("1_KMPA_3") {
+    workingDir("$projectDir/samples/swiftIosApp/Pods")
+    commandLine("xcodebuild", "-scheme", "Pods-swiftIosApp", "-sdk", "iphonesimulator", "-configuration", "Debug")
+}
+tasks.register<Exec>("1_KMPA_4") {
+    workingDir("$projectDir/samples/swiftIosApp/Pods")
+    commandLine(
+        "xcodebuild",
+        "-scheme",
+        "kotlin_multiplatform_agent",
+        "-arch",
+        "x86_64",
+        "-sdk",
+        "iphonesimulator",
+        "-configuration",
+        "Debug"
+    )
+}
 
-tasks.register<Copy>("copy") {
+tasks.register<Copy>("3_Copy_1") {
     from(layout.buildDirectory.dir("$projectDir/build/classes/kotlin/ios/main/kotlin-multiplatform-agent-cinterop-indylib.klib"))
     into(layout.buildDirectory.dir("$projectDir/samples/swiftIosApp/Pods"))
 }
 
-tasks.register<Exec>("archiveRealDevice") {
-    workingDir("$projectDir/samples/swiftIosApp")
-    commandLine("xcodebuild","archive -scheme swiftIosApp -sdk iphoneos -archivePath \"archives/ios_simulators.xcarchive\" BUILD_LIBRARY_FOR_DISTRIBUTION=YES SKIP_INSTALL=NO")
-}
-tasks.register<Exec>("archiveSimulator") {
-    workingDir("$projectDir/samples/swiftIosApp")
-    commandLine("xcodebuild","archive -scheme swiftIosApp -sdk iphonesimulator -archivePath \"archives/ios_simulators.xcarchive\" BUILD_LIBRARY_FOR_DISTRIBUTION=YES SKIP_INSTALL=NO")
+tasks.register<Copy>("3_Copy_2") {
+    from(layout.buildDirectory.dir("$projectDir/build/KotlinSharedSimulator"))
+    into(layout.buildDirectory.dir("$projectDir/samples/swiftIosApp/build/Debug-iphonesimulator/kotlin_multiplatform_agent"))
 }
 
-tasks.register<Exec>("archiveXCF") {
+tasks.register<Exec>("4_archiveSimulator") {
     workingDir("$projectDir/samples/swiftIosApp")
-    commandLine("xcodebuild","-create-xcframework -framework archives/ios_devices.xcarchive/Products/Library/Frameworks/MyFramework.framework -framework archives/ios_simulators.xcarchive/Products/Library/Frameworks/MyFramework.framework -output build/MyFramework.xcframework")
+    commandLine(
+        "xcodebuild",
+        "archive",
+        "-workspace",
+        "swiftIosApp.xcworkspace",
+        "-configuration",
+        "Debug",
+        "-scheme",
+        "swiftIosApp",
+        "-arch",
+        "x86_64",
+        "-sdk",
+        "iphonesimulator",
+        "-archivePath",
+        "archives/ios_simulators.xcarchive",
+        "BUILD_LIBRARY_FOR_DISTRIBUTION=YES",
+        "SKIP_INSTALL=NO"
+    )
 }
 
-tasks.register<Exec>("Pod") {
+tasks.register<Exec>("a0_Build") {
+    commandLine("./gradlew", "build") //REAL DEVICE
+}
+tasks.register<Exec>("a1_KMPA_1") {
     workingDir("$projectDir/samples/swiftIosApp/Pods")
-    commandLine("pwd")
-    commandLine("xcodebuild","-list")
-    commandLine("xcodebuild","-scheme","libzmq-pw")
-    commandLine("xcodebuild","-scheme","libsodium")
+    commandLine("xcodebuild", "-scheme", "libsodium", "-sdk", "iphoneos", "-configuration", "Debug")
 }
+tasks.register<Exec>("a1_KMPA_2") {
+    workingDir("$projectDir/samples/swiftIosApp/Pods")
+    commandLine("xcodebuild", "-scheme", "libzmq-pw", "-sdk", "iphoneos", "-configuration", "Debug") //iphoneos
+}
+tasks.register<Exec>("a1_KMPA_3") {
+    workingDir("$projectDir/samples/swiftIosApp/Pods")
+    commandLine("xcodebuild", "-scheme", "Pods-swiftIosApp", "-sdk", "iphoneos", "-configuration", "Debug")
+}
+tasks.register<Exec>("a1_KMPA_4") {
+    workingDir("$projectDir/samples/swiftIosApp/Pods")
+    commandLine(
+        "xcodebuild",
+        "-scheme",
+        "kotlin_multiplatform_agent",
+        "-arch",
+        "x86_64",
+        "-sdk",
+        "iphoneos",
+        "-configuration",
+        "Debug"
+    )
+}
+
+tasks.register<Copy>("a3_Copy_1") {
+    from(layout.buildDirectory.dir("$projectDir/build/classes/kotlin/ios/main/kotlin-multiplatform-agent-cinterop-indylib.klib"))
+    into(layout.buildDirectory.dir("$projectDir/samples/swiftIosApp/Pods"))
+}
+
+tasks.register<Copy>("a3_Copy_2") {
+    from(layout.buildDirectory.dir("$projectDir/build/KotlinSharedRealDevice"))
+    into(layout.buildDirectory.dir("$projectDir/samples/swiftIosApp/build/Debug-iphoneos/kotlin_multiplatform_agent"))
+}
+
+tasks.register<Exec>("a4_archiveRealDevice") {
+    workingDir("$projectDir/samples/swiftIosApp")
+    commandLine(
+        "xcodebuild",
+        "archive",
+        "-workspace",
+        "swiftIosApp.xcworkspace",
+        "-configuration",
+        "Debug",
+        "-scheme",
+        "swiftIosApp",
+        "-arch",
+        "arm64",
+        "-sdk",
+        "iphoneos",
+        "-archivePath",
+        "archives/ios_devices.xcarchive",
+        "BUILD_LIBRARY_FOR_DISTRIBUTION=YES",
+        "SKIP_INSTALL=NO"
+    )
+}
+
+tasks.register<Exec>("allXCF_Merge_1") {
+    workingDir("$projectDir/samples/swiftIosApp")
+    commandLine(
+        "xcodebuild",
+        "-create-xcframework",
+        "-framework",
+        "archives/ios_devices.xcarchive/Products/Library/Frameworks/libsodium.framework",
+        "-framework",
+        "archives/ios_simulators.xcarchive/Products/Library/Frameworks/libsodium.framework",
+        "-output",
+        "xcframework/sodium.xcframework"
+    )
+}
+tasks.register<Exec>("allXCF_Merge_2") {
+    workingDir("$projectDir/samples/swiftIosApp")
+    commandLine(
+        "xcodebuild",
+        "-create-xcframework",
+        "-framework",
+        "archives/ios_devices.xcarchive/Products/Library/Frameworks/libzmq_pw.framework",
+        "-framework",
+        "archives/ios_simulators.xcarchive/Products/Library/Frameworks/libzmq_pw.framework",
+        "-output",
+        "xcframework/libzmq_pw.xcframework"
+    )
+}
+tasks.register<Exec>("allXCF_Merge_3") {
+    workingDir("$projectDir/samples/swiftIosApp")
+    commandLine(
+        "xcodebuild",
+        "-create-xcframework",
+        "-framework",
+        "archives/ios_devices.xcarchive/Products/Library/Frameworks/Pods_swiftIosApp.framework",
+        "-framework",
+        "archives/ios_simulators.xcarchive/Products/Library/Frameworks/Pods_swiftIosApp.framework",
+        "-output",
+        "xcframework/Pods_swiftIosApp.xcframework"
+    )
+}
+
+val packForXcode by tasks.creating(Sync::class) {
+    group = "build"
+    val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
+    val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
+    val targetName = "ios"
+    if (sdkName.startsWith("iphoneos")) {
+        val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
+        inputs.property("mode", mode)
+        dependsOn(framework.linkTask)
+        val targetDir = File(buildDir, "KotlinSharedRealDevice")
+        from({ framework.outputDirectory })
+        into(targetDir)
+    } else {
+        val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
+        inputs.property("mode", mode)
+        dependsOn(framework.linkTask)
+        val targetDir = File(buildDir, "KotlinSharedSimulator")
+        from({ framework.outputDirectory })
+        into(targetDir)
+    }
+}
+tasks.getByName("build").dependsOn(packForXcode)
+
