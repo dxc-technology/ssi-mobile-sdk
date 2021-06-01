@@ -1,0 +1,6 @@
+framework module ssi_agent {
+    umbrella header "ssi_agent.h"
+
+    export *
+    module * { export * }
+}
