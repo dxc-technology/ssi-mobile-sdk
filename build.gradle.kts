@@ -231,15 +231,15 @@ tasks.register<Exec>("0_Build") {
 }
 tasks.register<Exec>("1_KMP_1") {
     workingDir("$projectDir/samples/swiftIosApp/Pods")
-    commandLine("xcodebuild", "-scheme", "libsodium", "-sdk", "iphonesimulator", "-configuration", "Debug")
+    commandLine("xcodebuild", "-scheme", "libsodium", "-sdk", "iphonesimulator", "-configuration", "Debug", "-arch", "x86_64")
 }
 tasks.register<Exec>("1_KMP_2") {
     workingDir("$projectDir/samples/swiftIosApp/Pods")
-    commandLine("xcodebuild", "-scheme", "libzmq-pw", "-sdk", "iphonesimulator", "-configuration", "Debug") //iphoneos
+    commandLine("xcodebuild", "-scheme", "libzmq-pw", "-sdk", "iphonesimulator", "-configuration", "Debug",  "-arch", "x86_64") //iphoneos
 }
 tasks.register<Exec>("1_KMP_3") {
     workingDir("$projectDir/samples/swiftIosApp/Pods")
-    commandLine("xcodebuild", "-scheme", "Pods-swiftIosApp", "-sdk", "iphonesimulator", "-configuration", "Debug")
+    commandLine("xcodebuild", "-scheme", "Pods-swiftIosApp", "-sdk", "iphonesimulator", "-configuration", "Debug", "-arch", "x86_64")
 }
 tasks.register<Exec>("1_KMP_4") {
     workingDir("$projectDir/samples/swiftIosApp/Pods")
@@ -247,6 +247,8 @@ tasks.register<Exec>("1_KMP_4") {
         "xcodebuild",
         "-scheme",
         "kotlin_multiplatform_agent",
+        "-arch",
+        "x86_64",
         "-sdk",
         "iphonesimulator",
         "-configuration",
@@ -275,10 +277,10 @@ tasks.register<Exec>("3_Simulator") {
         "Debug",
         "-scheme",
         "swiftIosApp",
-        "-arch",
-        "x86_64",
         "-sdk",
         "iphonesimulator",
+        "-arch",
+        "x86_64",
         "-archivePath",
         "archives/ios_simulators.xcarchive",
         "BUILD_LIBRARY_FOR_DISTRIBUTION=YES",
@@ -293,15 +295,15 @@ tasks.register<Exec>("a0_Build") {
 }
 tasks.register<Exec>("a1_KMP_1") {
     workingDir("$projectDir/samples/swiftIosApp/Pods")
-    commandLine("xcodebuild", "-scheme", "libsodium", "-sdk", "iphoneos", "-configuration", "Debug")
+    commandLine("xcodebuild", "-scheme", "libsodium", "-sdk", "iphoneos", "-configuration", "Debug", "-arch", "arm64")
 }
 tasks.register<Exec>("a1_KMP_2") {
     workingDir("$projectDir/samples/swiftIosApp/Pods")
-    commandLine("xcodebuild", "-scheme", "libzmq-pw", "-sdk", "iphoneos", "-configuration", "Debug") //iphoneos
+    commandLine("xcodebuild", "-scheme", "libzmq-pw", "-sdk", "iphoneos", "-configuration", "Debug", "-arch", "arm64") //iphoneos
 }
 tasks.register<Exec>("a1_KMP_3") {
     workingDir("$projectDir/samples/swiftIosApp/Pods")
-    commandLine("xcodebuild", "-scheme", "Pods-swiftIosApp", "-sdk", "iphoneos", "-configuration", "Debug")
+    commandLine("xcodebuild", "-scheme", "Pods-swiftIosApp", "-sdk", "iphoneos", "-configuration", "Debug", "-arch", "arm64")
 }
 tasks.register<Exec>("a1_KMP_4") {
     workingDir("$projectDir/samples/swiftIosApp/Pods")
@@ -339,8 +341,8 @@ tasks.register<Exec>("a3_RealDevice") {
         "Debug",
         "-scheme",
         "swiftIosApp",
-        "-arch",
-        "arm64",
+        "-destination",
+        "generic/platform=iOS",
         "-sdk",
         "iphoneos",
         "-archivePath",

@@ -8,7 +8,7 @@ target 'swiftIosApp' do
 
     pod 'libsodium', '~> 1.0.12'
     pod 'libzmq-pw', "4.2.2"
-    pod 'OpenSSL-XM'
+    pod 'OpenSSL-XM',  '~> 1.0.210.1'
     pod 'libindy', "1.15.0"
     pod 'kotlin_multiplatform_agent', :path => '../../'
 
