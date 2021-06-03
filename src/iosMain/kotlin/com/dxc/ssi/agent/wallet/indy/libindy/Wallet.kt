@@ -44,4 +44,8 @@ actual class Wallet actual constructor(private var walletHandle: Int) {
     actual fun getWalletHandle(): Int {
         return walletHandle
     }
+
+    actual suspend fun closeWallet() {
+        TODO("Not yet implemented")
+    }
 }

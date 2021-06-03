@@ -4,6 +4,7 @@ import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
+import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
 import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
@@ -37,7 +38,9 @@ class SsiAgentApiImplTest {
             ipAddress = "192.168.0.117"
         )
 
-        val ssiAgentApi = SsiAgentBuilderImpl()
+        val indyWalletConnector = IndyWalletConnector.build()
+
+        val ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
             .withEnvironment(EnvironmentImpl())
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())

@@ -47,5 +47,12 @@ actual class Did {
                 return CreateAndStoreMyDidResult(callbackResult.did, callbackResult.verkey)
             }
         }
+
+        actual suspend fun getDidWithMeta(
+            wallet: Wallet,
+            did: String
+        ): DidWithMetadataResult {
+            TODO("Not yet implemented")
+        }
     }
 }

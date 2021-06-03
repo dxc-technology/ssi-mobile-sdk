@@ -12,10 +12,11 @@ import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinit
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
+import com.dxc.ssi.agent.ledger.indy.helpers.TailsHelper
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 import com.dxc.ssi.agent.utils.JsonUtils
+import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
-import com.dxc.ssi.agent.ledger.indy.helpers.TailsHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.Anoncreds
 import com.dxc.ssi.agent.wallet.indy.libindy.CredentialsSearchForProofReq
 import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
@@ -89,15 +90,13 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
             Anoncreds.proverCreateMasterSecret(walletHolder.getWallet() as Wallet, id)
         } catch (e: Exception) {
             if (!e.message!!.contains("DuplicateMasterSecretNameException")) throw e
-
-            //TODO: think what should be the behaviour
-            println("MasterSecret already exists, who cares, continuing")
+            println("MasterSecret already exists, so we will use it")
         }
     }
 
     override fun createCredentialDefinitionIdFromOffer(credentialOffer: CredentialOffer): CredentialDefinitionId {
 
-        println("createCredentialDefinitionIdFromOffer: cred offer ${credentialOffer}")
+        println("createCredentialDefinitionIdFromOffer: cred offer $credentialOffer")
 
         val indyCredentialOffer = credentialOffer as IndyCredentialOffer
 

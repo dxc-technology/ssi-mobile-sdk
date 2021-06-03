@@ -1,9 +1,9 @@
 val serializationVersion: String = "1.0.1"
 val indyVersion: String = "1.16.0"
-val jacksonVersion: String= "2.9.7"
+val jacksonVersion: String = "2.9.7"
 val ktorVersion: String = "1.5.1"
 val okhttpVersion: String = "3.5.0"
-val kotlinxCourutinesVersion = "1.4.2-native-mt"
+val kotlinxCoroutinesVersion = "1.4.2-native-mt"
 val uuidVersion = "0.2.3"
 val junitVersion = "4.13"
 
@@ -93,13 +93,13 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 implementation("io.ktor:ktor-utils:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
-                implementation ("co.touchlab:stately-iso-collections:1.1.4-a1")
-                implementation ("co.touchlab:stately-concurrency:1.1.4")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
+                implementation("co.touchlab:stately-iso-collections:1.1.4-a1")
+                implementation("co.touchlab:stately-concurrency:1.1.4")
                 //TODO: check if two stately dependencies below are needed, considering that they should be included in the dependency above
-                implementation ("co.touchlab:stately-isolate:1.1.4-a1")
-                implementation ("co.touchlab:stately-common:1.1.4")
-                implementation ("com.benasher44:uuid:$uuidVersion")
+                implementation("co.touchlab:stately-isolate:1.1.4-a1")
+                implementation("co.touchlab:stately-common:1.1.4")
+                implementation("com.benasher44:uuid:$uuidVersion")
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))
             }
@@ -124,8 +124,8 @@ kotlin {
 
                 //TODO: this is temporal logging addition. Check idiomatic way to log in multiplatform env
                 implementation("org.slf4j:slf4j-api:1.7.30")
-                implementation ("org.slf4j:slf4j-log4j12:1.8.0-alpha2")
-                implementation ("log4j:log4j:1.2.17")
+                implementation("org.slf4j:slf4j-log4j12:1.8.0-alpha2")
+                implementation("log4j:log4j:1.2.17")
 
                 //implementation( "com.sun.jna:jna:3.0.9")
 

@@ -11,6 +11,13 @@ actual class Did {
             return Did.createAndStoreMyDid(wallet.wallet, didJson).get()
         }
 
+        actual suspend fun getDidWithMeta(
+            wallet: Wallet,
+            did: String
+        ): DidWithMetadataResult {
+            TODO("Not yet implemented")
+        }
+
     }
 
 }
