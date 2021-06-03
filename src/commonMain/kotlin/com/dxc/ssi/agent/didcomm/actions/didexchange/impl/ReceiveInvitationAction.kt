@@ -33,8 +33,6 @@ class ReceiveInvitationAction(
 
         val invitation = parseInvitationFromInvitationUrl(invitationUrl)
         val endpoint = parseEndpointFromInvitationUrl(invitationUrl)
-        //TODO: check if it is proper way to get DID of the inviter
-        val inviterDid = parseDidFromInvitation(invitation)
 
         println("Parsed invitation details: invitation = $invitation\nendpoint=$endpoint")
 
@@ -46,7 +44,6 @@ class ReceiveInvitationAction(
             invitation = invitationUrl,
             isSelfInitiated = true,
             peerRecipientKeys = invitation.recipientKeys,
-            peerDid = inviterDid,
             endpoint = endpoint
         )
 
@@ -99,14 +96,6 @@ class ReceiveInvitationAction(
 
     }
 
-
-    private fun parseDidFromInvitation(invitation: Invitation): String {
-        //Parse DID from this line "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/connections/1.0/invitation"
-        return Regex("^.*:.*:(.*);.*$").find(invitation.type)!!.groups[1]!!.value
-
-    }
-
-
     @OptIn(InternalAPI::class)
     private fun parseInvitationFromInvitationUrl(invitationUrl: String): Invitation {
         // TODO: add validation here that invitation is proper URL
@@ -141,7 +130,6 @@ class ReceiveInvitationAction(
             connection = buildConnection(),
             imageUrl = null
         )
-
 
     }
 
