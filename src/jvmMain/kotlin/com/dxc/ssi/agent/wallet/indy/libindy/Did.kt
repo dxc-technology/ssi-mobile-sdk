@@ -1,12 +1,9 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
 import com.dxc.ssi.agent.exceptions.indy.IndyJvmToCommonExceptionConverter
-import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.hyperledger.indy.sdk.did.Did
-import java.util.concurrent.ExecutionException
-
 
 actual class Did {
     actual companion object {

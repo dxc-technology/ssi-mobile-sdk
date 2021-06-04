@@ -7,7 +7,6 @@ actual class Wallet actual constructor(
     constructor(walletHandle: Int, wallet:org.hyperledger.indy.sdk.wallet.Wallet) : this(walletHandle) {
         this.wallet = wallet
     }
-
     //Storing original wallet as it is taken by java wrapper
     lateinit var wallet: org.hyperledger.indy.sdk.wallet.Wallet
 

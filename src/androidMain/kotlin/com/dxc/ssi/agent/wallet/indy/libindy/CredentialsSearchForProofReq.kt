@@ -7,12 +7,6 @@ actual class CredentialsSearchForProofReq actual constructor() {
     private lateinit var credentialsSearchForProofReq: CredentialsSearchForProofReq
 
     actual suspend fun open(wallet: Wallet, proofReqJson: String, extraQueryJson: String?) {
-
-        println("CredentialsSearchForProofReq.open with" +
-                "wallet = ${wallet.wallet}" +
-                "proofReqJson = $proofReqJson" +
-                "extraQueryJson = $extraQueryJson")
-
         credentialsSearchForProofReq = CredentialsSearchForProofReq.open(wallet.wallet, proofReqJson, extraQueryJson).get()
     }
 

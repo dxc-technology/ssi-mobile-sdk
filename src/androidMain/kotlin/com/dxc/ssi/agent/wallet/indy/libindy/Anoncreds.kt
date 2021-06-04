@@ -38,7 +38,7 @@ actual class Anoncreds {
             }
         }
 
-        actual  suspend fun proverStoreCredential(
+        actual suspend fun proverStoreCredential(
             wallet: Wallet,
             credId: String?,
             credReqMetadataJson: String,

@@ -18,7 +18,6 @@ actual class Wallet actual constructor(
         wallet.closeWallet().get()
     }
 
-
     actual companion object {
         actual suspend fun createWallet(config: String, credentials: String) {
             org.hyperledger.indy.sdk.wallet.Wallet.createWallet(config, credentials).get()
@@ -31,6 +30,5 @@ actual class Wallet actual constructor(
             val result = org.hyperledger.indy.sdk.wallet.Wallet.openWallet(config, credentials).get()
             return Wallet(result.walletHandle, result)
         }
-
     }
 }
