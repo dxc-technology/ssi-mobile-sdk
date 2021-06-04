@@ -7,6 +7,7 @@ import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
+import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
 import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
 import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
@@ -19,6 +20,10 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestConta
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.DidConfig
+import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
+import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
+import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
 import org.junit.Ignore
 import org.junit.Rule
@@ -26,6 +31,10 @@ import org.junit.Test
 
 //TODO: if we can use some common kotlin tests to have common tests for all platforms
 class SsiAgentApiImplTest {
+
+    private val walletName = "newWalletName"
+    private val walletPassword = "newWalletPassword"
+    private val did = "Goci8gnhuC9vvxTWg1aFSx"
 
     @Rule
     @JvmField
@@ -44,29 +53,46 @@ class SsiAgentApiImplTest {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
 
         println("Starting test")
+
+        EnvironmentUtils.initEnvironment(EnvironmentImpl(instrumentation.context))
+
+        val walletManager: WalletManager = IndyWalletManager
+
+        if (!walletManager.isWalletExistsAndOpenable(walletName, walletPassword))
+            walletManager.createWallet(walletName, walletPassword)
+
+        if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
+            val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
+            //Store did somewhere in your application to use it afterwards
+        }
+
+        val walletHolder = IndyWalletHolder(
+            walletName = walletName,
+            walletPassword = walletPassword,
+            didConfig = DidConfig(did = did)
+        )
+
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
             ipAddress = "192.168.0.117")
 
-        val indyWalletConnector = IndyWalletConnector.build()
+        val indyWalletConnector = IndyWalletConnector.build(walletHolder)
 
         val ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
-            .withEnvironment(EnvironmentImpl(instrumentation.context))
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())
             .withCredPresenterController(CredPresenterControllerImpl())
             .withLedgerConnector(IndyLedgerConnector(indyLedgerConnectorConfiguration))
-
             .build()
 
         ssiAgentApi.init()
 
 
         val issuerInvitationUrl =
-            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkoxRVZQUVg0VzkyRjN0ajhUQVkzSEJGV3Myem85M29uVTliMWZ6OExiSzRhIl0sInJlY2lwaWVudEtleXMiOlsiNDZGdFlaVGRxajIyelNXYlR1WXd3R3U1dkJSWFl5UXR6TEsyUXdiQ2thZUsiXSwiQGlkIjoiZmVlMWIyNzUtNjQ0Ni00YjRlLWEwZjEtZDEyNDI0NzY3ZDYzIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiR3hBenl3RzRaOEE0V25tY3gyTmVXY3Q5c0I5aHl3UE10UWhtUWQ5aUpRdEEiXSwicmVjaXBpZW50S2V5cyI6WyJBQnN1UlZ0d2YyYmpoZnk3V1g5OW5CQzhHaDk0a3BLVmtwcmszeFdTbVRXcCJdLCJAaWQiOiIyNWEwZjZjZS1mNzk4LTRhZmItYWExYi02MTFkNTMxNzlhMjYiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
-        val verifierInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRndORkdDOU1YdTNrOXhleFhQaDNOcHZaMkx3VVl2eDU2YnRzd0Z2MU0xc3MiXSwicmVjaXBpZW50S2V5cyI6WyJBc1BLNzZiMW1lWXVqWmI4aHhLdTV6RjlzamlIVE5Sa2tuakFSNnY3WmhFWSJdLCJAaWQiOiI0ZmQzYTBiZi1kZjNjLTQ1MTMtYTljMC05M2JkNmVjMmNlZDkiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+//        val verifierInvitationUrl =
+  //          "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRndORkdDOU1YdTNrOXhleFhQaDNOcHZaMkx3VVl2eDU2YnRzd0Z2MU0xc3MiXSwicmVjaXBpZW50S2V5cyI6WyJBc1BLNzZiMW1lWXVqWmI4aHhLdTV6RjlzamlIVE5Sa2tuakFSNnY3WmhFWSJdLCJAaWQiOiI0ZmQzYTBiZi1kZjNjLTQ1MTMtYTljMC05M2JkNmVjMmNlZDkiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
         println("Connecting to issuer")
         ssiAgentApi.connect(issuerInvitationUrl)
@@ -75,7 +101,7 @@ class SsiAgentApiImplTest {
         //Sleeper().sleep(4000)
 
         println("Connecting to verifier")
-        ssiAgentApi.connect(verifierInvitationUrl)
+    //    ssiAgentApi.connect(verifierInvitationUrl)
 
         Sleeper().sleep(500000)
 

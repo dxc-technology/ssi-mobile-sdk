@@ -93,13 +93,6 @@ open class IndyWalletHolder(
             Connection.fromJson(extractValue(retrievedValue))
         } catch (e: WalletItemNotFoundException) {
             null
-        } catch (e: Exception) {
-            //TODO: understand what ExecutionException in java implementation corresponds to in kotlin code
-            //TODO: check how to compare exact exception class rather than message contains string
-            if (e.message!!.contains("WalletItemNotFoundException"))
-                null
-            else
-                throw e
         }
     }
 

@@ -27,13 +27,13 @@ import org.junit.Test
 
 class SsiAgentApiImplTest {
 
-    private val walletName = "newWalletName"
+    private val walletName = "newWalletName2"
     private val walletPassword = "newWalletPassword"
     private val did = "4PCVFCeZbKXyvgjCedbXDx"
-    private val masterSecretId = "master secret id"
+
 
     @Test
-    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
         println("Starting test")

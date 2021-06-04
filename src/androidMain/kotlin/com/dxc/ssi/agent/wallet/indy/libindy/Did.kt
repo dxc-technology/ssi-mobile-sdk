@@ -1,6 +1,10 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
+import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.hyperledger.indy.sdk.did.Did
+import java.util.concurrent.ExecutionException
 
 actual class Did {
     actual companion object {
@@ -15,8 +19,16 @@ actual class Did {
             wallet: Wallet,
             did: String
         ): DidWithMetadataResult {
-            TODO("Not yet implemented")
+            try {
+                val result = Did.getDidWithMeta(wallet.wallet, did).get()
+                return Json.decodeFromString(result)
+            } catch (e: ExecutionException) {
+                if (e.cause is org.hyperledger.indy.sdk.wallet.WalletItemNotFoundException)
+                    throw WalletItemNotFoundException()
+                else throw e
+            }
         }
+
 
     }
 

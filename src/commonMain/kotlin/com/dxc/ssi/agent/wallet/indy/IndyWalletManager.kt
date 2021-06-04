@@ -2,11 +2,13 @@ package com.dxc.ssi.agent.wallet.indy
 
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletCreationStrategy
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
+import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.CreateAndStoreMyDidResult
 import com.dxc.ssi.agent.wallet.indy.libindy.Did
+import com.dxc.ssi.agent.wallet.indy.libindy.DidWithMetadataResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -22,7 +24,6 @@ class IndyWalletManager {
                 return@async try {
                     val wallet = WalletHelper.openExisting(walletName, walletPassword)
                     wallet.closeWallet()
-                    //TODO: check if wallet needs to be closed here
                     true
                 } catch (t: Throwable) {
                     false
@@ -33,13 +34,22 @@ class IndyWalletManager {
         override fun isDidExistsInWallet(did: String, walletName: String, walletPassword: String): Boolean {
             val walletManagerScope = CoroutineScope(Dispatchers.Default)
             val didWithMetaResult = CoroutineHelper.waitForCompletion(walletManagerScope.async {
+
+                var didWithMetadata: DidWithMetadataResult?
                 val wallet = WalletHelper.openExisting(walletName, walletPassword)
-                val didWithMetadata = Did.getDidWithMeta(wallet, did)
+
+                didWithMetadata = try {
+                    Did.getDidWithMeta(wallet, did)
+                } catch (e: WalletItemNotFoundException) {
+                    null
+                }
+
                 wallet.closeWallet()
+
                 didWithMetadata
             })
 
-            return didWithMetaResult.did == did
+            return  didWithMetaResult?.did == did
 
         }
 

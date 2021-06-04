@@ -16,9 +16,8 @@ actual class Wallet actual constructor(
     }
 
     actual suspend fun closeWallet() {
-        TODO("Not yet implemented")
+        wallet.closeWallet().get()
     }
-
 
     actual companion object {
         actual suspend fun createWallet(config: String, credentials: String) {
