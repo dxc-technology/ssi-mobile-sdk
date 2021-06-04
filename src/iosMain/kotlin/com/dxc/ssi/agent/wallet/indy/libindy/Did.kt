@@ -2,8 +2,12 @@ package com.dxc.ssi.agent.wallet.indy.libindy
 
 import com.dxc.ssi.agent.callback.CallbackData
 import com.dxc.ssi.agent.callback.callbackHandler
+import com.dxc.ssi.agent.callback.impl.StringCallback
 import com.indylib.indy_create_and_store_my_did
+import com.indylib.indy_get_my_did_with_meta
 import kotlinx.cinterop.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 
 actual class Did {
@@ -52,7 +56,20 @@ actual class Did {
             wallet: Wallet,
             did: String
         ): DidWithMetadataResult {
-            TODO("Not yet implemented")
+
+            val commandHandle = callbackHandler.prepareCallback()
+
+            indy_get_my_did_with_meta(
+                commandHandle,
+                wallet.getWalletHandle(),
+                did,
+                StringCallback.callback
+            )
+
+            val callbackResultJson = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
+
+            return Json.decodeFromString(callbackResultJson.stringResult)
+
         }
     }
 }

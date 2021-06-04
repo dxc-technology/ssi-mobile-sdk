@@ -72,7 +72,6 @@ class IndyWalletManager {
             })
         }
 
-        //TODO: add option to create new did and return it
         override fun createDid(
             didConfig: DidConfig,
             walletName: String,

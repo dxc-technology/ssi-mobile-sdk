@@ -1,17 +1,17 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
-import com.dxc.ssi.agent.callback.CallbackData
 import com.dxc.ssi.agent.callback.callbackHandler
 import com.dxc.ssi.agent.callback.impl.IntCallback
 import com.dxc.ssi.agent.callback.impl.SimpleCallback
+import com.indylib.indy_close_wallet
 import com.indylib.indy_create_wallet
 import com.indylib.indy_open_wallet
-import kotlinx.cinterop.staticCFunction
+
 
 actual class Wallet actual constructor(private var walletHandle: Int) {
 
     actual companion object {
-        actual suspend fun createWallet(config:String, credentials:String) {
+        actual suspend fun createWallet(config: String, credentials: String) {
             val commandHandle = callbackHandler.prepareCallback()
 
             indy_create_wallet(
@@ -25,7 +25,7 @@ actual class Wallet actual constructor(private var walletHandle: Int) {
 
         }
 
-        actual suspend fun openWallet(config:String, credentials:String) : Wallet {
+        actual suspend fun openWallet(config: String, credentials: String): Wallet {
             val commandHandle = callbackHandler.prepareCallback()
 
             indy_open_wallet(
@@ -46,6 +46,8 @@ actual class Wallet actual constructor(private var walletHandle: Int) {
     }
 
     actual suspend fun closeWallet() {
-        TODO("Not yet implemented")
+        val commandHandle = callbackHandler.prepareCallback()
+        indy_close_wallet(commandHandle, walletHandle, SimpleCallback.callback)
+        callbackHandler.waitForCallbackResult(commandHandle)
     }
 }

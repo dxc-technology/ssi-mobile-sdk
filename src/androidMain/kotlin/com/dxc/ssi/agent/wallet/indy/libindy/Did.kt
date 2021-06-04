@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
+import com.dxc.ssi.agent.exceptions.indy.IndyJvmToCommonExceptionConverter
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -19,13 +20,10 @@ actual class Did {
             wallet: Wallet,
             did: String
         ): DidWithMetadataResult {
-            try {
+            val converter = IndyJvmToCommonExceptionConverter<DidWithMetadataResult>()
+            return converter.convertException {
                 val result = Did.getDidWithMeta(wallet.wallet, did).get()
-                return Json.decodeFromString(result)
-            } catch (e: ExecutionException) {
-                if (e.cause is org.hyperledger.indy.sdk.wallet.WalletItemNotFoundException)
-                    throw WalletItemNotFoundException()
-                else throw e
+                Json.decodeFromString(result)
             }
         }
 

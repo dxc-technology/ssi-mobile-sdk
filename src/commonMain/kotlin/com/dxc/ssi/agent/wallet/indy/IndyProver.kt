@@ -11,6 +11,7 @@ import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
+import com.dxc.ssi.agent.exceptions.indy.DuplicateMasterSecretNameException
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import com.dxc.ssi.agent.ledger.indy.helpers.TailsHelper
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
@@ -88,8 +89,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         masterSecretId = id
         try {
             Anoncreds.proverCreateMasterSecret(walletHolder.getWallet() as Wallet, id)
-        } catch (e: Exception) {
-            if (!e.message!!.contains("DuplicateMasterSecretNameException")) throw e
+        } catch (e: DuplicateMasterSecretNameException) {
             println("MasterSecret already exists, so we will use it")
         }
     }
