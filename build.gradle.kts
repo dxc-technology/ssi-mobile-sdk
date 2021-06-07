@@ -401,14 +401,14 @@ val packForXcode by tasks.creating(Sync::class) {
         val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
         inputs.property("mode", mode)
         dependsOn(framework.linkTask)
-        val targetDir = File(buildDir, "KotlinSharedRealDevice")
+        val targetDir = File(buildDir, "xcode-framework-arm")
         from({ framework.outputDirectory })
         into(targetDir)
     } else {
         val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
         inputs.property("mode", mode)
         dependsOn(framework.linkTask)
-        val targetDir = File(buildDir, "KotlinSharedSimulator")
+        val targetDir = File(buildDir, "xcode-framework-X64")
         from({ framework.outputDirectory })
         into(targetDir)
     }
