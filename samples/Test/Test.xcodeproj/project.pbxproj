@@ -7,12 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A44A69DC26668C22006F4F80 /* libzmq_pw.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A44A69D826668C12006F4F80 /* libzmq_pw.xcframework */; };
-		A44A69DD26668C22006F4F80 /* libzmq_pw.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A44A69D826668C12006F4F80 /* libzmq_pw.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		A44A69DE26668C23006F4F80 /* sodium.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A44A69DA26668C1F006F4F80 /* sodium.xcframework */; };
-		A44A69DF26668C23006F4F80 /* sodium.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A44A69DA26668C1F006F4F80 /* sodium.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		A44A69E026668C25006F4F80 /* ssi_agent.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A44A69D226668B8E006F4F80 /* ssi_agent.framework */; };
-		A44A69E126668C25006F4F80 /* ssi_agent.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A44A69D226668B8E006F4F80 /* ssi_agent.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A44A6A45266BF11D006F4F80 /* libzmq_pw.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A44A6A44266BF11D006F4F80 /* libzmq_pw.xcframework */; };
+		A44A6A47266BF128006F4F80 /* sodium.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A44A6A46266BF128006F4F80 /* sodium.xcframework */; };
+		A44A6A49266BF15E006F4F80 /* ssi_agent.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A44A6A48266BF15E006F4F80 /* ssi_agent.framework */; };
 		A47CC5AA26640C1C00F5D33F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A47CC5A926640C1C00F5D33F /* AppDelegate.swift */; };
 		A4AC12A32660303E0036AB73 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4AC12A22660303E0036AB73 /* ContentView.swift */; };
 		A4AC12A5266030410036AB73 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A4AC12A4266030410036AB73 /* Assets.xcassets */; };
@@ -26,9 +23,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				A44A69DF26668C23006F4F80 /* sodium.xcframework in Embed Frameworks */,
-				A44A69DD26668C22006F4F80 /* libzmq_pw.xcframework in Embed Frameworks */,
-				A44A69E126668C25006F4F80 /* ssi_agent.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -36,9 +30,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		A44A69D226668B8E006F4F80 /* ssi_agent.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ssi_agent.framework; sourceTree = "<group>"; };
-		A44A69D826668C12006F4F80 /* libzmq_pw.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = libzmq_pw.xcframework; sourceTree = "<group>"; };
-		A44A69DA26668C1F006F4F80 /* sodium.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = sodium.xcframework; sourceTree = "<group>"; };
+		A44A6A44266BF11D006F4F80 /* libzmq_pw.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libzmq_pw.xcframework; path = ../swiftIosApp/xcframework/libzmq_pw.xcframework; sourceTree = "<group>"; };
+		A44A6A46266BF128006F4F80 /* sodium.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = sodium.xcframework; path = ../swiftIosApp/xcframework/sodium.xcframework; sourceTree = "<group>"; };
+		A44A6A48266BF15E006F4F80 /* ssi_agent.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ssi_agent.framework; path = ../../build/cocoapods/framework/ssi_agent.framework; sourceTree = "<group>"; };
 		A47CC5A926640C1C00F5D33F /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = ../../swiftIosApp/swiftIosApp/AppDelegate.swift; sourceTree = "<group>"; };
 		A4AC129D2660303E0036AB73 /* test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = test.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4AC12A22660303E0036AB73 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -52,9 +46,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A44A69DE26668C23006F4F80 /* sodium.xcframework in Frameworks */,
-				A44A69DC26668C22006F4F80 /* libzmq_pw.xcframework in Frameworks */,
-				A44A69E026668C25006F4F80 /* ssi_agent.framework in Frameworks */,
+				A44A6A47266BF128006F4F80 /* sodium.xcframework in Frameworks */,
+				A44A6A45266BF11D006F4F80 /* libzmq_pw.xcframework in Frameworks */,
+				A44A6A49266BF15E006F4F80 /* ssi_agent.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,9 +58,9 @@
 		A4AC12942660303E0036AB73 = {
 			isa = PBXGroup;
 			children = (
-				A44A69D826668C12006F4F80 /* libzmq_pw.xcframework */,
-				A44A69DA26668C1F006F4F80 /* sodium.xcframework */,
-				A44A69D226668B8E006F4F80 /* ssi_agent.framework */,
+				A44A6A44266BF11D006F4F80 /* libzmq_pw.xcframework */,
+				A44A6A48266BF15E006F4F80 /* ssi_agent.framework */,
+				A44A6A46266BF128006F4F80 /* sodium.xcframework */,
 				A4AC129F2660303E0036AB73 /* test */,
 				A4AC129E2660303E0036AB73 /* Products */,
 			);
@@ -135,7 +129,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A4AC12982660303E0036AB73 /* Build configuration list for PBXProject "test" */;
+			buildConfigurationList = A4AC12982660303E0036AB73 /* Build configuration list for PBXProject "Test" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -182,6 +176,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -243,6 +238,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -287,6 +283,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
@@ -319,6 +316,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				ONLY_ACTIVE_ARCH = YES;
+				"OTHER_LDFLAGS[sdk=iphonesimulator14.5]" = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "lux-team";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -351,6 +350,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "lux-team";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -362,7 +362,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A4AC12982660303E0036AB73 /* Build configuration list for PBXProject "test" */ = {
+		A4AC12982660303E0036AB73 /* Build configuration list for PBXProject "Test" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A4AC12AA266030410036AB73 /* Debug */,
