@@ -39,20 +39,12 @@ class SsiAgentApiImplTest {
         ssiAgentApi.init()
 
 
-        val issuerInvitationUrl =
-            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIlE2Ykx4cG1hTVNMOUVCVG9CV1BVdWtOVVBEUTNZVWJWdEZFZU5wbXA5NGMiXSwicmVjaXBpZW50S2V5cyI6WyIzelhpU2s2TXpLekw5R1RielhIVUZDZkhQQXl1RnA5NGZLZXVSQ0Z6RXVxYSJdLCJAaWQiOiI4MGIwOTJlYS0wZTY0LTQ5NWYtYjU0NC1mYjYxZTM3YmY1NjUiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
-
-        val verifierInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiR3dqR0pBQkZzRnNoZkFzYUpxNWFqOXVQdExHSmRDYXpFM2NiaWVvYWpoNVUiXSwicmVjaXBpZW50S2V5cyI6WyJzNlBOaUIzZlN6UG50V29aNXNmOHY4NDN6UjNyWEYxRmJXR1VtSEVIb2ZmIl0sIkBpZCI6IjlmMTI4YTI0LWM2YzMtNDhiMi1hN2Q1LTY4MzYyM2JmMmMwMSIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
+        val invitationUrl =
+            "ws://192.168.0.117/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiQU1jakh6eEtIczJ5dEJZR01UU1VKUzYzc1VqUDM4aWZ5a0ZHVWpnRFg4N3kiXSwicmVjaXBpZW50S2V5cyI6WyJDWFBzR3N6dzhDUU01Y0pXN1h2RWFXUkhHc29MQmhFdVVFb1FZbmpjQ3Q2YSJdLCJAaWQiOiJkY2MzOGE2YS0yOTRmLTQzYmUtODBlNy0wMTUwMjBmZGM2MTYiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
         println("Connecting to issuer")
-        ssiAgentApi.connect(issuerInvitationUrl)
+        ssiAgentApi.connect(invitationUrl)
 
-        //TODO: ensure that connection can be established without delay between two connections
-        //Sleeper().sleep(4000)
-
-        println("Connecting to verifier")
-        ssiAgentApi.connect(verifierInvitationUrl)
 
         Sleeper().sleep(500000)
 

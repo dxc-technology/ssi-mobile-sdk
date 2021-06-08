@@ -1,13 +1,13 @@
 package com.dxc.ssi.agent.transport
 
+import co.touchlab.stately.collections.sharedMutableListOf
+import co.touchlab.stately.collections.sharedMutableMapOf
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
-import com.dxc.utils.Sleeper
+import io.ktor.http.*
 import io.ktor.util.*
 import kotlinx.coroutines.delay
-import co.touchlab.stately.collections.sharedMutableMapOf
-import co.touchlab.stately.collections.sharedMutableListOf
 
 
 //TODO: handle closing websocket correctly
@@ -31,20 +31,12 @@ class WebSocketTransportImpl : Transport {
     @OptIn(InternalAPI::class)
     override suspend fun sendMessage(connection: Connection, message: MessageEnvelop) {
 
-        val host = parseHostFromEndpoint(connection.endpoint)
-        val port = parsePortFromEndpoint(connection.endpoint)
-        val path = parsePathFromEndpoint(connection.endpoint)
-        val protocol = parseProtocolFromEndpoint(connection.endpoint)
+        println("Before sending message to endpoint: ${connection.endpoint}")
 
-        println("host = $host, port = $port, path = $path, protocol = $protocol")
-
-        if (protocol != "ws")
+        if (!(connection.endpoint.protocol == URLProtocol.WS || connection.endpoint.protocol == URLProtocol.WSS))
             throw IllegalArgumentException("Only websockets are supported by WebSocketTransportImpl!")
 
-        val url = "$protocol://$host:$port$path"
-
-        println("Synthesized url: $url")
-        val appSocket = openOrGetExistingConnection(url)
+        val appSocket = openOrGetExistingConnection(connection.endpoint.toString())
         appSocket.send(message.payload)
     }
 
@@ -68,32 +60,12 @@ class WebSocketTransportImpl : Transport {
         return appSocket
     }
 
-    //TODO: find some proper URL data model
-    //ws://11.0.1.11:7000/ws
-    private fun parseProtocolFromEndpoint(endpoint: String): String {
-        return Regex("(^.*):\\/\\/.*:.*$").find(endpoint)!!.groups[1]!!.value
-    }
-
-    private fun parsePathFromEndpoint(endpoint: String): String {
-        return Regex("^.*:.*:.*(\\/.*$)").find(endpoint)!!.groups[1]!!.value
-
-    }
-
-    private fun parsePortFromEndpoint(endpoint: String): Int {
-        return Regex("^.*:.*:(.*)\\/.*$").find(endpoint)!!.groups[1]!!.value.toInt()
-    }
-
-    private fun parseHostFromEndpoint(endpoint: String): String {
-        return Regex("^.*:\\/\\/(.*):.*$").find(endpoint)!!.groups[1]!!.value
-    }
-
-
     //TODO: decide if we need to leave this call blocking
     override suspend fun receiveNextMessage(): MessageEnvelop {
         //TODO: ensure that all suspend functions are not blocking. For that use withContext block in the begining of each suspend fun
 
         while (incomingMessagesQueue.size == 0) {
-           // Sleeper().sleep(1000)
+            // Sleeper().sleep(1000)
             delay(1000)
         }
 
