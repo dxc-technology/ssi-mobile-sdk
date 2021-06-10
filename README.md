@@ -233,6 +233,21 @@ ssiAgentApi.connect(verifierInvitationUrl)
 
 # iOS usage
 
+## Prerequisites
+
+```bash
+brew install cmake
+brew install zeromq
+```
+
+If during the build in Xcode you have error complaining that platform.hpp was not found then do following:
+
+1. Run pod install --verbose and find cached libzmq-pw pod
+2. Remove directory with pod 
+3. Remove Pods directory from your project
+4. Ensure that cmake and zeromq are installed
+5. Execute pod install
+
 ## Instruction for kotlin multiplatform library developer to build the library
 
 1. Go to **libindy-pod** library (this folder content is copy-paste
