@@ -10,6 +10,7 @@ target 'swiftIosApp' do
     pod 'libzmq-pw', "4.2.2"
     pod 'OpenSSL-XM'
     pod 'libindy', "1.15.0"
+    #pod ‘ssi_agent’, ‘1.0.0’, :source => “https://github.com/kkamyczek/SSI_Agent.git”
     pod 'kotlin_multiplatform_agent', :path => '../../'
 
 

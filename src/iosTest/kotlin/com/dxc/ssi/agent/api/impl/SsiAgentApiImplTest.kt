@@ -79,6 +79,10 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
+        override fun onProblemReportGenerated(connection: Connection, problemReport: ProblemReport) {
+
+        }
+
     }
 
     class CredReceiverControllerImpl : CredReceiverController {
