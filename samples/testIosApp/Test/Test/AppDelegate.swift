@@ -1,11 +1,3 @@
-//
-//  AppDelegate.swift
-//  XCFrameworkCocoapodsDemo
-//
-//  Created by Anurag Ajwani on 11/07/2020.
-//  Copyright © 2020 Anurag Ajwani. All rights reserved.
-//
-//
 //  AppDelegate.swift
 //  swiftApp
 //
