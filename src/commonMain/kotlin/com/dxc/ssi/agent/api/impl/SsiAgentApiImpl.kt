@@ -28,10 +28,6 @@ class SsiAgentApiImpl(
     private val messageListener: MessageListener =
         MessageListenerImpl(transport, walletConnector, ledgerConnector, trustPingTrackerService, callbacks)
 
-
-    //TODO: add callback controllers here
-
-
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun init() {
 
@@ -45,7 +41,6 @@ class SsiAgentApiImpl(
             println("Before initializing walletConnector")
             walletConnector.walletHolder.openOrCreateWallet()
             println("After initializing walletConnector")
-            //TODO: lloks like here we need to make ledgerCOnnector.did to be IsoSatte
             ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
             println("Set ledgerConnectorDid")
 
@@ -55,7 +50,7 @@ class SsiAgentApiImpl(
         })
 
         println("Before running listener in GlobalScope")
-//TODO: design proper concurrency there
+//TODO: design proper concurrency there,  think if GlobalScope is appropriate here or some custom job should be used
         GlobalScope.launch {
             //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
             withContext(CoroutineHelper.singleThreadCoroutineContext("Listener thread")) {

@@ -25,8 +25,8 @@ object MessagePacker {
 
         println("Packed message: ${messageEnvelop.payload}")
 
-        //TODO: avoid NPE here
-        val forwardMessage = BuildForwardMessage.buildForwardMessage(messageEnvelop, connection.peerDid!!)
+        //TODO: understand how to handle case with multiple recepient keys. Should we form forward message for each of those keys?
+        val forwardMessage = BuildForwardMessage.buildForwardMessage(messageEnvelop, connection.peerRecipientKeys.first())
 
         val outerMessageEnvelop = MessageEnvelop(
             payload = walletConnector.walletHolder.packMessage(
