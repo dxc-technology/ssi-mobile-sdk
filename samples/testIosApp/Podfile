@@ -1,0 +1,10 @@
+source 'https://github.com/CocoaPods/Specs.git'
+source 'https://github.com/hyperledger/indy-sdk.git'
+
+project 'Test/Test.xcodeproj'
+target 'Test' do
+    use_frameworks!
+    pod 'ssi_agent', '1.0.0', :source => "https://github.com/kkamyczek/ssi-mobile-sdk.git"
+    pod 'libsodium', '~> 1.0.12'
+    pod 'libzmq-pw', "4.2.2"	
+end
