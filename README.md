@@ -264,6 +264,38 @@ TODO: automate those steps
 '''
 and then un-Ignore the SsiAgentApiImplTest from iosX64 module and try running it
 
+## Instruction for running samples/swiftIosApp
+
+Run pod:
+```script
+pod setup
+pod install --verbose
+```
+
+## Add multiplatform kotlin library to your app
+
+Add sources to your Podfile:
+```script
+source 'https://github.com/CocoaPods/Specs.git'
+source 'https://github.com/hyperledger/indy-sdk.git'
+```
+
+Add pods to your Podfile:
+```script
+pod 'ssi_agent', '0.0.1', :source => "https://github.com/kkamyczek/ssi-mobile-sdk.git"
+pod 'libsodium', '~> 1.0.12'
+pod 'libzmq-pw', "4.2.2
+```
+
+Run as described:
+
+```script
+pod setup
+pod install --verbose
+```
+Now you can run XCode and make a build/run
+Both a simulator, and a device are supported.
+
 ## Instruction for kotlin multiplatform library user to use the library in swift app
 
 The current instruction explains how to use swift example app. TODO: make some build artifact (podspec, podfile?) so
