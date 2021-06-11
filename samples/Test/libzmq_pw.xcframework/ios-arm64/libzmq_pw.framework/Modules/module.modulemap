@@ -1,6 +1,0 @@
-framework module libzmq_pw {
-  umbrella header "libzmq-pw-umbrella.h"
-
-  export *
-  module * { export * }
-}
