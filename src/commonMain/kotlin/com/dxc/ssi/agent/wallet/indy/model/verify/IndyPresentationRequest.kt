@@ -39,7 +39,7 @@ import kotlinx.serialization.Serializable
 }
  *
  */
-//TODO: ensure we parse this request in complex cases with predicartes and attributes
+//TODO: ensure we parse this request in complex cases with predicates and attributes
 @Serializable
 data class IndyPresentationRequest(
     val name: String,

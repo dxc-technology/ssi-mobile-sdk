@@ -7,7 +7,6 @@ import com.indylib.indy_create_pool_ledger_config
 import com.indylib.indy_open_pool_ledger
 import com.indylib.indy_set_protocol_version
 
-//TODO: unify this, define those methods as expected ones
 actual class Pool actual constructor(private val poolHandle: Int) {
 
     actual companion object {

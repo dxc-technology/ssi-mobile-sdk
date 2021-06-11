@@ -31,8 +31,6 @@ class WebSocketTransportImpl : Transport {
     @OptIn(InternalAPI::class)
     override suspend fun sendMessage(connection: Connection, message: MessageEnvelop) {
 
-        //TODO: properly parse host
-        //val host = "localhost"
         val host = parseHostFromEndpoint(connection.endpoint)
         val port = parsePortFromEndpoint(connection.endpoint)
         val path = parsePathFromEndpoint(connection.endpoint)

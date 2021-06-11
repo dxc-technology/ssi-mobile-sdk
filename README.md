@@ -1,18 +1,29 @@
 # Overview
 
-This is initial POC of multiplatform library which works without inntermediate cloud agent and implements did connection
-protocol Currently work is in progress and there are a lot of TODOs in the code
+This is initial POC of multiplatform library which works without intermediate cloud agent and implements did connection
+protocol Currently work is in progress and there are a lot of TODOs in the code.
 
-# Self Sovereign Identity Mobile SDK
+# Self Sovereign Identity Kotlin Multiplatform Agent
 
-A new Mobile SDK to use with Self Sovereign Identity (SSI) applications is available as an open-source project from
-Luxoft DXC. The SSI Mobile SDK provides libraries and tools to accelerate integration of digital wallet capabilities
-into existing mobile apps.
+Kotlin Multiplatform Agent is a multiplatform library which implements functionality of SSI Agent and intended to be
+compatible with https://github.com/hyperledger/aries-rfcs
 
-With Mobile SDK developers can leverage secure communication protocols and exchange Verifiable Credentials in mobile
-solutions. Digital wallets are a key component in the evolving SSI standards and ecosystems. Mobile SDK is based on
-Hyperledger Indy, stores Verifiable Credentials directly on the device, giving users to full control over how, and with
-whom, their information is shared.
+Currently it supports following platforms and if necessary can be extended to other platforms.
+
+- JVM -> jar
+- Android -> aar
+- iOS -> cocoapod 
+
+See https://kotlinlang.org/docs/multiplatform.html for details on how this multiplatform technology works.
+
+A new Kotlin Multiplatform Agent to use with Self Sovereign Identity (SSI) applications is available as an open-source
+project from Luxoft DXC. The SSI Kotlin Multiplatform Agent provides libraries and tools to accelerate integration of
+digital wallet capabilities into existing mobile apps.
+
+With Kotlin Multiplatform Agent developers can leverage secure communication protocols and exchange Verifiable
+Credentials in mobile solutions. Digital wallets are a key component in the evolving SSI standards and ecosystems.
+Kotlin Multiplatform Agent is based on Hyperledger Indy, stores Verifiable Credentials directly on the device, giving
+users to full control over how, and with whom, their information is shared.
 
 Building SSI capabilities into your mobile applications helps facilitates managing, compliance, liability, and security,
 for Identity-based use cases such as:
@@ -25,8 +36,74 @@ for Identity-based use cases such as:
   the Apache 2.0 license, Luxoft & DXC encourages standard approaches across internal projects and benefits from the
   transparency of technical peer-review from the community.
 
-SSI mobile SDK provides features of [Cordentity](https://github.com/hyperledger-labs/cordentity) for mobile Operating
-Systems.
+# Architecture
+
+Currently the library uses [indy](https://github.com/hyperledger/indy-sdk) as underlying technology for managing ledger
+and wallet but it is designed with abstractions which allow to use any other libs. It has pluggable WalletConnetor and
+LedgerConnector which allows to plug in any technology. As a transport layer it currently uses websockets but it allows
+any pluggable implementation and it is easy to add it for other transports.
+
+Diagram below present high-level view on components.
+
+- **API** - high level Kotlin interfaces for using of its functions
+- **DIDComm** - implementation of DIDComm protocol
+- **Transport** - pluggable module for transport. Initially it will use websockets, but it will allow to plug in any
+  transport protocol.
+- **Ledger Connector** - Connector allowing to use plug-able ledger
+- **Wallet Connector** - Connector allowing to use plug-able wallet
+- **Indy Ledger and Wallet** - Indy Implementation of Ledger and Wallet
+
+<img src="docs/ComponentDiagram.png" alt="docs/ComponentDiagram.png" style="zoom:50%;" />
+<img src="docs/ClassDiagram.png" alt="docs/ClassDiagram.png" style="zoom:50%;" />
+
+# Usage
+
+Usage is the same across platforms. Main difference will be only in addding dependency for the project. For android it
+will be aar from some maven repository and for ios it will be cocoapod. For the platform specific details see specific
+sections below.
+
+In general before using ths library you must build and initialize it.
+
+Example is given for android, but it will be almost the same for all platforms
+
+Here we define that lib should build genesys.txn file based on ip address of public ledger. Alternatively it is possible
+to use IndyLedgerConnectorConfiguration.GenesisMode.FILE and specify existing genesis file.
+
+```kotlin
+val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
+    genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
+    ipAddress = "192.168.0.117"
+)
+```
+
+next we build the library providing all pluggable parts. Business logic is encapusalted in controllers called at
+different stages of connection and credential lifecycle. Only those controller which we need for our specific business case should be defined.
+For example for case of holder mobile library we need to define following controllers.
+
+- ConnectionInitiatorController
+- CredPresenterController
+- CredReceiverController
+
+ANd we do not need to define controllers for issuence credentials or accepting connection.
+```kotlin
+ssiAgentApi = SsiAgentBuilderImpl()
+    .withEnvironment(EnvironmentImpl(this))
+    .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
+    .withCredReceiverController(CredReceiverControllerImpl())
+    .withCredPresenterController(CredPresenterControllerImpl())
+    .withLedgerConnector(IndyLedgerConnector(indyLedgerConnectorConfiguration))
+    .build()
+
+ssiAgentApi.init()
+```
+
+After that we can use connect function to establish connection.
+
+```kotlin
+ssiAgentApi.connect()
+```
+
+You can intervene into connecting process by placing your custom logic into ConnectionInitiatorController methods.
 
 # Android usage
 
@@ -97,9 +174,8 @@ dependencies {
 
 ## Add required permissions to android app
 
-Add to AndroidManifest.xml <uses-permission> tags and 
-android:usesCleartextTraffic="true",
-android:requestLegacyExternalStorage="true"  as below.
+Add to AndroidManifest.xml <uses-permission> tags and android:usesCleartextTraffic="true", android:
+requestLegacyExternalStorage="true"  as below.
 
 ```xml
 
@@ -126,7 +202,8 @@ request those permissions in runtime
 ```kotlin
 val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
     genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
-    ipAddress = "192.168.0.117")
+    ipAddress = "192.168.0.117"
+)
 
 ssiAgentApi = SsiAgentBuilderImpl()
     .withEnvironment(EnvironmentImpl(this))
@@ -138,8 +215,6 @@ ssiAgentApi = SsiAgentBuilderImpl()
 
 ssiAgentApi.init()
 
-agentInitialized = true
-println("Initialized SSI Agent")
 ```
 
 ## Use library for connection
@@ -180,9 +255,9 @@ just search in google when you encounter problems
    into indylib folder
 
 TODO: automate those steps
-<img src="screenshot1.png" alt="screenshot1" style="zoom:50%;" />
+<img src="docs/screenshot1.png" alt="docs/screenshot1" style="zoom:50%;" />
 
-  <img src="screenshot2.png" alt="screenshot2" style="zoom:50%;" />
+  <img src="docs/screenshot2.png" alt="docs/screenshot2" style="zoom:50%;" />
 5. Execute 
 '''console
 ./gradlew build
