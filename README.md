@@ -296,6 +296,19 @@ pod install --verbose
 Now you can run XCode and make a build/run
 Both a simulator, and a device are supported.
 
+## Instruction how to create XCF artifact 
+
+Run shell command from ssi-mobile-sdk root folder:
+```script
+sh run.sh
+```
+
+Artifact will be created in folder: 
+build/xcode-framework-universal
+
+Zip it and copy it to your Github release repository:
+https://github.com/kkamyczek/ssi-mobile-sdk/releases
+
 ## Instruction for kotlin multiplatform library user to use the library in swift app
 
 The current instruction explains how to use swift example app. TODO: make some build artifact (podspec, podfile?) so
