@@ -22,7 +22,7 @@ import org.junit.Test
 class SsiAgentApiImplTest {
 
     @Test
-    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+   // @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -40,7 +40,7 @@ class SsiAgentApiImplTest {
 
 
         val invitationUrl =
-            "ws://192.168.0.117/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiQU1jakh6eEtIczJ5dEJZR01UU1VKUzYzc1VqUDM4aWZ5a0ZHVWpnRFg4N3kiXSwicmVjaXBpZW50S2V5cyI6WyJDWFBzR3N6dzhDUU01Y0pXN1h2RWFXUkhHc29MQmhFdVVFb1FZbmpjQ3Q2YSJdLCJAaWQiOiJkY2MzOGE2YS0yOTRmLTQzYmUtODBlNy0wMTUwMjBmZGM2MTYiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRzJzVm9mUjFuNVYyQ1l5enA5c0ZmU0RtNHNqNzFRdlZnSEJ1azkyQ1pwUEsiXSwicmVjaXBpZW50S2V5cyI6WyI5aWpXdDZOa01Cem84cVJRZUdMV3JwZjV0bXZ6WlNHcEtBZTRBUnFrNmRzSiJdLCJAaWQiOiI5ZjUxNjE4OC01ZGViLTRjMGEtYjUzZS1hMmU1ZWM0ZDU2N2UiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
         println("Connecting to issuer")
         ssiAgentApi.connect(invitationUrl)
@@ -96,7 +96,6 @@ class SsiAgentApiImplTest {
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         override fun onInvitationReceived(
             connection: Connection,
-            endpoint: String,
             invitation: Invitation
         ): CallbackResult {
             return CallbackResult(canProceedFurther = true)

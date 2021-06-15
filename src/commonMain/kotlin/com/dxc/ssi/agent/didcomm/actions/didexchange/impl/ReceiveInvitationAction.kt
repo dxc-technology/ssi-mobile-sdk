@@ -32,39 +32,25 @@ class ReceiveInvitationAction(
         // Create connection and store it in wallet // Create separate action for this?
         // Send Connection Request
         // Ensure transport is initialized?
-
-        val url = Url(invitationUrl)
-        val endpoint = with(URLBuilder()) {
-            this.host = url.host
-            this.protocol = url.protocol
-            this.port = url.port
-            this.encodedPath = url.encodedPath
-            this.build()
-        }
-
-        val encodedInvitation = url.parameters["c_i"]!!
+        val invitationUrl = Url(invitationUrl)
+        val encodedInvitation = invitationUrl.parameters["c_i"]!!
         val invitation = parseInvitationFromInvitationUrl(encodedInvitation)
-
-
-        println("Parsed invitation details: invitation = $invitation\nendpoint=$endpoint")
 
         val connectionId = uuid4().toString()
 
-
         val connection = Connection(
             id = connectionId, state = "START",
-            invitation = invitationUrl,
+            invitation = this.invitationUrl,
             isSelfInitiated = true,
             peerRecipientKeys = invitation.recipientKeys,
-            endpoint = endpoint
+            endpoint = invitation.serviceEndpoint
         )
 
 
         //TODO: before storing record check if there were record with the same invitation and reuse it
         //TODO: think about not storing connection object at all untill callback result is received
         walletConnector.walletHolder.storeConnectionRecord(connection)
-        val callbackResult =
-            connectionInitiatorController.onInvitationReceived(connection, endpoint.toString(), invitation)
+        val callbackResult = connectionInitiatorController.onInvitationReceived(connection, invitation)
 
         if (callbackResult.canProceedFurther) {
 

@@ -8,7 +8,8 @@ import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
 import com.dxc.ssi.agent.model.Connection
 
 interface ConnectionInitiatorController {
-    fun onInvitationReceived(connection: Connection, endpoint: String, invitation: Invitation): CallbackResult
+    //TODO: looks like we do not need to pass endpoint separately if it is already part of invitation
+    fun onInvitationReceived(connection: Connection, invitation: Invitation): CallbackResult
     fun onRequestSent(connection: Connection, request: ConnectionRequest): CallbackResult
     fun onResponseReceived(connection: Connection, response: ConnectionResponse): CallbackResult
     fun onCompleted(connection: Connection): CallbackResult

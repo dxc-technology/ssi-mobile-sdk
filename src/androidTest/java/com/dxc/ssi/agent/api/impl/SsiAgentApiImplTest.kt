@@ -115,7 +115,6 @@ class SsiAgentApiImplTest {
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         override fun onInvitationReceived(
             connection: Connection,
-            endpoint: String,
             invitation: Invitation
         ): CallbackResult {
             return CallbackResult(canProceedFurther = true)
