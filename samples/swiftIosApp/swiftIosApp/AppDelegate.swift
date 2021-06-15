@@ -34,13 +34,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .build()
         
                ssiAgentApi.doInit()
-               let issuerInvitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjNwQUNXdHZMZVZBSlA1bmpGRWlmODRONlBVWEppdzZYNUNZb2VUUEZSMmNoIl0sInJlY2lwaWVudEtleXMiOlsiRUhCWk0xQXNIaVJqVmhjWkJzY2kxdlJpdVoxR2JOakJ4V1FvVjh3OG9GTDkiXSwiQGlkIjoiODAyYWNjYzUtMmVkZC00OTM0LTk0ZTItZDQ3ZmI1NjM0ZGVjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+               let issuerInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiQU1jakh6eEtIczJ5dEJZR01UU1VKUzYzc1VqUDM4aWZ5a0ZHVWpnRFg4N3kiXSwicmVjaXBpZW50S2V5cyI6WyIzall6VnA0N0dFQ0VDZzNIaFlrbUJNMnJQNXk3QW9Ub24zM1NDRWl0NXk1VSJdLCJAaWQiOiJjNWFlMzFjYy00NDBiLTQzMmUtOTAzYy0yMTg2MDJlOTUxN2IiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
                
                ssiAgentApi.connect(url: issuerInvitation)
-        
-        let verifierInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiQ3R4QVZUWTFSY2g0M29jYldBS3NWWk1zTXRkcG5GUXRhVHIyQWVwOXRLUWYiXSwicmVjaXBpZW50S2V5cyI6WyJCcHFRQ0doenNFSnA4alg2czI5QXBDb1h0TWVXYWFqVFdVWXVuZm55NlFBZiJdLCJAaWQiOiI3OTYxNjU1Ni04YzMwLTQ0MTctOGE1Yi02YmNiYmFhOWE3ZGMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
-        
-        ssiAgentApi.connect(url: verifierInvitation)
+      
         
                sleep(10000)
         // Override point for customization after application launch.
