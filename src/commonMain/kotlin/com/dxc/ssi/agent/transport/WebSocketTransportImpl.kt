@@ -1,7 +1,7 @@
 package com.dxc.ssi.agent.transport
 
 import com.dxc.ssi.agent.api.pluggable.Transport
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import io.ktor.http.*
 import io.ktor.util.*
@@ -16,7 +16,7 @@ class WebSocketTransportImpl : Transport {
 
 
     @OptIn(InternalAPI::class)
-    override suspend fun sendMessage(connection: Connection, message: MessageEnvelop) {
+    override suspend fun sendMessage(connection: PeerConnection, message: MessageEnvelop) {
 
         println("Before sending message to endpoint: ${connection.endpoint}")
 

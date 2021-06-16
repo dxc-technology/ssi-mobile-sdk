@@ -1,6 +1,6 @@
 package com.dxc.ssi.agent.api.pluggable.wallet
 
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
@@ -20,13 +20,13 @@ interface WalletHolder {
 
     fun getTailsPath(): String
 
-    suspend fun storeConnectionRecord(connection: Connection)
+    suspend fun storeConnectionRecord(connection: PeerConnection)
 
 
-    suspend fun getConnectionRecordById(connectionId: String): Connection?
+    suspend fun getConnectionRecordById(connectionId: String): PeerConnection?
 
 
-    suspend fun findConnectionByVerKey(verKey: String): Connection?
+    suspend fun findConnectionByVerKey(verKey: String): PeerConnection?
 
     //TODO: rewrite this to return Wallet object instead of Any
     fun getWallet(): Any

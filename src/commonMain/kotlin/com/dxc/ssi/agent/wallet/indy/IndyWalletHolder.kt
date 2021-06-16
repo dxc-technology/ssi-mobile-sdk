@@ -3,7 +3,7 @@ package com.dxc.ssi.agent.wallet.indy
 import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
@@ -51,7 +51,7 @@ open class IndyWalletHolder(
         TODO("Not yet implemented")
     }
 
-    override suspend fun storeConnectionRecord(connection: Connection) {
+    override suspend fun storeConnectionRecord(connection: PeerConnection) {
         //TODO: check if we need to check wallet health status before using it
         val existingConnection = getConnectionRecordById(connection.id)
         val tagsJson = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${connection.peerVerkey}\"}"
@@ -73,7 +73,7 @@ open class IndyWalletHolder(
         }
     }
 
-    override suspend fun getConnectionRecordById(connectionId: String): Connection? {
+    override suspend fun getConnectionRecordById(connectionId: String): PeerConnection? {
 
         //TODO: use some serializable data structure
         val options = "{\"retrieveType\" : true}"
@@ -90,13 +90,13 @@ open class IndyWalletHolder(
             val wallet = isoWallet.access { it.obj }
             val retrievedValue =
                 WalletRecord.get(wallet!!, WalletRecordType.ConnectionRecord.name, connectionId, options)
-            Connection.fromJson(extractValue(retrievedValue))
+            PeerConnection.fromJson(extractValue(retrievedValue))
         } catch (e: WalletItemNotFoundException) {
             null
         }
     }
 
-    override suspend fun findConnectionByVerKey(verKey: String): Connection? {
+    override suspend fun findConnectionByVerKey(verKey: String): PeerConnection? {
 
 
         val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"
@@ -124,7 +124,7 @@ open class IndyWalletHolder(
             .map {
                 println(it.value)
                 it.value
-            }.map<String, Connection> { Json.decodeFromString(it) }
+            }.map<String, PeerConnection> { Json.decodeFromString(it) }
             .firstOrNull()
 
     }

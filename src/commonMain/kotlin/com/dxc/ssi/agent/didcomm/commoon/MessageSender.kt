@@ -2,14 +2,14 @@ package com.dxc.ssi.agent.didcomm.commoon
 
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 //TODO: understand what should be responsibility of this helper and how we can avoid it
 object MessageSender {
 
     suspend fun packAndSendMessage(
         message: Message,
-        connection: Connection,
+        connection: PeerConnection,
         walletConnector: WalletConnector,
         transport: Transport
     ) {

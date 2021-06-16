@@ -10,7 +10,7 @@ import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.utils.EnvironmentUtils
 import kotlinx.coroutines.*
@@ -77,7 +77,7 @@ class SsiAgentApiImpl(
         }
     }
 
-    override fun connect(url: String): Connection {
+    override fun connect(url: String): PeerConnection {
         println("Entered connect function")
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
@@ -86,23 +86,23 @@ class SsiAgentApiImpl(
             })
     }
 
-    override fun disconnect(connection: Connection) {
+    override fun disconnect(connection: PeerConnection) {
         TODO("Not yet implemented")
     }
 
     //TODO: current function is synchronous with hardcoded timeout, generalize it
-    override fun sendTrustPing(connection: Connection): Boolean {
+    override fun sendTrustPing(connection: PeerConnection): Boolean {
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
                 messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
             })
     }
 
-    override fun issueCredentialOverConnection(connection: Connection) {
+    override fun issueCredentialOverConnection(connection: PeerConnection) {
         TODO("Not yet implemented")
     }
 
-    override fun requestProofOverConnection(connection: Connection) {
+    override fun requestProofOverConnection(connection: PeerConnection) {
         TODO("Not yet implemented")
     }
 
@@ -124,11 +124,11 @@ class SsiAgentApiImpl(
         println("Stopped the agent")
     }
 
-    override fun getConnections(): Set<Connection> {
+    override fun getConnections(): Set<PeerConnection> {
         TODO("Not yet implemented")
     }
 
-    override fun disconnect(connection: Connection, force: Boolean) {
+    override fun disconnect(connection: PeerConnection, force: Boolean) {
         TODO("Not yet implemented")
     }
 

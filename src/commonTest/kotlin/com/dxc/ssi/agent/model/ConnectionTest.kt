@@ -9,7 +9,7 @@ class ConnectionTest {
     @Test
     fun testSerialization() {
 
-        val connection = Connection(
+        val connection = PeerConnection(
             id = "id",
             state = "state",
             invitation = "invitati",
@@ -22,7 +22,7 @@ class ConnectionTest {
 
         println(jsonString)
 
-        val connection2 = Connection.fromJson(jsonString)
+        val connection2 = PeerConnection.fromJson(jsonString)
 
         assertEquals(connection, connection2)
 
