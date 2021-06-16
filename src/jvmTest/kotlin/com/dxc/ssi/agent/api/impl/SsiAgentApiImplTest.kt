@@ -29,7 +29,7 @@ class SsiAgentApiImplTest {
 
     private val walletName = "newWalletName2"
     private val walletPassword = "newWalletPassword"
-    private val did = "4PCVFCeZbKXyvgjCedbXDx"
+    private val did = "Aj4mwDVVEh46K17Cqh4dpU"
 
 
     @Test
@@ -47,6 +47,7 @@ class SsiAgentApiImplTest {
 
         if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
             val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
+            print("Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}")
             //Store did somewhere in your application to use it afterwards
         }
 
@@ -69,7 +70,7 @@ class SsiAgentApiImplTest {
 
 
         val invitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiNmVOQXpSOFBWRzhQaFJrNW55YUFQVnRoQmVHZEQydFRNWUVRd3pkRkR5YngiXSwicmVjaXBpZW50S2V5cyI6WyJuSjVmNDVEQ3ZKTUdMOXBVQlo2VlpWY3VWcG5MM2N6dmVFZE10bWVESzczIl0sIkBpZCI6ImY2ZDZkYjE5LTU0NzMtNDcxOS05NDY2LTcyZTdjNWE4YTNjNyIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRVk0ZFZSUjZVb0Q5WWN5SkQ5VURZUmd6QnI3SDZFeEhGUTdxWEJkaHVKUXQiXSwicmVjaXBpZW50S2V5cyI6WyI3WFJiZ1dmRlNaQThNZXpKMkJrRnI4eUszeTJrQUtvaVNWQVNuNGQxaEhSYSJdLCJAaWQiOiI1ZDBkNmM0OS0wYjQ0LTRiZDQtYjhhOS1jMDk3NTFlNjE5ZDEiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
 
         println("Connecting to issuer")
