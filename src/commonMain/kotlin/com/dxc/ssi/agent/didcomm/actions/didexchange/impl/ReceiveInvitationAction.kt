@@ -9,7 +9,7 @@ import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
 import com.dxc.ssi.agent.didcomm.commoon.MessagePacker
 import com.dxc.ssi.agent.didcomm.model.common.Service
 import com.dxc.ssi.agent.didcomm.model.didexchange.*
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 import com.dxc.ssi.agent.model.messages.Message
 import io.ktor.util.*
 import kotlinx.serialization.decodeFromString
@@ -39,7 +39,7 @@ class ReceiveInvitationAction(
         val connectionId = uuid4().toString()
 
 
-        val connection = Connection(
+        val connection = SharedConnection(
             id = connectionId, state = "START",
             invitation = invitationUrl,
             isSelfInitiated = true,
@@ -133,8 +133,8 @@ class ReceiveInvitationAction(
 
     }
 
-    private fun buildConnection(): com.dxc.ssi.agent.didcomm.model.didexchange.Connection {
-        val connection = com.dxc.ssi.agent.didcomm.model.didexchange.Connection(
+    private fun buildConnection(): Connection {
+        val connection = Connection(
             //TODO: understand what did should be set to
             did = walletConnector.walletHolder.getIdentityDetails().did,
             didDocument = buildDidDocument()

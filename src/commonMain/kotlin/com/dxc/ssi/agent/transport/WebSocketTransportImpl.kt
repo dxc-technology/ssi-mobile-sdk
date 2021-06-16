@@ -1,7 +1,7 @@
 package com.dxc.ssi.agent.transport
 
 import com.dxc.ssi.agent.api.pluggable.Transport
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import com.dxc.utils.Sleeper
 import io.ktor.util.*
@@ -29,7 +29,7 @@ class WebSocketTransportImpl : Transport {
     }
 
     @OptIn(InternalAPI::class)
-    override suspend fun sendMessage(connection: Connection, message: MessageEnvelop) {
+    override suspend fun sendMessage(connection: SharedConnection, message: MessageEnvelop) {
 
         val host = parseHostFromEndpoint(connection.endpoint)
         val port = parsePortFromEndpoint(connection.endpoint)

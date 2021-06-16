@@ -4,7 +4,7 @@ import co.touchlab.stately.collections.IsoMutableMap
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.didexchange.impl.AbortConnection
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 import com.dxc.utils.Sleeper
 import com.dxc.utils.System
 
@@ -55,12 +55,12 @@ class TrustPingTrackerService(
     }
 
 
-    fun trustPingSentOverConnectionEvent(connection: Connection) {
+    fun trustPingSentOverConnectionEvent(connection: SharedConnection) {
         println("TrustPing sent for connectionId = ${connection.id}")
         sentPingsMap[connection.id] = System.currentTimeMillis()
     }
 
-    fun trustPingResponseReceivedEvent(connection: Connection) {
+    fun trustPingResponseReceivedEvent(connection: SharedConnection) {
         println("TrustPing received for connectionId = ${connection.id}")
         sentPingsMap.remove(connection.id)
     }

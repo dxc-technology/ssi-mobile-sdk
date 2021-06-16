@@ -1,6 +1,6 @@
 package com.dxc.ssi.agent.didcomm.processor.didexchange
 
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.MessageContext
 
@@ -8,7 +8,7 @@ import com.dxc.ssi.agent.model.messages.MessageContext
 
 interface DidExchangeProcessor {
     //TODO: think about special data structure Invitation instead of String
-    suspend fun initiateConnectionByInvitation(invitation: String): Connection
+    suspend fun initiateConnectionByInvitation(invitation: String): SharedConnection
     suspend fun processMessage(messageContext: MessageContext)
 
 

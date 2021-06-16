@@ -1,6 +1,6 @@
 package com.dxc.ssi.agent.didcomm.model.common
 
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString

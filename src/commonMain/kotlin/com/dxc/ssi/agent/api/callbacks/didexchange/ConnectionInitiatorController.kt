@@ -5,12 +5,12 @@ import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 
 interface ConnectionInitiatorController {
-    fun onInvitationReceived(connection: Connection, endpoint: String, invitation: Invitation): CallbackResult
-    fun onRequestSent(connection: Connection, request: ConnectionRequest): CallbackResult
-    fun onResponseReceived(connection: Connection, response: ConnectionResponse): CallbackResult
-    fun onCompleted(connection: Connection): CallbackResult
-    fun onAbandoned(connection: Connection, problemReport: ProblemReport): CallbackResult
+    fun onInvitationReceived(connection: SharedConnection, endpoint: String, invitation: Invitation): CallbackResult
+    fun onRequestSent(connection: SharedConnection, request: ConnectionRequest): CallbackResult
+    fun onResponseReceived(connection: SharedConnection, response: ConnectionResponse): CallbackResult
+    fun onCompleted(connection: SharedConnection): CallbackResult
+    fun onAbandoned(connection: SharedConnection, problemReport: ProblemReport): CallbackResult
 }

@@ -13,7 +13,7 @@ import com.dxc.ssi.agent.didcomm.model.common.Attach
 import com.dxc.ssi.agent.didcomm.model.common.Thread
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationContainer
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils.jsonProcessor
 import kotlinx.serialization.decodeFromString

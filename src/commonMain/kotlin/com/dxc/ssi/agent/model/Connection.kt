@@ -9,7 +9,7 @@ import kotlinx.serialization.json.Json
 //TODO: replace String state with some proper enum or reuse DIDExchangeState
 //TODO: see if UUID type can be used instead of String for id
 @Serializable
-data class Connection(
+data class SharedConnection(
     val id: String,
     val state: String,
     val invitation: String,
@@ -22,7 +22,7 @@ data class Connection(
     fun toJson(): String = Json.encodeToString(this)
 
     companion object {
-        fun fromJson(jsonString: String): Connection =
-            Json { ignoreUnknownKeys = true }.decodeFromString<Connection>(jsonString)
+        fun fromJson(jsonString: String): SharedConnection =
+            Json { ignoreUnknownKeys = true }.decodeFromString<SharedConnection>(jsonString)
     }
 }

@@ -1,9 +1,9 @@
 package com.dxc.ssi.agent.model.messages
 
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 
 
 data class MessageContext(
-    val connection: Connection?,
+    val connection: SharedConnection?,
     val receivedUnpackedMessage: ReceivedUnpackedMessage
 )

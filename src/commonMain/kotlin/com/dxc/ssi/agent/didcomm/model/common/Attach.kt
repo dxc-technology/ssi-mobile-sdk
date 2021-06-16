@@ -16,5 +16,5 @@ import kotlinx.serialization.Serializable
 data class Attach(
     @SerialName("@id") val id: String,
     @SerialName("mime-type") val mimeType: String,
-    val data: Data
+    val data: SharedData
 )

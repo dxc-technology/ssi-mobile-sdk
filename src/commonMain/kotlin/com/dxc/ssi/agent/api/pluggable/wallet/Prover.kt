@@ -1,7 +1,7 @@
 package com.dxc.ssi.agent.api.pluggable.wallet
 
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
-import com.dxc.ssi.agent.didcomm.model.common.Data
+import com.dxc.ssi.agent.didcomm.model.common.SharedData
 import com.dxc.ssi.agent.didcomm.model.common.Thread
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.data.*
@@ -124,17 +124,17 @@ interface Prover {
      * @param id [String]
      */
     suspend fun createMasterSecret(id: String)
-    fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): Data
-    fun buildCredentialObjectFromRawData(data: Data): Credential
-    fun buildCredentialOfferObjectFromRawData(data: Data): CredentialOffer
+    fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): SharedData
+    fun buildCredentialObjectFromRawData(data: SharedData): Credential
+    fun buildCredentialOfferObjectFromRawData(data: SharedData): CredentialOffer
     suspend fun removeCredentialExchangeRecordByThread(thread: Thread)
-    fun buildPresentationRequestObjectFromRawData(data: Data): PresentationRequest
+    fun buildPresentationRequestObjectFromRawData(data: SharedData): PresentationRequest
     suspend fun createPresentation(
         presentationRequest: PresentationRequest,
         ledgerConnector: LedgerConnector,
     ): Presentation
 
-    fun extractPresentationDataFromPresentation(presentation: Presentation): Data
+    fun extractPresentationDataFromPresentation(presentation: Presentation): SharedData
 
 
 }

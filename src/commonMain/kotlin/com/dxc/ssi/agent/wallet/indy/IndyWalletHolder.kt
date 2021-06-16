@@ -4,7 +4,7 @@ import co.touchlab.stately.isolate.IsolateState
 import co.touchlab.stately.isolate.StateHolder
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
@@ -49,7 +49,7 @@ open class IndyWalletHolder : WalletHolder {
         TODO("Not yet implemented")
     }
 
-    override suspend fun storeConnectionRecord(connection: Connection) {
+    override suspend fun storeConnectionRecord(connection: SharedConnection) {
         //TODO: check if we need to check wallet health status before using it
         val existingConnection = getConnectionRecordById(connection.id)
         val tagsJson = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${connection.peerVerkey}\"}"
@@ -71,7 +71,7 @@ open class IndyWalletHolder : WalletHolder {
         }
     }
 
-    override suspend fun getConnectionRecordById(connectionId: String): Connection? {
+    override suspend fun getConnectionRecordById(connectionId: String): SharedConnection? {
 
         //TODO: use some serializable data structure
         val options = "{\"retrieveType\" : true}"
@@ -88,7 +88,7 @@ open class IndyWalletHolder : WalletHolder {
             val wallet = isoWallet.access { it.obj }
             val retrievedValue =
                 WalletRecord.get(wallet!!, WalletRecordType.ConnectionRecord.name, connectionId, options)
-            Connection.fromJson(extractValue(retrievedValue))
+            SharedConnection.fromJson(extractValue(retrievedValue))
         } catch (e: WalletItemNotFoundException) {
             null
         } catch (e: Exception) {
@@ -101,7 +101,7 @@ open class IndyWalletHolder : WalletHolder {
         }
     }
 
-    override suspend fun findConnectionByVerKey(verKey: String): Connection? {
+    override suspend fun findConnectionByVerKey(verKey: String): SharedConnection? {
 
 
         val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"
@@ -129,7 +129,7 @@ open class IndyWalletHolder : WalletHolder {
             .map {
                 println(it.value)
                 it.value
-            }.map<String, Connection> { Json.decodeFromString(it) }
+            }.map<String, SharedConnection> { Json.decodeFromString(it) }
             .firstOrNull()
 
     }

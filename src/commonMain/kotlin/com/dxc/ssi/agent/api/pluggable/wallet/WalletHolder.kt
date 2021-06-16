@@ -1,6 +1,6 @@
 package com.dxc.ssi.agent.api.pluggable.wallet
 
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
 
@@ -53,21 +53,21 @@ interface WalletHolder {
      * Stores Connection object in Non Secret space of wallet
 
      */
-    suspend fun storeConnectionRecord(connection: Connection)
+    suspend fun storeConnectionRecord(connection: SharedConnection)
 
     /**
      * Gets connection record from wallet by id
      *
      * @return Connection object
      */
-    suspend fun getConnectionRecordById(connectionId: String): Connection?
+    suspend fun getConnectionRecordById(connectionId: String): SharedConnection?
 
     /**
      * Find connection record in a wallet by verkey
      *
      * @return Connection object
      */
-    suspend fun findConnectionByVerKey(verKey: String): Connection?
+    suspend fun findConnectionByVerKey(verKey: String): SharedConnection?
 
     /**
      * Opens or creates wallet

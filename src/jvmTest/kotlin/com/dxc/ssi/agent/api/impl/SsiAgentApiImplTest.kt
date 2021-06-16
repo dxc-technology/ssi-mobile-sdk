@@ -14,7 +14,7 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContaine
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 import com.dxc.utils.Sleeper
 import org.junit.Ignore
 import org.junit.Test
@@ -60,13 +60,13 @@ class SsiAgentApiImplTest {
 
     class CredPresenterControllerImpl : CredPresenterController {
         override fun onRequestReceived(
-            connection: Connection,
+            connection: SharedConnection,
             presentationRequest: PresentationRequestContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: Connection): CallbackResult {
+        override fun onDone(connection: SharedConnection): CallbackResult {
             return CallbackResult(true)
         }
 
@@ -74,27 +74,27 @@ class SsiAgentApiImplTest {
 
     class CredReceiverControllerImpl : CredReceiverController {
         override fun onOfferReceived(
-            connection: Connection,
+            connection: SharedConnection,
             credentialOfferContainer: CredentialOfferContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
         override fun onRequestSent(
-            connection: Connection,
+            connection: SharedConnection,
             credentialRequestContainer: CredentialRequestContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
         override fun onCredentialReceived(
-            connection: Connection,
+            connection: SharedConnection,
             credentialContainer: CredentialContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: Connection, credentialContainer: CredentialContainer): CallbackResult {
+        override fun onDone(connection: SharedConnection, credentialContainer: CredentialContainer): CallbackResult {
             return CallbackResult(true)
         }
 
@@ -103,29 +103,29 @@ class SsiAgentApiImplTest {
 
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         override fun onInvitationReceived(
-            connection: Connection,
+            connection: SharedConnection,
             endpoint: String,
             invitation: Invitation
         ): CallbackResult {
             return CallbackResult(canProceedFurther = true)
         }
 
-        override fun onRequestSent(connection: Connection, request: ConnectionRequest): CallbackResult {
+        override fun onRequestSent(connection: SharedConnection, request: ConnectionRequest): CallbackResult {
             println("Request sent hook called : $connection, $request")
             return CallbackResult(true)
         }
 
-        override fun onResponseReceived(connection: Connection, response: ConnectionResponse): CallbackResult {
+        override fun onResponseReceived(connection: SharedConnection, response: ConnectionResponse): CallbackResult {
             println("Response received hook called : $connection, $response")
             return CallbackResult(true)
         }
 
-        override fun onCompleted(connection: Connection): CallbackResult {
+        override fun onCompleted(connection: SharedConnection): CallbackResult {
             println("Connection completed : $connection")
             return CallbackResult(true)
         }
 
-        override fun onAbandoned(connection: Connection, problemReport: ProblemReport): CallbackResult {
+        override fun onAbandoned(connection: SharedConnection, problemReport: ProblemReport): CallbackResult {
             println("Connection abandoned : $connection")
             return CallbackResult(true)
         }

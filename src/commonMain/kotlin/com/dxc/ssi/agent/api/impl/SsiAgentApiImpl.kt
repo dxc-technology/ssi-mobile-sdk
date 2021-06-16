@@ -10,7 +10,7 @@ import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.SharedConnection
 import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.utils.EnvironmentUtils
 import kotlinx.coroutines.*
@@ -67,30 +67,30 @@ class SsiAgentApiImpl(
 
     }
 
-    override fun connect(url: String): Connection {
+    override fun connect(url: String): SharedConnection {
         return CoroutineHelper.waitForCompletion(
             GlobalScope.async {
                 messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
             })
     }
 
-    override fun disconnect(connection: Connection) {
+    override fun disconnect(connection: SharedConnection) {
         TODO("Not yet implemented")
     }
 
     //TODO: current function is synchronous with hardcoded timeout, generalize it
-    override fun sendTrustPing(connection: Connection): Boolean {
+    override fun sendTrustPing(connection: SharedConnection): Boolean {
         return CoroutineHelper.waitForCompletion(
             GlobalScope.async {
                 messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
             })
     }
 
-    override fun issueCredentialOverConnection(connection: Connection) {
+    override fun issueCredentialOverConnection(connection: SharedConnection) {
         TODO("Not yet implemented")
     }
 
-    override fun requestProofOverConnection(connection: Connection) {
+    override fun requestProofOverConnection(connection: SharedConnection) {
         TODO("Not yet implemented")
     }
 
@@ -106,11 +106,11 @@ class SsiAgentApiImpl(
         TODO("Not yet implemented")
     }
 
-    override fun getConnections(): Set<Connection> {
+    override fun getConnections(): Set<SharedConnection> {
         TODO("Not yet implemented")
     }
 
-    override fun disconnect(connection: Connection, force: Boolean) {
+    override fun disconnect(connection: SharedConnection, force: Boolean) {
         TODO("Not yet implemented")
     }
 
