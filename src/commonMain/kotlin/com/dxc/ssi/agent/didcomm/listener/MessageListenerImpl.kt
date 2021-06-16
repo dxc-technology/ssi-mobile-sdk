@@ -7,7 +7,7 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.router.MessageRouter
 import com.dxc.ssi.agent.didcomm.router.MessageRouterImpl
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
-import com.dxc.ssi.agent.model.SharedConnection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.MessageContext
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
@@ -70,7 +70,7 @@ class MessageListenerImpl(
 
     }
 
-    private suspend fun getConnectionByVerkey(senderVerKey: String): SharedConnection? {
+    private suspend fun getConnectionByVerkey(senderVerKey: String): PeerConnection? {
         return walletConnector.walletHolder.findConnectionByVerKey(senderVerKey)
     }
 

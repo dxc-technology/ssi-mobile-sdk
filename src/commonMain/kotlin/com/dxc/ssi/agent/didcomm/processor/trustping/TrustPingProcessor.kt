@@ -1,6 +1,6 @@
 package com.dxc.ssi.agent.didcomm.processor.trustping
 
-import com.dxc.ssi.agent.model.SharedConnection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.MessageContext
 
@@ -8,7 +8,7 @@ import com.dxc.ssi.agent.model.messages.MessageContext
 
 interface TrustPingProcessor {
     //TODO: think about special data structure Invitation instead of String
-    suspend fun sendTrustPingOverConnection(connection: SharedConnection): Boolean
+    suspend fun sendTrustPingOverConnection(connection: PeerConnection): Boolean
     suspend fun processMessage(messageContext: MessageContext)
 
 }

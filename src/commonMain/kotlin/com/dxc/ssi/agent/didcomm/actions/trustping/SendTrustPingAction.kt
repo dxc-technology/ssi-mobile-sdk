@@ -9,7 +9,7 @@ import com.dxc.ssi.agent.didcomm.commoon.MessageSender
 import com.dxc.ssi.agent.didcomm.model.trustping.TrustPingRequest
 import com.dxc.ssi.agent.didcomm.model.trustping.TrustPingResponse
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
-import com.dxc.ssi.agent.model.SharedConnection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.ReceivedUnpackedMessage
 import kotlinx.serialization.decodeFromString
@@ -20,7 +20,7 @@ class SendTrustPingAction(
     val walletConnector: WalletConnector,
     val transport: Transport,
     val trustPingTrackerService: TrustPingTrackerService,
-    private val connection: SharedConnection
+    private val connection: PeerConnection
 ) {
 
     suspend fun perform(): ActionResult {

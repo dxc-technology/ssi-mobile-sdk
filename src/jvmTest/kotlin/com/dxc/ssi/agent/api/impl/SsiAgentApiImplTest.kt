@@ -16,7 +16,7 @@ import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
-import com.dxc.ssi.agent.model.SharedConnection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
@@ -82,17 +82,17 @@ class SsiAgentApiImplTest {
 
     class CredPresenterControllerImpl : CredPresenterController {
         override fun onRequestReceived(
-            connection: SharedConnection,
+            connection: PeerConnection,
             presentationRequest: PresentationRequestContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: SharedConnection): CallbackResult {
+        override fun onDone(connection: PeerConnection): CallbackResult {
             return CallbackResult(true)
         }
 
-        override fun onProblemReportGenerated(connection: SharedConnection, problemReport: ProblemReport) {
+        override fun onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
 
         }
 
@@ -100,27 +100,27 @@ class SsiAgentApiImplTest {
 
     class CredReceiverControllerImpl : CredReceiverController {
         override fun onOfferReceived(
-            connection: SharedConnection,
+            connection: PeerConnection,
             credentialOfferContainer: CredentialOfferContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
         override fun onRequestSent(
-            connection: SharedConnection,
+            connection: PeerConnection,
             credentialRequestContainer: CredentialRequestContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
         override fun onCredentialReceived(
-            connection: SharedConnection,
+            connection: PeerConnection,
             credentialContainer: CredentialContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: SharedConnection, credentialContainer: CredentialContainer): CallbackResult {
+        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
             return CallbackResult(true)
         }
 
@@ -129,28 +129,28 @@ class SsiAgentApiImplTest {
 
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         override fun onInvitationReceived(
-            connection: SharedConnection,
+            connection: PeerConnection,
             invitation: Invitation
         ): CallbackResult {
             return CallbackResult(canProceedFurther = true)
         }
 
-        override fun onRequestSent(connection: SharedConnection, request: ConnectionRequest): CallbackResult {
+        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
             println("Request sent hook called : $connection, $request")
             return CallbackResult(true)
         }
 
-        override fun onResponseReceived(connection: SharedConnection, response: ConnectionResponse): CallbackResult {
+        override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
             println("Response received hook called : $connection, $response")
             return CallbackResult(true)
         }
 
-        override fun onCompleted(connection: SharedConnection): CallbackResult {
+        override fun onCompleted(connection: PeerConnection): CallbackResult {
             println("Connection completed : $connection")
             return CallbackResult(true)
         }
 
-        override fun onAbandoned(connection: SharedConnection, problemReport: ProblemReport): CallbackResult {
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
             println("Connection abandoned : $connection")
             return CallbackResult(true)
         }

@@ -6,11 +6,11 @@ import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
-import com.dxc.ssi.agent.model.SharedConnection
+import com.dxc.ssi.agent.model.PeerConnection
 
 class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
     override fun onInvitationReceived(
-        connection: SharedConnection,
+        connection: PeerConnection,
         endpoint: String,
         invitation: Invitation
     ): CallbackResult {
@@ -18,22 +18,22 @@ class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         return CallbackResult(canProceedFurther = true)
     }
 
-    override fun onRequestSent(connection: SharedConnection, request: ConnectionRequest): CallbackResult {
+    override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
         println("Request sent hook called : $connection, $request")
         return CallbackResult(true)
     }
 
-    override fun onResponseReceived(connection: SharedConnection, response: ConnectionResponse): CallbackResult {
+    override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
         println("Response received hook called : $connection, $response")
         return CallbackResult(true)
     }
 
-    override fun onCompleted(connection: SharedConnection): CallbackResult {
+    override fun onCompleted(connection: PeerConnection): CallbackResult {
         println("Connection completed : $connection")
         return CallbackResult(true)
     }
 
-    override fun onAbandoned(connection: SharedConnection, problemReport: ProblemReport): CallbackResult {
+    override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
         println("Connection abandoned : $connection")
         return CallbackResult(true)
     }

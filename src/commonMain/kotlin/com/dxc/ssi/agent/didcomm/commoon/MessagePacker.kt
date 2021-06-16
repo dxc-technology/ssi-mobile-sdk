@@ -2,7 +2,7 @@ package com.dxc.ssi.agent.didcomm.commoon
 
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.forward.BuildForwardMessage
-import com.dxc.ssi.agent.model.SharedConnection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import kotlinx.serialization.encodeToString
@@ -12,7 +12,7 @@ object MessagePacker {
     //TODO: uunderstand what Message models we need and unify them
     suspend fun packAndPrepareForwardMessage(
         message: Message,
-        connection: SharedConnection,
+        connection: PeerConnection,
         walletConnector: WalletConnector
     ): MessageEnvelop {
         //TODO: check if we always need to pack our message into forward message

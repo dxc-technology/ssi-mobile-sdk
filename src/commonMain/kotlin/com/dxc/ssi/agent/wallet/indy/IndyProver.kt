@@ -5,7 +5,7 @@ import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.wallet.Prover
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
 import com.dxc.ssi.agent.config.Configuration
-import com.dxc.ssi.agent.didcomm.model.common.SharedData
+import com.dxc.ssi.agent.didcomm.model.common.RawData
 import com.dxc.ssi.agent.didcomm.model.common.Thread
 import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
@@ -192,7 +192,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): SharedData {
+    override fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): RawData {
 
         //TODO: check if this type cast is needed here
         val credentialRequestJson =
@@ -200,7 +200,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         println("extractCredentialRequestDataFromCredentialInfo: credentialRequestJson = $credentialRequestJson")
 
 
-        return SharedData(base64 = Base64.plainStringToBase64String(credentialRequestJson))
+        return RawData(base64 = Base64.plainStringToBase64String(credentialRequestJson))
 
     }
 
@@ -278,7 +278,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         return revocationState
     }
 
-    override fun buildCredentialObjectFromRawData(data: SharedData): Credential {
+    override fun buildCredentialObjectFromRawData(data: RawData): Credential {
 
         val indyCredentialJson = Base64.base64StringToPlainString(data.base64)
 
@@ -289,7 +289,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun buildCredentialOfferObjectFromRawData(data: SharedData): CredentialOffer {
+    override fun buildCredentialOfferObjectFromRawData(data: RawData): CredentialOffer {
 
         val jsonCredentialOffer = Base64.base64StringToPlainString(data.base64)
 
@@ -314,7 +314,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         )
     }
 
-    override fun buildPresentationRequestObjectFromRawData(data: SharedData): PresentationRequest {
+    override fun buildPresentationRequestObjectFromRawData(data: RawData): PresentationRequest {
         val indyPresentationRequestJson = Base64.base64StringToPlainString(data.base64)
 
         println("Received JSON PresentationRequest: $indyPresentationRequestJson")
@@ -520,7 +520,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun extractPresentationDataFromPresentation(presentation: Presentation): SharedData {
+    override fun extractPresentationDataFromPresentation(presentation: Presentation): RawData {
 
         //TODO: check if this type cast is needed here
         val presentationJson =
@@ -528,7 +528,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         println("extractPresentationDataFromPresentation: presentationJson = $presentationJson")
 
 
-        return SharedData(base64 = Base64.plainStringToBase64String(presentationJson))
+        return RawData(base64 = Base64.plainStringToBase64String(presentationJson))
 
     }
 

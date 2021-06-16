@@ -487,25 +487,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 {
-    func onCompleted(connection: Connection) -> CallbackResult {
+    func onCompleted(connection: PeerConnection) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onInvitationReceived(connection: Connection, endpoint: String, invitation: Invitation) -> CallbackResult {
+    func onInvitationReceived(connection: PeerConnection, endpoint: String, invitation: Invitation) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
    
     
-    func onRequestSent(connection: Connection, request: ConnectionRequest) -> CallbackResult {
+    func onRequestSent(connection: PeerConnection, request: ConnectionRequest) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onResponseReceived(connection: Connection, response: ConnectionResponse) -> CallbackResult {
+    func onResponseReceived(connection: PeerConnection, response: ConnectionResponse) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onAbandoned(connection: Connection, problemReport: ProblemReport) -> CallbackResult {
+    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
         
     }
@@ -514,19 +514,19 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 
 
 class CredentialReceiverControllerImpl: CredReceiverController {
-    func onCredentialReceived(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
+    func onCredentialReceived(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onDone(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
+    func onDone(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onOfferReceived(connection: Connection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
+    func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onRequestSent(connection: Connection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
+    func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
@@ -534,11 +534,11 @@ class CredentialReceiverControllerImpl: CredReceiverController {
 
 
 class CredPresenterControllerImpl: CredPresenterController {
-    func onDone(connection: Connection) -> CallbackResult {
+    func onDone(connection: PeerConnection) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onRequestReceived(connection: Connection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
+    func onRequestReceived(connection: PeerConnection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     

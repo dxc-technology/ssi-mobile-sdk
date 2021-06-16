@@ -9,7 +9,7 @@ import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
 import com.dxc.ssi.agent.didcomm.commoon.MessageSender
 import com.dxc.ssi.agent.didcomm.model.common.Service
 import com.dxc.ssi.agent.didcomm.model.didexchange.*
-import com.dxc.ssi.agent.model.SharedConnection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.utils.Base64
 import io.ktor.http.*
@@ -38,7 +38,7 @@ class ReceiveInvitationAction(
 
         val connectionId = uuid4().toString()
 
-        val connection = SharedConnection(
+        val connection = PeerConnection(
             id = connectionId, state = "START",
             invitation = this.invitationUrl,
             isSelfInitiated = true,
