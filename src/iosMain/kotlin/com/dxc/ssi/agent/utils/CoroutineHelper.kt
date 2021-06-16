@@ -13,8 +13,8 @@ actual class CoroutineHelper {
             }
         }
 
-        actual fun singleThreadCoroutineContext(threadName: String): CoroutineContext =
-            newSingleThreadContext(threadName)
+        actual fun singleThreadCoroutineContext(threadName: String): SingleThreadContext =
+            SingleThreadContext(newSingleThreadContext(threadName))
 
 
     }

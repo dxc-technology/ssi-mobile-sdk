@@ -38,15 +38,17 @@ class MessageListenerImpl(
 
         while (!isShutdown) {
 
-            println("Checking for new messages")
+            println("Message Listener: Checking for new messages")
 
             val receivedMessage = transport.receiveNextMessage()
+
+            println("Message Listener: Received message")
 
             val messageContext = unpackAndBuildMesageContext(receivedMessage)
 
 
             messageRouter.routeAndProcessMessage(messageContext)
-            println("procesed message")
+            println("Message Listener: : procesed message")
         }
 
     }

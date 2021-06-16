@@ -25,5 +25,11 @@ actual class System {
             //System.setProperty(key, value)
 
         }
+
+        actual fun getCurrentThread(): String {
+
+            return Thread.currentThread().name
+
+        }
     }
 }

@@ -4,9 +4,10 @@ platform :ios, '10.2'
 
 target 'swiftIosApp' do
     use_frameworks!
-    pod 'ssi_agent', '0.0.1', :source => "https://github.com/kkamyczek/ssi-mobile-sdk.git"
     pod 'libsodium', '~> 1.0.12'
     pod 'libzmq-pw', "4.2.2"
+    pod 'ssi_agent', '0.0.1', :source => "https://github.com/kkamyczek/ssi-mobile-sdk.git"
+    # Comment out line above and uncomment three lines below for local development
     #pod 'kotlin_multiplatform_agent', :path => '../../'
     #pod 'OpenSSL-XM',  '~> 1.0.210.1'
     #pod 'libindy', "1.15.0"

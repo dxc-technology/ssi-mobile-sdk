@@ -99,7 +99,8 @@ kotlin {
                 //For now we use ktor only to have common URL class. Also I assume we might extend its usage
                 implementation ("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
-                implementation("co.touchlab:stately-iso-collections:1.1.4-a1")
+                implementation ("co.touchlab:stately-iso-collections:1.1.4-a1")
+                implementation ("co.touchlab:stately-concurrency:1.1.4")
                 //TODO: check if two stately dependencies below are needed, considering that they should be included in the dependency above
                 implementation("co.touchlab:stately-isolate:1.1.4-a1")
                 implementation("co.touchlab:stately-common:1.1.4")
@@ -188,7 +189,7 @@ android {
     compileSdkVersion(29)
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
-        minSdkVersion(23)
+        minSdkVersion(24)
         //TODO: understand why websockets stop working when changing targetSDKVersion above 27
         targetSdkVersion(27)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
