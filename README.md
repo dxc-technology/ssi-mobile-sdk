@@ -233,6 +233,21 @@ ssiAgentApi.connect(verifierInvitationUrl)
 
 # iOS usage
 
+## Prerequisites
+
+```bash
+brew install cmake
+brew install zeromq
+```
+
+If during the build in Xcode you have error complaining that platform.hpp was not found then do following:
+
+1. Run pod install --verbose and find cached libzmq-pw pod
+2. Remove directory with pod 
+3. Remove Pods directory from your project
+4. Ensure that cmake and zeromq are installed
+5. Execute pod install
+
 ## Instruction for kotlin multiplatform library developer to build the library
 
 1. Go to **libindy-pod** library (this folder content is copy-paste
@@ -264,21 +279,61 @@ TODO: automate those steps
 '''
 and then un-Ignore the SsiAgentApiImplTest from iosX64 module and try running it
 
+
 ## Instruction for kotlin multiplatform library user to use the library in swift app
 
-The current instruction explains how to use swift example app. TODO: make some build artifact (podspec, podfile?) so
-that client user could use as a dependency
+Add sources to your Podfile:
+```script
+source 'https://github.com/CocoaPods/Specs.git'
+source 'https://github.com/hyperledger/indy-sdk.git'
+```
+
+Add pods to your Podfile:
+```script
+pod 'ssi_agent', '0.0.1', :source => "https://github.com/kkamyczek/ssi-mobile-sdk.git"
+pod 'libsodium', '~> 1.0.12'
+pod 'libzmq-pw', "4.2.2
+```
+
+Run as described:
+
+```script
+pod setup
+pod install --verbose
+```
+Now you can run XCode and make a build/run
+Both a simulator, and a device are supported.
+
+## Instruction how to create XCF artifact 
+
+Run shell command from ssi-mobile-sdk root folder:
+```script
+sh build_ios_artifact.sh
+```
+
+Artifact will be created in folder: 
+build/xcode-framework-universal
+
+Zip it and copy it to your GitHub release repository:
+https://github.com/kkamyczek/ssi-mobile-sdk/releases
+
+## Instruction for running samples/swiftIosApp
 
 1. Example ios app is located in samples/swiftIosApp
-2. This app contains Podfile wich would add proper dependencies to ios app
-3. Execute ```./gradlew clean build``` from root repo folder. After this build is completed, gradle will automatically
-   make "pod install" in samples/swiftIosApp folder
-4. Open samples/swiftIosApp workspace in Xcode. Set *Validate workspace* to true in project build settings
-5. Build Xcode project
-6. For testing purpose replace "invitationUrl" value in AppDelegate to actual fresh invitation form
-7. Run the app in xcode. Emulator is supposed to be started and on application start the connection will be established
+2. This app contains Podfile which would add proper dependencies to ios app 
+   
+Run pod:
+```script
+pod setup
+pod install --verbose
+```
+
+3. Open samples/swiftIosApp workspace in Xcode. Set *Validate workspace* to true in project build settings
+4. Build Xcode project
+5. For testing purpose replace "invitationUrl" value in AppDelegate to actual fresh invitation form
+6. Run the app in xcode. Emulator is supposed to be started and on application start the connection will be established
    with remote agent
-8. Example of swift code to establish connection
+7. Example of swift code to establish connection
 
 ```swift
 import UIKit

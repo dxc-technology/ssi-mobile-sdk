@@ -1,5 +1,3 @@
 package com.dxc.ssi.agent.exceptions.indy
 
-actual class WalletItemNotFoundException : IndyException() {
-
-}
+actual class WalletItemNotFoundException : IndyException()

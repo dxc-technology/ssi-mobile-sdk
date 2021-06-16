@@ -6,6 +6,7 @@ import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.issue.CredentialIssuenceAction
 import com.dxc.ssi.agent.didcomm.commoon.MessagePacker
+import com.dxc.ssi.agent.didcomm.commoon.MessageSender
 import com.dxc.ssi.agent.didcomm.model.common.Attach
 import com.dxc.ssi.agent.didcomm.model.common.Thread
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
@@ -86,18 +87,7 @@ class ReceiveCredentialOfferAction(
 
             println("Credential request created:$credentialRequest")
 
-            // 3.2 Send CredentialRequest
-
-            val messageToSend =
-                MessagePacker.packAndPrepareForwardMessage(
-                    Message(Json.encodeToString(credentialRequest)),
-                    connection,
-                    walletConnector
-                )
-
-            transport.sendMessage(connection, messageToSend)
-
-            //4. Store credential record to wallet
+            MessageSender.packAndSendMessage(Message(Json.encodeToString(credentialRequest)), connection, walletConnector, transport)
 
             walletConnector.prover.storeCredentialExchangeRecord(
                 CredentialExchangeRecord(

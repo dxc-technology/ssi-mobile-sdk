@@ -4,7 +4,7 @@ import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
-import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
@@ -39,20 +39,12 @@ class SsiAgentApiImplTest {
         ssiAgentApi.init()
 
 
-        val issuerInvitationUrl =
-            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIlE2Ykx4cG1hTVNMOUVCVG9CV1BVdWtOVVBEUTNZVWJWdEZFZU5wbXA5NGMiXSwicmVjaXBpZW50S2V5cyI6WyIzelhpU2s2TXpLekw5R1RielhIVUZDZkhQQXl1RnA5NGZLZXVSQ0Z6RXVxYSJdLCJAaWQiOiI4MGIwOTJlYS0wZTY0LTQ5NWYtYjU0NC1mYjYxZTM3YmY1NjUiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+        val invitationUrl =
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiNmVOQXpSOFBWRzhQaFJrNW55YUFQVnRoQmVHZEQydFRNWUVRd3pkRkR5YngiXSwicmVjaXBpZW50S2V5cyI6WyJuSjVmNDVEQ3ZKTUdMOXBVQlo2VlpWY3VWcG5MM2N6dmVFZE10bWVESzczIl0sIkBpZCI6ImY2ZDZkYjE5LTU0NzMtNDcxOS05NDY2LTcyZTdjNWE4YTNjNyIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
 
-        val verifierInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiR3dqR0pBQkZzRnNoZkFzYUpxNWFqOXVQdExHSmRDYXpFM2NiaWVvYWpoNVUiXSwicmVjaXBpZW50S2V5cyI6WyJzNlBOaUIzZlN6UG50V29aNXNmOHY4NDN6UjNyWEYxRmJXR1VtSEVIb2ZmIl0sIkBpZCI6IjlmMTI4YTI0LWM2YzMtNDhiMi1hN2Q1LTY4MzYyM2JmMmMwMSIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
 
         println("Connecting to issuer")
-        ssiAgentApi.connect(issuerInvitationUrl)
-
-        //TODO: ensure that connection can be established without delay between two connections
-        //Sleeper().sleep(4000)
-
-        println("Connecting to verifier")
-        ssiAgentApi.connect(verifierInvitationUrl)
+        ssiAgentApi.connect(invitationUrl)
 
         Sleeper().sleep(500000)
 
@@ -68,6 +60,10 @@ class SsiAgentApiImplTest {
 
         override fun onDone(connection: Connection): CallbackResult {
             return CallbackResult(true)
+        }
+
+        override fun onProblemReportGenerated(connection: Connection, problemReport: ProblemReport) {
+
         }
 
     }
@@ -104,7 +100,6 @@ class SsiAgentApiImplTest {
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         override fun onInvitationReceived(
             connection: Connection,
-            endpoint: String,
             invitation: Invitation
         ): CallbackResult {
             return CallbackResult(canProceedFurther = true)
