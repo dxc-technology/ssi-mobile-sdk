@@ -5,7 +5,7 @@ val indyVersion: String = "1.16.0"
 val jacksonVersion: String = "2.9.7"
 val ktorVersion: String = "1.5.1"
 val okhttpVersion: String = "3.5.0"
-val kotlinxCourutinesVersion = "1.4.2-native-mt"
+val kotlinxCoroutinesVersion = "1.4.2-native-mt"
 val uuidVersion = "0.2.3"
 val junitVersion = "4.13"
 
@@ -98,7 +98,7 @@ kotlin {
                 implementation("io.ktor:ktor-utils:$ktorVersion")
                 //For now we use ktor only to have common URL class. Also I assume we might extend its usage
                 implementation ("io.ktor:ktor-client-core:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
                 implementation ("co.touchlab:stately-iso-collections:1.1.4-a1")
                 implementation ("co.touchlab:stately-concurrency:1.1.4")
                 //TODO: check if two stately dependencies below are needed, considering that they should be included in the dependency above

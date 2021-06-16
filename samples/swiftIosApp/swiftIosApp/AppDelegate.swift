@@ -12,7 +12,9 @@ import ssi_agent
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    let myWalletName = "newWalletName4"
+    let myWalletPassword = "newWalletPassword"
+    let myDid = "4PCVFCeZbKXyvgjCedbXDx"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
@@ -20,13 +22,45 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let crc = CredentialReceiverControllerImpl()
         let cpc = CredPresenterControllerImpl()
         
+
+        EnvironmentUtils().doInitEnvironment(environment: EnvironmentImpl())
+
+        let walletManager = IndyWalletManager.Companion()
+
+
+        if (!walletManager.isWalletExistsAndOpenable(walletName: myWalletName, walletPassword: myWalletPassword)) {
+            print("Recreating wallet")
+            walletManager.createWallet(walletName: myWalletName, walletPassword: myWalletPassword, walletCreationStrategy: WalletCreationStrategy.truncateandcreate)}
+
+
+        if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
+            print("Recreating did")
+            let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
+                didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
+                walletName : myWalletName, walletPassword:myWalletPassword)
+
+            print("Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())")
+            //Store did somewhere in your application to use it afterwards
+        }
+
+        let walletHolder = IndyWalletHolder(
+            walletName : myWalletName,
+            walletPassword :myWalletPassword,
+            didConfig : DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil)
+        )
+
+        let indyWalletConnector = IndyWalletConnector().build(walletHolder: walletHolder)
+
+
         let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisFilePath: "./docker_pool_transactions_genesis.txt",
             ipAddress: "192.168.0.117",
-            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip)
+            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
+            generatedGenesysFileName: "genesis.txn",
+            retryTimes: 5,
+            retryDelayMs: 5000)
         
-               let ssiAgentApi = SsiAgentBuilderImpl()
-                .withEnvironment(environment: EnvironmentImpl())
+        let ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
                 .withConnectionInitiatorController(connectionInitiatorController: cic)
                 .withCredReceiverController(credReceiverController: crc)
                 .withCredPresenterController(credPresenterController: cpc)

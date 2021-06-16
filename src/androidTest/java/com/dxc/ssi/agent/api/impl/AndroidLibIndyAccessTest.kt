@@ -15,7 +15,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 
 class AndroidLibIndyAccessTest {
-
+/*
     @Rule
     @JvmField
     val permissionRule = GrantPermissionRule.grant(
@@ -65,4 +65,6 @@ class AndroidLibIndyAccessTest {
 
 
     }
+
+ */
 }

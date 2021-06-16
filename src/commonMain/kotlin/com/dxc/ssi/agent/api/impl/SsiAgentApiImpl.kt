@@ -19,8 +19,7 @@ class SsiAgentApiImpl(
     private val transport: Transport,
     private val walletConnector: WalletConnector,
     private val ledgerConnector: LedgerConnector,
-    private val callbacks: Callbacks,
-    private val environment: Environment
+    private val callbacks: Callbacks
 ) : SsiAgentApi {
 
     private var job = Job()
@@ -46,21 +45,22 @@ class SsiAgentApiImpl(
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun init() {
 
-        EnvironmentUtils.initEnvironment(environment)
+        if(!EnvironmentUtils.environmentInitizlized)
+            throw RuntimeException("Please initialize environment before initializing SsiAgentApiImpl")
+
 
         println("Before running agentScope.async")
         CoroutineHelper.waitForCompletion(agentScope.async {
             println("Before initializing ledgerConnector")
             ledgerConnector.init()
-            println("After initializing ledgerConnector")
-            println("Before initializing walletConnector")
-            walletConnector.walletHolder.openOrCreateWallet()
-            println("After initializing walletConnector")
+            //TODO: combine it into single function
+            walletConnector.walletHolder.openWalletOrFail()
+            walletConnector.walletHolder.initializeDid()
             ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
             println("Set ledgerConnectorDid")
 
             if (walletConnector.prover != null) {
-                walletConnector.prover!!.createMasterSecret(Configuration.masterSecretId)
+                walletConnector.prover.createMasterSecret(Configuration.masterSecretId)
             }
         })
 

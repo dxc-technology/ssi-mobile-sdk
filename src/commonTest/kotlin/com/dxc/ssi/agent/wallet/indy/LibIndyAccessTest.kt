@@ -9,7 +9,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 
 class LibIndyAccessTest {
-
+/*
     @Test
     @Ignore
     fun simpleLibIndyCall() {
@@ -46,4 +46,6 @@ class LibIndyAccessTest {
 
 
     }
+    */
+
 }

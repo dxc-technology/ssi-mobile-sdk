@@ -3,7 +3,7 @@ package com.dxc.ssi.agent.transport
 import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import com.dxc.ssi.agent.utils.CoroutineHelper
-import com.dxc.ssi.agent.wallet.indy.ObjectHolder
+import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.utils.System
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel

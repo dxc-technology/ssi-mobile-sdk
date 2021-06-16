@@ -10,8 +10,8 @@ import com.dxc.ssi.agent.didcomm.model.verify.data.SchemaId
 import com.dxc.ssi.agent.ledger.indy.helpers.PoolHelper
 import com.dxc.ssi.agent.ledger.indy.libindy.Ledger
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool
+import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
-import com.dxc.ssi.agent.wallet.indy.ObjectHolder
 import com.dxc.ssi.agent.wallet.indy.model.issue.IndyCredentialDefinition
 import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefinitionId
 import com.dxc.ssi.agent.wallet.indy.model.verify.IndySchema
@@ -39,15 +39,18 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
                 PoolHelper.openOrCreateFromFilename(indyLedgerConnectorConfiguration.genesisFilePath)
             } else {
                 PoolHelper.openOrCreateFromIp(
-                    indyLedgerConnectorConfiguration.ipAddress, EnvironmentUtils.writableUserHomePath )
+                    indyLedgerConnectorConfiguration.ipAddress,
+                    EnvironmentUtils.writableUserHomePath,
+                    indyLedgerConnectorConfiguration.generatedGenesysFileName
+                )
             }
 
         isoPool.access { it.obj = pool }
     }
 
 
-    override suspend fun retrieveSchema(id: SchemaId, delayMs: Long, retryTimes: Int): Schema? {
-        repeat(retryTimes) {
+    override suspend fun retrieveSchema(id: SchemaId): Schema? {
+        repeat(indyLedgerConnectorConfiguration.retryTimes) {
             try {
 
                 val pool = isoPool.access { it.obj }
@@ -60,7 +63,7 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
                 return IndySerializationUtils.jsonProcessor.decodeFromString<IndySchema>(parsedRes.objectJson)
             } catch (e: Exception) {
                 println("Schema retrieving failed (id: $id). Retry attempt $it")
-                Sleeper().sleep((delayMs * it) as Int)
+                Sleeper().sleep((indyLedgerConnectorConfiguration.retryDelayMs * it) as Int)
             }
         }
 
@@ -68,11 +71,9 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
     }
 
     override suspend fun retrieveCredentialDefinition(
-        id: CredentialDefinitionId,
-        delayMs: Long,
-        retryTimes: Int
+        id: CredentialDefinitionId
     ): CredentialDefinition? {
-        repeat(retryTimes) {
+        repeat(indyLedgerConnectorConfiguration.retryTimes) {
             try {
                 val pool = isoPool.access { it.obj }
                 val getCredDefRequest = Ledger.buildGetCredDefRequest(did, id.toString())
@@ -94,7 +95,7 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
                 println("Exception $e")
                 println { "Credential definition retrieving failed (id: $id). Retry attempt $it" }
 
-                Sleeper().sleep((delayMs * it) as Int)
+                Sleeper().sleep((indyLedgerConnectorConfiguration.retryDelayMs * it) as Int)
             }
         }
 
@@ -102,11 +103,9 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
     }
 
     override suspend fun retrieveRevocationRegistryDefinition(
-        id: RevocationRegistryDefinitionId,
-        delayMs: Long,
-        retryTimes: Int
+        id: RevocationRegistryDefinitionId
     ): RevocationRegistryDefinition? {
-        repeat(retryTimes) {
+        repeat(indyLedgerConnectorConfiguration.retryTimes) {
             try {
                 val pool = isoPool.access { it.obj }
                 val request = Ledger.buildGetRevocRegDefRequest(did, id.toString())
@@ -117,7 +116,7 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
 
             } catch (e: Exception) {
                 println("Revocation registry definition retrieving failed (id: $id). Retry attempt $it")
-                Sleeper().sleep((delayMs * it) as Int)
+                Sleeper().sleep((indyLedgerConnectorConfiguration.retryDelayMs * it) as Int)
             }
         }
 
@@ -126,11 +125,9 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
 
     override suspend fun retrieveRevocationRegistryDelta(
         id: RevocationRegistryDefinitionId,
-        interval: Interval,
-        delayMs: Long,
-        retryTimes: Int
+        interval: Interval
     ): Pair<Long, RevocationRegistryEntry>? {
-        repeat(retryTimes) {
+        repeat(indyLedgerConnectorConfiguration.retryTimes) {
             try {
                 val pool = isoPool.access { it.obj }
                 val from = interval.from
@@ -147,7 +144,7 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
                 return Pair(timestamp, revRegDelta)
             } catch (e: Exception) {
                 println("Revocation registry delta retrieving failed (id: $id, interval: $interval). Retry attempt $it")
-                Sleeper().sleep((delayMs * it) as Int)
+                Sleeper().sleep((indyLedgerConnectorConfiguration.retryDelayMs * it) as Int)
             }
         }
 

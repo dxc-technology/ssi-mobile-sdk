@@ -1,7 +1,6 @@
 package com.dxc.ssi.agent.wallet.indy
 
 import co.touchlab.stately.isolate.IsolateState
-import co.touchlab.stately.isolate.StateHolder
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import com.dxc.ssi.agent.model.Connection
@@ -9,29 +8,32 @@ import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.utils.JsonUtils.extractValue
+import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.*
 import com.dxc.ssi.agent.wallet.indy.model.RetrievedWalletRecords
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import io.ktor.utils.io.core.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-//TODO: move this class to separate file
-data class ObjectHolder<T>(var obj: T? = null)
-
-open class IndyWalletHolder : WalletHolder {
-    //TODO: think where do we need to store did
+open class IndyWalletHolder(
+    private val walletName: String,
+    private val walletPassword: String,
+    private val didConfig: DidConfig
+) : WalletHolder {
     //TODO: think how to avoid optionals here
-    //understand what is the proper place for storing did
-    private var isoDid = IsolateState {ObjectHolder<String?>()}
-    private var isoVerkey = IsolateState {ObjectHolder<String?>()}
+    private var isoDid = IsolateState { ObjectHolder<String?>() }
+    private var isoVerkey = IsolateState { ObjectHolder<String?>() }
 
-    private var isoWallet = IsolateState {ObjectHolder<Wallet>()}
+    private var isoWallet = IsolateState { ObjectHolder<Wallet>() }
 
-
+    private var job = Job()
+    private val walletHolderScope = CoroutineScope(Dispatchers.Default + job)
 
     override fun createSessionDid(identityRecord: IdentityDetails): String {
         TODO("Not yet implemented")
@@ -67,7 +69,7 @@ open class IndyWalletHolder : WalletHolder {
             val wallet = isoWallet.access { it.obj }
             WalletRecord.updateValue(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value)
             //TODO: check if there are cases when we really need to update tags
-            WalletRecord.updateTags(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, tagsJson)
+            WalletRecord.updateTags(wallet, WalletRecordType.ConnectionRecord.name, connection.id, tagsJson)
         }
     }
 
@@ -91,13 +93,6 @@ open class IndyWalletHolder : WalletHolder {
             Connection.fromJson(extractValue(retrievedValue))
         } catch (e: WalletItemNotFoundException) {
             null
-        } catch (e: Exception) {
-            //TODO: understand what ExecutionException in java implementation corresponds to in kotlin code
-            //TODO: check how to compare exact exception class rather than message contains string
-            if (e.message!!.contains("WalletItemNotFoundException"))
-                null
-            else
-                throw e
         }
     }
 
@@ -113,7 +108,7 @@ open class IndyWalletHolder : WalletHolder {
 
         val wallet = isoWallet.access { it.obj }
         search.open(wallet!!, WalletRecordType.ConnectionRecord.name, query, options)
-        //TODO: make proper fetch in batches insetad of just fetching 100 records
+        //TODO: make proper fetch in batches instead of just fetching 100 records
         val foundRecordsJson = search.searchFetchNextRecords(wallet!!, 100)
         search.closeSearch()
 
@@ -134,25 +129,10 @@ open class IndyWalletHolder : WalletHolder {
 
     }
 
-    override suspend fun openOrCreateWallet() {
 
-        //TODO: think where to store name and password and how to pass it properly
-        val walletName = "testWalletName"
-        val walletPassword = "testWalletPassword"
-
-        //TODO: remove this line in order to not clear wallet each time
-        WalletHelper.createOrTrunc(walletName = walletName, walletPassword = walletPassword)
-        val wallet = WalletHelper.openOrCreate(walletName = walletName, walletPassword = walletPassword)
-        isoWallet.access { it.obj = wallet }
-
-        //TODO: do not recreate did each time on wallet opening
-        //TODO: alow to provide specific DID config
-
-        val didConfigJson = Json.encodeToString(DidConfig())
-        val didResult = Did.createAndStoreMyDid(wallet!!, didConfigJson)
-        isoDid.access { it.obj = didResult.getDid() }
-        isoVerkey.access { it.obj = didResult.getVerkey() }
-
+    //TODO: remove this fun if it is not used
+    override suspend fun isWalletHolderInitialized(): Boolean {
+        return (isoWallet.access { it.obj } != null && isoDid.access { it.obj } != null && isoVerkey.access { it.obj } != null)
     }
 
     override fun getWallet(): Any {
@@ -194,4 +174,19 @@ open class IndyWalletHolder : WalletHolder {
         return Message(decodedString)
 
     }
+
+    override suspend fun openWalletOrFail() {
+
+        val wallet = WalletHelper.openExisting(walletName, walletPassword)
+        isoWallet.access { it.obj = wallet }
+
+    }
+
+    override suspend fun initializeDid() {
+        val wallet = isoWallet.access { it.obj }
+        val didWithMetaResult = Did.getDidWithMeta(wallet!!, didConfig.did!!)
+        isoDid.access { it.obj = didWithMetaResult.did }
+        isoVerkey.access { it.obj = didWithMetaResult.verkey }
+    }
+
 }
