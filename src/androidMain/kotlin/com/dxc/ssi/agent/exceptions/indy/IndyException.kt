@@ -1,4 +1,3 @@
 package com.dxc.ssi.agent.exceptions.indy
 
-actual open class IndyException : Exception() {
-}
+actual open class IndyException : Exception()

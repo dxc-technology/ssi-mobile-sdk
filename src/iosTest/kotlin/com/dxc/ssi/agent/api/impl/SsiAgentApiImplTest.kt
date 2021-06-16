@@ -6,13 +6,13 @@ import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
 import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
-import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
@@ -107,6 +107,10 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
+        override fun onProblemReportGenerated(connection: Connection, problemReport: ProblemReport) {
+
+        }
+
     }
 
     class CredReceiverControllerImpl : CredReceiverController {
@@ -141,7 +145,6 @@ class SsiAgentApiImplTest {
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         override fun onInvitationReceived(
             connection: Connection,
-            endpoint: String,
             invitation: Invitation
         ): CallbackResult {
             return CallbackResult(canProceedFurther = true)
