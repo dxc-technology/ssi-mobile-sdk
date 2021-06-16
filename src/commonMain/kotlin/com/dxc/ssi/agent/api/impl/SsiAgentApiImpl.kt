@@ -1,15 +1,18 @@
 package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.Callbacks
+import com.dxc.ssi.agent.api.Environment
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
+import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.Connection
-import com.dxc.ssi.agent.utils.PlatformInit
 import com.dxc.ssi.agent.utils.CoroutineHelper
+import com.dxc.utils.EnvironmentUtils
 import kotlinx.coroutines.*
 
 class SsiAgentApiImpl(
@@ -18,36 +21,67 @@ class SsiAgentApiImpl(
     private val ledgerConnector: LedgerConnector,
     private val callbacks: Callbacks
 ) : SsiAgentApi {
-    private val messageListener: MessageListener = MessageListenerImpl(transport, walletConnector, callbacks)
 
-    //TODO: add callback controllers here
+    private var job = Job()
+    private val agentScope = CoroutineScope(Dispatchers.Default + job)
 
+    /*TODO: for mobile application having one thread of listener is enough.
+    for mobile application having one thread of listener is enough.For using on server side we will need to implement Thread Pool ourselves, or wait until it is done in kotlin coroutines
+    The problem is  with IOS Dispatchers.Default having very limited number of threads.
+    Alternative solution to creating our thread pool will be separation of this listener invokation to platform specific implementations.
+    Then for JVM we will use standard thread pool, while for ios it wil be enough to have single listener thread
+     */
+
+    private val mainListenerSingleThreadDispatcher =
+        CoroutineHelper.singleThreadCoroutineContext("Main Listener Thread")
+    private val trustPingListenerSingleThreadDispatcher =
+        CoroutineHelper.singleThreadCoroutineContext("TrustPing Listener Thread")
+    private val trustPingTrackerService =
+        TrustPingTrackerService(walletConnector, callbacks.connectionInitiatorController!!)
+
+    private val messageListener: MessageListener =
+        MessageListenerImpl(transport, walletConnector, ledgerConnector, trustPingTrackerService, callbacks)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun init() {
 
-        val platformInit = PlatformInit()
-        platformInit.init()
+        if(!EnvironmentUtils.environmentInitizlized)
+            throw RuntimeException("Please initialize environment before initializing SsiAgentApiImpl")
 
-        CoroutineHelper.waitForCompletion(GlobalScope.async {
-            walletConnector.walletHolder.openOrCreateWallet()
+
+        println("Before running agentScope.async")
+        CoroutineHelper.waitForCompletion(agentScope.async {
+            println("Before initializing ledgerConnector")
+            ledgerConnector.init()
+            //TODO: combine it into single function
+            walletConnector.walletHolder.openWalletOrFail()
+            walletConnector.walletHolder.initializeDid()
+            ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
+            println("Set ledgerConnectorDid")
+
+            if (walletConnector.prover != null) {
+                walletConnector.prover.createMasterSecret(Configuration.masterSecretId)
+            }
         })
 
-
-//TODO: design proper concurrency there
-        GlobalScope.launch {
-            //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
-            withContext(CoroutineHelper.singleThreadCoroutineContext("Listener thread")) {
+        agentScope.launch {
+            withContext(mainListenerSingleThreadDispatcher.context) {
                 messageListener.listen()
             }
         }
 
-
+        agentScope.launch {
+            withContext(trustPingListenerSingleThreadDispatcher.context) {
+                trustPingTrackerService.track()
+            }
+        }
     }
 
     override fun connect(url: String): Connection {
+        println("Entered connect function")
         return CoroutineHelper.waitForCompletion(
-            GlobalScope.async {
+            agentScope.async {
+                println("Entered async connection initiation")
                 messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
             })
     }
@@ -59,7 +93,7 @@ class SsiAgentApiImpl(
     //TODO: current function is synchronous with hardcoded timeout, generalize it
     override fun sendTrustPing(connection: Connection): Boolean {
         return CoroutineHelper.waitForCompletion(
-            GlobalScope.async {
+            agentScope.async {
                 messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
             })
     }
@@ -80,8 +114,14 @@ class SsiAgentApiImpl(
         TODO("Not yet implemented")
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun shutdown(force: Boolean) {
-        TODO("Not yet implemented")
+        //TODO: make some intelligence and control cancellation behaviour. Make cancellation graceful and controllable. Understand what force parameter would mean
+        job.cancel()
+        mainListenerSingleThreadDispatcher.closeContext()
+        trustPingListenerSingleThreadDispatcher.closeContext()
+        transport.shutdown()
+        println("Stopped the agent")
     }
 
     override fun getConnections(): Set<Connection> {

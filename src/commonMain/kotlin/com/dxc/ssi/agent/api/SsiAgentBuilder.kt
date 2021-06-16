@@ -13,11 +13,6 @@ import com.dxc.ssi.agent.api.pluggable.wallet.*
 interface SsiAgentBuilder {
     fun build(): SsiAgentApi
     fun withTransport(transport: Transport): SsiAgentBuilder
-    fun withProver(prover: Prover): SsiAgentBuilder
-    fun withIssuer(issuer: Issuer): SsiAgentBuilder
-    fun withVerifier(verifier: Verifier): SsiAgentBuilder
-    fun withTrustee(trustee: Trustee): SsiAgentBuilder
-    fun withWalletHolder(trustee: WalletHolder): SsiAgentBuilder
     fun withLedgerConnector(ledgerConnector: LedgerConnector): SsiAgentBuilder
     fun withConnectionInitiatorController(connectionInitiatorController: ConnectionInitiatorController): SsiAgentBuilder
     fun withConnectionResponderController(connectionResponderController: ConnectionResponderController): SsiAgentBuilder
@@ -25,5 +20,6 @@ interface SsiAgentBuilder {
     fun withCredIssuerController(credIssuerController: CredIssuerController): SsiAgentBuilder
     fun withCredPresenterController(credPresenterController: CredPresenterController): SsiAgentBuilder
     fun withCredVerifierController(credVerifierController: CredVerifierController): SsiAgentBuilder
+
 
 }

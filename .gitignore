@@ -2,3 +2,13 @@
 /.idea/
 /build/
 /local.properties
+/kotlin_multiplatform_agent.podspec
+/samples/swiftIosApp/Pods/
+/indylib/libindy.a
+/samples/androidApp/.idea/.gitignore
+/samples/androidApp/.idea/.name
+/samples/androidApp/.idea/compiler.xml
+/samples/androidApp/.idea/gradle.xml
+/samples/androidApp/.idea/jarRepositories.xml
+/samples/androidApp/.idea/misc.xml
+/samples/androidApp/.idea/vcs.xml

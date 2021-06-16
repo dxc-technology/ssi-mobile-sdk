@@ -1,6 +1,8 @@
 package com.dxc.ssi.agent.model
 
 
+import com.dxc.ssi.agent.utils.UrlSerializer
+import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -15,7 +17,10 @@ data class Connection(
     val invitation: String,
     val isSelfInitiated: Boolean,
     val peerRecipientKeys: List<String>,
-    val endpoint: String
+    val peerVerkey: String? = null,
+    val peerDid: String? = null,
+    @Serializable(with = UrlSerializer::class)
+    val endpoint: Url
 ) {
     fun toJson(): String = Json.encodeToString(this)
 

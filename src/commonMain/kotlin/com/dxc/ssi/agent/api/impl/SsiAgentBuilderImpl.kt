@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.Callbacks
+import com.dxc.ssi.agent.api.Environment
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.SsiAgentBuilder
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
@@ -11,19 +12,16 @@ import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.callbacks.verification.CredVerifierController
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
-import com.dxc.ssi.agent.api.pluggable.wallet.*
+import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.transport.WebSocketTransportImpl
 import com.dxc.ssi.agent.wallet.indy.*
 
-class SsiAgentBuilderImpl : SsiAgentBuilder {
+class SsiAgentBuilderImpl(private val walletConnector: WalletConnector) : SsiAgentBuilder {
 
     private var transport: Transport? = null
-    private var issuer: Issuer? = null
-    private var prover: Prover? = null
-    private var verifier: Verifier? = null
-    private var trustee: Trustee? = null
-    private var walletHolder: WalletHolder? = null
     private var ledgerConnector: LedgerConnector? = null
     private var connectionInitiatorController: ConnectionInitiatorController? = null
     private var connectionResponderController: ConnectionResponderController? = null
@@ -37,28 +35,9 @@ class SsiAgentBuilderImpl : SsiAgentBuilder {
         if (transport == null) {
             transport = WebSocketTransportImpl()
         }
+
         if (ledgerConnector == null)
-            ledgerConnector = IndyLedgerConnector()
-
-        if (issuer == null)
-            issuer = IndyIssuer()
-        if (verifier == null)
-            verifier = IndyVerifier()
-        if (trustee == null)
-            trustee = IndyTrustee()
-        if (prover == null)
-            prover = IndyProver()
-        if (walletHolder == null)
-            walletHolder = IndyWalletHolder()
-
-
-        val walletConnector = WalletConnector(
-            issuer = issuer,
-            prover = prover,
-            verifier = verifier,
-            trustee = trustee,
-            walletHolder = walletHolder!!
-        )
+            ledgerConnector = IndyLedgerConnector(IndyLedgerConnectorConfiguration())
 
         //TODO: think about some sensible defaults for those callbacks
         val callbacks = Callbacks(
@@ -70,11 +49,9 @@ class SsiAgentBuilderImpl : SsiAgentBuilder {
             credVerifierController
         )
 
-
-
         return SsiAgentApiImpl(
             transport = transport!!,
-            walletConnector = walletConnector,
+            walletConnector = walletConnector!!,
             ledgerConnector = ledgerConnector!!,
             callbacks = callbacks
         )
@@ -83,31 +60,6 @@ class SsiAgentBuilderImpl : SsiAgentBuilder {
 
     override fun withTransport(transport: Transport): SsiAgentBuilder {
         this.transport = transport
-        return this
-    }
-
-    override fun withProver(prover: Prover): SsiAgentBuilder {
-        this.prover = prover
-        return this
-    }
-
-    override fun withIssuer(issuer: Issuer): SsiAgentBuilder {
-        this.issuer = issuer
-        return this
-    }
-
-    override fun withVerifier(verifier: Verifier): SsiAgentBuilder {
-        this.verifier = verifier
-        return this
-    }
-
-    override fun withTrustee(trustee: Trustee): SsiAgentBuilder {
-        this.trustee = trustee
-        return this
-    }
-
-    override fun withWalletHolder(trustee: WalletHolder): SsiAgentBuilder {
-        this.walletHolder = walletHolder
         return this
     }
 

@@ -3,108 +3,40 @@ package com.dxc.ssi.agent.transport
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.model.Connection
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
+import io.ktor.http.*
 import io.ktor.util.*
-import kotlinx.coroutines.delay
-import co.touchlab.stately.collections.sharedMutableMapOf
-import co.touchlab.stately.collections.sharedMutableListOf
-
+import kotlinx.coroutines.channels.Channel
 
 //TODO: handle closing websocket correctly
 //TODO: cleanup websockets cache with time to avoid memory leak
 class WebSocketTransportImpl : Transport {
+    private val incomingMessagesChannel: Channel<MessageEnvelop> = Channel()
 
+    private val appSocketThreadSafeProvider = AppSocketThreadSafeProvider(incomingMessagesChannel)
 
-    //TODO: temporarily using it instead of queue. Need to understand how to use queues/channels?
-    //TODO: understand how will it work with concurrency
-    private val incomingMessagesQueue = sharedMutableListOf<MessageEnvelop>()
-    //TODO: deal with proper closing of sockets
-    //private val appSocketsMap = mutableMapOf<String, AppSocket>()
-
-    private val appSocketsMap = sharedMutableMapOf<String, AppSocket>()
-
-    fun init() {
-
-
-    }
 
     @OptIn(InternalAPI::class)
     override suspend fun sendMessage(connection: Connection, message: MessageEnvelop) {
 
-        //TODO: properly parse host
-        //val host = "localhost"
-        val host = parseHostFromEndpoint(connection.endpoint)
-        val port = parsePortFromEndpoint(connection.endpoint)
-        val path = parsePathFromEndpoint(connection.endpoint)
-        val protocol = parseProtocolFromEndpoint(connection.endpoint)
+        println("Before sending message to endpoint: ${connection.endpoint}")
 
-        println("host = $host, port = $port, path = $path, protocol = $protocol")
-
-        if (protocol != "ws")
+        if (!(connection.endpoint.protocol == URLProtocol.WS || connection.endpoint.protocol == URLProtocol.WSS))
             throw IllegalArgumentException("Only websockets are supported by WebSocketTransportImpl!")
 
-        val url = "$protocol://$host:$port$path"
+        val appSocket = appSocketThreadSafeProvider.provideAppSocket(connection.endpoint.toString())
 
-        println("Synthesized url: $url")
-        val appSocket = openOrGetExistingConnection(url)
         appSocket.send(message.payload)
     }
 
-    private suspend fun openConnection(endpoint: String): AppSocket {
-        val appSocket = AppSocket(endpoint, incomingMessagesQueue)
-        appSocket.connect()
 
-        return appSocket
-    }
-
-    //TODO: make it thread safe
-    private suspend fun openOrGetExistingConnection(endpoint: String): AppSocket {
-
-        if (appSocketsMap[endpoint] != null)
-            return appSocketsMap[endpoint]!!
-
-        val appSocket = openConnection(endpoint)
-
-        appSocketsMap[endpoint] = appSocket
-
-        return appSocket
-    }
-
-    //TODO: find some proper URL data model
-    //ws://11.0.1.11:7000/ws
-    private fun parseProtocolFromEndpoint(endpoint: String): String {
-        return Regex("(^.*):\\/\\/.*:.*$").find(endpoint)!!.groups[1]!!.value
-    }
-
-    private fun parsePathFromEndpoint(endpoint: String): String {
-        return Regex("^.*:.*:.*(\\/.*$)").find(endpoint)!!.groups[1]!!.value
-
-    }
-
-    private fun parsePortFromEndpoint(endpoint: String): Int {
-        return Regex("^.*:.*:(.*)\\/.*$").find(endpoint)!!.groups[1]!!.value.toInt()
-    }
-
-    private fun parseHostFromEndpoint(endpoint: String): String {
-        return Regex("^.*:\\/\\/(.*):.*$").find(endpoint)!!.groups[1]!!.value
-    }
-
-
-    //TODO: decide if we need to leave this call blocking
     override suspend fun receiveNextMessage(): MessageEnvelop {
-        //TODO: ensure that all suspend functions are not blocking. For that use withContext block in the begining of each suspend fun
+        //TODO: ensure that all suspend functions are not blocking. For that use withContext block in the begininng of each suspend fun
+        return incomingMessagesChannel.receive()
+    }
 
-        while (incomingMessagesQueue.size == 0) {
-           // Sleeper().sleep(1000)
-            delay(1000)
-        }
-
-        val message = incomingMessagesQueue[0]
-        incomingMessagesQueue.removeAt(0)
-
-        println("Received message $message")
-
-        return message
-
+    override fun shutdown() {
+        //TODO: understand what else is needed here
+        appSocketThreadSafeProvider.shutdown()
     }
 
 }
