@@ -12,7 +12,9 @@ import ssi_agent
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    let myWalletName = "newWalletName4"
+    let myWalletPassword = "newWalletPassword"
+    let myDid = "4PCVFCeZbKXyvgjCedbXDx"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
@@ -20,13 +22,45 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let crc = CredentialReceiverControllerImpl()
         let cpc = CredPresenterControllerImpl()
         
+
+        EnvironmentUtils().doInitEnvironment(environment: EnvironmentImpl())
+
+        let walletManager = IndyWalletManager.Companion()
+
+
+        if (!walletManager.isWalletExistsAndOpenable(walletName: myWalletName, walletPassword: myWalletPassword)) {
+            print("Recreating wallet")
+            walletManager.createWallet(walletName: myWalletName, walletPassword: myWalletPassword, walletCreationStrategy: WalletCreationStrategy.truncateandcreate)}
+
+
+        if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
+            print("Recreating did")
+            let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
+                didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
+                walletName : myWalletName, walletPassword:myWalletPassword)
+
+            print("Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())")
+            //Store did somewhere in your application to use it afterwards
+        }
+
+        let walletHolder = IndyWalletHolder(
+            walletName : myWalletName,
+            walletPassword :myWalletPassword,
+            didConfig : DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil)
+        )
+
+        let indyWalletConnector = IndyWalletConnector().build(walletHolder: walletHolder)
+
+
         let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisFilePath: "./docker_pool_transactions_genesis.txt",
-            ipAddress: "192.168.0.116",
-            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip)
+            ipAddress: "192.168.0.117",
+            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
+            generatedGenesysFileName: "genesis.txn",
+            retryTimes: 5,
+            retryDelayMs: 5000)
         
-               let ssiAgentApi = SsiAgentBuilderImpl()
-                .withEnvironment(environment: EnvironmentImpl())
+        let ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
                 .withConnectionInitiatorController(connectionInitiatorController: cic)
                 .withCredReceiverController(credReceiverController: crc)
                 .withCredPresenterController(credPresenterController: cpc)
@@ -34,17 +68,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .build()
         
                ssiAgentApi.doInit()
-               let issuerInvitation =
-                "ws://192.168.0.116:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTY6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkNVdVpmdzNmdFJWWXRBWU5SNlRUdTZLam00djRGcFhVSjJtcHVWQVdFeDgiXSwicmVjaXBpZW50S2V5cyI6WyJNd2c4R0tUcmFyS0w1UWdBWmIxaXR5TXJ3blBqYlJWMjdqNGlhN050d05EIl0sIkBpZCI6ImM2ODk0Njg0LTg5ZTktNDlmZS05YWEyLTVjMGNmNjQ1NWE2NiIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
-               
-               ssiAgentApi.connect(url: issuerInvitation)
-        
-        let verifierInvitation =
-           "ws://192.168.0.116:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNjo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiR1Q1OUo0TWl5N2ZHcEV6ajN1SnpLbjVQbmVUYXNrYkNtSGtSWGQ0ekh1bVIiXSwicmVjaXBpZW50S2V5cyI6WyI4QWJUWGE1Y2pFV3hDcEZSRlZHZ3B2eUcyYUxWbVBHRzhwQnc2d3YzUkpFcSJdLCJAaWQiOiJjYzEyMDg1NS0zN2U2LTQ0ZmQtYWU3Yi01MTIxYTkxNzI3OTQiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
-        
-        ssiAgentApi.connect(url: verifierInvitation)
-        
-               sleep(10000)
+
+
+       ssiAgentApi.connect(url: "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiR2s4NWZENW1CWGVRc0dlcVpVV0NuUllnTmZ1M1AzdnVTRHQ5N1RHcEduVmsiXSwicmVjaXBpZW50S2V5cyI6WyJBOVNKZ0szakRtYWM2RE43ekp3UXJLSnBhWUtCMzJzcTROQUZGcGJITXlXRCJdLCJAaWQiOiJkNjI4ODU4Ni1kYjEzLTQyY2ItYmZlNy01MDY1NGRhNWE4ZmQiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0=")
+
+
+               sleep(180)
+        ssiAgentApi.shutdown(force: true)
         // Override point for customization after application launch.
         return true
     }
@@ -65,104 +95,67 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 }
+
 class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 {
-    func onCompleted(connection: SharedConnection) -> CallbackResult {
-        print ("ConnectionInitiatorControllerImpl:onCompleted")
-        print (connection)
-        
+    func onCompleted(connection: Connection) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onInvitationReceived(connection: SharedConnection, endpoint: String, invitation: Invitation) -> CallbackResult {
-        print ("ConnectionInitiatorControllerImpl:onInvitationReceived")
-        print (connection)
-        print ("ConnectionInitiatorControllerImpl:Invitation:")
-        print (invitation)
+    func onInvitationReceived(connection: Connection, invitation: Invitation) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
    
     
-    func onRequestSent(connection: SharedConnection, request: ConnectionRequest) -> CallbackResult {
-        print ("ConnectionInitiatorControllerImpl:onRequestSent")
-        print (connection)
-        print ("ConnectionInitiatorControllerImpl:ConnectionRequest:")
-        print (request)
- 
-
+    func onRequestSent(connection: Connection, request: ConnectionRequest) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onResponseReceived(connection: SharedConnection, response: ConnectionResponse) -> CallbackResult {
-        print ("ConnectionInitiatorControllerImpl:onResponseReceived")
-        print (connection)
-        print ("ConnectionInitiatorControllerImpl:ConnectionResponse:")
-        print (response)
- 
+    func onResponseReceived(connection: Connection, response: ConnectionResponse) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onAbandoned(connection: SharedConnection, problemReport: ProblemReport) -> CallbackResult {
-        print ("ConnectionInitiatorControllerImpl:onAbandoned")
-        print (connection)
-        print ("ConnectionInitiatorControllerImpl:ProblemReport:")
-        print (problemReport)
+    func onAbandoned(connection: Connection, problemReport: ProblemReport) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
         
     }
     
 }
- 
- 
+
+
 class CredentialReceiverControllerImpl: CredReceiverController {
-    func onCredentialReceived(connection: SharedConnection, credentialContainer: CredentialContainer) -> CallbackResult {
-        print ("CredentialReceiverControllerImpl:onCredentialReceived")
-        print (connection)
-        print ("CredentialReceiverControllerImpl:credentialContainer:")
-        print (credentialContainer)
+    func onCredentialReceived(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onDone(connection: SharedConnection, credentialContainer: CredentialContainer) -> CallbackResult {
-        print ("CredentialReceiverControllerImpl:onDone")
-        print (connection)
-        print ("CredentialReceiverControllerImpl:credentialContainer:")
-        print (credentialContainer)
+    func onDone(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onOfferReceived(connection: SharedConnection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
-        print ("CredentialReceiverControllerImpl:onOfferReceived")
-        print (connection)
-        print ("CredentialReceiverControllerImpl:credentialOfferContainer:")
-        print (credentialOfferContainer)
+    func onOfferReceived(connection: Connection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onRequestSent(connection: SharedConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
-        print ("CredentialReceiverControllerImpl:onRequestSent")
-        print (connection)
-        print ("CredentialReceiverControllerImpl:credentialRequestContainer:")
-        print (credentialRequestContainer)
+    func onRequestSent(connection: Connection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
 }
- 
- 
+
+
 class CredPresenterControllerImpl: CredPresenterController {
-    func onDone(connection: SharedConnection) -> CallbackResult {
-        print ("CredPresenterControllerImpl:onDone")
-        print (connection)
+    func onProblemReportGenerated(connection: Connection, problemReport: ProblemReport) {
+
+    }
+
+    func onDone(connection: Connection) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onRequestReceived(connection: SharedConnection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
-        print ("CredPresenterControllerImpl:onRequestReceived")
-        print (connection)
-        print ("CredPresenterControllerImpl:PresentationRequestContainer:")
-        print (presentationRequest)
+    func onRequestReceived(connection: Connection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
+    
+    
 }

@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.model
 
+import io.ktor.http.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -14,7 +15,7 @@ class ConnectionTest {
             invitation = "invitati",
             isSelfInitiated = true,
             peerRecipientKeys = listOf("keys"),
-            endpoint = "ws:\\endpoint:111\\ws"
+            endpoint = Url("ws:\\endpoint:111\\ws")
         )
 
         val jsonString = connection.toJson()

@@ -5,7 +5,7 @@ val indyVersion: String = "1.16.0"
 val jacksonVersion: String = "2.9.7"
 val ktorVersion: String = "1.5.1"
 val okhttpVersion: String = "3.5.0"
-val kotlinxCourutinesVersion = "1.4.2-native-mt"
+val kotlinxCoroutinesVersion = "1.4.2-native-mt"
 val uuidVersion = "0.2.3"
 val junitVersion = "4.13"
 
@@ -93,10 +93,14 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                //TODO: there is a problem with this dependency when setting minimumSdkAndroid version below 23. If we want to support older android versions we need to investigate it and find a solution or workaround
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 implementation("io.ktor:ktor-utils:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCourutinesVersion")
-                implementation("co.touchlab:stately-iso-collections:1.1.4-a1")
+                //For now we use ktor only to have common URL class. Also I assume we might extend its usage
+                implementation ("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
+                implementation ("co.touchlab:stately-iso-collections:1.1.4-a1")
+                implementation ("co.touchlab:stately-concurrency:1.1.4")
                 //TODO: check if two stately dependencies below are needed, considering that they should be included in the dependency above
                 implementation("co.touchlab:stately-isolate:1.1.4-a1")
                 implementation("co.touchlab:stately-common:1.1.4")
@@ -122,7 +126,7 @@ kotlin {
                 //TODO: find out a way to get rid of faster xml completely as it is not usable outside of JVM
                 implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-
+                implementation("io.ktor:ktor-client-java:$ktorVersion")
                 //TODO: this is temporal logging addition. Check idiomatic way to log in multiplatform env
                 implementation("org.slf4j:slf4j-api:1.7.30")
                 implementation("org.slf4j:slf4j-log4j12:1.8.0-alpha2")
@@ -155,6 +159,7 @@ kotlin {
                 implementation("net.java.dev.jna:jna:5.8.0@aar")
                 implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+                implementation("io.ktor:ktor-client-android:$ktorVersion")
             }
         }
         val androidTest by getting {
@@ -169,6 +174,7 @@ kotlin {
         val iosMain by getting {
             dependencies {
                 implementation(files("indylib.klib"))
+                implementation("io.ktor:ktor-client-ios:$ktorVersion")
             }
         }
         val iosTest by getting {

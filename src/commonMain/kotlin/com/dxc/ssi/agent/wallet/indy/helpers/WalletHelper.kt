@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.wallet.indy.helpers
 
+import com.dxc.ssi.agent.exceptions.WalletDoesNotExistException
 import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
 import com.dxc.ssi.agent.wallet.indy.model.WalletConfig
 import com.dxc.ssi.agent.wallet.indy.model.WalletPassword
@@ -72,9 +73,9 @@ object WalletHelper {
      *
      * @throws ExecutionException with cause [WalletAlreadyOpenedException]
      */
-    suspend fun openExisting(config: WalletConfig, password: WalletPassword): Wallet {
+    private suspend fun openExisting(config: WalletConfig, password: WalletPassword): Wallet {
         if (!exists(config.id))
-            throw RuntimeException("Wallet ${EnvironmentUtils.getIndyWalletPath(config.id)} doesn't exist")
+            throw WalletDoesNotExistException("Wallet ${EnvironmentUtils.getIndyWalletPath(config.id)} doesn't exist")
 
         val walletConfigJson = Json.encodeToString(config)
         val walletPasswordJson = Json.encodeToString(password)
@@ -118,4 +119,19 @@ object WalletHelper {
      */
     suspend fun openOrCreate(walletName: String, walletPassword: String): Wallet =
         openOrCreate(WalletConfig(walletName), WalletPassword(walletPassword))
+
+
+    suspend fun createOrFail(walletName: String, walletPassword: String) {
+
+        createOrFail(WalletConfig(walletName), WalletPassword(walletPassword))
+    }
+
+    suspend fun createOrFail(config: WalletConfig, password: WalletPassword) {
+
+        if (exists(config.id))
+            throw RuntimeException("Wallet already exists")
+
+        createNonExisting(config, password)
+    }
+
 }

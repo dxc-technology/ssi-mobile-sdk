@@ -2,16 +2,19 @@ package com.dxc.ssi.agent.ledger.indy.genesis
 
 import com.dxc.utils.FileUtils
 
-class GenesisGenerator(val indyPoolIp: String, val dir: String) {
+class GenesisGenerator(
+    private val indyPoolIp: String,
+    private val dir: String,
+    private val generatedGenesisFileName: String = "genesys.txn"
+) {
 
     fun initGenesisFile(): String {
-        //TODO: make in configurable
-        val filename = "genesis.txn"
+
         val genesisContent = buildStandardIndyPoolGenesis(indyPoolIp)
 
         println("Generated genesys: $genesisContent")
-        val filePath = "$dir/$filename"
-        if(FileUtils.fileExists(filePath)) {
+        val filePath = "$dir/$generatedGenesisFileName"
+        if (FileUtils.fileExists(filePath)) {
             FileUtils.deleteRecursively(filePath)
         }
         FileUtils.createFileWithContent(filePath, genesisContent)
