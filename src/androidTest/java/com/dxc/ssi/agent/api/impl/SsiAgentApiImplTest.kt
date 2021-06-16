@@ -36,7 +36,7 @@ class SsiAgentApiImplTest {
     )
 
     @Test
-   // @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -118,7 +118,6 @@ class SsiAgentApiImplTest {
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         override fun onInvitationReceived(
             connection: Connection,
-            endpoint: String,
             invitation: Invitation
         ): CallbackResult {
             return CallbackResult(canProceedFurther = true)

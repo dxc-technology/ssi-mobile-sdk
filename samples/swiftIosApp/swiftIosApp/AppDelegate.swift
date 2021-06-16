@@ -37,8 +37,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                let issuerInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRHZlanRiTXRDVHZLb0RmY3Vyd0g2eFJ2RXREUHRkZkFzYzkyNG9MSzlGMVoiXSwicmVjaXBpZW50S2V5cyI6WyJIenMxZ2hVS3daQTJBOXRBeGt5UmZrbXFHZ0xHNGJkZkszUXQ2SzVQRFl0VCJdLCJAaWQiOiI5ZWUzZmUzNi1hOTVjLTQxNGQtYjUyNi1iMmQ2NzBhNjYwNGMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
                
                ssiAgentApi.connect(url: issuerInvitation)
-      
-        
+
+
                sleep(10000)
         // Override point for customization after application launch.
         return true
@@ -67,7 +67,7 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onInvitationReceived(connection: Connection, endpoint: String, invitation: Invitation) -> CallbackResult {
+    func onInvitationReceived(connection: Connection, invitation: Invitation) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
@@ -111,9 +111,9 @@ class CredentialReceiverControllerImpl: CredReceiverController {
 
 class CredPresenterControllerImpl: CredPresenterController {
     func onProblemReportGenerated(connection: Connection, problemReport: ProblemReport) {
-        
+
     }
-    
+
     func onDone(connection: Connection) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
