@@ -4,7 +4,7 @@ import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
-import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
@@ -22,7 +22,7 @@ import org.junit.Test
 class SsiAgentApiImplTest {
 
     @Test
-   // @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -40,11 +40,11 @@ class SsiAgentApiImplTest {
 
 
         val invitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRzJzVm9mUjFuNVYyQ1l5enA5c0ZmU0RtNHNqNzFRdlZnSEJ1azkyQ1pwUEsiXSwicmVjaXBpZW50S2V5cyI6WyI5aWpXdDZOa01Cem84cVJRZUdMV3JwZjV0bXZ6WlNHcEtBZTRBUnFrNmRzSiJdLCJAaWQiOiI5ZjUxNjE4OC01ZGViLTRjMGEtYjUzZS1hMmU1ZWM0ZDU2N2UiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiNmVOQXpSOFBWRzhQaFJrNW55YUFQVnRoQmVHZEQydFRNWUVRd3pkRkR5YngiXSwicmVjaXBpZW50S2V5cyI6WyJuSjVmNDVEQ3ZKTUdMOXBVQlo2VlpWY3VWcG5MM2N6dmVFZE10bWVESzczIl0sIkBpZCI6ImY2ZDZkYjE5LTU0NzMtNDcxOS05NDY2LTcyZTdjNWE4YTNjNyIsIkB0eXBlIjoiZGlkOnNvdjpCekNic05ZaE1yakhpcVpEVFVBU0hnO3NwZWMvY29ubmVjdGlvbnMvMS4wL2ludml0YXRpb24ifQ=="
+
 
         println("Connecting to issuer")
         ssiAgentApi.connect(invitationUrl)
-
 
         Sleeper().sleep(500000)
 
@@ -60,6 +60,10 @@ class SsiAgentApiImplTest {
 
         override fun onDone(connection: Connection): CallbackResult {
             return CallbackResult(true)
+        }
+
+        override fun onProblemReportGenerated(connection: Connection, problemReport: ProblemReport) {
+
         }
 
     }

@@ -1,7 +1,7 @@
 package com.dxc.ssi.agent.api.callbacks.didexchange
 
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
-import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation

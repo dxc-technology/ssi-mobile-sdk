@@ -7,7 +7,7 @@ import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
-import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
@@ -59,8 +59,7 @@ class SsiAgentApiImplTest {
 
 
         val issuerInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiQU1jakh6eEtIczJ5dEJZR01UU1VKUzYzc1VqUDM4aWZ5a0ZHVWpnRFg4N3kiXSwicmVjaXBpZW50S2V5cyI6WyJEdXFOdEtERGFlREZvZWY5dzVjREhZSnpkalBzQ2J6Q3NHZGFNVVNFcFl6MiJdLCJAaWQiOiI1ZmE1Y2JhMS04OWY5LTQ1ODYtOTE1MS1mYTNkNjM2YzkzYzYiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
-
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRHZlanRiTXRDVHZLb0RmY3Vyd0g2eFJ2RXREUHRkZkFzYzkyNG9MSzlGMVoiXSwicmVjaXBpZW50S2V5cyI6WyI1eUNjYUR1bmtiUlR4UU5RQnY3NUFlZDcxZVA2UUx5RjJTQ2NFWXAyVVFHNyJdLCJAaWQiOiJmZWY3Yjg2Zi00OWYzLTQwN2QtYWRjYS04YjFjYmJiOWU1ZTQiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
         println("Connecting to issuer")
         ssiAgentApi.connect(issuerInvitationUrl)
@@ -79,6 +78,10 @@ class SsiAgentApiImplTest {
 
         override fun onDone(connection: Connection): CallbackResult {
             return CallbackResult(true)
+        }
+
+        override fun onProblemReportGenerated(connection: Connection, problemReport: ProblemReport) {
+
         }
 
     }
