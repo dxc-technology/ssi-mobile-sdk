@@ -66,8 +66,6 @@ class ReceiveCredentialOfferAction(
             )
 
             val credentialRequest = CredentialRequestContainer(
-                //TODO: create enum or other holder for message type, replace hardocde and move it inside of the message, as the template will suit only this particular request
-                type = "https://didcomm.org/issue-credential/1.0/request-credential",
                 //TODO: set proper id
                 id = uuid4().toString(),
                 thread = Thread(thid = credentialOfferContainerMessage.id),

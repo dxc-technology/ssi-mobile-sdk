@@ -1,7 +1,6 @@
 package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.Callbacks
-import com.dxc.ssi.agent.api.Environment
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
@@ -45,7 +44,7 @@ class SsiAgentApiImpl(
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun init() {
 
-        if(!EnvironmentUtils.environmentInitizlized)
+        if (!EnvironmentUtils.environmentInitizlized)
             throw RuntimeException("Please initialize environment before initializing SsiAgentApiImpl")
 
 
@@ -86,10 +85,6 @@ class SsiAgentApiImpl(
             })
     }
 
-    override fun disconnect(connection: PeerConnection) {
-        TODO("Not yet implemented")
-    }
-
     //TODO: current function is synchronous with hardcoded timeout, generalize it
     override fun sendTrustPing(connection: PeerConnection): Boolean {
         return CoroutineHelper.waitForCompletion(
@@ -124,15 +119,28 @@ class SsiAgentApiImpl(
         println("Stopped the agent")
     }
 
-    override fun getConnections(): Set<PeerConnection> {
+    override fun getConnections(includingAbandoned: Boolean): Set<PeerConnection> {
         TODO("Not yet implemented")
     }
 
-    override fun disconnect(connection: PeerConnection, force: Boolean) {
-        TODO("Not yet implemented")
+    override fun abandonConnection(connection: PeerConnection, force: Boolean, notifyPeerBeforeAbandoning: Boolean) {
+        CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                messageListener.messageRouter.abandonConnectionProcessor.abandonConnection(
+                    connection,
+                    notifyPeerBeforeAbandoning
+                )
+            })
     }
 
-    override fun disconnectAll(force: Boolean) {
+    override fun abandonAllConnections(force: Boolean, notifyPeerBeforeAbandoning: Boolean) {
+        getConnections().forEach { abandonConnection(it, force, notifyPeerBeforeAbandoning) }
+    }
+
+    override fun removeAbandonedConnectionsFromWallet() {
         TODO("Not yet implemented")
+        /*
+        * Currently when we disconnect a connection , we mark it as Abandoned in wallet. This function is to cleanup such connections
+        * */
     }
 }

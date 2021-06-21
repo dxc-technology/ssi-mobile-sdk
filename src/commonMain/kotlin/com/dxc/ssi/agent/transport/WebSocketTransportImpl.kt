@@ -28,6 +28,10 @@ class WebSocketTransportImpl : Transport {
         appSocket.send(message.payload)
     }
 
+    override suspend fun disconnect(connection: PeerConnection) {
+        appSocketThreadSafeProvider.disconnectAndDropAppSocket(connection.endpoint.toString())
+    }
+
 
     override suspend fun receiveNextMessage(): MessageEnvelop {
         //TODO: ensure that all suspend functions are not blocking. For that use withContext block in the begininng of each suspend fun

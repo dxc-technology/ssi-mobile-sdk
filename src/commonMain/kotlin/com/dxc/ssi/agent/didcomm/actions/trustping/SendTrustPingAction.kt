@@ -32,7 +32,6 @@ class SendTrustPingAction(
 
         val trustPingRequest =
             TrustPingRequest(
-                type = "https://didcomm.org/trust_ping/1.0/ping",
                 id = requestId,
                 responseRequested = true
             )

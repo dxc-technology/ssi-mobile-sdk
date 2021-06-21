@@ -13,7 +13,7 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class PeerConnection(
     val id: String,
-    val state: String,
+    val state: PeerConnectionState,
     val invitation: String,
     val isSelfInitiated: Boolean,
     val peerRecipientKeys: List<String>,

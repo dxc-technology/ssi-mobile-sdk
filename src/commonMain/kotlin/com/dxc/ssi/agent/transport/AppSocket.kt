@@ -8,8 +8,6 @@ import com.dxc.utils.System
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 
-//Common
-
 class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
     private val ws = PlatformSocket(url)
     private val job: CompletableJob = Job()
@@ -29,13 +27,13 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
 
             currentState = State.CONNECTED
             CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketOpenedChannel.send(Unit) })
-            println("${System.getCurrentThread()} - Opened socket")
+            println("PlatformSocketListener: ${System.getCurrentThread()} - Opened socket")
         }
 
         override fun onFailure(t: Throwable) {
             socketError = t
             currentState = State.CLOSED
-            println("Socket failure: $t \n ${t.stackTraceToString()}")
+            println("PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}")
         }
 
         override fun onMessage(msg: String) {
@@ -48,18 +46,20 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
 
         override fun onClosing(code: Int, reason: String) {
             currentState = State.CLOSING
-            println("Closing socket: code = $code, reason = $reason")
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketClosingChannel.send(Unit) })
+            println("PlatformSocketListener: Closing socket: code = $code, reason = $reason")
         }
 
         override fun onClosed(code: Int, reason: String) {
             currentState = State.CLOSED
 
-            println("Closed socket: code = $code, reason = $reason")
+            println("PlatformSocketListener: Closed socket: code = $code, reason = $reason")
             job.complete()
         }
     }
 
     val socketOpenedChannel: Channel<Unit> = Channel()
+    val socketClosingChannel: Channel<Unit> = Channel()
 
     suspend fun connect() {
         if (currentState != State.CLOSED) {
@@ -80,12 +80,12 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
 
     }
 
-    //TODO: ensure to disconnect properly otherwise we will have leaking threads
-    fun disconnect() {
+    suspend fun disconnect() {
         if (currentState != State.CLOSED) {
             currentState = State.CLOSING
             ws.closeSocket(1000, "The user has closed the connection.")
-            job.complete()
+            //TODO: if we try to do it it hangs currently
+            //socketClosingChannel.receive()
         }
     }
 

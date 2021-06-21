@@ -8,8 +8,10 @@ import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
 import com.dxc.ssi.agent.didcomm.constants.DidCommProblemCodes
 import com.dxc.ssi.agent.didcomm.constants.toProblemReportDescription
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
+import com.dxc.ssi.agent.model.PeerConnectionState
 
 
+//TODO: understand difference between AbortConnection and AbandonConnection
 //TODO: Think about more generic actions constructor parameters and returns
 class AbortConnection(
     val walletConnector: WalletConnector,
@@ -19,7 +21,7 @@ class AbortConnection(
     override suspend fun perform(): ActionResult {
         //TODO: think how to avoid NPE here
         val connection = walletConnector.walletHolder.getConnectionRecordById(connectionId)!!
-        val updatedConnection = connection.copy(state = "Abandoned")
+        val updatedConnection = connection.copy(state = PeerConnectionState.ABANDONED)
         walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
         //TODO: provide meaningful ProblemReport here
         val problemReport = ProblemReport(

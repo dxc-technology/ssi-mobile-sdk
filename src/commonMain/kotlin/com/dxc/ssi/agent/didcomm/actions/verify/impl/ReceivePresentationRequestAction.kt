@@ -48,8 +48,6 @@ class ReceivePresentationRequestAction(
                 val presentationData = walletConnector.prover!!.createPresentation(presentationRequest, ledgerConnector)
 
                 val presentation = PresentationContainer(
-                    //TODO: create enum or other holder for message type, replace hardocde and move it inside of the message, as the template will suit only this particular request
-                    type = "https://didcomm.org/present-proof/1.0/presentation",
                     //TODO: set proper id
                     id = uuid4().toString(),
                     thread = Thread(thid = presentationRequestMessage.id),

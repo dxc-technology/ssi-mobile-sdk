@@ -4,6 +4,8 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.didcomm.processor.abandon.AbandonConnectionProcessor
+import com.dxc.ssi.agent.didcomm.processor.abandon.AbandonConnectionProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.didexchange.DidExchangeProcessor
 import com.dxc.ssi.agent.didcomm.processor.didexchange.DidExchangeProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.issue.CredIssuerProcessor
@@ -59,17 +61,26 @@ class MessageRouterImpl(
         trustPingTrackerService
     )
 
+    override val abandonConnectionProcessor: AbandonConnectionProcessor = AbandonConnectionProcessorImpl(
+        walletConnector,
+        ledgerConnector,
+        transport,
+        callbacks,
+        trustPingProcessor,
+        trustPingTrackerService
+    )
+
     //TODO: check connection in message context and throw exception if it is not null if it is expected to be non-null
     override suspend fun routeAndProcessMessage(messageContext: MessageContext) {
 
-        val route = determineRoute(messageContext)
-
-        when (route) {
+        when (determineRoute(messageContext)) {
             //TODO: add route for forward message
             Route.DidExchange -> didExchangeProcessor.processMessage(messageContext)
             Route.CredIssuer -> credIssuerProcessor.processMessage(messageContext)
             Route.CredVerifier -> credVerifierProcessor.processMessage(messageContext)
             Route.TrustPing -> trustPingProcessor.processMessage(messageContext)
+            Route.AbandonConnection -> abandonConnectionProcessor.processMessage(messageContext)
+
         }
     }
 
@@ -85,6 +96,7 @@ class MessageRouterImpl(
             typeAttribute.contains("/connections/1") -> Route.DidExchange
             typeAttribute.contains("/present-proof/1") -> Route.CredVerifier
             typeAttribute.contains("/trust_ping/1") -> Route.TrustPing
+            typeAttribute.contains("abandon_connection/1.0") -> Route.AbandonConnection
             else -> throw IllegalArgumentException("Unknown message type: $typeAttribute")
         }
 
@@ -98,6 +110,7 @@ class MessageRouterImpl(
         DidExchange,
         CredIssuer,
         CredVerifier,
-        TrustPing
+        TrustPing,
+        AbandonConnection
     }
 }

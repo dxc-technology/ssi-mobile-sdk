@@ -10,6 +10,7 @@ import com.dxc.ssi.agent.didcomm.commoon.MessageSender
 import com.dxc.ssi.agent.didcomm.model.common.Service
 import com.dxc.ssi.agent.didcomm.model.didexchange.*
 import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PeerConnectionState
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.utils.Base64
 import io.ktor.http.*
@@ -39,7 +40,7 @@ class ReceiveInvitationAction(
         val connectionId = uuid4().toString()
 
         val connection = PeerConnection(
-            id = connectionId, state = "START",
+            id = connectionId, state = PeerConnectionState.INVITATION_RECEIVED,
             invitation = this.invitationUrl,
             isSelfInitiated = true,
             peerRecipientKeys = invitation.recipientKeys,
@@ -64,7 +65,7 @@ class ReceiveInvitationAction(
             MessageSender.packAndSendMessage(Message(connectionRequestJson), connection, walletConnector, transport)
 
             //TODO: set proper state here
-            val updatedConnection = connection.copy(state = "RequestSent")
+            val updatedConnection = connection.copy(state = PeerConnectionState.REQUEST_SENT)
             walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
 
             connectionInitiatorController.onRequestSent(updatedConnection, connectionRequest)
@@ -75,7 +76,7 @@ class ReceiveInvitationAction(
         } else {
             //TODO: handle this situation here
             //update status to abandoned
-            val updatedConnection = connection.copy(state = "Abandoned")
+            val updatedConnection = connection.copy(state = PeerConnectionState.ABANDONED)
             //TODO: see if we need to store it at all
             walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
             return ActionResult(updatedConnection)
@@ -97,8 +98,6 @@ class ReceiveInvitationAction(
         return ConnectionRequest(
             //TODO: understand how to populate id properly
             id = connectionId,
-            //TODO: create enum or other holder for message type, replace hardocde and move it inside of the message, as the template will suit only this particular request
-            type = "https://didcomm.org/connections/1.0/request",
             //TODO: understand what label should be
             label = "Holder",
             connection = buildConnection(),

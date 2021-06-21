@@ -25,6 +25,7 @@ import kotlinx.serialization.Serializable
 //TODO: think about some model types instead of just strings
 @Serializable
 data class Invitation(
+    //TODO: set default type here and validate it
     @SerialName("@type") val type: String,
     @SerialName("@id") val id: String,
     val label: String,
