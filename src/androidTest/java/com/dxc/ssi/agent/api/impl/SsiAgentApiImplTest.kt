@@ -30,7 +30,7 @@ class SsiAgentApiImplTest {
 
     @Rule
     @JvmField
-    val permissionRule = if (Build.VERSION.SDK_INT <= 30) {
+    val permissionRule = if (Build.VERSION.SDK_INT >= 30) {
         GrantPermissionRule.grant(
             //Manifest.permission.MANAGE_EXTERNAL_STORAGE, Use Android API 30 Platform to run it
             Manifest.permission.READ_EXTERNAL_STORAGE,
