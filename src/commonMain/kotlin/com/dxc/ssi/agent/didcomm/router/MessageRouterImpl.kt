@@ -4,13 +4,13 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
-import com.dxc.ssi.agent.didcomm.Processors
+import com.dxc.ssi.agent.didcomm.processor.Processors
 import com.dxc.ssi.agent.didcomm.processor.abandon.AbandonConnectionProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.didexchange.DidExchangeProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.issue.CredIssuerProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.verify.CredVerifierProcessorImpl
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
 import com.dxc.ssi.agent.model.messages.MessageContext
 import kotlinx.serialization.decodeFromString
@@ -19,7 +19,7 @@ import kotlinx.serialization.json.Json
 class MessageRouterImpl(
     private val walletConnector: WalletConnector,
     private val ledgerConnector: LedgerConnector,
-    private val trustPingTrackerService: TrustPingTrackerService,
+    private val services: Services,
     private val transport: Transport,
     private val callbacks: Callbacks
 ) :
@@ -35,7 +35,7 @@ class MessageRouterImpl(
             transport,
             callbacks,
             processors,
-            trustPingTrackerService
+            services
         )
 
         processors.abandonConnectionProcessor = AbandonConnectionProcessorImpl(
@@ -44,7 +44,7 @@ class MessageRouterImpl(
             transport,
             callbacks,
             processors,
-            trustPingTrackerService
+            services
         )
 
         processors.credIssuerProcessor = CredIssuerProcessorImpl(
@@ -53,7 +53,7 @@ class MessageRouterImpl(
             transport,
             callbacks,
             processors,
-            trustPingTrackerService,
+            services,
         )
 
         processors.didExchangeProcessor = DidExchangeProcessorImpl(
@@ -62,7 +62,7 @@ class MessageRouterImpl(
             transport,
             callbacks,
             processors,
-            trustPingTrackerService
+            services
         )
 
 
@@ -72,7 +72,7 @@ class MessageRouterImpl(
             transport,
             callbacks,
             processors,
-            trustPingTrackerService
+            services
         )
 
 

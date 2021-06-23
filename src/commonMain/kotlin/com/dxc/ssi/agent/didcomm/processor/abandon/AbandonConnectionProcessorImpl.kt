@@ -4,7 +4,6 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
-import com.dxc.ssi.agent.didcomm.Processors
 import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.abandon.impl.InitiateAbandonConnectionAction
@@ -12,15 +11,15 @@ import com.dxc.ssi.agent.didcomm.actions.abandon.impl.ReceiveAbandonConnectionAc
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
 import com.dxc.ssi.agent.didcomm.processor.MessageType
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.processor.Processors
+import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.PeerConnection
 
-//TODO: for now this class won;t be part of abstraction, once it is implemented see if it is posible to generalize it with MessageProcessor and AbstractMessageProcessor
-//TODO: remove all redundant part of code left from DidExchangeProcessor
+
 class AbandonConnectionProcessorImpl(
     walletConnector: WalletConnector,
     ledgerConnector: LedgerConnector, transport: Transport, callbacks: Callbacks,
-    processors: Processors, trustPingTrackerService: TrustPingTrackerService
+    processors: Processors, services: Services
     //TODO: introduce callbacks for TrustPing
 ) : AbstractMessageProcessor(
     walletConnector,
@@ -28,7 +27,7 @@ class AbandonConnectionProcessorImpl(
     transport,
     callbacks,
     processors,
-    trustPingTrackerService
+    services
 ), AbandonConnectionProcessor {
 
     override suspend fun abandonConnection(
@@ -40,7 +39,7 @@ class AbandonConnectionProcessorImpl(
             InitiateAbandonConnectionAction(
                 walletConnector,
                 transport,
-                trustPingTrackerService!!,
+                services,
                 callbacks,
                 connection,
                 notifyPeerBeforeAbandoning,

@@ -9,7 +9,8 @@ import com.dxc.ssi.agent.didcomm.actions.abandon.AbandonAction
 import com.dxc.ssi.agent.didcomm.commoon.MessageSender
 import com.dxc.ssi.agent.didcomm.model.abandon.AbandonConnectionAnnounce
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
+import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
 import com.dxc.ssi.agent.model.messages.Message
@@ -21,7 +22,7 @@ import kotlinx.serialization.json.Json
 class InitiateAbandonConnectionAction(
     val walletConnector: WalletConnector,
     val transport: Transport,
-    trustPingTrackerService: TrustPingTrackerService,
+    services: Services,
     val callbacks: Callbacks,
     val connection: PeerConnection,
     val notifyPeerBeforeAbandoning: Boolean,

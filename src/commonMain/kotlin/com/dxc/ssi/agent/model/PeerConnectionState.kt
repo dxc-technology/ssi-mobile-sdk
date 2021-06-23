@@ -5,5 +5,4 @@ enum class PeerConnectionState {
     REQUEST_SENT,
     COMPLETED,
     ABANDONED
-
 }

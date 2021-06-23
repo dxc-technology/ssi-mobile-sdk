@@ -3,6 +3,7 @@ package com.dxc.ssi.agent.api
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PeerConnectionState
 
 interface SsiAgentApi {
     fun init()
@@ -19,7 +20,7 @@ interface SsiAgentApi {
     fun getLedgerConnector(): LedgerConnector
     fun getWalletConnector(): WalletConnector
     fun shutdown(force: Boolean)
-    fun getConnections(includingAbandoned: Boolean = false): Set<PeerConnection>
+    fun getConnections(connectionState: PeerConnectionState? = PeerConnectionState.COMPLETED): Set<PeerConnection>
     fun abandonConnection(connection: PeerConnection, force: Boolean = true, notifyPeerBeforeAbandoning: Boolean = true)
     fun abandonAllConnections(force: Boolean = true, notifyPeerBeforeAbandoning: Boolean = true)
     fun removeAbandonedConnectionsFromWallet()

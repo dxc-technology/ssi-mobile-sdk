@@ -6,7 +6,8 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.router.MessageRouter
 import com.dxc.ssi.agent.didcomm.router.MessageRouterImpl
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
+import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.MessageContext
@@ -19,14 +20,14 @@ class MessageListenerImpl(
     private val transport: Transport,
     private val walletConnector: WalletConnector,
     private val ledgerConnector: LedgerConnector,
-    private val trustPingTrackerService: TrustPingTrackerService,
+    private val services: Services,
     callbacks: Callbacks
 ) :
     MessageListener {
 
     private var isShutdown: Boolean = false
     override val messageRouter: MessageRouter =
-        MessageRouterImpl(walletConnector, ledgerConnector, trustPingTrackerService, transport, callbacks)
+        MessageRouterImpl(walletConnector, ledgerConnector, services, transport, callbacks)
 
     override fun shutdown() {
         isShutdown = true

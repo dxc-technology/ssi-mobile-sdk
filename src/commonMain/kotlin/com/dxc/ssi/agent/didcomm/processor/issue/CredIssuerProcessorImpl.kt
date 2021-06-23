@@ -4,14 +4,15 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
-import com.dxc.ssi.agent.didcomm.Processors
+import com.dxc.ssi.agent.didcomm.processor.Processors
 import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.issue.impl.ReceiveCredentialAction
 import com.dxc.ssi.agent.didcomm.actions.issue.impl.ReceiveCredentialOfferAction
 import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
 import com.dxc.ssi.agent.didcomm.processor.MessageType
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
+import com.dxc.ssi.agent.didcomm.services.Services
 
 class CredIssuerProcessorImpl(
     walletConnector: WalletConnector,
@@ -19,14 +20,14 @@ class CredIssuerProcessorImpl(
     transport: Transport,
     callbacks: Callbacks,
     processors: Processors,
-    trustPingTrackerService: TrustPingTrackerService,
+    services: Services,
 ) : AbstractMessageProcessor(
     walletConnector,
     ledgerConnector,
     transport,
     callbacks,
     processors,
-    trustPingTrackerService
+    services
 ), CredIssuerProcessor {
 
 

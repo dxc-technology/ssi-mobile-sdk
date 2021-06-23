@@ -1,4 +1,4 @@
-package com.dxc.ssi.agent.didcomm
+package com.dxc.ssi.agent.didcomm.processor
 
 import com.dxc.ssi.agent.didcomm.processor.abandon.AbandonConnectionProcessor
 import com.dxc.ssi.agent.didcomm.processor.didexchange.DidExchangeProcessor

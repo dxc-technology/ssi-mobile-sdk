@@ -4,14 +4,14 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
-import com.dxc.ssi.agent.didcomm.Processors
 import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.didexchange.impl.ReceiveConnectionResponseAction
 import com.dxc.ssi.agent.didcomm.actions.didexchange.impl.ReceiveInvitationAction
 import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
 import com.dxc.ssi.agent.didcomm.processor.MessageType
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.processor.Processors
+import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.PeerConnection
 
 //TODO: for now this class won;t be part of abstraction, once it is implemented see if it is posible to generalize it with MessageProcessor and AbstractMessageProcessor
@@ -20,10 +20,10 @@ class DidExchangeProcessorImpl(
     walletConnector: WalletConnector,
     ledgerConnector: LedgerConnector, transport: Transport, callbacks: Callbacks,
     processors: Processors,
-    trustPingTrackerService: TrustPingTrackerService
+    services: Services
 ) : AbstractMessageProcessor(
     walletConnector, ledgerConnector, transport, callbacks, processors,
-    trustPingTrackerService
+    services
 ), DidExchangeProcessor {
 
 
@@ -31,7 +31,13 @@ class DidExchangeProcessorImpl(
 
         //TODO: think how to avoid NPE here
         val receiveInvitationAction =
-            ReceiveInvitationAction(walletConnector, transport, processors, callbacks.connectionInitiatorController!!, invitation)
+            ReceiveInvitationAction(
+                walletConnector,
+                transport,
+                processors,
+                callbacks.connectionInitiatorController!!,
+                invitation
+            )
         return receiveInvitationAction.perform().connection!!
     }
 

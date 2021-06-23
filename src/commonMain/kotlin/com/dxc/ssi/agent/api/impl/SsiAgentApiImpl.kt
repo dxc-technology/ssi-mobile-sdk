@@ -8,8 +8,10 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
+import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PeerConnectionState
 import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.utils.EnvironmentUtils
 import kotlinx.coroutines.*
@@ -35,11 +37,24 @@ class SsiAgentApiImpl(
         CoroutineHelper.singleThreadCoroutineContext("Main Listener Thread")
     private val trustPingListenerSingleThreadDispatcher =
         CoroutineHelper.singleThreadCoroutineContext("TrustPing Listener Thread")
-    private val trustPingTrackerService =
-        TrustPingTrackerService(walletConnector, callbacks.connectionInitiatorController!!)
+
+
+    private val services = Services()
 
     private val messageListener: MessageListener =
-        MessageListenerImpl(transport, walletConnector, ledgerConnector, trustPingTrackerService, callbacks)
+        MessageListenerImpl(transport, walletConnector, ledgerConnector, services, callbacks)
+
+
+    init {
+
+        services.connectionsTrackerService = ConnectionsTrackerService(
+            walletConnector,
+            callbacks.connectionInitiatorController!!,
+            messageListener.messageRouter.processors
+        )
+
+
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun init() {
@@ -71,7 +86,7 @@ class SsiAgentApiImpl(
 
         agentScope.launch {
             withContext(trustPingListenerSingleThreadDispatcher.context) {
-                trustPingTrackerService.track()
+                services.connectionsTrackerService!!.start()
             }
         }
     }
@@ -104,11 +119,11 @@ class SsiAgentApiImpl(
     }
 
     override fun getLedgerConnector(): LedgerConnector {
-        TODO("Not yet implemented")
+        return ledgerConnector
     }
 
     override fun getWalletConnector(): WalletConnector {
-        TODO("Not yet implemented")
+        return walletConnector
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -117,12 +132,16 @@ class SsiAgentApiImpl(
         job.cancel()
         mainListenerSingleThreadDispatcher.closeContext()
         trustPingListenerSingleThreadDispatcher.closeContext()
+        services.connectionsTrackerService!!.shutdown()
         transport.shutdown()
         println("Stopped the agent")
     }
 
-    override fun getConnections(includingAbandoned: Boolean): Set<PeerConnection> {
-        TODO("Not yet implemented")
+    override fun getConnections(connectionState: PeerConnectionState?): Set<PeerConnection> {
+        return CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                walletConnector.walletHolder.getConnections(connectionState)
+            })
     }
 
     override fun abandonConnection(connection: PeerConnection, force: Boolean, notifyPeerBeforeAbandoning: Boolean) {
