@@ -12,8 +12,11 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
     private val ws = PlatformSocket(url)
     private val job: CompletableJob = Job()
 
-    var socketError: Throwable? = null
-        private set
+    var socketError: Throwable?
+        get() = isoSocketError.access { it.obj }!!
+        private set(value) {
+            isoSocketError.access { it.obj = value }
+        }
 
     var currentState: State
         get() = isoCurrentState.access { it.obj }!!
@@ -21,6 +24,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
             isoCurrentState.access { it.obj = value }
         }
     private val isoCurrentState = IsolateState { ObjectHolder(State.CLOSED) }
+    private val isoSocketError = IsolateState { ObjectHolder<Throwable?>(null) }
 
     private val socketListener: PlatformSocketListener = object : PlatformSocketListener {
         override fun onOpen() {

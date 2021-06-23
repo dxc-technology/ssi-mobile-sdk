@@ -139,6 +139,10 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
+        override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
+            TODO("Not yet implemented")
+        }
+
 
     }
 
@@ -165,7 +169,7 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
             println("Connection abandoned : $connection")
             return CallbackResult(true)
         }
