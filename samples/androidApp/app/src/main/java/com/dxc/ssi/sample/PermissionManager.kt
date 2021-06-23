@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -32,7 +33,7 @@ object PermissionManager {
 
 
         val missingPermissions = getMissingPermissions(requiredPermissions, context)
-        if (missingPermissions.isNotEmpty())
+        if (missingPermissions.isNotEmpty() && Build.VERSION.SDK_INT < 30)
             requestMissingPermissions(missingPermissions, context, activity)
 
     }

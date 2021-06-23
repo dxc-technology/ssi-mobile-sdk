@@ -242,9 +242,7 @@ ssiAgentApi.connect(verifierInvitationUrl)
 
 <img src="docs/android/Connect.png" alt="docs/android/Connect" style="zoom:50%;" />
 
-## Setup permissions for API 30 - make it manually on the phone allow managment all files
-
-<img src="docs/android/App_permissions.png" alt="docs/android/App_permissions" style="zoom:30%;" />
+## Setup permissions for API 30 - just approve permissions on the phone
 
 <img src="docs/android/Allow_all_files.png" alt="docs/android/Allow_all_files" style="zoom:30%;" />
 
