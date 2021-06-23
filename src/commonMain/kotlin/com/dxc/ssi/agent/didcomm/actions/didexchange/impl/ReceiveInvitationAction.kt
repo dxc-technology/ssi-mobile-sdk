@@ -4,11 +4,15 @@ import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.didcomm.Processors
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
 import com.dxc.ssi.agent.didcomm.commoon.MessageSender
+import com.dxc.ssi.agent.didcomm.constants.DidCommProblemCodes
+import com.dxc.ssi.agent.didcomm.constants.toProblemReportDescription
 import com.dxc.ssi.agent.didcomm.model.common.Service
 import com.dxc.ssi.agent.didcomm.model.didexchange.*
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
 import com.dxc.ssi.agent.model.messages.Message
@@ -25,6 +29,7 @@ import kotlin.random.Random
 class ReceiveInvitationAction(
     val walletConnector: WalletConnector,
     val transport: Transport,
+    val processors: Processors,
     val connectionInitiatorController: ConnectionInitiatorController,
     private val invitationUrl: String
 ) : DidExchangeAction {
@@ -61,17 +66,25 @@ class ReceiveInvitationAction(
 
             println("Connection request: $connectionRequestJson")
 
-            //TODO: ensure that transport function is synchronous here because we will save new status to wallet only after actual message was sent
-            MessageSender.packAndSendMessage(Message(connectionRequestJson), connection, walletConnector, transport)
+            MessageSender.packAndSendMessage(
+                Message(connectionRequestJson), connection, walletConnector, transport,
+                onMessageSendingFailure = {
+                    val problemReport = ProblemReport(
+                        id = uuid4().toString(),
+                        description = DidCommProblemCodes.COULD_NOT_DELIVER_MESSAGE.toProblemReportDescription()
+                    )
+                    processors.abandonConnectionProcessor!!.abandonConnection(connection, false, problemReport)
+                    null
+                },
+                onMessageSent = {
+                    val updatedConnection = connection.copy(state = PeerConnectionState.REQUEST_SENT)
+                    walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
+                    connectionInitiatorController.onRequestSent(updatedConnection, connectionRequest)
+                    null
+                }
+            )
 
-            //TODO: set proper state here
-            val updatedConnection = connection.copy(state = PeerConnectionState.REQUEST_SENT)
-            walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
-
-            connectionInitiatorController.onRequestSent(updatedConnection, connectionRequest)
-
-            //update status to request sent
-            return ActionResult(updatedConnection)
+            return ActionResult(walletConnector.walletHolder.getConnectionRecordById(connection.id))
 
         } else {
             //TODO: handle this situation here

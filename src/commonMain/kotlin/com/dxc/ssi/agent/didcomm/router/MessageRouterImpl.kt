@@ -4,14 +4,11 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
-import com.dxc.ssi.agent.didcomm.processor.abandon.AbandonConnectionProcessor
+import com.dxc.ssi.agent.didcomm.Processors
 import com.dxc.ssi.agent.didcomm.processor.abandon.AbandonConnectionProcessorImpl
-import com.dxc.ssi.agent.didcomm.processor.didexchange.DidExchangeProcessor
 import com.dxc.ssi.agent.didcomm.processor.didexchange.DidExchangeProcessorImpl
-import com.dxc.ssi.agent.didcomm.processor.issue.CredIssuerProcessor
 import com.dxc.ssi.agent.didcomm.processor.issue.CredIssuerProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessorImpl
-import com.dxc.ssi.agent.didcomm.processor.verify.CredVerifierProcessor
 import com.dxc.ssi.agent.didcomm.processor.verify.CredVerifierProcessorImpl
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
@@ -28,58 +25,69 @@ class MessageRouterImpl(
 ) :
     MessageRouter {
 
-    override val trustPingProcessor = TrustPingProcessorImpl(
-        walletConnector,
-        ledgerConnector,
-        transport,
-        callbacks,
-        null,
-        trustPingTrackerService
-    )
-    override val didExchangeProcessor: DidExchangeProcessor = DidExchangeProcessorImpl(
-        walletConnector,
-        ledgerConnector,
-        transport,
-        callbacks,
-        trustPingProcessor,
-        trustPingTrackerService
-    )
-    private val credIssuerProcessor: CredIssuerProcessor = CredIssuerProcessorImpl(
-        walletConnector,
-        ledgerConnector,
-        transport,
-        callbacks,
-        trustPingProcessor,
-        trustPingTrackerService
-    )
-    private val credVerifierProcessor: CredVerifierProcessor = CredVerifierProcessorImpl(
-        walletConnector,
-        ledgerConnector,
-        transport,
-        callbacks,
-        trustPingProcessor,
-        trustPingTrackerService
-    )
+    override val processors = Processors()
 
-    override val abandonConnectionProcessor: AbandonConnectionProcessor = AbandonConnectionProcessorImpl(
-        walletConnector,
-        ledgerConnector,
-        transport,
-        callbacks,
-        trustPingProcessor,
-        trustPingTrackerService
-    )
+    init {
+
+        processors.trustPingProcessor = TrustPingProcessorImpl(
+            walletConnector,
+            ledgerConnector,
+            transport,
+            callbacks,
+            processors,
+            trustPingTrackerService
+        )
+
+        processors.abandonConnectionProcessor = AbandonConnectionProcessorImpl(
+            walletConnector,
+            ledgerConnector,
+            transport,
+            callbacks,
+            processors,
+            trustPingTrackerService
+        )
+
+        processors.credIssuerProcessor = CredIssuerProcessorImpl(
+            walletConnector,
+            ledgerConnector,
+            transport,
+            callbacks,
+            processors,
+            trustPingTrackerService,
+        )
+
+        processors.didExchangeProcessor = DidExchangeProcessorImpl(
+            walletConnector,
+            ledgerConnector,
+            transport,
+            callbacks,
+            processors,
+            trustPingTrackerService
+        )
+
+
+        processors.credVerifierProcessor = CredVerifierProcessorImpl(
+            walletConnector,
+            ledgerConnector,
+            transport,
+            callbacks,
+            processors,
+            trustPingTrackerService
+        )
+
+
+    }
 
     //TODO: check connection in message context and throw exception if it is not null if it is expected to be non-null
     override suspend fun routeAndProcessMessage(messageContext: MessageContext) {
 
         when (determineRoute(messageContext)) {
             //TODO: add route for forward message
-            Route.DidExchange -> didExchangeProcessor.processMessage(messageContext)
-            Route.CredIssuer -> credIssuerProcessor.processMessage(messageContext)
-            Route.CredVerifier -> credVerifierProcessor.processMessage(messageContext)
-            Route.TrustPing -> trustPingProcessor.processMessage(messageContext)
-            Route.AbandonConnection -> abandonConnectionProcessor.processMessage(messageContext)
+            Route.DidExchange -> processors.didExchangeProcessor!!.processMessage(messageContext)
+            Route.CredIssuer -> processors.credIssuerProcessor!!.processMessage(messageContext)
+            Route.CredVerifier -> processors.credVerifierProcessor!!.processMessage(messageContext)
+            Route.TrustPing -> processors.trustPingProcessor!!.processMessage(messageContext)
+            Route.AbandonConnection -> processors.abandonConnectionProcessor!!.processMessage(messageContext)
 
         }
     }

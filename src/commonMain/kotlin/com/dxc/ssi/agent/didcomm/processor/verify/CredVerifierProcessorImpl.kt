@@ -4,25 +4,25 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.didcomm.Processors
 import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.verify.impl.ReceivePresentationRequestAction
 import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
 import com.dxc.ssi.agent.didcomm.processor.MessageType
-import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessor
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationStateMachine
 
 class CredVerifierProcessorImpl(
     walletConnector: WalletConnector,
     ledgerConnector: LedgerConnector, transport: Transport, callbacks: Callbacks,
-    trustPingProcessor: TrustPingProcessor, trustPingTrackerService: TrustPingTrackerService
+    processors: Processors, trustPingTrackerService: TrustPingTrackerService
 ) : AbstractMessageProcessor(
     walletConnector,
     ledgerConnector,
     transport,
     callbacks,
-    trustPingProcessor,
+    processors,
     trustPingTrackerService
 ), CredVerifierProcessor {
 

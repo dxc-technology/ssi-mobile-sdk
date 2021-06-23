@@ -67,9 +67,29 @@ class ReceivePresentationRequestAction(
                     Message(Json.encodeToString(presentation)),
                     connection,
                     walletConnector,
-                    transport
+                    transport,
+                    onMessageSent = {
+                        credPresenterController.onDone(connection)
+                        null
+                    },
+                    onMessageSendingFailure = {
+                        val problemReport = ProblemReport(
+                            id = uuid4().toString(),
+                            description = DidCommProblemCodes.COULD_NOT_SEND_PRESENTATION.toProblemReportDescription()
+                        )
+
+                        //TODO: make this callback async
+                        credPresenterController.onProblemReportGenerated(connection, problemReport)
+                        actionParams.processors.abandonConnectionProcessor!!.abandonConnection(
+                            connection,
+                            false,
+                            problemReport
+                        )
+                        null
+                    }
                 )
-                credPresenterController.onDone(connection)
+
+
             } catch (e: NoCredentialToSatisfyPresentationRequestException) {
 
                 val problemReport = ProblemReport(
@@ -82,7 +102,14 @@ class ReceivePresentationRequestAction(
                     Message(Json.encodeToString(problemReport)),
                     connection,
                     walletConnector,
-                    transport
+                    transport,
+                    onMessageSendingFailure = {
+                        actionParams.processors.abandonConnectionProcessor!!.abandonConnection(
+                            connection,
+                            false
+                        )
+                        null
+                    }
                 )
 
                 //TODO: Here and everywhere catch all exceptions coming from user callbacks
@@ -100,12 +127,18 @@ class ReceivePresentationRequestAction(
                     Message(Json.encodeToString(problemReport)),
                     connection,
                     walletConnector,
-                    transport
+                    transport,
+                    onMessageSendingFailure = {
+                        actionParams.processors.abandonConnectionProcessor!!.abandonConnection(
+                            connection,
+                            false
+                        )
+                        null
+                    }
                 )
 
                 credPresenterController.onProblemReportGenerated(connection, problemReport)
             }
-
 
         } else {
             //TODO: Consider an option to send Send PresentationProposal here instead of ProblemReport, depending on user input
@@ -116,12 +149,21 @@ class ReceivePresentationRequestAction(
                 thread = Thread(presentationRequestMessage.id)
             )
 
+
             MessageSender.packAndSendMessage(
                 Message(Json.encodeToString(problemReport)),
                 connection,
                 walletConnector,
-                transport
+                transport,
+                onMessageSendingFailure = {
+                    actionParams.processors.abandonConnectionProcessor!!.abandonConnection(
+                        connection,
+                        false
+                    )
+                    null
+                }
             )
+
 
         }
 

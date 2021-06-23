@@ -1,6 +1,6 @@
 package com.dxc.ssi.agent.wallet.indy.helpers
 
-import com.dxc.ssi.agent.exceptions.WalletDoesNotExistException
+import com.dxc.ssi.agent.exceptions.wallet.WalletDoesNotExistException
 import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
 import com.dxc.ssi.agent.wallet.indy.model.WalletConfig
 import com.dxc.ssi.agent.wallet.indy.model.WalletPassword

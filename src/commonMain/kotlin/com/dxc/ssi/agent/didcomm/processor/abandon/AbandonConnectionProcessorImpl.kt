@@ -4,13 +4,14 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.didcomm.Processors
 import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.abandon.impl.InitiateAbandonConnectionAction
 import com.dxc.ssi.agent.didcomm.actions.abandon.impl.ReceiveAbandonConnectionAction
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
 import com.dxc.ssi.agent.didcomm.processor.MessageType
-import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessor
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.PeerConnection
 
@@ -19,25 +20,31 @@ import com.dxc.ssi.agent.model.PeerConnection
 class AbandonConnectionProcessorImpl(
     walletConnector: WalletConnector,
     ledgerConnector: LedgerConnector, transport: Transport, callbacks: Callbacks,
-    trustPingProcessor: TrustPingProcessor?, trustPingTrackerService: TrustPingTrackerService
+    processors: Processors, trustPingTrackerService: TrustPingTrackerService
     //TODO: introduce callbacks for TrustPing
 ) : AbstractMessageProcessor(
     walletConnector,
     ledgerConnector,
     transport,
     callbacks,
-    trustPingProcessor,
+    processors,
     trustPingTrackerService
 ), AbandonConnectionProcessor {
 
-    override suspend fun abandonConnection(connection: PeerConnection, notifyPeerBeforeAbandoning: Boolean) {
+    override suspend fun abandonConnection(
+        connection: PeerConnection,
+        notifyPeerBeforeAbandoning: Boolean,
+        problemReport: ProblemReport?
+    ) {
         val abandonConnectionAction =
             InitiateAbandonConnectionAction(
                 walletConnector,
                 transport,
                 trustPingTrackerService!!,
+                callbacks,
                 connection,
-                notifyPeerBeforeAbandoning
+                notifyPeerBeforeAbandoning,
+                problemReport
             )
         abandonConnectionAction.perform()
     }

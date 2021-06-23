@@ -5,6 +5,8 @@ import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.didcomm.Processors
+import com.dxc.ssi.agent.didcomm.processor.abandon.AbandonConnectionProcessor
 import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessor
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.messages.MessageContext
@@ -15,6 +17,6 @@ data class ActionParams(
     val transport: Transport,
     val callbacks: Callbacks,
     val messageContext: MessageContext,
-    val trustPingProcessor: TrustPingProcessor? = null,
-    val trustPingTrackerService: TrustPingTrackerService? = null
+    val trustPingTrackerService: TrustPingTrackerService? = null,
+    val processors:Processors
 )

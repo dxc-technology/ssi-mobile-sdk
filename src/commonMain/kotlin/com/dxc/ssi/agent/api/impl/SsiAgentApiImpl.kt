@@ -81,7 +81,8 @@ class SsiAgentApiImpl(
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
                 println("Entered async connection initiation")
-                messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
+                //TODO: fix NPE
+                messageListener.messageRouter.processors.didExchangeProcessor!!.initiateConnectionByInvitation(url)
             })
     }
 
@@ -89,7 +90,8 @@ class SsiAgentApiImpl(
     override fun sendTrustPing(connection: PeerConnection): Boolean {
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
-                messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
+                //TODO: fix NPE
+                messageListener.messageRouter.processors.trustPingProcessor!!.sendTrustPingOverConnection(connection)
             })
     }
 
@@ -126,7 +128,8 @@ class SsiAgentApiImpl(
     override fun abandonConnection(connection: PeerConnection, force: Boolean, notifyPeerBeforeAbandoning: Boolean) {
         CoroutineHelper.waitForCompletion(
             agentScope.async {
-                messageListener.messageRouter.abandonConnectionProcessor.abandonConnection(
+                //TODO: fix NPE
+                messageListener.messageRouter.processors.abandonConnectionProcessor!!.abandonConnection(
                     connection,
                     notifyPeerBeforeAbandoning
                 )

@@ -4,13 +4,13 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.didcomm.Processors
 import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.trustping.ReceiveTrustPingResponseAction
 import com.dxc.ssi.agent.didcomm.actions.trustping.SendTrustPingAction
 import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
 import com.dxc.ssi.agent.didcomm.processor.MessageType
-import com.dxc.ssi.agent.didcomm.processor.verify.CredVerifierProcessorImpl
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.PeerConnection
 
@@ -18,18 +18,29 @@ import com.dxc.ssi.agent.model.PeerConnection
 //TODO: remove all redundant part of code left from DidExchangeProcessor
 class TrustPingProcessorImpl(
     walletConnector: WalletConnector,
-    ledgerConnector: LedgerConnector, transport: Transport, callbacks: Callbacks,
-    trustPingProcessor: TrustPingProcessor?, trustPingTrackerService: TrustPingTrackerService
+    ledgerConnector: LedgerConnector,
+    transport: Transport,
+    callbacks: Callbacks,
+    processors: Processors,
+    trustPingTrackerService: TrustPingTrackerService
     //TODO: introduce callbacks for TrustPing
-) : AbstractMessageProcessor(walletConnector, ledgerConnector, transport, callbacks, trustPingProcessor, trustPingTrackerService), TrustPingProcessor {
+) : AbstractMessageProcessor(
+    walletConnector,
+    ledgerConnector,
+    transport,
+    callbacks,
+    processors,
+    trustPingTrackerService
+
+), TrustPingProcessor {
 
     override suspend fun sendTrustPingOverConnection(connection: PeerConnection): Boolean {
-        val sendTrustPingAction = SendTrustPingAction(walletConnector, transport, trustPingTrackerService!!, connection)
+        val sendTrustPingAction =
+            SendTrustPingAction(walletConnector, transport, trustPingTrackerService!!, processors, connection)
         val actionResult = sendTrustPingAction.perform()
 
         return actionResult.trustPingSuccessful!!
     }
-
 
 
     enum class TrustPingMessageType(val _typeString: String, val _action: (ActionParams) -> Action) : MessageType {

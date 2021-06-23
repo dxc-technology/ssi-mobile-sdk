@@ -4,7 +4,9 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.didcomm.Processors
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
+import com.dxc.ssi.agent.didcomm.processor.abandon.AbandonConnectionProcessor
 import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessor
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
@@ -18,8 +20,8 @@ abstract class AbstractMessageProcessor(
     val ledgerConnector: LedgerConnector,
     val transport: Transport,
     val callbacks: Callbacks,
-    val trustPingProcessor: TrustPingProcessor?,
-    val trustPingTrackerService: TrustPingTrackerService?
+    val processors: Processors,
+    val trustPingTrackerService: TrustPingTrackerService?,
 ) : MessageProcessor {
 
 
@@ -32,7 +34,7 @@ abstract class AbstractMessageProcessor(
             transport = transport,
             callbacks = callbacks,
             messageContext = messageContext,
-            trustPingProcessor = trustPingProcessor,
+            processors = processors,
             trustPingTrackerService = trustPingTrackerService
         )
 

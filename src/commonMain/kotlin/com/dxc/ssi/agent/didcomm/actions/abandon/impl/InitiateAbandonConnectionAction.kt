@@ -1,12 +1,14 @@
 package com.dxc.ssi.agent.didcomm.actions.abandon.impl
 
 import com.benasher44.uuid.uuid4
+import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.abandon.AbandonAction
 import com.dxc.ssi.agent.didcomm.commoon.MessageSender
 import com.dxc.ssi.agent.didcomm.model.abandon.AbandonConnectionAnnounce
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
@@ -20,8 +22,10 @@ class InitiateAbandonConnectionAction(
     val walletConnector: WalletConnector,
     val transport: Transport,
     trustPingTrackerService: TrustPingTrackerService,
+    val callbacks: Callbacks,
     val connection: PeerConnection,
-    val notifyPeerBeforeAbandoning: Boolean
+    val notifyPeerBeforeAbandoning: Boolean,
+    val problemReport: ProblemReport?
 ) : AbandonAction {
     override suspend fun perform(): ActionResult {
 
@@ -29,31 +33,33 @@ class InitiateAbandonConnectionAction(
         val storedConnection = walletConnector.walletHolder.getConnectionRecordById(connection.id)
 
 
+
         when {
             storedConnection?.state == PeerConnectionState.COMPLETED -> {
                 if (notifyPeerBeforeAbandoning) {
                     val abandonConnectionAnnounce = AbandonConnectionAnnounce(id = uuid4().toString())
                     val abandonConnectionAnnounceJson = Json.encodeToString(abandonConnectionAnnounce)
-                    try {
-                        MessageSender.packAndSendMessage(
-                            Message(abandonConnectionAnnounceJson),
-                            connection,
-                            walletConnector,
-                            transport
-                        )
-                    } catch (t: Throwable) {
-                        // If we were not able to send this message then simply ignore it and continue to connection closure
-                    }
+
+                    MessageSender.packAndSendMessage(
+                        Message(abandonConnectionAnnounceJson),
+                        connection,
+                        walletConnector,
+                        transport,
+                        onMessageSendingFailure = {
+                            println("Warning: we could not notify remote peer that we are abandoning connection. Abandoning without notification")
+                            null
+                        }
+                    )
                 }
 
                 transport.disconnect(connection)
-                walletConnector.walletHolder.storeConnectionRecord(connection.copy(state = PeerConnectionState.ABANDONED))
+                abandonConnectionOnOurSide()
 
             }
             storedConnection != null -> {
                 //TODO: currently we won't handle separately case when connection is in process of establishment
                 transport.disconnect(connection)
-                walletConnector.walletHolder.storeConnectionRecord(connection.copy(state = PeerConnectionState.ABANDONED))
+                abandonConnectionOnOurSide()
             }
             else -> {
                 // Looks like there is no such record, but just in case, try to disconnect transport
@@ -61,5 +67,12 @@ class InitiateAbandonConnectionAction(
             }
         }
         return ActionResult()
+    }
+
+    private suspend fun abandonConnectionOnOurSide() {
+        val updatedConnection = connection.copy(state = PeerConnectionState.ABANDONED)
+        walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
+        callbacks.connectionInitiatorController!!.onAbandoned(updatedConnection, problemReport)
+
     }
 }

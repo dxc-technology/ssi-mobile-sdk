@@ -23,6 +23,7 @@ import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
+import org.junit.Ignore
 import org.junit.Test
 
 class SsiAgentApiImplTest {
@@ -34,7 +35,7 @@ class SsiAgentApiImplTest {
     private lateinit var ssiAgentApi: SsiAgentApi
 
     @Test
-    // @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
         println("Starting test")
@@ -71,7 +72,7 @@ class SsiAgentApiImplTest {
 
 
         val invitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiMkQ2TjluTFVaVXhpWWRkalZUYVlCRTNHR0JEU1VHUlRmcXhSdVg3RjU3SGciXSwicmVjaXBpZW50S2V5cyI6WyI2Q05xTGdTVHdWaWE4U0V6VXVEVU55VFd4QWh6VUR5MllDZGV0ZXFZcktGUyJdLCJAaWQiOiJiYjg3NmQzMS02OThiLTRjMjItOWIwNS1jZDdmNDU3YjIyNmMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiMkQ2TjluTFVaVXhpWWRkalZUYVlCRTNHR0JEU1VHUlRmcXhSdVg3RjU3SGciXSwicmVjaXBpZW50S2V5cyI6WyJFUWZWbU51eTJSQkR5aDVONlFHTmJOYldXZkhkcnV3Q2NBOHZwanhMOUNDdiJdLCJAaWQiOiI5MjI1MWNiMC0yNjhkLTRjNWItYTAxZC1jODEyYjRkMmU0NTUiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
 
         println("Connecting to issuer")
@@ -79,9 +80,10 @@ class SsiAgentApiImplTest {
         println("Connected to issuer")
 
         Sleeper().sleep(10000)
+        /*
         println("Abandoning connection")
         ssiAgentApi.abandonConnection(connection, notifyPeerBeforeAbandoning = true)
-
+*/
 
         Sleeper().sleep(500000)
 
@@ -131,6 +133,10 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
+        override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
+            TODO("Not yet implemented")
+        }
+
 
     }
 
@@ -154,14 +160,11 @@ class SsiAgentApiImplTest {
 
         override fun onCompleted(connection: PeerConnection): CallbackResult {
             println("Connection completed : $connection")
-
             return CallbackResult(true)
-
-
         }
 
-        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
-            println("Connection abandoned : $connection")
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
+            println("Received connection abandoned hook")
             return CallbackResult(true)
         }
 

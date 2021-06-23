@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
             val ssiAgentApi = application.getSsiAgent()
 
             val invitationUrl =
-                "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiN0xHU0xjOEFLYjRlMXJDRktqMWdMdXRSRHEya3N1cVJOTk5hcVhoVFM3azMiXSwicmVjaXBpZW50S2V5cyI6WyJIV25qQWRENHQ2MUd6TEh4N2EycVhYbmVqaEVhMlJpWll4Tmc0eXRRcm1FNiJdLCJAaWQiOiI0YWFiMTUwNi1hNWZiLTQ5YzgtYmY2My0yZWQ5ZGQyZDNhYTciLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+                "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiMkQ2TjluTFVaVXhpWWRkalZUYVlCRTNHR0JEU1VHUlRmcXhSdVg3RjU3SGciXSwicmVjaXBpZW50S2V5cyI6WyI4SGZMOVlMSkNNSEN4OHRVcGN0UVJCTjk2WWhRejZvQWdCeHZuTW9hcWZXdCJdLCJAaWQiOiJlMTFmNjUzOC0wMzE5LTQ5NDUtYmFkNS1mYjFiM2IyZmVjZjAiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
             ssiAgentApi.connect(invitationUrl)
 

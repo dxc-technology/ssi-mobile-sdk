@@ -26,7 +26,9 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
         override fun onOpen() {
 
             currentState = State.CONNECTED
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketOpenedChannel.send(Unit) })
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                socketOpenedChannel.send(SocketOpenedMessage())
+            })
             println("PlatformSocketListener: ${System.getCurrentThread()} - Opened socket")
         }
 
@@ -34,6 +36,10 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
             socketError = t
             currentState = State.CLOSED
             println("PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}")
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                socketOpenedChannel.send(SocketFailureMessage())
+            })
+
         }
 
         override fun onMessage(msg: String) {
@@ -58,7 +64,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
         }
     }
 
-    val socketOpenedChannel: Channel<Unit> = Channel()
+    val socketOpenedChannel: Channel<AppSocketMessage> = Channel()
     val socketClosingChannel: Channel<Unit> = Channel()
 
     suspend fun connect() {
@@ -72,11 +78,18 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
         ws.openSocket(socketListener)
         println("Thread = ${System.getCurrentThread()} awaiting while websocket is opened")
 
-        socketOpenedChannel.receive()
-        println("After socketListener.onOpen")
+        when (socketOpenedChannel.receive()) {
+            is SocketOpenedMessage -> {
+                println("After socketListener.onOpen")
+                if (currentState != State.CONNECTED)
+                    throw IllegalStateException("Could not be opened")
+            }
+            is SocketFailureMessage -> {
+                //TODO: make the exception more meaningful allowing to differentiate between different types of errors
+                throw IllegalStateException("Could not be opened")
+            }
 
-        if (currentState != State.CONNECTED)
-            throw throw IllegalStateException("Could not be opened")
+        }
 
     }
 
@@ -102,4 +115,9 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
         CLOSING,
         CLOSED
     }
+
+    interface AppSocketMessage
+
+    class SocketOpenedMessage : AppSocketMessage
+    class SocketFailureMessage : AppSocketMessage
 }

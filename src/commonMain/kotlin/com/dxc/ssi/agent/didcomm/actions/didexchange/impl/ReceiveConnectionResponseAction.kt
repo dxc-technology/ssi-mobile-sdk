@@ -18,7 +18,7 @@ class ReceiveConnectionResponseAction(
         val connectionInitiatorController = actionParams.callbacks.connectionInitiatorController!!
         val messageContext = actionParams.messageContext
         val walletConnector = actionParams.walletConnector
-        val trustPingProcessor = actionParams.trustPingProcessor!!
+        val trustPingProcessor = actionParams.processors.trustPingProcessor!!
 
 
         val connectionResponse =
