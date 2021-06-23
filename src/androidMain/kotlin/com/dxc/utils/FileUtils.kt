@@ -1,6 +1,7 @@
 package com.dxc.utils
 
 import java.io.File
+import java.io.IOException
 
 actual class FileUtils {
     actual companion object {
@@ -14,7 +15,12 @@ actual class FileUtils {
 
         actual fun createFileWithContent(filePath: String, content: String) {
             val file = File(filePath)
-            file.createNewFile()
+            try {
+                file.createNewFile()
+            } catch (e: IOException) {
+                println("Couldn't create a file in dir $filePath, cause ${e.message}, please check phone access rights")
+                return
+            }
             file.writeText(content)
         }
     }
