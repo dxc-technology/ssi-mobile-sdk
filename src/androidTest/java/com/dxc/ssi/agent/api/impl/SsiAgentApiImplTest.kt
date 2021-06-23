@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.api.impl
 
 import android.Manifest
+import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
@@ -26,14 +27,25 @@ import org.junit.Test
 //TODO: if we can use some common kotlin tests to have common tests for all platforms
 class SsiAgentApiImplTest {
 
+
     @Rule
     @JvmField
-    val permissionRule = GrantPermissionRule.grant(
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.INTERNET,
-        Manifest.permission.ACCESS_NETWORK_STATE
-    )
+    val permissionRule = if (Build.VERSION.SDK_INT <= 30) {
+        GrantPermissionRule.grant(
+            //Manifest.permission.MANAGE_EXTERNAL_STORAGE, Use Android API 30 Platform to run it
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE
+        )
+    } else {
+        GrantPermissionRule.grant(
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE
+        )
+    }
+
 
     @Test
     @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
@@ -113,7 +125,10 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: Connection, credentialContainer: CredentialContainer): CallbackResult {
+        override fun onDone(
+            connection: Connection,
+            credentialContainer: CredentialContainer
+        ): CallbackResult {
             return CallbackResult(true)
         }
 
@@ -129,12 +144,18 @@ class SsiAgentApiImplTest {
             return CallbackResult(canProceedFurther = true)
         }
 
-        override fun onRequestSent(connection: Connection, request: ConnectionRequest): CallbackResult {
+        override fun onRequestSent(
+            connection: Connection,
+            request: ConnectionRequest
+        ): CallbackResult {
             println("Request sent hook called : $connection, $request")
             return CallbackResult(true)
         }
 
-        override fun onResponseReceived(connection: Connection, response: ConnectionResponse): CallbackResult {
+        override fun onResponseReceived(
+            connection: Connection,
+            response: ConnectionResponse
+        ): CallbackResult {
             println("Response received hook called : $connection, $response")
             return CallbackResult(true)
         }
@@ -144,7 +165,10 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onAbandoned(connection: Connection, problemReport: ProblemReport): CallbackResult {
+        override fun onAbandoned(
+            connection: Connection,
+            problemReport: ProblemReport
+        ): CallbackResult {
             println("Connection abandoned : $connection")
             return CallbackResult(true)
         }
