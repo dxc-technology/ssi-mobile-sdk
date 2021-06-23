@@ -234,7 +234,7 @@ ssiAgentApi.connect(issuerInvitationUrl)
 ssiAgentApi.connect(verifierInvitationUrl)
 ```
 
-## Supported android devices APIs 24, 28, 29, 30:
+## Supported android devices APIs 24, 25, 26, 27, 28, 29, 30:
 
 <img src="docs/android/Devices.png" alt="docs/android/Devices" style="zoom:50%;" />
 
@@ -242,11 +242,9 @@ ssiAgentApi.connect(verifierInvitationUrl)
 
 <img src="docs/android/Connect.png" alt="docs/android/Connect" style="zoom:50%;" />
 
-## Setup permissions for API 30 - make it manually on the phone
+## Setup permissions for API 30 - make it manually on the phone allow managment all files
 
 <img src="docs/android/App_permissions.png" alt="docs/android/App_permissions" style="zoom:30%;" />
-
-<img src="docs/android/Files_and_media_permission.png" alt="docs/android/Files_and_media_permission" style="zoom:30%;" />
 
 <img src="docs/android/Allow_all_files.png" alt="docs/android/Allow_all_files" style="zoom:30%;" />
 
