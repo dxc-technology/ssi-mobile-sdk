@@ -12,7 +12,9 @@ import ssi_agent
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    let myWalletName = "newWalletName4"
+    let myWalletPassword = "newWalletPassword"
+    let myDid = "4PCVFCeZbKXyvgjCedbXDx"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
@@ -20,13 +22,45 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let crc = CredentialReceiverControllerImpl()
         let cpc = CredPresenterControllerImpl()
         
+
+        EnvironmentUtils().doInitEnvironment(environment: EnvironmentImpl())
+
+        let walletManager = IndyWalletManager.Companion()
+
+
+        if (!walletManager.isWalletExistsAndOpenable(walletName: myWalletName, walletPassword: myWalletPassword)) {
+            print("Recreating wallet")
+            walletManager.createWallet(walletName: myWalletName, walletPassword: myWalletPassword, walletCreationStrategy: WalletCreationStrategy.truncateandcreate)}
+
+
+        if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
+            print("Recreating did")
+            let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
+                didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
+                walletName : myWalletName, walletPassword:myWalletPassword)
+
+            print("Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())")
+            //Store did somewhere in your application to use it afterwards
+        }
+
+        let walletHolder = IndyWalletHolder(
+            walletName : myWalletName,
+            walletPassword :myWalletPassword,
+            didConfig : DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil)
+        )
+
+        let indyWalletConnector = IndyWalletConnector().build(walletHolder: walletHolder)
+
+
         let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisFilePath: "./docker_pool_transactions_genesis.txt",
-            ipAddress: "192.168.0.117",
-            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip)
+            ipAddress: "192.168.0.116",
+            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
+            generatedGenesysFileName: "genesis.txn",
+            retryTimes: 5,
+            retryDelayMs: 5000)
         
-               let ssiAgentApi = SsiAgentBuilderImpl()
-                .withEnvironment(environment: EnvironmentImpl())
+        let ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
                 .withConnectionInitiatorController(connectionInitiatorController: cic)
                 .withCredReceiverController(credReceiverController: crc)
                 .withCredPresenterController(credPresenterController: cpc)
@@ -34,15 +68,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .build()
         
                ssiAgentApi.doInit()
-               let issuerInvitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjNwQUNXdHZMZVZBSlA1bmpGRWlmODRONlBVWEppdzZYNUNZb2VUUEZSMmNoIl0sInJlY2lwaWVudEtleXMiOlsiRUhCWk0xQXNIaVJqVmhjWkJzY2kxdlJpdVoxR2JOakJ4V1FvVjh3OG9GTDkiXSwiQGlkIjoiODAyYWNjYzUtMmVkZC00OTM0LTk0ZTItZDQ3ZmI1NjM0ZGVjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
-               
-               ssiAgentApi.connect(url: issuerInvitation)
-        
-        let verifierInvitation = "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiQ3R4QVZUWTFSY2g0M29jYldBS3NWWk1zTXRkcG5GUXRhVHIyQWVwOXRLUWYiXSwicmVjaXBpZW50S2V5cyI6WyJCcHFRQ0doenNFSnA4alg2czI5QXBDb1h0TWVXYWFqVFdVWXVuZm55NlFBZiJdLCJAaWQiOiI3OTYxNjU1Ni04YzMwLTQ0MTctOGE1Yi02YmNiYmFhOWE3ZGMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
-        
-        ssiAgentApi.connect(url: verifierInvitation)
-        
-               sleep(10000)
+
+
+       ssiAgentApi.connect(url: "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiR2s4NWZENW1CWGVRc0dlcVpVV0NuUllnTmZ1M1AzdnVTRHQ5N1RHcEduVmsiXSwicmVjaXBpZW50S2V5cyI6WyJBOVNKZ0szakRtYWM2RE43ekp3UXJLSnBhWUtCMzJzcTROQUZGcGJITXlXRCJdLCJAaWQiOiJkNjI4ODU4Ni1kYjEzLTQyY2ItYmZlNy01MDY1NGRhNWE4ZmQiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0=")
+
+
+               sleep(180)
+        ssiAgentApi.shutdown(force: true)
         // Override point for customization after application launch.
         return true
     }
@@ -66,25 +98,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 {
-    func onCompleted(connection: Connection) -> CallbackResult {
+    func onCompleted(connection: PeerConnection) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onInvitationReceived(connection: Connection, endpoint: String, invitation: Invitation) -> CallbackResult {
+    func onInvitationReceived(connection: PeerConnection, invitation: Invitation) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
    
     
-    func onRequestSent(connection: Connection, request: ConnectionRequest) -> CallbackResult {
+    func onRequestSent(connection: PeerConnection, request: ConnectionRequest) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onResponseReceived(connection: Connection, response: ConnectionResponse) -> CallbackResult {
+    func onResponseReceived(connection: PeerConnection, response: ConnectionResponse) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onAbandoned(connection: Connection, problemReport: ProblemReport) -> CallbackResult {
+    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
         
     }
@@ -93,19 +125,19 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 
 
 class CredentialReceiverControllerImpl: CredReceiverController {
-    func onCredentialReceived(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
+    func onCredentialReceived(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onDone(connection: Connection, credentialContainer: CredentialContainer) -> CallbackResult {
+    func onDone(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onOfferReceived(connection: Connection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
+    func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onRequestSent(connection: Connection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
+    func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
@@ -113,11 +145,15 @@ class CredentialReceiverControllerImpl: CredReceiverController {
 
 
 class CredPresenterControllerImpl: CredPresenterController {
-    func onDone(connection: Connection) -> CallbackResult {
+    func onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
+
+    }
+
+    func onDone(connection: PeerConnection) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onRequestReceived(connection: Connection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
+    func onRequestReceived(connection: PeerConnection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     

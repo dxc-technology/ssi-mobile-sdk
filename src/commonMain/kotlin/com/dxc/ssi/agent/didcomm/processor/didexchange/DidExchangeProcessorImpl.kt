@@ -12,7 +12,7 @@ import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
 import com.dxc.ssi.agent.didcomm.processor.MessageType
 import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessor
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 
 //TODO: for now this class won;t be part of abstraction, once it is implemented see if it is posible to generalize it with MessageProcessor and AbstractMessageProcessor
 //TODO: rename DidExchange to Connection everywhere? Since Did exchange spec is not yet in active status
@@ -26,7 +26,7 @@ class DidExchangeProcessorImpl(
 ), DidExchangeProcessor {
 
 
-    override suspend fun initiateConnectionByInvitation(invitation: String): Connection {
+    override suspend fun initiateConnectionByInvitation(invitation: String): PeerConnection {
 
         //TODO: think how to avoid NPE here
         val receiveInvitationAction =

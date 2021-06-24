@@ -8,10 +8,7 @@ actual class Base64 {
     actual companion object {
         @OptIn(InternalAPI::class)
         actual fun base64StringToPlainString(base64String: String): String {
-
-
             return base64String.decodeBase64String()
-
         }
 
         @OptIn(InternalAPI::class)
@@ -22,7 +19,6 @@ actual class Base64 {
             return data.base64EncodedStringWithOptions(options = 0)
 
  */
-
             return plainString.encodeBase64()
         }
     }

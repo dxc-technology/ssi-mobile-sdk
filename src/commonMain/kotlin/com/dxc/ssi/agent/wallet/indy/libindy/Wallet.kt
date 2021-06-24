@@ -4,6 +4,7 @@ expect class Wallet(walletHandle:Int) {
 
     //TODO: check if it can be replaced with property access syntax
     fun getWalletHandle(): Int
+    suspend fun closeWallet()
 
     companion object {
         suspend fun createWallet(config: String, credentials: String)

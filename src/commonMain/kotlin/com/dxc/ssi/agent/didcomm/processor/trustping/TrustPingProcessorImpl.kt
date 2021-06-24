@@ -12,7 +12,7 @@ import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
 import com.dxc.ssi.agent.didcomm.processor.MessageType
 import com.dxc.ssi.agent.didcomm.processor.verify.CredVerifierProcessorImpl
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 
 //TODO: for now this class won;t be part of abstraction, once it is implemented see if it is posible to generalize it with MessageProcessor and AbstractMessageProcessor
 //TODO: remove all redundant part of code left from DidExchangeProcessor
@@ -23,7 +23,7 @@ class TrustPingProcessorImpl(
     //TODO: introduce callbacks for TrustPing
 ) : AbstractMessageProcessor(walletConnector, ledgerConnector, transport, callbacks, trustPingProcessor, trustPingTrackerService), TrustPingProcessor {
 
-    override suspend fun sendTrustPingOverConnection(connection: Connection): Boolean {
+    override suspend fun sendTrustPingOverConnection(connection: PeerConnection): Boolean {
         val sendTrustPingAction = SendTrustPingAction(walletConnector, transport, trustPingTrackerService!!, connection)
         val actionResult = sendTrustPingAction.perform()
 

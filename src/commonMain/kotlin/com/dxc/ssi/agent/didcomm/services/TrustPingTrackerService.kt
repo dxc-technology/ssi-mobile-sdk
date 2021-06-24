@@ -4,9 +4,10 @@ import co.touchlab.stately.collections.IsoMutableMap
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.didexchange.impl.AbortConnection
-import com.dxc.ssi.agent.model.Connection
-import com.dxc.utils.Sleeper
+import com.dxc.ssi.agent.model.PeerConnection
+
 import com.dxc.utils.System
+import kotlinx.coroutines.delay
 
 //TODO: rewrite this class to be stateless and take infor from wallet. This is not needed for mobile library, but will be needed for scalable server-side library
 class TrustPingTrackerService(
@@ -29,7 +30,7 @@ class TrustPingTrackerService(
             //TODO:actually abort dead connection shere
             abortDeadConnections(deadConnections)
 
-            Sleeper().sleep(10000)
+            delay(10000)
             println("Done checking trust pings states")
         }
     }
@@ -55,12 +56,12 @@ class TrustPingTrackerService(
     }
 
 
-    fun trustPingSentOverConnectionEvent(connection: Connection) {
+    fun trustPingSentOverConnectionEvent(connection: PeerConnection) {
         println("TrustPing sent for connectionId = ${connection.id}")
         sentPingsMap[connection.id] = System.currentTimeMillis()
     }
 
-    fun trustPingResponseReceivedEvent(connection: Connection) {
+    fun trustPingResponseReceivedEvent(connection: PeerConnection) {
         println("TrustPing received for connectionId = ${connection.id}")
         sentPingsMap.remove(connection.id)
     }

@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class RequestedProof(
     @SerialName("revealed_attrs") val revealedAttrs: Map<String, RevealedAttributeReference>,
+    @SerialName("revealed_attr_groups") val revealedAttrGroupss: Map<String, RevealedAttributeGroupReference>,
     @SerialName("self_attested_attrs") val selfAttestedAttrs: Map<String, RevealedAttributeReference>, // not tested
     @SerialName("unrevealed_attrs") val unrevealedAttrs: Map<String, CredentialReference>, // not tested
     val predicates: Map<String, RevealedPredicateReference>

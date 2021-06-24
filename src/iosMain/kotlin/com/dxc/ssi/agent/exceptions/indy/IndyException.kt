@@ -45,6 +45,7 @@ actual open class IndyException(override val message:String, val sdkErrorCode: I
                 ErrorCode.CommonInvalidParam13,
                 ErrorCode.CommonInvalidParam14 -> InvalidParameterException(sdkErrorCode)
                 ErrorCode.WalletItemNotFound -> WalletItemNotFoundException()
+                ErrorCode.AnoncredsMasterSecretDuplicateNameError -> DuplicateMasterSecretNameException()
                 /*
                 TODO: implement those exceptions when we need them
                 ErrorCode.CommonInvalidState -> InvalidStateException()
@@ -78,7 +79,7 @@ actual open class IndyException(override val message:String, val sdkErrorCode: I
                 ErrorCode.LedgerNotFound -> LedgerNotFoundException()
                 ErrorCode.AnoncredsRevocationRegistryFullError -> RevocationRegistryFullException()
                 ErrorCode.AnoncredsInvalidUserRevocId -> AnoncredsInvalidUserRevocId()
-                ErrorCode.AnoncredsMasterSecretDuplicateNameError -> DuplicateMasterSecretNameException()
+
                 ErrorCode.AnoncredsProofRejected -> ProofRejectedException()
                 ErrorCode.AnoncredsCredentialRevoked -> CredentialRevokedException()
                 ErrorCode.AnoncredsCredDefAlreadyExistsError -> CredDefAlreadyExistsException()

@@ -1,36 +1,26 @@
 PODS:
-  - kotlin_multiplatform_agent (1.0-SNAPSHOT)
-  - libindy (1.15.0)
   - libsodium (1.0.12)
   - libzmq-pw (4.2.2)
-  - OpenSSL-XM (1.0.210.1)
+  - ssi_agent (0.0.1)
 
 DEPENDENCIES:
-  - kotlin_multiplatform_agent (from `../../`)
-  - libindy (= 1.15.0)
   - libsodium (~> 1.0.12)
   - libzmq-pw (= 4.2.2)
-  - OpenSSL-XM
+  - ssi_agent (= 0.0.1)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
     - libsodium
-    - OpenSSL-XM
   https://github.com/hyperledger/indy-sdk.git:
-    - libindy
     - libzmq-pw
-
-EXTERNAL SOURCES:
-  kotlin_multiplatform_agent:
-    :path: "../../"
+  https://github.com/kkamyczek/ssi-mobile-sdk.git:
+    - ssi_agent
 
 SPEC CHECKSUMS:
-  kotlin_multiplatform_agent: 56a46b6cda4935027d29fc249f68140d3bd06620
-  libindy: 11318335b528494a6155943c4cc6579926cee7e3
   libsodium: 9a8faa5ef2fa0d2d57bd7f7d79bf8fb7c1a9f0ea
   libzmq-pw: 493d316cf7f91117bce03df7588b3a7ff0f4a797
-  OpenSSL-XM: f2d7697be2a4b01a2c62239fd577e4137cab4f3a
+  ssi_agent: 8764c846b27ade904b8b848e376927f97b820998
 
-PODFILE CHECKSUM: 4c93f524e209f6fe0b6801b4ad6f011acf6c92e2
+PODFILE CHECKSUM: 05693605e21ac16812469c0848c84db39fdb70c5
 
 COCOAPODS: 1.10.1

@@ -7,7 +7,7 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.router.MessageRouter
 import com.dxc.ssi.agent.didcomm.router.MessageRouterImpl
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.MessageContext
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
@@ -38,15 +38,17 @@ class MessageListenerImpl(
 
         while (!isShutdown) {
 
-            println("Checking for new messages")
+            println("Message Listener: Checking for new messages")
 
             val receivedMessage = transport.receiveNextMessage()
+
+            println("Message Listener: Received message")
 
             val messageContext = unpackAndBuildMesageContext(receivedMessage)
 
 
             messageRouter.routeAndProcessMessage(messageContext)
-            println("procesed message")
+            println("Message Listener: : procesed message")
         }
 
     }
@@ -68,7 +70,7 @@ class MessageListenerImpl(
 
     }
 
-    private suspend fun getConnectionByVerkey(senderVerKey: String): Connection? {
+    private suspend fun getConnectionByVerkey(senderVerKey: String): PeerConnection? {
         return walletConnector.walletHolder.findConnectionByVerKey(senderVerKey)
     }
 

@@ -16,5 +16,9 @@ actual class System {
 
         actual fun setEnv(key: String, value: String) {
         }
+
+        actual fun getCurrentThread(): String {
+            TODO("Not yet implemented")
+        }
     }
 }

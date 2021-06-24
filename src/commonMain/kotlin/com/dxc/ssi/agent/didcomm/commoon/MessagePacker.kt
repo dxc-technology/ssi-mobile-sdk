@@ -2,7 +2,7 @@ package com.dxc.ssi.agent.didcomm.commoon
 
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.forward.BuildForwardMessage
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import kotlinx.serialization.encodeToString
@@ -12,7 +12,7 @@ object MessagePacker {
     //TODO: uunderstand what Message models we need and unify them
     suspend fun packAndPrepareForwardMessage(
         message: Message,
-        connection: Connection,
+        connection: PeerConnection,
         walletConnector: WalletConnector
     ): MessageEnvelop {
         //TODO: check if we always need to pack our message into forward message
@@ -25,8 +25,8 @@ object MessagePacker {
 
         println("Packed message: ${messageEnvelop.payload}")
 
-        //TODO: avoid NPE here
-        val forwardMessage = BuildForwardMessage.buildForwardMessage(messageEnvelop, connection.peerDid!!)
+        //TODO: understand how to handle case with multiple recepient keys. Should we form forward message for each of those keys?
+        val forwardMessage = BuildForwardMessage.buildForwardMessage(messageEnvelop, connection.peerRecipientKeys.first())
 
         val outerMessageEnvelop = MessageEnvelop(
             payload = walletConnector.walletHolder.packMessage(

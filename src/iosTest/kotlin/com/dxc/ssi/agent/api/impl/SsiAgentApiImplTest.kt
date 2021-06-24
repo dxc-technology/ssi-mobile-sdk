@@ -4,26 +4,35 @@ import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
-import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
+import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
+import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.utils.ToBeReworked
+import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
+import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
+import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
-import kotlinx.coroutines.*
-
-
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.test.Test
 import kotlin.test.Ignore
+
 //TODO: move this test to common level
 class SsiAgentApiImplTest {
+
+    private val walletName = "newWalletName2"
+    private val walletPassword = "newWalletPassword"
+    private val did = "4PCVFCeZbKXyvgjCedbXDx"
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
@@ -32,13 +41,32 @@ class SsiAgentApiImplTest {
 
         ToBeReworked.enableIndyLog()
 
+        EnvironmentUtils.initEnvironment(EnvironmentImpl())
+
+        val walletManager: WalletManager = IndyWalletManager
+
+        if (!walletManager.isWalletExistsAndOpenable(walletName, walletPassword))
+            walletManager.createWallet(walletName, walletPassword)
+
+        if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
+            val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
+            //Store did somewhere in your application to use it afterwards
+        }
+
+        val walletHolder = IndyWalletHolder(
+            walletName = walletName,
+            walletPassword = walletPassword,
+            didConfig = DidConfig(did = did)
+        )
+
+        val indyWalletConnector = IndyWalletConnector.build(walletHolder)
+
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
             ipAddress = "192.168.0.117"
         )
 
-        val ssiAgentApi = SsiAgentBuilderImpl()
-            .withEnvironment(EnvironmentImpl())
+        val ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())
             .withCredPresenterController(CredPresenterControllerImpl())
@@ -69,41 +97,45 @@ class SsiAgentApiImplTest {
 
     class CredPresenterControllerImpl : CredPresenterController {
         override fun onRequestReceived(
-            connection: Connection,
+            connection: PeerConnection,
             presentationRequest: PresentationRequestContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: Connection): CallbackResult {
+        override fun onDone(connection: PeerConnection): CallbackResult {
             return CallbackResult(true)
+        }
+
+        override fun onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
+
         }
 
     }
 
     class CredReceiverControllerImpl : CredReceiverController {
         override fun onOfferReceived(
-            connection: Connection,
+            connection: PeerConnection,
             credentialOfferContainer: CredentialOfferContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
         override fun onRequestSent(
-            connection: Connection,
+            connection: PeerConnection,
             credentialRequestContainer: CredentialRequestContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
         override fun onCredentialReceived(
-            connection: Connection,
+            connection: PeerConnection,
             credentialContainer: CredentialContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: Connection, credentialContainer: CredentialContainer): CallbackResult {
+        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
             return CallbackResult(true)
         }
 
@@ -112,29 +144,28 @@ class SsiAgentApiImplTest {
 
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         override fun onInvitationReceived(
-            connection: Connection,
-            endpoint: String,
+            connection: PeerConnection,
             invitation: Invitation
         ): CallbackResult {
             return CallbackResult(canProceedFurther = true)
         }
 
-        override fun onRequestSent(connection: Connection, request: ConnectionRequest): CallbackResult {
+        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
             println("Request sent hook called : $connection, $request")
             return CallbackResult(true)
         }
 
-        override fun onResponseReceived(connection: Connection, response: ConnectionResponse): CallbackResult {
+        override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
             println("Response received hook called : $connection, $response")
             return CallbackResult(true)
         }
 
-        override fun onCompleted(connection: Connection): CallbackResult {
+        override fun onCompleted(connection: PeerConnection): CallbackResult {
             println("Connection completed : $connection")
             return CallbackResult(true)
         }
 
-        override fun onAbandoned(connection: Connection, problemReport: ProblemReport): CallbackResult {
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
             println("Connection abandoned : $connection")
             return CallbackResult(true)
         }

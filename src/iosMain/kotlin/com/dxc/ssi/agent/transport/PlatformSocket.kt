@@ -13,12 +13,11 @@ import kotlin.native.concurrent.isFrozen
 data class WebSocketWrapper(var websocket: NSURLSessionWebSocketTask? = null)
 internal actual class PlatformSocket actual constructor(url: String) {
     private val socketEndpoint = NSURL.URLWithString(url)!!
-
-    // private var webSocket: NSURLSessionWebSocketTask? = null
     private val isolatedWebSocket = IsolateState { WebSocketWrapper() }
 
-    //: IsolateState<NSURLSessionWebSocketTask> = IsolateState(null)
-    actual fun openSocket(socketListenerAdapter: SocketListenerAdapter) {
+    actual fun openSocket(
+        platformSocketListener: PlatformSocketListener
+    ) {
         val urlSession = NSURLSession.sessionWithConfiguration(
             configuration = NSURLSessionConfiguration.defaultSessionConfiguration(),
             delegate = object : NSObject(), NSURLSessionWebSocketDelegateProtocol {
@@ -27,8 +26,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
                     webSocketTask: NSURLSessionWebSocketTask,
                     didOpenWithProtocol: String?
                 ) {
-                    socketListenerAdapter.onOpened()
-
+                    platformSocketListener.onOpen()
 
                 }
 
@@ -39,14 +37,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
                     reason: NSData?
                 ) {
 
-                    socketListenerAdapter.onClosed(
-                        SocketClosureDetails(
-                            didCloseWithCode.toInt(),
-                            reason.toString()
-                        )
-                    )
-
-
+                    platformSocketListener.onClosed(didCloseWithCode.toInt(), reason.toString())
                 }
             }.freeze(),
             delegateQueue = NSOperationQueue.currentQueue()
@@ -61,33 +52,36 @@ internal actual class PlatformSocket actual constructor(url: String) {
 
         }
 
-        listenMessages(socketListenerAdapter)
+        listenMessages(platformSocketListener)
         isolatedWebSocket.access { it.websocket?.resume() }
 
     }
 
-    private fun listenMessages(socketListenerAdapter: SocketListenerAdapter) {
-        isolatedWebSocket.access {
+    private fun listenMessages(
+        platformSocketListener: PlatformSocketListener
+    ) {
+        println("PlatformSocket: in listenMessages")
 
+        isolatedWebSocket.access {
+            println("PlatformSocket: accessed isolatedWebsocket")
 
             val receiverHandler = { message: NSURLSessionWebSocketMessage?, nsError: NSError? ->
                 when {
                     nsError != null -> {
-
-                        socketListenerAdapter.onFailure(Throwable(nsError.description))
+                        platformSocketListener.onFailure(Throwable(nsError.description))
                     }
                     message != null -> {
                         message.string?.let {
-
-                            socketListenerAdapter.onMessageReceived(it)
+                            println("PlatformSocket: received text message $it")
+                            platformSocketListener.onMessage(it)
                         }
                     }
                 }
-                listenMessages(socketListenerAdapter)
+                listenMessages(platformSocketListener)
             }
 
 
-
+            println("PlatformSocket: constructed receiverHandler")
             it.websocket?.receiveMessageWithCompletionHandler(receiverHandler.freeze())
         }
     }

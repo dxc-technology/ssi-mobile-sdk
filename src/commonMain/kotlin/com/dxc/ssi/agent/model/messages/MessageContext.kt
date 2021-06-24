@@ -1,9 +1,9 @@
 package com.dxc.ssi.agent.model.messages
 
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 
 
 data class MessageContext(
-    val connection: Connection?,
+    val connection: PeerConnection?,
     val receivedUnpackedMessage: ReceivedUnpackedMessage
 )

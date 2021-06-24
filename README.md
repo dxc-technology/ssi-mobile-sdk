@@ -12,7 +12,7 @@ Currently it supports following platforms and if necessary can be extended to ot
 
 - JVM -> jar
 - Android -> aar
-- iOS -> cocoapod 
+- iOS -> cocoapod
 
 See https://kotlinlang.org/docs/multiplatform.html for details on how this multiplatform technology works.
 
@@ -66,6 +66,46 @@ In general before using ths library you must build and initialize it.
 
 Example is given for android, but it will be almost the same for all platforms
 
+Before using the library we need to initialize Environment using the code below:
+
+```kotlin
+  EnvironmentUtils.initEnvironment(EnvironmentImpl(this))
+```
+
+Next use *WalletManager* in order to check if wallet exists or not and create it if it does not exists. Those checks are
+responsibility of application developer, because there are unrecoverable user data at stake, thus it was decided that
+library should not manage this automatically. Once you have generated DID you need to store it somewhere in order to
+reuse it on application restart.
+
+```kotlin 
+    val walletName = "newWalletName1"
+    val walletPassword = "newWalletPassword"
+    val did = "Kg5Cq9vKv7QrLfTGUP9xbd"
+    val walletManager: WalletManager = IndyWalletManager
+
+    if (!walletManager.isWalletExistsAndOpenable(walletName, walletPassword))
+        walletManager.createWallet(walletName, walletPassword)
+
+    if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
+        val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
+        println("Generated didResult: $didResult")
+    //Store did somewhere in your application to use it afterwards
+    }
+```
+
+After we have checked that wallet exists and contains did we can proceed with configuring the library to use it and the
+code below build the wallet connector.
+
+```kotlin
+val walletHolder = IndyWalletHolder(
+    walletName = walletName,
+    walletPassword = walletPassword,
+    didConfig = DidConfig(did = did)
+)
+
+val indyWalletConnector = IndyWalletConnector.build(walletHolder)
+```
+
 Here we define that lib should build genesys.txn file based on ip address of public ledger. Alternatively it is possible
 to use IndyLedgerConnectorConfiguration.GenesisMode.FILE and specify existing genesis file.
 
@@ -76,18 +116,18 @@ val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
 )
 ```
 
-next we build the library providing all pluggable parts. Business logic is encapusalted in controllers called at
-different stages of connection and credential lifecycle. Only those controller which we need for our specific business case should be defined.
-For example for case of holder mobile library we need to define following controllers.
+Next we build the library providing all pluggable parts. Business logic is encapusalted in controllers called at
+different stages of connection and credential lifecycle. Only those controller which we need for our specific business
+case should be defined. For example for case of holder mobile library we need to define following controllers.
 
 - ConnectionInitiatorController
 - CredPresenterController
 - CredReceiverController
 
 ANd we do not need to define controllers for issuence credentials or accepting connection.
+
 ```kotlin
-ssiAgentApi = SsiAgentBuilderImpl()
-    .withEnvironment(EnvironmentImpl(this))
+    val ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
     .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
     .withCredReceiverController(CredReceiverControllerImpl())
     .withCredPresenterController(CredPresenterControllerImpl())
@@ -181,10 +221,13 @@ requestLegacyExternalStorage="true"  as below.
 
 <manifest>
     ...
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        android:minSdkVersion="30" />
     <application
     ...
     android:usesCleartextTraffic="true"
@@ -200,13 +243,33 @@ request those permissions in runtime
 ## Library initialization
 
 ```kotlin
+EnvironmentUtils.initEnvironment(EnvironmentImpl(this))
+
+val walletManager: WalletManager = IndyWalletManager
+
+if (!walletManager.isWalletExistsAndOpenable(walletName, walletPassword))
+    walletManager.createWallet(walletName, walletPassword)
+
+if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
+    val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
+    println("Generated didResult: $didResult")
+    //Store did somewhere in your application to use it afterwards
+}
+
+val walletHolder = IndyWalletHolder(
+    walletName = walletName,
+    walletPassword = walletPassword,
+    didConfig = DidConfig(did = did)
+)
+
+val indyWalletConnector = IndyWalletConnector.build(walletHolder)
+
 val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
     genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
     ipAddress = "192.168.0.117"
 )
 
-ssiAgentApi = SsiAgentBuilderImpl()
-    .withEnvironment(EnvironmentImpl(this))
+ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
     .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
     .withCredReceiverController(CredReceiverControllerImpl())
     .withCredPresenterController(CredPresenterControllerImpl())
@@ -231,7 +294,34 @@ ssiAgentApi.connect(issuerInvitationUrl)
 ssiAgentApi.connect(verifierInvitationUrl)
 ```
 
+## Supported android devices APIs 24, 25, 26, 27, 28, 29, 30:
+
+<img src="docs/android/Devices.png" alt="docs/android/Devices" style="zoom:50%;" />
+
+## Setup permissions <= API 28 - just approve permissions on the phone
+
+<img src="docs/android/Connect.png" alt="docs/android/Connect" style="zoom:50%;" />
+
+## Setup permissions for API 30 - just approve permissions on the phone
+
+<img src="docs/android/Allow_all_files.png" alt="docs/android/Allow_all_files" style="zoom:30%;" />
+
 # iOS usage
+
+## Prerequisites
+
+```bash
+brew install cmake
+brew install zeromq
+```
+
+If during the build in Xcode you have error complaining that platform.hpp was not found then do following:
+
+1. Run pod install --verbose and find cached libzmq-pw pod
+2. Remove directory with pod 
+3. Remove Pods directory from your project
+4. Ensure that cmake and zeromq are installed
+5. Execute pod install
 
 ## Instruction for kotlin multiplatform library developer to build the library
 
@@ -264,62 +354,132 @@ TODO: automate those steps
 '''
 and then un-Ignore the SsiAgentApiImplTest from iosX64 module and try running it
 
+
 ## Instruction for kotlin multiplatform library user to use the library in swift app
 
-The current instruction explains how to use swift example app. TODO: make some build artifact (podspec, podfile?) so
-that client user could use as a dependency
+Add sources to your Podfile:
+```script
+source 'https://github.com/CocoaPods/Specs.git'
+source 'https://github.com/hyperledger/indy-sdk.git'
+```
+
+Add pods to your Podfile:
+```script
+pod 'ssi_agent', '0.0.1', :source => "https://github.com/kkamyczek/ssi-mobile-sdk.git"
+pod 'libsodium', '~> 1.0.12'
+pod 'libzmq-pw', "4.2.2
+```
+
+Run as described:
+
+```script
+pod setup
+pod install --verbose
+```
+Now you can run XCode and make a build/run
+Both a simulator, and a device are supported.
+
+## Instruction how to create XCF artifact 
+
+Run shell command from ssi-mobile-sdk root folder:
+```script
+sh build_ios_artifact.sh
+```
+
+Artifact will be created in folder: 
+build/xcode-framework-universal
+
+Zip it and copy it to your GitHub release repository:
+https://github.com/kkamyczek/ssi-mobile-sdk/releases
+
+## Instruction for running samples/swiftIosApp
 
 1. Example ios app is located in samples/swiftIosApp
-2. This app contains Podfile wich would add proper dependencies to ios app
-3. Execute ```./gradlew clean build``` from root repo folder. After this build is completed, gradle will automatically
-   make "pod install" in samples/swiftIosApp folder
-4. Open samples/swiftIosApp workspace in Xcode. Set *Validate workspace* to true in project build settings
-5. Build Xcode project
-6. For testing purpose replace "invitationUrl" value in AppDelegate to actual fresh invitation form
-7. Run the app in xcode. Emulator is supposed to be started and on application start the connection will be established
+2. This app contains Podfile which would add proper dependencies to ios app 
+   
+Run pod:
+```script
+pod setup
+pod install --verbose
+```
+
+3. Open samples/swiftIosApp workspace in Xcode. Set *Validate workspace* to true in project build settings
+4. Build Xcode project
+5. For testing purpose replace "invitationUrl" value in AppDelegate to actual fresh invitation form
+6. Run the app in xcode. Emulator is supposed to be started and on application start the connection will be established
    with remote agent
-8. Example of swift code to establish connection
+7. Example of swift code to establish connection
 
 ```swift
 import UIKit
 import ssi_agent
 
-class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
-{
-    func onCompleted(connection: Connection_) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-    func onInvitationReceived(connection: Connection_, endpoint: String, invitation: Invitation) -> CallbackResult {
-    
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-    func onRequestSent(connection: Connection_, request: ConnectionRequest) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-    func onResponseReceived(connection: Connection_, response: ConnectionResponse) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-    }
-    
-}
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    let myWalletName = "newWalletName4"
+    let myWalletPassword = "newWalletPassword"
+    let myDid = "4PCVFCeZbKXyvgjCedbXDx"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         let cic = ConnectionInitiatorControllerImpl()
-               let ssiAgentApi = SsiAgentBuilderImpl().withConnectionInitiatorController(connectionInitiatorController: cic).build()
+        let crc = CredentialReceiverControllerImpl()
+        let cpc = CredPresenterControllerImpl()
+        
+        
+        EnvironmentUtils().doInitEnvironment(environment: EnvironmentImpl())
+
+        let walletManager = IndyWalletManager.Companion()
+        
+
+        if (!walletManager.isWalletExistsAndOpenable(walletName: myWalletName, walletPassword: myWalletPassword)) {
+            print("Recreating wallet")
+            walletManager.createWallet(walletName: myWalletName, walletPassword: myWalletPassword, walletCreationStrategy: WalletCreationStrategy.truncateandcreate)}
+
+        
+        if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
+            print("Recreating did")
+            let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
+                didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
+                walletName : myWalletName, walletPassword:myWalletPassword)
+            
+            print("Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())")
+            //Store did somewhere in your application to use it afterwards
+        }
+
+        let walletHolder = IndyWalletHolder(
+            walletName : myWalletName,
+            walletPassword :myWalletPassword,
+            didConfig : DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil)
+        )
+
+        let indyWalletConnector = IndyWalletConnector().build(walletHolder: walletHolder)
+        
+        
+        let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
+            genesisFilePath: "./docker_pool_transactions_genesis.txt",
+            ipAddress: "192.168.0.117",
+            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
+            generatedGenesysFileName: "genesis.txn",
+            retryTimes: 5,
+            retryDelayMs: 5000)
+        
+        let ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
+                .withConnectionInitiatorController(connectionInitiatorController: cic)
+                .withCredReceiverController(credReceiverController: crc)
+                .withCredPresenterController(credPresenterController: cpc)
+                .withLedgerConnector(ledgerConnector: IndyLedgerConnector(indyLedgerConnectorConfiguration: indyLedgerConnectorConfiguration))
+                .build()
+        
                ssiAgentApi.doInit()
-               let invitation = "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkRtMkhFRWNlWXo4cnJ1QTVMQWh0Y3B0WVFYVmN0N3V2NUVpNUxHTjdoY2h1Il0sInJlY2lwaWVudEtleXMiOlsiNmpDRGk4YW9iS1Z5WllpRkM0YWgxNmtzcDhFYWVKRlpEY3Vwc29mTGdTeWgiXSwiQGlkIjoiMDRlNjNmY2MtNzk2Yy00YTUwLWI4NzEtOTMxZjRiOGJiYzY5IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9="
-               
-               ssiAgentApi.connect(url: invitation)
-               sleep(10000)
-        // Override point for customization after application launch.
+      
+       ssiAgentApi.connect(url: "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiNDk3WG5jdjNUckI5Wk5MSHlyYWNQTUxNMm54ZGZHV2R2RXNtb2pXWDNBYVQiXSwicmVjaXBpZW50S2V5cyI6WyJIYUY3bW5BZkYyZXFIcFdndDNDMlljMzNoM25ZV2c0dlBnOXhteWpTVW1KeSJdLCJAaWQiOiI5MmE3OTEwZC0zYWUyLTQzZTgtYmE3YS0xMGI1MGVmYWEwMWIiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0=")
+
+        sleep(180)
+        ssiAgentApi.shutdown(force: true)
+        
         return true
     }
 
@@ -340,7 +500,65 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
+{
+    func onCompleted(connection: PeerConnection) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onInvitationReceived(connection: PeerConnection, endpoint: String, invitation: Invitation) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+   
+    
+    func onRequestSent(connection: PeerConnection, request: ConnectionRequest) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onResponseReceived(connection: PeerConnection, response: ConnectionResponse) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+        
+    }
+    
+}
 
+
+class CredentialReceiverControllerImpl: CredReceiverController {
+    func onCredentialReceived(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onDone(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+}
+
+
+class CredPresenterControllerImpl: CredPresenterController {
+    func onDone(connection: PeerConnection) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    func onRequestReceived(connection: PeerConnection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
+    
+}
 ```
 
 ## Some documentation references

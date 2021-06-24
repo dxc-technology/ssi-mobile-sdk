@@ -5,6 +5,10 @@ actual class Wallet actual constructor(walletHandle: Int) {
         TODO("Not yet implemented")
     }
 
+    actual suspend fun closeWallet() {
+        TODO("Not yet implemented")
+    }
+
     actual companion object {
         actual suspend fun createWallet(config: String, credentials: String) {
             TODO("Not yet implemented")

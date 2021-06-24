@@ -6,5 +6,6 @@ expect class System {
         fun getEnv(key: String): String?
         fun getProperty(key: String): String?
         fun setEnv(key: String, value: String)
+        fun getCurrentThread(): String
     }
 }
