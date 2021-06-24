@@ -53,7 +53,7 @@ class SsiApplication : Application() {
             walletManager.createWallet(walletName, walletPassword)
 
         if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
-            val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
+            val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword, didConfig = DidConfig(did = did))
             println("Generated didResult: $didResult")
             //Store did somewhere in your application to use it afterwards
         }
@@ -68,7 +68,7 @@ class SsiApplication : Application() {
 
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
-            ipAddress = "192.168.0.117")
+            ipAddress = "192.168.0.122")
 
         ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
