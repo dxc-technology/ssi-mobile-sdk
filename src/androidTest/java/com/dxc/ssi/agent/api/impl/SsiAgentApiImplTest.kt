@@ -30,12 +30,12 @@ class SsiAgentApiImplTest {
 
     @Rule
     @JvmField
-    val permissionRule = if (Build.VERSION.SDK_INT >= 30) {
+    val permissionRule = if (Build.VERSION.SDK_INT >= 30) {   //  Use Android API 30 Platform to run it
         GrantPermissionRule.grant(
-            //Manifest.permission.MANAGE_EXTERNAL_STORAGE, Use Android API 30 Platform to run it
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.INTERNET,
-            Manifest.permission.ACCESS_NETWORK_STATE
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            //  Instead of running this: Manifest.permission.MANAGE_EXTERNAL_STORAGE use this command: adb shell appops set --uid com.dxc.ssi.agent.test MANAGE_EXTERNAL_STORAGE allow
         )
     } else {
         GrantPermissionRule.grant(
@@ -48,7 +48,7 @@ class SsiAgentApiImplTest {
 
 
     @Test
-    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration test which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -57,7 +57,7 @@ class SsiAgentApiImplTest {
         println("Starting test")
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
-            ipAddress = "192.168.0.117")
+            ipAddress = "192.168.0.122")
 
         val ssiAgentApi = SsiAgentBuilderImpl()
             .withEnvironment(EnvironmentImpl(instrumentation.context))
