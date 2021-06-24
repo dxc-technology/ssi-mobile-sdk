@@ -1,35 +1,13 @@
 package com.dxc.ssi.sample
 
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import android.widget.Button
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
 
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun hasAllFilesPermission() = Environment.isExternalStorageManager()
-
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        if (Build.VERSION.SDK_INT >= 30 && !hasAllFilesPermission()) {
-            println("Build version ${Build.VERSION.SDK_INT}")
-
-            val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
-
-            startActivity(
-                    Intent(
-                            Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                            uri
-                    )
-            )
-        }
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
