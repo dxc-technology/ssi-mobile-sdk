@@ -5,31 +5,31 @@ import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 
 class CredReceiverControllerImpl : CredReceiverController {
     override fun onOfferReceived(
-        connection: Connection,
+        connection: PeerConnection,
         credentialOfferContainer: CredentialOfferContainer
     ): CallbackResult {
         return CallbackResult(true)
     }
 
     override fun onRequestSent(
-        connection: Connection,
+        connection: PeerConnection,
         credentialRequestContainer: CredentialRequestContainer
     ): CallbackResult {
         return CallbackResult(true)
     }
 
     override fun onCredentialReceived(
-        connection: Connection,
+        connection: PeerConnection,
         credentialContainer: CredentialContainer
     ): CallbackResult {
         return CallbackResult(true)
     }
 
-    override fun onDone(connection: Connection, credentialContainer: CredentialContainer): CallbackResult {
+    override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
         return CallbackResult(true)
     }
 

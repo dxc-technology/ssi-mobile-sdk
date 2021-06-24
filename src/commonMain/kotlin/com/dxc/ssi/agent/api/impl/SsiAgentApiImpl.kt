@@ -10,7 +10,7 @@ import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.utils.EnvironmentUtils
 import kotlinx.coroutines.*
@@ -19,9 +19,23 @@ class SsiAgentApiImpl(
     private val transport: Transport,
     private val walletConnector: WalletConnector,
     private val ledgerConnector: LedgerConnector,
-    private val callbacks: Callbacks,
-    private val environment:Environment
+    private val callbacks: Callbacks
 ) : SsiAgentApi {
+
+    private var job = Job()
+    private val agentScope = CoroutineScope(Dispatchers.Default + job)
+
+    /*TODO: for mobile application having one thread of listener is enough.
+    for mobile application having one thread of listener is enough.For using on server side we will need to implement Thread Pool ourselves, or wait until it is done in kotlin coroutines
+    The problem is  with IOS Dispatchers.Default having very limited number of threads.
+    Alternative solution to creating our thread pool will be separation of this listener invokation to platform specific implementations.
+    Then for JVM we will use standard thread pool, while for ios it wil be enough to have single listener thread
+     */
+
+    private val mainListenerSingleThreadDispatcher =
+        CoroutineHelper.singleThreadCoroutineContext("Main Listener Thread")
+    private val trustPingListenerSingleThreadDispatcher =
+        CoroutineHelper.singleThreadCoroutineContext("TrustPing Listener Thread")
     private val trustPingTrackerService =
         TrustPingTrackerService(walletConnector, callbacks.connectionInitiatorController!!)
 
@@ -31,66 +45,64 @@ class SsiAgentApiImpl(
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun init() {
 
-        EnvironmentUtils.initEnvironment(environment)
+        if(!EnvironmentUtils.environmentInitizlized)
+            throw RuntimeException("Please initialize environment before initializing SsiAgentApiImpl")
 
 
-        CoroutineHelper.waitForCompletion(GlobalScope.async {
+        println("Before running agentScope.async")
+        CoroutineHelper.waitForCompletion(agentScope.async {
             println("Before initializing ledgerConnector")
             ledgerConnector.init()
-            println("After initializing ledgerConnector")
-            println("Before initializing walletConnector")
-            walletConnector.walletHolder.openOrCreateWallet()
-            println("After initializing walletConnector")
+            //TODO: combine it into single function
+            walletConnector.walletHolder.openWalletOrFail()
+            walletConnector.walletHolder.initializeDid()
             ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
             println("Set ledgerConnectorDid")
 
             if (walletConnector.prover != null) {
-                walletConnector.prover!!.createMasterSecret(Configuration.masterSecretId)
+                walletConnector.prover.createMasterSecret(Configuration.masterSecretId)
             }
         })
 
-        println("Before running listener in GlobalScope")
-//TODO: design proper concurrency there,  think if GlobalScope is appropriate here or some custom job should be used
-        GlobalScope.launch {
-            //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
-            withContext(CoroutineHelper.singleThreadCoroutineContext("Listener thread")) {
+        agentScope.launch {
+            withContext(mainListenerSingleThreadDispatcher.context) {
                 messageListener.listen()
             }
         }
-//TODO: design proper concurrency there
-        GlobalScope.launch {
-            //TODO: understannd for which functions we need to use separate thread, for which Dispathers.Default and for which Dispatchers.IO
-            withContext(CoroutineHelper.singleThreadCoroutineContext("Listener thread")) {
+
+        agentScope.launch {
+            withContext(trustPingListenerSingleThreadDispatcher.context) {
                 trustPingTrackerService.track()
             }
         }
-
     }
 
-    override fun connect(url: String): Connection {
+    override fun connect(url: String): PeerConnection {
+        println("Entered connect function")
         return CoroutineHelper.waitForCompletion(
-            GlobalScope.async {
+            agentScope.async {
+                println("Entered async connection initiation")
                 messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
             })
     }
 
-    override fun disconnect(connection: Connection) {
+    override fun disconnect(connection: PeerConnection) {
         TODO("Not yet implemented")
     }
 
     //TODO: current function is synchronous with hardcoded timeout, generalize it
-    override fun sendTrustPing(connection: Connection): Boolean {
+    override fun sendTrustPing(connection: PeerConnection): Boolean {
         return CoroutineHelper.waitForCompletion(
-            GlobalScope.async {
+            agentScope.async {
                 messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
             })
     }
 
-    override fun issueCredentialOverConnection(connection: Connection) {
+    override fun issueCredentialOverConnection(connection: PeerConnection) {
         TODO("Not yet implemented")
     }
 
-    override fun requestProofOverConnection(connection: Connection) {
+    override fun requestProofOverConnection(connection: PeerConnection) {
         TODO("Not yet implemented")
     }
 
@@ -102,15 +114,21 @@ class SsiAgentApiImpl(
         TODO("Not yet implemented")
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun shutdown(force: Boolean) {
+        //TODO: make some intelligence and control cancellation behaviour. Make cancellation graceful and controllable. Understand what force parameter would mean
+        job.cancel()
+        mainListenerSingleThreadDispatcher.closeContext()
+        trustPingListenerSingleThreadDispatcher.closeContext()
+        transport.shutdown()
+        println("Stopped the agent")
+    }
+
+    override fun getConnections(): Set<PeerConnection> {
         TODO("Not yet implemented")
     }
 
-    override fun getConnections(): Set<Connection> {
-        TODO("Not yet implemented")
-    }
-
-    override fun disconnect(connection: Connection, force: Boolean) {
+    override fun disconnect(connection: PeerConnection, force: Boolean) {
         TODO("Not yet implemented")
     }
 

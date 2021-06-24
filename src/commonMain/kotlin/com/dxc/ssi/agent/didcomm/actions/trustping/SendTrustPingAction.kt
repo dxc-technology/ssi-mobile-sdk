@@ -5,10 +5,11 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.commoon.MessagePacker
+import com.dxc.ssi.agent.didcomm.commoon.MessageSender
 import com.dxc.ssi.agent.didcomm.model.trustping.TrustPingRequest
 import com.dxc.ssi.agent.didcomm.model.trustping.TrustPingResponse
 import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.ReceivedUnpackedMessage
 import kotlinx.serialization.decodeFromString
@@ -19,7 +20,7 @@ class SendTrustPingAction(
     val walletConnector: WalletConnector,
     val transport: Transport,
     val trustPingTrackerService: TrustPingTrackerService,
-    private val connection: Connection
+    private val connection: PeerConnection
 ) {
 
     suspend fun perform(): ActionResult {
@@ -36,18 +37,8 @@ class SendTrustPingAction(
                 responseRequested = true
             )
 
+        MessageSender.packAndSendMessage(Message(Json.encodeToString(trustPingRequest)), connection, walletConnector, transport)
 
-        val messageToSend =
-            MessagePacker.packAndPrepareForwardMessage(
-                Message(Json.encodeToString(trustPingRequest)),
-                connection,
-                walletConnector
-            )
-
-        // 2. Send TrustPingRequestMessage
-
-        //TODO: ensure that transport function is synchronous here because we will save new status to wallet only after actual message was sent
-        transport.sendMessage(connection, messageToSend)
         trustPingTrackerService.trustPingSentOverConnectionEvent(connection)
 
 

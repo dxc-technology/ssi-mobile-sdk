@@ -10,8 +10,8 @@ import kotlin.test.assertEquals
 
 class IndyPresentationTest {
 
-    @Test
     @Ignore
+    @Test
     fun testDeserialization() {
 
         val presentationJson =

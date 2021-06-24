@@ -6,11 +6,13 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
-import com.dxc.ssi.agent.didcomm.commoon.MessagePacker
+import com.dxc.ssi.agent.didcomm.commoon.MessageSender
 import com.dxc.ssi.agent.didcomm.model.common.Service
 import com.dxc.ssi.agent.didcomm.model.didexchange.*
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
+import com.dxc.utils.Base64
+import io.ktor.http.*
 import io.ktor.util.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -30,28 +32,25 @@ class ReceiveInvitationAction(
         // Create connection and store it in wallet // Create separate action for this?
         // Send Connection Request
         // Ensure transport is initialized?
-
-        val invitation = parseInvitationFromInvitationUrl(invitationUrl)
-        val endpoint = parseEndpointFromInvitationUrl(invitationUrl)
-
-        println("Parsed invitation details: invitation = $invitation\nendpoint=$endpoint")
+        val invitationUrl = Url(invitationUrl)
+        val encodedInvitation = invitationUrl.parameters["c_i"]!!
+        val invitation = parseInvitationFromInvitationUrl(encodedInvitation)
 
         val connectionId = uuid4().toString()
 
-
-        val connection = Connection(
+        val connection = PeerConnection(
             id = connectionId, state = "START",
-            invitation = invitationUrl,
+            invitation = this.invitationUrl,
             isSelfInitiated = true,
             peerRecipientKeys = invitation.recipientKeys,
-            endpoint = endpoint
+            endpoint = invitation.serviceEndpoint
         )
 
 
         //TODO: before storing record check if there were record with the same invitation and reuse it
         //TODO: think about not storing connection object at all untill callback result is received
         walletConnector.walletHolder.storeConnectionRecord(connection)
-        val callbackResult = connectionInitiatorController.onInvitationReceived(connection, endpoint, invitation)
+        val callbackResult = connectionInitiatorController.onInvitationReceived(connection, invitation)
 
         if (callbackResult.canProceedFurther) {
 
@@ -61,15 +60,8 @@ class ReceiveInvitationAction(
 
             println("Connection request: $connectionRequestJson")
 
-            //send request
-            //TODO: introduce message packing/unpacking here
-
-            val messageToSend =
-                MessagePacker.packAndPrepareForwardMessage(Message(connectionRequestJson), connection, walletConnector)
-
-
             //TODO: ensure that transport function is synchronous here because we will save new status to wallet only after actual message was sent
-            transport.sendMessage(connection, messageToSend)
+            MessageSender.packAndSendMessage(Message(connectionRequestJson), connection, walletConnector, transport)
 
             //TODO: set proper state here
             val updatedConnection = connection.copy(state = "RequestSent")
@@ -90,35 +82,17 @@ class ReceiveInvitationAction(
 
         }
 
-        //
-        //val connection2 = walletConnector.walletHolder.getConnectionRecordById(connection.id)
-
 
     }
 
     @OptIn(InternalAPI::class)
-    private fun parseInvitationFromInvitationUrl(invitationUrl: String): Invitation {
-        // TODO: add validation here that invitation is proper URL
-        //TODO: modify it to support other parameters apart form c_i
-        val base64Invitation = Regex("^.*c_i=(.*$)").find(invitationUrl)!!.groups[1]!!.value
-
-        println("Parsed invitation json form URL $base64Invitation")
-
-        //TODO: find a replacement of ktor utils for decoding base64 to avoid InternalApi usage
-        val jsonInvitation = base64Invitation.decodeBase64String()
-
+    private fun parseInvitationFromInvitationUrl(encodedInvitation: String): Invitation {
+        val jsonInvitation = Base64.base64StringToPlainString(encodedInvitation)
         println("JSON invitation $jsonInvitation")
-
         return Json { ignoreUnknownKeys = true }.decodeFromString<Invitation>(jsonInvitation)
-
-    }
-
-    private fun parseEndpointFromInvitationUrl(invitation: String): String {
-        return Regex("(^.*)\\?c_i=.*$").find(invitationUrl)!!.groups[1]!!.value
     }
 
     private fun buildConnectionRequest(invitation: Invitation, connectionId: String): ConnectionRequest {
-
 
         return ConnectionRequest(
             //TODO: understand how to populate id properly
@@ -133,8 +107,8 @@ class ReceiveInvitationAction(
 
     }
 
-    private fun buildConnection(): com.dxc.ssi.agent.didcomm.model.didexchange.Connection {
-        val connection = com.dxc.ssi.agent.didcomm.model.didexchange.Connection(
+    private fun buildConnection(): Connection {
+        val connection = Connection(
             //TODO: understand what did should be set to
             did = walletConnector.walletHolder.getIdentityDetails().did,
             didDocument = buildDidDocument()

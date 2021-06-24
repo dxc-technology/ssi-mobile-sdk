@@ -20,5 +20,9 @@ actual class System {
         actual fun setEnv(key: String, value: String) {
             System.setProperty(key, value)
         }
+
+        actual fun getCurrentThread(): String {
+            return Thread.currentThread().name
+        }
     }
 }

@@ -5,17 +5,20 @@ import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.wallet.Prover
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
 import com.dxc.ssi.agent.config.Configuration
-import com.dxc.ssi.agent.didcomm.model.common.Data
+import com.dxc.ssi.agent.didcomm.model.common.RawData
 import com.dxc.ssi.agent.didcomm.model.common.Thread
 import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
+import com.dxc.ssi.agent.exceptions.indy.DuplicateMasterSecretNameException
+import com.dxc.ssi.agent.exceptions.common.NoCredentialToSatisfyPresentationRequestException
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
+import com.dxc.ssi.agent.ledger.indy.helpers.TailsHelper
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 import com.dxc.ssi.agent.utils.JsonUtils
+import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
-import com.dxc.ssi.agent.ledger.indy.helpers.TailsHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.Anoncreds
 import com.dxc.ssi.agent.wallet.indy.libindy.CredentialsSearchForProofReq
 import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
@@ -87,17 +90,14 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         masterSecretId = id
         try {
             Anoncreds.proverCreateMasterSecret(walletHolder.getWallet() as Wallet, id)
-        } catch (e: Exception) {
-            if (!e.message!!.contains("DuplicateMasterSecretNameException")) throw e
-
-            //TODO: think what should be the behaviour
-            println("MasterSecret already exists, who cares, continuing")
+        } catch (e: DuplicateMasterSecretNameException) {
+            println("MasterSecret already exists, so we will use it")
         }
     }
 
     override fun createCredentialDefinitionIdFromOffer(credentialOffer: CredentialOffer): CredentialDefinitionId {
 
-        println("createCredentialDefinitionIdFromOffer: cred offer ${credentialOffer}")
+        println("createCredentialDefinitionIdFromOffer: cred offer $credentialOffer")
 
         val indyCredentialOffer = credentialOffer as IndyCredentialOffer
 
@@ -192,7 +192,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): Data {
+    override fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): RawData {
 
         //TODO: check if this type cast is needed here
         val credentialRequestJson =
@@ -200,7 +200,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         println("extractCredentialRequestDataFromCredentialInfo: credentialRequestJson = $credentialRequestJson")
 
 
-        return Data(base64 = Base64.plainStringToBase64String(credentialRequestJson))
+        return RawData(base64 = Base64.plainStringToBase64String(credentialRequestJson))
 
     }
 
@@ -278,7 +278,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         return revocationState
     }
 
-    override fun buildCredentialObjectFromRawData(data: Data): Credential {
+    override fun buildCredentialObjectFromRawData(data: RawData): Credential {
 
         val indyCredentialJson = Base64.base64StringToPlainString(data.base64)
 
@@ -289,7 +289,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun buildCredentialOfferObjectFromRawData(data: Data): CredentialOffer {
+    override fun buildCredentialOfferObjectFromRawData(data: RawData): CredentialOffer {
 
         val jsonCredentialOffer = Base64.base64StringToPlainString(data.base64)
 
@@ -314,7 +314,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         )
     }
 
-    override fun buildPresentationRequestObjectFromRawData(data: Data): PresentationRequest {
+    override fun buildPresentationRequestObjectFromRawData(data: RawData): PresentationRequest {
         val indyPresentationRequestJson = Base64.base64StringToPlainString(data.base64)
 
         println("Received JSON PresentationRequest: $indyPresentationRequestJson")
@@ -359,7 +359,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
             val credentialForTheRequest =
                 IndySerializationUtils.jsonProcessor.decodeFromString<List<IndyCredentialForTheRequest>>(credentialJson)
                     .firstOrNull()
-                    ?: throw RuntimeException("Unable to find attribute $key that satisfies proof request: ${indyPresentationRequest.requestedAttributes[key]}")
+                    ?: throw NoCredentialToSatisfyPresentationRequestException("Unable to find attribute $key that satisfies proof request: ${indyPresentationRequest.requestedAttributes[key]}")
 
             allSchemaIds.add(IndySchemaId.fromString(credentialForTheRequest.credInfo.schemaId))
             allCredentialDefinitionIds.add(IndyCredentialDefinitionId.fromString(credentialForTheRequest.credInfo.credDefId))
@@ -520,7 +520,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun extractPresentationDataFromPresentation(presentation: Presentation): Data {
+    override fun extractPresentationDataFromPresentation(presentation: Presentation): RawData {
 
         //TODO: check if this type cast is needed here
         val presentationJson =
@@ -528,7 +528,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         println("extractPresentationDataFromPresentation: presentationJson = $presentationJson")
 
 
-        return Data(base64 = Base64.plainStringToBase64String(presentationJson))
+        return RawData(base64 = Base64.plainStringToBase64String(presentationJson))
 
     }
 

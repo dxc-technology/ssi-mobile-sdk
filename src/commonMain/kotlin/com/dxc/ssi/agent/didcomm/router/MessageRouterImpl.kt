@@ -62,10 +62,8 @@ class MessageRouterImpl(
     //TODO: check connection in message context and throw exception if it is not null if it is expected to be non-null
     override suspend fun routeAndProcessMessage(messageContext: MessageContext) {
 
-
         val route = determineRoute(messageContext)
 
-        //TODO: think about concurrency here
         when (route) {
             //TODO: add route for forward message
             Route.DidExchange -> didExchangeProcessor.processMessage(messageContext)
@@ -73,7 +71,6 @@ class MessageRouterImpl(
             Route.CredVerifier -> credVerifierProcessor.processMessage(messageContext)
             Route.TrustPing -> trustPingProcessor.processMessage(messageContext)
         }
-
     }
 
     fun determineRoute(messageContext: MessageContext): Route {

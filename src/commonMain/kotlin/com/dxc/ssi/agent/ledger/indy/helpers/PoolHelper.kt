@@ -86,9 +86,10 @@ object PoolHelper {
 
     suspend fun openOrCreateFromIp(
         ipAddress: String,
-        dir: String
+        dir: String,
+        generatedGenesisFileName: String = "genesis.txn"
     ): Pool {
-        val genesysGenerator = GenesisGenerator(ipAddress,dir)
+        val genesysGenerator = GenesisGenerator(ipAddress,dir,generatedGenesisFileName)
         val filename = genesysGenerator.initGenesisFile()
 
         return openOrCreateFromFilename(filename)
