@@ -221,10 +221,13 @@ requestLegacyExternalStorage="true"  as below.
 
 <manifest>
     ...
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        android:minSdkVersion="30" />
     <application
     ...
     android:usesCleartextTraffic="true"
@@ -290,6 +293,18 @@ val verifierInvitationUrl =
 ssiAgentApi.connect(issuerInvitationUrl)
 ssiAgentApi.connect(verifierInvitationUrl)
 ```
+
+## Supported android devices APIs 24, 25, 26, 27, 28, 29, 30:
+
+<img src="docs/android/Devices.png" alt="docs/android/Devices" style="zoom:50%;" />
+
+## Setup permissions <= API 28 - just approve permissions on the phone
+
+<img src="docs/android/Connect.png" alt="docs/android/Connect" style="zoom:50%;" />
+
+## Setup permissions for API 30 - just approve permissions on the phone
+
+<img src="docs/android/Allow_all_files.png" alt="docs/android/Allow_all_files" style="zoom:30%;" />
 
 # iOS usage
 

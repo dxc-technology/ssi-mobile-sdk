@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
     s.homepage     = "https://kotlinlang.org/docs/multiplatform.html"
     s.license      = "All the original code is licensed under the Apache 2.0 License."
     s.author       = { "Krzysztof Kamyczek" => "krzysztof.kamyczek@dxc.com" }
-    s.source       = { :http => "https://github.com/kkamyczek/ssi-mobile-sdk/releases/download/v1.0/ssi_agent.xcframework.zip"}
+    s.source       = { :http => "https://github.com/Lumedic/ssi-mobile-sdk/releases/download/0.0.1/dxc-ssi-agent-ios-0.0.1.zip"}
     s.vendored_frameworks = "ssi_agent.xcframework"
     s.platform = :ios
     s.swift_version = "4.2"
