@@ -1,0 +1,5 @@
+package = com.indylib
+headers = indy_core.h
+depends = Foundation
+linkerOpts =-framework Security
+staticLibraries = libindy.a liblibzmq-pw.a libssl.a libcrypto.a liblibsodium.a

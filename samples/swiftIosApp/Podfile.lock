@@ -1,0 +1,26 @@
+PODS:
+  - libsodium (1.0.12)
+  - libzmq-pw (4.2.2)
+  - ssi_agent (0.0.1)
+
+DEPENDENCIES:
+  - libsodium (~> 1.0.12)
+  - libzmq-pw (= 4.2.2)
+  - ssi_agent (= 0.0.1)
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - libsodium
+  https://github.com/hyperledger/indy-sdk.git:
+    - libzmq-pw
+  https://github.com/kkamyczek/ssi-mobile-sdk.git:
+    - ssi_agent
+
+SPEC CHECKSUMS:
+  libsodium: 9a8faa5ef2fa0d2d57bd7f7d79bf8fb7c1a9f0ea
+  libzmq-pw: 493d316cf7f91117bce03df7588b3a7ff0f4a797
+  ssi_agent: 8764c846b27ade904b8b848e376927f97b820998
+
+PODFILE CHECKSUM: 05693605e21ac16812469c0848c84db39fdb70c5
+
+COCOAPODS: 1.10.1
