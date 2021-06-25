@@ -4,7 +4,6 @@ import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
-import com.dxc.ssi.agent.didcomm.processor.Processors
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
 import com.dxc.ssi.agent.didcomm.commoon.MessageSender
@@ -13,6 +12,9 @@ import com.dxc.ssi.agent.didcomm.constants.toProblemReportDescription
 import com.dxc.ssi.agent.didcomm.model.common.Service
 import com.dxc.ssi.agent.didcomm.model.didexchange.*
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
+import com.dxc.ssi.agent.didcomm.processor.Processors
+import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.model.ConnectionTransportState
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
 import com.dxc.ssi.agent.model.messages.Message
@@ -30,8 +32,10 @@ class ReceiveInvitationAction(
     val walletConnector: WalletConnector,
     val transport: Transport,
     val processors: Processors,
+    val services: Services,
     val connectionInitiatorController: ConnectionInitiatorController,
-    private val invitationUrl: String
+    private val invitationUrl: String,
+    private val keepConnectionAlive: Boolean
 ) : DidExchangeAction {
     override suspend fun perform(): ActionResult {
         // TODO: think to only form special message here and pass it to message processor
@@ -49,12 +53,12 @@ class ReceiveInvitationAction(
             invitation = this.invitationUrl,
             isSelfInitiated = true,
             peerRecipientKeys = invitation.recipientKeys,
-            endpoint = invitation.serviceEndpoint
-        )
+            endpoint = invitation.serviceEndpoint,
+            keepTransportAlive = keepConnectionAlive,
+            transportState = ConnectionTransportState.INITIALIZATION)
 
 
         //TODO: before storing record check if there were record with the same invitation and reuse it
-        //TODO: think about not storing connection object at all untill callback result is received
         walletConnector.walletHolder.storeConnectionRecord(connection)
         val callbackResult = connectionInitiatorController.onInvitationReceived(connection, invitation)
 
@@ -67,7 +71,7 @@ class ReceiveInvitationAction(
             println("Connection request: $connectionRequestJson")
 
             MessageSender.packAndSendMessage(
-                Message(connectionRequestJson), connection, walletConnector, transport,
+                Message(connectionRequestJson), connection, walletConnector, transport, services,
                 onMessageSendingFailure = {
                     val problemReport = ProblemReport(
                         id = uuid4().toString(),

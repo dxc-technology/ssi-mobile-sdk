@@ -49,7 +49,7 @@ class SsiAgentApiImpl(
 
         services.connectionsTrackerService = ConnectionsTrackerService(
             walletConnector,
-            callbacks.connectionInitiatorController!!,
+            callbacks,
             messageListener.messageRouter.processors
         )
 
@@ -91,13 +91,38 @@ class SsiAgentApiImpl(
         }
     }
 
-    override fun connect(url: String): PeerConnection {
+    override fun connect(url: String, keepConnectionAlive: Boolean): PeerConnection {
         println("Entered connect function")
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
                 println("Entered async connection initiation")
                 //TODO: fix NPE
-                messageListener.messageRouter.processors.didExchangeProcessor!!.initiateConnectionByInvitation(url)
+                messageListener.messageRouter.processors.didExchangeProcessor!!.initiateConnectionByInvitation(
+                    url,
+                    keepConnectionAlive
+                )
+            })
+    }
+
+    override fun reconnect(connection: PeerConnection, keepConnectionAlive: Boolean) {
+
+
+        CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                println("Entered async keepAlive connection status change")
+                //TODO: think about avoiding NPE
+                services.connectionsTrackerService!!.reconnect(connection, keepConnectionAlive)
+
+            })
+    }
+
+    override fun keepConnectionAlive(connection: PeerConnection, keepConnectionAlive: Boolean) {
+        CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                println("Entered async keepAlive connection status change")
+                //TODO: think about avoiding NPE
+                services.connectionsTrackerService!!.keepConnectionAlive(connection, keepConnectionAlive)
+
             })
     }
 
@@ -135,6 +160,13 @@ class SsiAgentApiImpl(
         services.connectionsTrackerService!!.shutdown()
         transport.shutdown()
         println("Stopped the agent")
+    }
+
+    override fun getConnection(connectionId: String): PeerConnection? {
+        return CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                walletConnector.walletHolder.getConnectionRecordById(connectionId)
+            })
     }
 
     override fun getConnections(connectionState: PeerConnectionState?): Set<PeerConnection> {

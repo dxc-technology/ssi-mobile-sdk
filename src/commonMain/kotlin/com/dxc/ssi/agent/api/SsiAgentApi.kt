@@ -7,7 +7,9 @@ import com.dxc.ssi.agent.model.PeerConnectionState
 
 interface SsiAgentApi {
     fun init()
-    fun connect(url: String): PeerConnection
+    fun connect(url: String, keepConnectionAlive: Boolean = false): PeerConnection
+    fun reconnect(connection: PeerConnection, keepConnectionAlive: Boolean = false)
+    fun keepConnectionAlive(connection:PeerConnection, keepConnectionAlive: Boolean = true)
 
     //TODO: add timeout and sync/async modifier
     fun sendTrustPing(connection: PeerConnection): Boolean
@@ -20,6 +22,7 @@ interface SsiAgentApi {
     fun getLedgerConnector(): LedgerConnector
     fun getWalletConnector(): WalletConnector
     fun shutdown(force: Boolean)
+    fun getConnection(connectionId: String): PeerConnection?
     fun getConnections(connectionState: PeerConnectionState? = PeerConnectionState.COMPLETED): Set<PeerConnection>
     fun abandonConnection(connection: PeerConnection, force: Boolean = true, notifyPeerBeforeAbandoning: Boolean = true)
     fun abandonAllConnections(force: Boolean = true, notifyPeerBeforeAbandoning: Boolean = true)

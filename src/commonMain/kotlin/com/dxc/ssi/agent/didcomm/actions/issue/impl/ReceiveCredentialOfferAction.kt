@@ -27,6 +27,7 @@ class ReceiveCredentialOfferAction(
         val walletConnector = actionParams.walletConnector
         val ledgerConnector = actionParams.ledgerConnector
         val transport = actionParams.transport
+        val services = actionParams.services
         //TODO: here and in all related places instead of NPE print relevant log message
         val credReceiverController = actionParams.callbacks.credReceiverController!!
         val credentialOfferContainerMessage =
@@ -93,6 +94,7 @@ class ReceiveCredentialOfferAction(
                 connection,
                 walletConnector,
                 transport,
+                services,
                 onMessageSent = {
                     walletConnector.prover.storeCredentialExchangeRecord(
                         CredentialExchangeRecord(
@@ -121,11 +123,6 @@ class ReceiveCredentialOfferAction(
 
                     //TODO: make this callback async
                     credReceiverController.onProblemReport(connection, problemReport)
-                    actionParams.processors.abandonConnectionProcessor!!.abandonConnection(
-                        connection,
-                        false,
-                        problemReport
-                    )
                     null
                 }
             )

@@ -4,10 +4,12 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.Environment
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.SsiAgentBuilder
+import com.dxc.ssi.agent.api.callbacks.connection.StatefulConnectionController
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionResponderController
 import com.dxc.ssi.agent.api.callbacks.issue.CredIssuerController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.trustping.TrustPingController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.callbacks.verification.CredVerifierController
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
@@ -29,6 +31,8 @@ class SsiAgentBuilderImpl(private val walletConnector: WalletConnector) : SsiAge
     private var credIssuerController: CredIssuerController? = null
     private var credPresenterController: CredPresenterController? = null
     private var credVerifierController: CredVerifierController? = null
+    private var statefulConnectionController: StatefulConnectionController? = null
+    private var trustPingController: TrustPingController? = null
 
     override fun build(): SsiAgentApi {
 
@@ -46,7 +50,9 @@ class SsiAgentBuilderImpl(private val walletConnector: WalletConnector) : SsiAge
             credReceiverController,
             credIssuerController,
             credPresenterController,
-            credVerifierController
+            credVerifierController,
+            statefulConnectionController,
+            trustPingController
         )
 
         return SsiAgentApiImpl(
@@ -95,6 +101,16 @@ class SsiAgentBuilderImpl(private val walletConnector: WalletConnector) : SsiAge
 
     override fun withCredVerifierController(credVerifierController: CredVerifierController): SsiAgentBuilder {
         this.credVerifierController = credVerifierController
+        return this
+    }
+
+    override fun withStatefulConnectionController(statefulConnectionController: StatefulConnectionController): SsiAgentBuilder {
+        this.statefulConnectionController = statefulConnectionController
+        return this
+    }
+
+    override fun withTrustPingController(trustPingController: TrustPingController): SsiAgentBuilder {
+        this.trustPingController = trustPingController
         return this
     }
 

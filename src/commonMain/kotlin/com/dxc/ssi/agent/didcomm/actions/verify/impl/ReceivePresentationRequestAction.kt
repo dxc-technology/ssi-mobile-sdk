@@ -29,6 +29,7 @@ class ReceivePresentationRequestAction(
         val walletConnector = actionParams.walletConnector
         val ledgerConnector = actionParams.ledgerConnector
         val transport = actionParams.transport
+        val services = actionParams.services
 
         val presentationRequestMessage = Json {
             ignoreUnknownKeys = true
@@ -68,6 +69,7 @@ class ReceivePresentationRequestAction(
                     connection,
                     walletConnector,
                     transport,
+                    services,
                     onMessageSent = {
                         credPresenterController.onDone(connection)
                         null
@@ -80,11 +82,6 @@ class ReceivePresentationRequestAction(
 
                         //TODO: make this callback async
                         credPresenterController.onProblemReportGenerated(connection, problemReport)
-                        actionParams.processors.abandonConnectionProcessor!!.abandonConnection(
-                            connection,
-                            false,
-                            problemReport
-                        )
                         null
                     }
                 )
@@ -103,13 +100,7 @@ class ReceivePresentationRequestAction(
                     connection,
                     walletConnector,
                     transport,
-                    onMessageSendingFailure = {
-                        actionParams.processors.abandonConnectionProcessor!!.abandonConnection(
-                            connection,
-                            false
-                        )
-                        null
-                    }
+                    services
                 )
 
                 //TODO: Here and everywhere catch all exceptions coming from user callbacks
@@ -128,13 +119,7 @@ class ReceivePresentationRequestAction(
                     connection,
                     walletConnector,
                     transport,
-                    onMessageSendingFailure = {
-                        actionParams.processors.abandonConnectionProcessor!!.abandonConnection(
-                            connection,
-                            false
-                        )
-                        null
-                    }
+                    services
                 )
 
                 credPresenterController.onProblemReportGenerated(connection, problemReport)
@@ -155,13 +140,7 @@ class ReceivePresentationRequestAction(
                 connection,
                 walletConnector,
                 transport,
-                onMessageSendingFailure = {
-                    actionParams.processors.abandonConnectionProcessor!!.abandonConnection(
-                        connection,
-                        false
-                    )
-                    null
-                }
+                services
             )
 
 

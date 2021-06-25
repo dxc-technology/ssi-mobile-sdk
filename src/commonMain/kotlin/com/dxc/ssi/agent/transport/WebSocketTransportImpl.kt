@@ -33,6 +33,7 @@ class WebSocketTransportImpl : Transport {
         while (true) {
             try {
                 val appSocket = appSocketThreadSafeProvider.provideAppSocket(connection.endpoint.toString())
+                //TODO: check with Ilya if we need TrustPing explicitly after reconnect or any message would do?
                 appSocket.send(message.payload)
                 break
             } catch (t: Throwable) {

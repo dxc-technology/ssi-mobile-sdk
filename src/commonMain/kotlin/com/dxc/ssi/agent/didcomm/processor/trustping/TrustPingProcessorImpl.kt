@@ -37,7 +37,7 @@ class TrustPingProcessorImpl(
 
     override suspend fun sendTrustPingOverConnection(connection: PeerConnection): Boolean {
         val sendTrustPingAction =
-            SendTrustPingAction(walletConnector, transport, services, processors, connection)
+            SendTrustPingAction(walletConnector, transport, services, processors, callbacks, connection)
         val actionResult = sendTrustPingAction.perform()
 
         return actionResult.trustPingSuccessful!!

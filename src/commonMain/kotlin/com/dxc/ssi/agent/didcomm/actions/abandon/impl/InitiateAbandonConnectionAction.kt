@@ -22,7 +22,7 @@ import kotlinx.serialization.json.Json
 class InitiateAbandonConnectionAction(
     val walletConnector: WalletConnector,
     val transport: Transport,
-    services: Services,
+    val services: Services,
     val callbacks: Callbacks,
     val connection: PeerConnection,
     val notifyPeerBeforeAbandoning: Boolean,
@@ -46,6 +46,7 @@ class InitiateAbandonConnectionAction(
                         connection,
                         walletConnector,
                         transport,
+                        services,
                         onMessageSendingFailure = {
                             println("Warning: we could not notify remote peer that we are abandoning connection. Abandoning without notification")
                             null

@@ -35,7 +35,7 @@ class SsiAgentApiImplTest {
     private lateinit var ssiAgentApi: SsiAgentApi
 
     @Test
-    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
+    //@Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
         println("Starting test")
@@ -48,7 +48,7 @@ class SsiAgentApiImplTest {
             walletManager.createWallet(walletName, walletPassword)
 
         if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
-            val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
+            val didResult = walletManager.createDid(didConfig = DidConfig(did = did),walletName = walletName, walletPassword = walletPassword)
             print("Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}")
             //Store did somewhere in your application to use it afterwards
         }
@@ -72,11 +72,11 @@ class SsiAgentApiImplTest {
 
 
         val invitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiMkQ2TjluTFVaVXhpWWRkalZUYVlCRTNHR0JEU1VHUlRmcXhSdVg3RjU3SGciXSwicmVjaXBpZW50S2V5cyI6WyJENXpCWVZqWmh4QWZ4dXFDMUdGanU1ZEJ6blo4TlczOGFDTUJvZGdLd0h0dyJdLCJAaWQiOiI4YmM5ZGE3ZC04NWNmLTQ1YzctOWQ5Ny01YjJjOGMxNDMwNWIiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiMkQ2TjluTFVaVXhpWWRkalZUYVlCRTNHR0JEU1VHUlRmcXhSdVg3RjU3SGciXSwicmVjaXBpZW50S2V5cyI6WyJFa2VTOFBVVWJCbkIzTGE4dTlqUTg1WWdqdjNWV3NVSG1td1hkTDdEM0F0VCJdLCJAaWQiOiIyY2M5NGQyZi02ZTgxLTQxMTUtYWVlNy0xNjlkOGIyZjUxYTQiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
 
         println("Connecting to issuer")
-        val connection = ssiAgentApi.connect(invitationUrl)
+        val connection = ssiAgentApi.connect(invitationUrl, keepConnectionAlive = true)
         println("Connected to issuer")
 
         Sleeper().sleep(10000)

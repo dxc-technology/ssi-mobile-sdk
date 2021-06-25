@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.didcomm.actions.trustping
 
 import com.benasher44.uuid.uuid4
+import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.processor.Processors
@@ -22,6 +23,7 @@ class SendTrustPingAction(
     val transport: Transport,
     val services: Services,
     val processors: Processors,
+    val callbacks: Callbacks,
     private val connection: PeerConnection
 ) {
 
@@ -44,8 +46,10 @@ class SendTrustPingAction(
             connection,
             walletConnector,
             transport,
+            services,
             onMessageSent = {
                 services.connectionsTrackerService!!.trustPingSentOverConnectionEvent(connection)
+                callbacks.trustPingController?.onTrustPingSent(connection)
                 //TODO: instead of true, set some other status, like trustPing is sent, and we do not know the result yet
                 Result.Success(ActionResult(trustPingSuccessful = true))
 
@@ -55,7 +59,6 @@ class SendTrustPingAction(
                     id = uuid4().toString(),
                     description = DidCommProblemCodes.COULD_NOT_DELIVER_MESSAGE.toProblemReportDescription()
                 )
-                processors.abandonConnectionProcessor!!.abandonConnection(connection, false, problemReport)
                 Result.Success(ActionResult(trustPingSuccessful = false))
             }
         )

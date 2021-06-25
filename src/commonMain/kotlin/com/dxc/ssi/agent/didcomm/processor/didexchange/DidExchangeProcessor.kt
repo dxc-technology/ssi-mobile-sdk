@@ -8,7 +8,7 @@ import com.dxc.ssi.agent.model.messages.MessageContext
 
 interface DidExchangeProcessor {
     //TODO: think about special data structure Invitation instead of String
-    suspend fun initiateConnectionByInvitation(invitation: String): PeerConnection
+    suspend fun initiateConnectionByInvitation(invitation: String, keepConnectionAlive: Boolean): PeerConnection
     suspend fun processMessage(messageContext: MessageContext)
 
 

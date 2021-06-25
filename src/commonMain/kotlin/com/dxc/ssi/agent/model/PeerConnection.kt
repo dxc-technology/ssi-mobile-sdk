@@ -20,7 +20,9 @@ data class PeerConnection(
     val peerVerkey: String? = null,
     val peerDid: String? = null,
     @Serializable(with = UrlSerializer::class)
-    val endpoint: Url
+    val endpoint: Url,
+    val keepTransportAlive: Boolean,
+    val transportState: ConnectionTransportState
 ) {
     fun toJson(): String = Json.encodeToString(this)
 
