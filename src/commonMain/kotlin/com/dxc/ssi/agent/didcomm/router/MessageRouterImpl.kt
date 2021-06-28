@@ -104,7 +104,7 @@ class MessageRouterImpl(
             typeAttribute.contains("/connections/1") -> Route.DidExchange
             typeAttribute.contains("/present-proof/1") -> Route.CredVerifier
             typeAttribute.contains("/trust_ping/1") -> Route.TrustPing
-            typeAttribute.contains("abandon_connection/1.0") -> Route.AbandonConnection
+            typeAttribute.contains("/abandon_connection/1.0") -> Route.AbandonConnection
             else -> throw IllegalArgumentException("Unknown message type: $typeAttribute")
         }
 

@@ -39,7 +39,7 @@ class WebSocketTransportImpl : Transport {
             } catch (t: Throwable) {
                 //TODO: check somewhere if connection already abandoned, do not retry
                 numberOfRetries++
-
+                appSocketThreadSafeProvider.disconnectAndDropAppSocket(connection.endpoint.toString())
                 println("Error happened while sending message")
                 if (numberOfRetries == maxNumberOfRetries) {
                     println("Retry limit exceeded. Won't try")
