@@ -126,6 +126,15 @@ class SsiAgentApiImpl(
             })
     }
 
+    override fun disconnect(connection: PeerConnection) {
+        CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                println("Entered async disconnect")
+                transport.disconnect(connection)
+
+            })
+    }
+
     //TODO: current function is synchronous with hardcoded timeout, generalize it
     override fun sendTrustPing(connection: PeerConnection): Boolean {
         return CoroutineHelper.waitForCompletion(

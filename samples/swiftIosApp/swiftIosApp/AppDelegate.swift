@@ -12,7 +12,7 @@ import ssi_agent
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    let myWalletName = "newWalletName4"
+    let myWalletName = "newWalletName5"
     let myWalletPassword = "newWalletPassword"
     let myDid = "4PCVFCeZbKXyvgjCedbXDx"
 
@@ -70,13 +70,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                ssiAgentApi.doInit()
 
 
-       let connection = ssiAgentApi.connect(url: "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiMkQ2TjluTFVaVXhpWWRkalZUYVlCRTNHR0JEU1VHUlRmcXhSdVg3RjU3SGciXSwicmVjaXBpZW50S2V5cyI6WyJGWXJQcEVpVGtGWEFrb1lYMmVLU3djM0Nrb1g5WUdxcVpDajhINjcxMkF6RyJdLCJAaWQiOiIzY2M0N2I0NS1kYjlhLTQzOGItYTMzMS01ZTQ1NWU1MWVjMTkiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0=")
+       let connection = ssiAgentApi.connect(url: "ws://192.168.0.117:8080/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo4MDgwL3dzIiwicm91dGluZ0tleXMiOlsiQmg4dTRqRzFheVQ1UGtEQTc3R3dRclpMN3pWS1U1SkM0andzV0FKaWFhdWYiXSwicmVjaXBpZW50S2V5cyI6WyJBYXFxeFVFNUphalNEU1VMSmdxaXdNdk1xVERkaTdhemZpVVNGcm9YaUFxVCJdLCJAaWQiOiJlZGQ5NzlhOC02YjI5LTRjNGQtYWVjOS0zOTUxODg2M2Y5MGMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0=", keepConnectionAlive: true)
 
       
         
         
 
-        sleep(180)
+        sleep(300)
         ssiAgentApi.abandonConnection(connection: connection, force: true, notifyPeerBeforeAbandoning : false)
         ssiAgentApi.shutdown(force: true)
         // Override point for customization after application launch.

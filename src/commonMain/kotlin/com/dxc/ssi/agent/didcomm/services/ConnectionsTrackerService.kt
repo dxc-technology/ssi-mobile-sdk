@@ -1,12 +1,14 @@
 package com.dxc.ssi.agent.didcomm.services
 
 import co.touchlab.stately.collections.IsoMutableMap
+import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.processor.Processors
 import com.dxc.ssi.agent.model.ConnectionTransportState
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
+import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.utils.System
 import kotlinx.coroutines.*
 
@@ -20,7 +22,13 @@ class ConnectionsTrackerService(
     private var job = Job()
     private val serviceScope = CoroutineScope(Dispatchers.Default + job)
 
-    private var isShutdown = false
+    private var isShutdown
+        get() = isoIsShutdown.access { it.obj }!!
+        set(value) {
+            isoIsShutdown.access { it.obj = value }
+        }
+
+    private val isoIsShutdown = IsolateState { ObjectHolder(false) }
 
     private val maxTimeoutForTrustPingResponseMs = 120_000L
     private val sendTrustPingIntervalMs = 60_000L

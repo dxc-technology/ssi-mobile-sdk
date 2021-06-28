@@ -11,6 +11,7 @@ interface SsiAgentApi {
     fun connect(url: String, keepConnectionAlive: Boolean = false): PeerConnection
     fun reconnect(connection: PeerConnection, keepConnectionAlive: Boolean = false)
     fun keepConnectionAlive(connection:PeerConnection, keepConnectionAlive: Boolean = true)
+    fun disconnect(connection:PeerConnection)
 
     //TODO: add timeout and sync/async modifier
     fun sendTrustPing(connection: PeerConnection): Boolean
