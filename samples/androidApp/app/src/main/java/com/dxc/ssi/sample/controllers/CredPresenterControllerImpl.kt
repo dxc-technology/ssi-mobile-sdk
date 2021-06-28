@@ -18,11 +18,8 @@ class CredPresenterControllerImpl : CredPresenterController {
         return CallbackResult(true)
     }
 
-    override fun onProblemReportGenerated(
-        connection: PeerConnection,
-        problemReport: ProblemReport
-    ) {
-        TODO("Not yet implemented")
+    override fun onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
+
     }
 
 }

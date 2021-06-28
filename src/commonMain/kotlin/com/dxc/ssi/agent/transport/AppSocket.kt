@@ -8,14 +8,15 @@ import com.dxc.utils.System
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 
-//Common
-
 class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
     private val ws = PlatformSocket(url)
     private val job: CompletableJob = Job()
 
-    var socketError: Throwable? = null
-        private set
+    var socketError: Throwable?
+        get() = isoSocketError.access { it.obj }!!
+        private set(value) {
+            isoSocketError.access { it.obj = value }
+        }
 
     var currentState: State
         get() = isoCurrentState.access { it.obj }!!
@@ -23,19 +24,26 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
             isoCurrentState.access { it.obj = value }
         }
     private val isoCurrentState = IsolateState { ObjectHolder(State.CLOSED) }
+    private val isoSocketError = IsolateState { ObjectHolder<Throwable?>(null) }
 
     private val socketListener: PlatformSocketListener = object : PlatformSocketListener {
         override fun onOpen() {
 
             currentState = State.CONNECTED
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketOpenedChannel.send(Unit) })
-            println("${System.getCurrentThread()} - Opened socket")
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                socketOpenedChannel.send(SocketOpenedMessage())
+            })
+            println("PlatformSocketListener: ${System.getCurrentThread()} - Opened socket")
         }
 
         override fun onFailure(t: Throwable) {
             socketError = t
             currentState = State.CLOSED
-            println("Socket failure: $t \n ${t.stackTraceToString()}")
+            println("PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}")
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                socketOpenedChannel.send(SocketFailureMessage())
+            })
+
         }
 
         override fun onMessage(msg: String) {
@@ -48,18 +56,20 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
 
         override fun onClosing(code: Int, reason: String) {
             currentState = State.CLOSING
-            println("Closing socket: code = $code, reason = $reason")
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketClosingChannel.send(Unit) })
+            println("PlatformSocketListener: Closing socket: code = $code, reason = $reason")
         }
 
         override fun onClosed(code: Int, reason: String) {
             currentState = State.CLOSED
 
-            println("Closed socket: code = $code, reason = $reason")
+            println("PlatformSocketListener: Closed socket: code = $code, reason = $reason")
             job.complete()
         }
     }
 
-    val socketOpenedChannel: Channel<Unit> = Channel()
+    val socketOpenedChannel: Channel<AppSocketMessage> = Channel()
+    val socketClosingChannel: Channel<Unit> = Channel()
 
     suspend fun connect() {
         if (currentState != State.CLOSED) {
@@ -72,20 +82,27 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
         ws.openSocket(socketListener)
         println("Thread = ${System.getCurrentThread()} awaiting while websocket is opened")
 
-        socketOpenedChannel.receive()
-        println("After socketListener.onOpen")
+        when (socketOpenedChannel.receive()) {
+            is SocketOpenedMessage -> {
+                println("After socketListener.onOpen")
+                if (currentState != State.CONNECTED)
+                    throw IllegalStateException("Could not be opened")
+            }
+            is SocketFailureMessage -> {
+                //TODO: make the exception more meaningful allowing to differentiate between different types of errors
+                throw IllegalStateException("Could not be opened")
+            }
 
-        if (currentState != State.CONNECTED)
-            throw throw IllegalStateException("Could not be opened")
+        }
 
     }
 
-    //TODO: ensure to disconnect properly otherwise we will have leaking threads
-    fun disconnect() {
+    suspend fun disconnect() {
         if (currentState != State.CLOSED) {
             currentState = State.CLOSING
             ws.closeSocket(1000, "The user has closed the connection.")
-            job.complete()
+            //TODO: if we try to do it it hangs currently
+            //socketClosingChannel.receive()
         }
     }
 
@@ -102,4 +119,9 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
         CLOSING,
         CLOSED
     }
+
+    interface AppSocketMessage
+
+    class SocketOpenedMessage : AppSocketMessage
+    class SocketFailureMessage : AppSocketMessage
 }

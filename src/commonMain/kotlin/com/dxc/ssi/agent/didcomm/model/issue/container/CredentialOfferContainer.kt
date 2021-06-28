@@ -56,6 +56,7 @@ import kotlinx.serialization.Serializable
 //TODO: think about some model types instead of just strings
 @Serializable
 data class CredentialOfferContainer(
+    //TODO: set default value and validate it
     @SerialName("@type") val type: String,
     @SerialName("@id") val id: String,
     @SerialName("credential_preview") val credentialPreview: CredentialPreview,

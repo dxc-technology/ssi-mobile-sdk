@@ -3,9 +3,10 @@ package com.dxc.ssi.agent.wallet.indy
 import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
-import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.IdentityDetails
+import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PeerConnectionState
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.utils.JsonUtils.extractValue
 import com.dxc.ssi.agent.utils.ObjectHolder
@@ -54,7 +55,8 @@ open class IndyWalletHolder(
     override suspend fun storeConnectionRecord(connection: PeerConnection) {
         //TODO: check if we need to check wallet health status before using it
         val existingConnection = getConnectionRecordById(connection.id)
-        val tagsJson = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${connection.peerVerkey}\"}"
+        val tagsJson =
+            "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${connection.peerVerkey}\", \"${WalletRecordTag.ConnectionState.name}\": \"${connection.state.name}\"}"
 
         if (existingConnection == null) {
 
@@ -98,23 +100,8 @@ open class IndyWalletHolder(
 
     override suspend fun findConnectionByVerKey(verKey: String): PeerConnection? {
 
-
         val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"
-        val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
-
-        println("Searching connections using query: $query")
-
-        val search = WalletSearch()
-
-        val wallet = isoWallet.access { it.obj }
-        search.open(wallet!!, WalletRecordType.ConnectionRecord.name, query, options)
-        //TODO: make proper fetch in batches instead of just fetching 100 records
-        val foundRecordsJson = search.searchFetchNextRecords(wallet!!, 100)
-        search.closeSearch()
-
-        println("Fetched connections json = $foundRecordsJson")
-
-        val retrievedWalletRecords = Json {}.decodeFromString<RetrievedWalletRecords>(foundRecordsJson)
+        val retrievedWalletRecords = queryWalletRecords(query)
 
         if (retrievedWalletRecords.totalCount == null || retrievedWalletRecords.totalCount == 0)
             return null
@@ -126,6 +113,46 @@ open class IndyWalletHolder(
                 it.value
             }.map<String, PeerConnection> { Json.decodeFromString(it) }
             .firstOrNull()
+
+    }
+
+    override suspend fun getConnections(connectionState: PeerConnectionState?): Set<PeerConnection> {
+
+        val query = if (connectionState != null) {
+            "{\"${WalletRecordTag.ConnectionState.name}\": \"${connectionState!!.name}\"}"
+        } else {
+            ""
+        }
+
+        val retrievedWalletRecords = queryWalletRecords(query)
+
+        if (retrievedWalletRecords.totalCount == null || retrievedWalletRecords.totalCount == 0)
+            return emptySet()
+
+        return retrievedWalletRecords.records!!
+            .map {
+                println(it.value)
+                it.value
+            }.map<String, PeerConnection> { Json.decodeFromString(it) }.toSet()
+
+    }
+
+    private suspend fun queryWalletRecords(query: String): RetrievedWalletRecords {
+        println("Searching connections using query: $query")
+
+        val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
+
+        val search = WalletSearch()
+
+        val wallet = isoWallet.access { it.obj }
+        search.open(wallet!!, WalletRecordType.ConnectionRecord.name, query, options)
+        //TODO: make proper fetch in batches instead of just fetching 100 records
+        val foundRecordsJson = search.searchFetchNextRecords(wallet!!, 100)
+        search.closeSearch()
+
+        println("Fetched connections json = $foundRecordsJson")
+
+        return Json {}.decodeFromString(foundRecordsJson)
 
     }
 

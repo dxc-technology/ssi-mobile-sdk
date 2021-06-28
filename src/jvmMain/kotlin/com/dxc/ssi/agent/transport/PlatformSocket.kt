@@ -1,10 +1,7 @@
 package com.dxc.ssi.agent.transport
 
 
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import okhttp3.WebSocket
+import okhttp3.*
 
 internal actual class PlatformSocket actual constructor(url: String) {
     private val socketEndpoint = url
@@ -14,7 +11,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
         val webClient = OkHttpClient().newBuilder().build()
         webSocket = webClient.newWebSocket(
             socketRequest,
-            object : okhttp3.WebSocketListener() {
+            object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) = platformSocketListener.onOpen()
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) =
                     platformSocketListener.onFailure(t)
@@ -23,7 +20,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
                     platformSocketListener.onMessage(text)
 
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) =
-                    platformSocketListener.onClosed(code, reason)
+                    platformSocketListener.onClosing(code, reason)
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) =
                     platformSocketListener.onClosed(code, reason)
@@ -36,6 +33,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
     actual fun closeSocket(code: Int, reason: String) {
         webSocket?.close(code, reason)
         webSocket = null
+
     }
 
     actual fun sendMessage(msg: String) {

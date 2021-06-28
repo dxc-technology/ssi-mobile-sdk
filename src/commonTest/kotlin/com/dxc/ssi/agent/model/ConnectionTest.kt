@@ -11,11 +11,13 @@ class ConnectionTest {
 
         val connection = PeerConnection(
             id = "id",
-            state = "state",
-            invitation = "invitati",
+            state = PeerConnectionState.INVITATION_RECEIVED,
+            invitation = "invitation",
             isSelfInitiated = true,
             peerRecipientKeys = listOf("keys"),
-            endpoint = Url("ws:\\endpoint:111\\ws")
+            endpoint = Url("ws:\\endpoint:111\\ws"),
+            keepTransportAlive = true,
+            transportState = ConnectionTransportState.CONNECTED
         )
 
         val jsonString = connection.toJson()

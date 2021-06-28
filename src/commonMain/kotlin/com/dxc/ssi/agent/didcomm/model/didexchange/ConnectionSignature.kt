@@ -14,6 +14,7 @@ import kotlinx.serialization.Serializable
 //TODO: think about proper data structures to use instead of String
 @Serializable
 data class ConnectionSignature(
+    //TODO: set default type here
     @SerialName("@type") val type: String,
     val signature: String,
     @SerialName("sig_data") val signedData: String,

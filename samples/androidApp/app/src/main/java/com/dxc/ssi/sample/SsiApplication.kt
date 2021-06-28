@@ -20,7 +20,7 @@ import com.dxc.utils.EnvironmentUtils
 class SsiApplication : Application() {
 
     private var agentInitialized: Boolean = false
-    private val walletName = "newWalletName1"
+    private val walletName = "newWalletName2"
     private val walletPassword = "newWalletPassword"
     private val did = "Kg5Cq9vKv7QrLfTGUP9xbd"
 
@@ -53,7 +53,7 @@ class SsiApplication : Application() {
             walletManager.createWallet(walletName, walletPassword)
 
         if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
-            val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword, didConfig = DidConfig(did = did))
+            val didResult = walletManager.createDid(didConfig = DidConfig(did = did),walletName = walletName, walletPassword = walletPassword)
             println("Generated didResult: $didResult")
             //Store did somewhere in your application to use it afterwards
         }

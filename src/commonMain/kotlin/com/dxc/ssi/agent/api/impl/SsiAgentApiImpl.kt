@@ -1,7 +1,6 @@
 package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.Callbacks
-import com.dxc.ssi.agent.api.Environment
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
@@ -9,8 +8,10 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
+import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PeerConnectionState
 import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.utils.EnvironmentUtils
 import kotlinx.coroutines.*
@@ -36,16 +37,29 @@ class SsiAgentApiImpl(
         CoroutineHelper.singleThreadCoroutineContext("Main Listener Thread")
     private val trustPingListenerSingleThreadDispatcher =
         CoroutineHelper.singleThreadCoroutineContext("TrustPing Listener Thread")
-    private val trustPingTrackerService =
-        TrustPingTrackerService(walletConnector, callbacks.connectionInitiatorController!!)
+
+
+    private val services = Services()
 
     private val messageListener: MessageListener =
-        MessageListenerImpl(transport, walletConnector, ledgerConnector, trustPingTrackerService, callbacks)
+        MessageListenerImpl(transport, walletConnector, ledgerConnector, services, callbacks)
+
+
+    init {
+
+        services.connectionsTrackerService = ConnectionsTrackerService(
+            walletConnector,
+            callbacks,
+            messageListener.messageRouter.processors
+        )
+
+
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun init() {
 
-        if(!EnvironmentUtils.environmentInitizlized)
+        if (!EnvironmentUtils.environmentInitizlized)
             throw RuntimeException("Please initialize environment before initializing SsiAgentApiImpl")
 
 
@@ -72,29 +86,61 @@ class SsiAgentApiImpl(
 
         agentScope.launch {
             withContext(trustPingListenerSingleThreadDispatcher.context) {
-                trustPingTrackerService.track()
+                services.connectionsTrackerService!!.start()
             }
         }
     }
 
-    override fun connect(url: String): PeerConnection {
+    override fun connect(url: String, keepConnectionAlive: Boolean): PeerConnection {
         println("Entered connect function")
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
                 println("Entered async connection initiation")
-                messageListener.messageRouter.didExchangeProcessor.initiateConnectionByInvitation(url)
+                //TODO: fix NPE
+                messageListener.messageRouter.processors.didExchangeProcessor!!.initiateConnectionByInvitation(
+                    url,
+                    keepConnectionAlive
+                )
+            })
+    }
+
+    override fun reconnect(connection: PeerConnection, keepConnectionAlive: Boolean) {
+
+
+        CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                println("Entered async keepAlive connection status change")
+                //TODO: think about avoiding NPE
+                services.connectionsTrackerService!!.reconnect(connection, keepConnectionAlive)
+
+            })
+    }
+
+    override fun keepConnectionAlive(connection: PeerConnection, keepConnectionAlive: Boolean) {
+        CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                println("Entered async keepAlive connection status change")
+                //TODO: think about avoiding NPE
+                services.connectionsTrackerService!!.keepConnectionAlive(connection, keepConnectionAlive)
+
             })
     }
 
     override fun disconnect(connection: PeerConnection) {
-        TODO("Not yet implemented")
+        CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                println("Entered async disconnect")
+                transport.disconnect(connection)
+
+            })
     }
 
     //TODO: current function is synchronous with hardcoded timeout, generalize it
     override fun sendTrustPing(connection: PeerConnection): Boolean {
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
-                messageListener.messageRouter.trustPingProcessor.sendTrustPingOverConnection(connection)
+                //TODO: fix NPE
+                messageListener.messageRouter.processors.trustPingProcessor!!.sendTrustPingOverConnection(connection)
             })
     }
 
@@ -106,13 +152,10 @@ class SsiAgentApiImpl(
         TODO("Not yet implemented")
     }
 
-    override fun getLedgerConnector(): LedgerConnector {
-        TODO("Not yet implemented")
-    }
+    override fun getLedgerConnector(): LedgerConnector = ledgerConnector
+    override fun getWalletConnector(): WalletConnector = walletConnector
+    override fun getTransport(): Transport = transport
 
-    override fun getWalletConnector(): WalletConnector {
-        TODO("Not yet implemented")
-    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun shutdown(force: Boolean) {
@@ -120,19 +163,44 @@ class SsiAgentApiImpl(
         job.cancel()
         mainListenerSingleThreadDispatcher.closeContext()
         trustPingListenerSingleThreadDispatcher.closeContext()
+        services.connectionsTrackerService!!.shutdown()
         transport.shutdown()
         println("Stopped the agent")
     }
 
-    override fun getConnections(): Set<PeerConnection> {
-        TODO("Not yet implemented")
+    override fun getConnection(connectionId: String): PeerConnection? {
+        return CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                walletConnector.walletHolder.getConnectionRecordById(connectionId)
+            })
     }
 
-    override fun disconnect(connection: PeerConnection, force: Boolean) {
-        TODO("Not yet implemented")
+    override fun getConnections(connectionState: PeerConnectionState?): Set<PeerConnection> {
+        return CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                walletConnector.walletHolder.getConnections(connectionState)
+            })
     }
 
-    override fun disconnectAll(force: Boolean) {
+    override fun abandonConnection(connection: PeerConnection, force: Boolean, notifyPeerBeforeAbandoning: Boolean) {
+        CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                //TODO: fix NPE
+                messageListener.messageRouter.processors.abandonConnectionProcessor!!.abandonConnection(
+                    connection,
+                    notifyPeerBeforeAbandoning
+                )
+            })
+    }
+
+    override fun abandonAllConnections(force: Boolean, notifyPeerBeforeAbandoning: Boolean) {
+        getConnections().forEach { abandonConnection(it, force, notifyPeerBeforeAbandoning) }
+    }
+
+    override fun removeAbandonedConnectionsFromWallet() {
         TODO("Not yet implemented")
+        /*
+        * Currently when we disconnect a connection , we mark it as Abandoned in wallet. This function is to cleanup such connections
+        * */
     }
 }

@@ -2,6 +2,7 @@ package com.dxc.ssi.agent.didcomm.model.issue.container
 
 import com.dxc.ssi.agent.didcomm.model.common.Attach
 import com.dxc.ssi.agent.didcomm.model.common.Thread
+import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -27,7 +28,9 @@ import kotlinx.serialization.Serializable
 //TODO: think about some model types instead of just strings
 @Serializable
 data class CredentialRequestContainer(
-    @SerialName("@type") val type: String,
+    //TODO: create enum or other holder for message type, replace hardocde and move it inside of the message, as the template will suit only this particular request
+
+    @Required @SerialName("@type") val type: String = "https://didcomm.org/issue-credential/1.0/request-credential",
     @SerialName("@id") val id: String,
     @SerialName("~thread") val thread: Thread,
     @SerialName("requests~attach") val requestsAttach: List<Attach>,
