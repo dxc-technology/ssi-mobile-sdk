@@ -37,7 +37,7 @@ class SsiAgentApiImplTest {
     private lateinit var ssiAgentApi: SsiAgentApi
 
     @Test
-    //@Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
         println("Starting test")
