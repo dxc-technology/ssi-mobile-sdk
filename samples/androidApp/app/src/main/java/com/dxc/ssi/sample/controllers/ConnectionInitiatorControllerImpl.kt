@@ -16,7 +16,10 @@ class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         return CallbackResult(true)
     }
 
-    override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
+    override fun onResponseReceived(
+        connection: PeerConnection,
+        response: ConnectionResponse
+    ): CallbackResult {
         println("Response received hook called : $connection, $response")
         return CallbackResult(true)
     }
