@@ -10,7 +10,7 @@
     </appender>
 
     <root>
-        <level value="INFO"/>
+        <level value="TRACE"/>
         <appender-ref ref="console"/>
     </root>
 

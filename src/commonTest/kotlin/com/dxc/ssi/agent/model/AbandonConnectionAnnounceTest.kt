@@ -40,6 +40,8 @@ class AbandonConnectionAnnounceTest {
 
         println(abandonConnectionAnnounce2)
 
+        assertEquals("c17147d2-ada6-4d3c-a489-dc1e1bf778ab", abandonConnectionAnnounce2.id)
+
 
     }
 }
