@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.api
 
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
+import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
@@ -21,6 +22,7 @@ interface SsiAgentApi {
     fun requestProofOverConnection(connection: PeerConnection)
     fun getLedgerConnector(): LedgerConnector
     fun getWalletConnector(): WalletConnector
+    fun getTransport(): Transport
     fun shutdown(force: Boolean)
     fun getConnection(connectionId: String): PeerConnection?
     fun getConnections(connectionState: PeerConnectionState? = PeerConnectionState.COMPLETED): Set<PeerConnection>

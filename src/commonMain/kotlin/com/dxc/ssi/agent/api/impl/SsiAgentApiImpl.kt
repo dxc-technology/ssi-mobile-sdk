@@ -143,13 +143,10 @@ class SsiAgentApiImpl(
         TODO("Not yet implemented")
     }
 
-    override fun getLedgerConnector(): LedgerConnector {
-        return ledgerConnector
-    }
+    override fun getLedgerConnector(): LedgerConnector = ledgerConnector
+    override fun getWalletConnector(): WalletConnector = walletConnector
+    override fun getTransport(): Transport = transport
 
-    override fun getWalletConnector(): WalletConnector {
-        return walletConnector
-    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun shutdown(force: Boolean) {
