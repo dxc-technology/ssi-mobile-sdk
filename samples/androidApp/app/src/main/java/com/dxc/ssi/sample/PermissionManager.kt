@@ -15,7 +15,7 @@ import androidx.core.content.ContextCompat
 
 object PermissionManager {
 
-    @RequiresApi(Build.VERSION_CODES.Q)
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun hasAllFilesPermission() = Environment.isExternalStorageManager()
 
     val PERMISSION_REQUEST_CODE = 1
