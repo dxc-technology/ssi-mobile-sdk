@@ -227,6 +227,17 @@ dependencies {
     implementation("junit:junit:$junitVersion")
 }
 
+tasks.register<Exec>("PreparePods") {
+    workingDir("./libindy-pod")
+    commandLine("pod","setup")
+    commandLine("pod","install")
+}
+
+tasks.register<Copy>("CopyLibIndy") {
+    from(layout.buildDirectory.dir("$projectDir/libindy-pod/Pods/libindy/libindy.a"))
+    into(layout.buildDirectory.dir("$projectDir/indylib"))
+}
+
 tasks.register<Exec>("BuildSimulator") {
     commandLine("./gradlew", "build")
 }
