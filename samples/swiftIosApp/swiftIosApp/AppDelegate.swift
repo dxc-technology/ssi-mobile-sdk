@@ -11,13 +11,13 @@ import ssi_agent
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
+    var window : UIWindow?
     let myWalletName = "newWalletName5"
     let myWalletPassword = "newWalletPassword"
     let myDid = "4PCVFCeZbKXyvgjCedbXDx"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
+    
         let cic = ConnectionInitiatorControllerImpl()
         let crc = CredentialReceiverControllerImpl()
         let cpc = CredPresenterControllerImpl()
@@ -54,7 +54,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisFilePath: "./docker_pool_transactions_genesis.txt",
-            ipAddress: "192.168.0.117",
+            ipAddress: "192.168.0.104",
             genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
             generatedGenesysFileName: "genesis.txn",
             retryTimes: 5,
@@ -70,34 +70,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                ssiAgentApi.doInit()
 
 
-       let connection = ssiAgentApi.connect(url: "ws://192.168.0.117:8080/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo4MDgwL3dzIiwicm91dGluZ0tleXMiOlsiQmg4dTRqRzFheVQ1UGtEQTc3R3dRclpMN3pWS1U1SkM0andzV0FKaWFhdWYiXSwicmVjaXBpZW50S2V5cyI6WyJBYXFxeFVFNUphalNEU1VMSmdxaXdNdk1xVERkaTdhemZpVVNGcm9YaUFxVCJdLCJAaWQiOiJlZGQ5NzlhOC02YjI5LTRjNGQtYWVjOS0zOTUxODg2M2Y5MGMiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0=", keepConnectionAlive: true)
+       let connection = ssiAgentApi.connect(url: "ws://192.168.0.104:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMDQ6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIk5LcVVOdkM3UFJ1VURjdDViUlhzdDcyVEJCdnd3d1dkSHNmUFkzVldDOE0iXSwicmVjaXBpZW50S2V5cyI6WyI4OUFaRnZZZlBSWEYxMVBjblJoRTVEblVTTHh0V2Vjcm0xMzFBSGlMWkpSeiJdLCJAaWQiOiJlYTZkYTY2MS04MzU5LTRhOGItYmRiOC00ZWMzMTdiN2JhNTAiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0=", keepConnectionAlive: true)
 
       
-        
-        
-
         sleep(300)
         ssiAgentApi.abandonConnection(connection: connection, force: true, notifyPeerBeforeAbandoning : false)
         ssiAgentApi.shutdown(force: true)
         // Override point for customization after application launch.
-        return true
+    
+                    if #available(iOS 13, *) {
+                        // do only pure app launch stuff, not interface stuff
+                    } else {
+                        self.window = UIWindow()
+                        let vc = ViewController()
+                        self.window!.rootViewController = vc
+                        self.window!.makeKeyAndVisible()
+                        self.window!.backgroundColor = .red
+                    }
+                    return true
+                        
     }
-
-    // MARK: UISceneSession Lifecycle
-
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-    }
-
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
-    }
-
-
+     
 }
 
 class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
