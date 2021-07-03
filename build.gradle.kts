@@ -93,7 +93,7 @@ kotlin {
 
         summary = "Kotlin sample project with CocoaPods dependencies"
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
-        ios.deploymentTarget = "6.0"
+        ios.deploymentTarget = "12.2"
         osx.deploymentTarget = "10.8"
         tvos.deploymentTarget = "9.0"
         frameworkName = "ssi_agent"
