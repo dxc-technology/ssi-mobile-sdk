@@ -59,6 +59,11 @@ kotlin {
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
+                val socketlib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
+                    extraOpts("-libraryPath", "$projectDir/socketlib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
+                }
             }
         }
     } else {
@@ -70,14 +75,27 @@ kotlin {
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
+                val socketlib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
+                    extraOpts("-libraryPath", "$projectDir/socketlib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
+                }
             }
         }
     }
 
     cocoapods {
+        pod("PocketSocket") {
+            source = git("https://github.com/zwopple/PocketSocket") {
+                tag = "1.0.1"
+            }
+        }
+
         summary = "Kotlin sample project with CocoaPods dependencies"
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
-        ios.deploymentTarget = "10.2"
+        ios.deploymentTarget = "12.2"
+        osx.deploymentTarget = "10.8"
+        tvos.deploymentTarget = "9.0"
         frameworkName = "ssi_agent"
         podfile = project.file("./samples/swiftIosApp/Podfile")
     }

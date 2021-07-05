@@ -9,6 +9,7 @@ import SwiftUI
 
 //@main
 struct swiftIosAppApp: App {
+    @available(iOS 14.0, *)
     var body: some Scene {
         WindowGroup {
             ContentView()
