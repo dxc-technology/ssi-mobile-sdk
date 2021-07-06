@@ -54,7 +54,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisFilePath: "./docker_pool_transactions_genesis.txt",
-            ipAddress: "192.168.0.104",
+            ipAddress: "20.36.7.68",
             genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
             generatedGenesysFileName: "genesis.txn",
             retryTimes: 5,
@@ -70,7 +70,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                ssiAgentApi.doInit()
 
 
-       let connection = ssiAgentApi.connect(url: "ws://192.168.0.104:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMDQ6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIk5LcVVOdkM3UFJ1VURjdDViUlhzdDcyVEJCdnd3d1dkSHNmUFkzVldDOE0iXSwicmVjaXBpZW50S2V5cyI6WyI4OUFaRnZZZlBSWEYxMVBjblJoRTVEblVTTHh0V2Vjcm0xMzFBSGlMWkpSeiJdLCJAaWQiOiJlYTZkYTY2MS04MzU5LTRhOGItYmRiOC00ZWMzMTdiN2JhNTAiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0=", keepConnectionAlive: true)
+       let connection = ssiAgentApi.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIkhhcVVEM1Y0OEx5eGJmWWJxWE5XZ0hVdTdVS0paRmNvNmJyMjJDSEZ3dTZIIl0sInJlY2lwaWVudEtleXMiOlsiSDd4WnNoZjZhNGFEcGtNV3pZNUdDNkR2NjN1NHhLeXZWbWVpeGFVUEhkZHMiXSwiQGlkIjoiYzIwOTY3Y2QtZmIzYi00OTI2LWFlZDctZGQ5Mjc5ZTU0ZGZiIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
 
       
         sleep(300)
