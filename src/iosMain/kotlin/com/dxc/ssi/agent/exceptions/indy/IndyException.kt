@@ -48,7 +48,6 @@ actual open class IndyException(override val message:String, val sdkErrorCode: I
                 ErrorCode.AnoncredsMasterSecretDuplicateNameError -> DuplicateMasterSecretNameException()
                 /*
                 TODO: implement those exceptions when we need them
-                ErrorCode.CommonInvalidState -> InvalidStateException()
                 ErrorCode.CommonInvalidStructure -> InvalidStructureException()
                 ErrorCode.CommonIOError -> IOException()
                 ErrorCode.WalletInvalidHandle -> InvalidWalletException()
@@ -56,6 +55,8 @@ actual open class IndyException(override val message:String, val sdkErrorCode: I
                 ErrorCode.WalletTypeAlreadyRegisteredError -> DuplicateWalletTypeException()
                 */
                 ErrorCode.WalletAlreadyExistsError -> WalletExistsException()
+                ErrorCode.PoolLedgerTimeout -> PoolLedgerTimeoutException()
+                ErrorCode.CommonInvalidState -> InvalidStateException()
                 /*
                 ErrorCode.WalletNotFoundError -> WalletNotFoundException()
                 ErrorCode.WalletInputError -> WalletInputException()
