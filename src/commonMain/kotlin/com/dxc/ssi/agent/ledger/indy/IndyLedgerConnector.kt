@@ -34,6 +34,7 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
 
     override suspend fun init() {
         //TODO: think where to store and initialize pool variable
+        try {
         val pool =
             if (indyLedgerConnectorConfiguration.genesisMode == IndyLedgerConnectorConfiguration.GenesisMode.FILE) {
                 PoolHelper.openOrCreateFromFilename(indyLedgerConnectorConfiguration.genesisFilePath)
@@ -44,8 +45,10 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
                     indyLedgerConnectorConfiguration.generatedGenesysFileName
                 )
             }
-
         isoPool.access { it.obj = pool }
+        } catch (e: Exception) {
+            println("An issue occurred: $e")
+        }
     }
 
 

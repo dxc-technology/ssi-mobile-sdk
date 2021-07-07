@@ -13,14 +13,16 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class PeerConnection(
     val id: String,
-    val state: String,
+    val state: PeerConnectionState,
     val invitation: String,
     val isSelfInitiated: Boolean,
     val peerRecipientKeys: List<String>,
     val peerVerkey: String? = null,
     val peerDid: String? = null,
     @Serializable(with = UrlSerializer::class)
-    val endpoint: Url
+    val endpoint: Url,
+    val keepTransportAlive: Boolean,
+    val transportState: ConnectionTransportState
 ) {
     fun toJson(): String = Json.encodeToString(this)
 

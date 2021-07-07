@@ -29,6 +29,7 @@ class ReceivePresentationRequestAction(
         val walletConnector = actionParams.walletConnector
         val ledgerConnector = actionParams.ledgerConnector
         val transport = actionParams.transport
+        val services = actionParams.services
 
         val presentationRequestMessage = Json {
             ignoreUnknownKeys = true
@@ -48,8 +49,6 @@ class ReceivePresentationRequestAction(
                 val presentationData = walletConnector.prover!!.createPresentation(presentationRequest, ledgerConnector)
 
                 val presentation = PresentationContainer(
-                    //TODO: create enum or other holder for message type, replace hardocde and move it inside of the message, as the template will suit only this particular request
-                    type = "https://didcomm.org/present-proof/1.0/presentation",
                     //TODO: set proper id
                     id = uuid4().toString(),
                     thread = Thread(thid = presentationRequestMessage.id),
@@ -69,9 +68,25 @@ class ReceivePresentationRequestAction(
                     Message(Json.encodeToString(presentation)),
                     connection,
                     walletConnector,
-                    transport
+                    transport,
+                    services,
+                    onMessageSent = {
+                        credPresenterController.onDone(connection)
+                        null
+                    },
+                    onMessageSendingFailure = {
+                        val problemReport = ProblemReport(
+                            id = uuid4().toString(),
+                            description = DidCommProblemCodes.COULD_NOT_SEND_PRESENTATION.toProblemReportDescription()
+                        )
+
+                        //TODO: make this callback async
+                        credPresenterController.onProblemReportGenerated(connection, problemReport)
+                        null
+                    }
                 )
-                credPresenterController.onDone(connection)
+
+
             } catch (e: NoCredentialToSatisfyPresentationRequestException) {
 
                 val problemReport = ProblemReport(
@@ -84,7 +99,8 @@ class ReceivePresentationRequestAction(
                     Message(Json.encodeToString(problemReport)),
                     connection,
                     walletConnector,
-                    transport
+                    transport,
+                    services
                 )
 
                 //TODO: Here and everywhere catch all exceptions coming from user callbacks
@@ -102,12 +118,12 @@ class ReceivePresentationRequestAction(
                     Message(Json.encodeToString(problemReport)),
                     connection,
                     walletConnector,
-                    transport
+                    transport,
+                    services
                 )
 
                 credPresenterController.onProblemReportGenerated(connection, problemReport)
             }
-
 
         } else {
             //TODO: Consider an option to send Send PresentationProposal here instead of ProblemReport, depending on user input
@@ -118,12 +134,15 @@ class ReceivePresentationRequestAction(
                 thread = Thread(presentationRequestMessage.id)
             )
 
+
             MessageSender.packAndSendMessage(
                 Message(Json.encodeToString(problemReport)),
                 connection,
                 walletConnector,
-                transport
+                transport,
+                services
             )
+
 
         }
 

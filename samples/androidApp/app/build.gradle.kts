@@ -53,7 +53,8 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.7.26")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
     implementation("io.ktor:ktor-utils:1.5.1")
-    implementation("com.squareup.okhttp3:okhttp:3.5.0")
+    implementation("io.ktor:ktor-client-android:1.5.1")
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
 
 
 

@@ -33,7 +33,7 @@ import org.junit.Test
 //TODO: if we can use some common kotlin tests to have common tests for all platforms
 class SsiAgentApiImplTest {
 
-    private val walletName = "newWalletName"
+    private val walletName = "newWalletName2"
     private val walletPassword = "newWalletPassword"
     private val did = "Goci8gnhuC9vvxTWg1aFSx"
 
@@ -56,7 +56,7 @@ class SsiAgentApiImplTest {
     }
 
     @Test
-    @Ignore("Ignored because it is actually integration test which should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -72,7 +72,7 @@ class SsiAgentApiImplTest {
             walletManager.createWallet(walletName, walletPassword)
 
         if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
-            val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
+            val didResult = walletManager.createDid (didConfig = DidConfig(did = did),walletName = walletName, walletPassword = walletPassword)
             print("Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}")
             //Store did somewhere in your application to use it afterwards
         }
@@ -101,7 +101,7 @@ class SsiAgentApiImplTest {
 
 
         val issuerInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRVk0ZFZSUjZVb0Q5WWN5SkQ5VURZUmd6QnI3SDZFeEhGUTdxWEJkaHVKUXQiXSwicmVjaXBpZW50S2V5cyI6WyJIWWFCS3pGVVVWaTk2aGlkeFh4Q3RocWJSTVQyd3lyYm5OZTFCV1VUV3V6QyJdLCJAaWQiOiJhMGY4NjUwOC1kZDdjLTQxNGUtODA1Zi1kNGRhMTRhODc0YjUiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiMkQ2TjluTFVaVXhpWWRkalZUYVlCRTNHR0JEU1VHUlRmcXhSdVg3RjU3SGciXSwicmVjaXBpZW50S2V5cyI6WyJEaE5EVXpHQXdyVUNxb1RjQkVYR3NYeEZZdU5kNHJXc05hcUZ6dWV5bXoyMiJdLCJAaWQiOiJhZDk3NDFhMS01NjQxLTQ0NDgtOTdlOC1iZDJiZGQ4NGUyZjQiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
 
         println("Connecting to issuer")
         ssiAgentApi.connect(issuerInvitationUrl)
@@ -154,6 +154,10 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
+        override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
+            return CallbackResult(true)
+        }
+
 
     }
 
@@ -180,10 +184,11 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
-            println("Connection abandoned : $connection")
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
+            println("Connection completed : $connection")
             return CallbackResult(true)
         }
+
 
     }
 }

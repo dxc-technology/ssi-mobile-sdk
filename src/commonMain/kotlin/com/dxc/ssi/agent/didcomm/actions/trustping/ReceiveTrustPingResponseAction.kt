@@ -15,7 +15,7 @@ class ReceiveTrustPingResponseAction(private val actionParams: ActionParams): Ac
         println("Got messageContext")
         val connection = messageContext.connection!!
         println("Got connection")
-        val trustPingTrackerService = actionParams.trustPingTrackerService!!
+        val connectionsTrackerService = actionParams.services.connectionsTrackerService!!
         println("Got trustPingService")
 
         val trustPingResponseMessage =
@@ -25,7 +25,8 @@ class ReceiveTrustPingResponseAction(private val actionParams: ActionParams): Ac
 
         println("Decoded trustPingResponseMessage")
 
-        trustPingTrackerService.trustPingResponseReceivedEvent(connection)
+        connectionsTrackerService.trustPingResponseReceivedEvent(connection)
+        actionParams.callbacks.trustPingController?.onTrustPingResponseReceived(connection)
         println("Marked ping message as received")
         return ActionResult()
     }

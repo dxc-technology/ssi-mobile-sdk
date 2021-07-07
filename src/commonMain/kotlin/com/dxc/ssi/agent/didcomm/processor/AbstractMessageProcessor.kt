@@ -5,8 +5,7 @@ import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
-import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessor
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
 import com.dxc.ssi.agent.model.messages.MessageContext
 import kotlinx.serialization.decodeFromString
@@ -18,8 +17,8 @@ abstract class AbstractMessageProcessor(
     val ledgerConnector: LedgerConnector,
     val transport: Transport,
     val callbacks: Callbacks,
-    val trustPingProcessor: TrustPingProcessor?,
-    val trustPingTrackerService: TrustPingTrackerService?
+    val processors: Processors,
+    val services: Services,
 ) : MessageProcessor {
 
 
@@ -32,8 +31,8 @@ abstract class AbstractMessageProcessor(
             transport = transport,
             callbacks = callbacks,
             messageContext = messageContext,
-            trustPingProcessor = trustPingProcessor,
-            trustPingTrackerService = trustPingTrackerService
+            processors = processors,
+            services = services
         )
 
         val actionResult = getMessageType(messageContext.receivedUnpackedMessage.message)

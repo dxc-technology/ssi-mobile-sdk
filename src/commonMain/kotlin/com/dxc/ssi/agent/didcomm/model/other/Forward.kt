@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.didcomm.model.other
 
 import com.dxc.ssi.agent.didcomm.model.envelop.EncryptedEnvelop
+import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -23,7 +24,7 @@ import kotlinx.serialization.Serializable
 //TODO: think if forward message should belong to didexchange package or it is some other feature
 @Serializable
 data class Forward(
-    @SerialName("@type") val type: String,
+    @Required @SerialName("@type") val type: String = "https://didcomm.org/routing/1.0/forward",
     @SerialName("@id") val id :String,
     val to: String,
     val msg: EncryptedEnvelop

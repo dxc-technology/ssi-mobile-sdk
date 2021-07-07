@@ -5,12 +5,14 @@ import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.issue.CredentialIssuenceAction
-import com.dxc.ssi.agent.didcomm.commoon.MessagePacker
 import com.dxc.ssi.agent.didcomm.commoon.MessageSender
+import com.dxc.ssi.agent.didcomm.constants.DidCommProblemCodes
+import com.dxc.ssi.agent.didcomm.constants.toProblemReportDescription
 import com.dxc.ssi.agent.didcomm.model.common.Attach
 import com.dxc.ssi.agent.didcomm.model.common.Thread
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 import com.dxc.ssi.agent.model.messages.Message
 import kotlinx.serialization.decodeFromString
@@ -25,6 +27,7 @@ class ReceiveCredentialOfferAction(
         val walletConnector = actionParams.walletConnector
         val ledgerConnector = actionParams.ledgerConnector
         val transport = actionParams.transport
+        val services = actionParams.services
         //TODO: here and in all related places instead of NPE print relevant log message
         val credReceiverController = actionParams.callbacks.credReceiverController!!
         val credentialOfferContainerMessage =
@@ -66,8 +69,6 @@ class ReceiveCredentialOfferAction(
             )
 
             val credentialRequest = CredentialRequestContainer(
-                //TODO: create enum or other holder for message type, replace hardocde and move it inside of the message, as the template will suit only this particular request
-                type = "https://didcomm.org/issue-credential/1.0/request-credential",
                 //TODO: set proper id
                 id = uuid4().toString(),
                 thread = Thread(thid = credentialOfferContainerMessage.id),
@@ -87,35 +88,49 @@ class ReceiveCredentialOfferAction(
 
             println("Credential request created:$credentialRequest")
 
-            MessageSender.packAndSendMessage(Message(Json.encodeToString(credentialRequest)), connection, walletConnector, transport)
 
-            walletConnector.prover.storeCredentialExchangeRecord(
-                CredentialExchangeRecord(
-                    state = "CredentialRequestSent",
-                    connectionId = connection.id,
-                    //TODO: decide what data structure to store there: DiDComm generic offer or indy specific one
-                    credentialOfferContainer = credentialOfferContainerMessage,
-                    credentialRequestContainer = credentialRequest,
-                    credentialRequestInfo = credentialRequestInfo,
-                    credentialDefinition = credentialDefinition,
-                    thread = Thread(thid = credentialOfferContainerMessage.id)
-                )
+            MessageSender.packAndSendMessage(
+                Message(Json.encodeToString(credentialRequest)),
+                connection,
+                walletConnector,
+                transport,
+                services,
+                onMessageSent = {
+                    walletConnector.prover.storeCredentialExchangeRecord(
+                        CredentialExchangeRecord(
+                            state = "CredentialRequestSent",
+                            connectionId = connection.id,
+                            //TODO: decide what data structure to store there: DiDComm generic offer or indy specific one
+                            credentialOfferContainer = credentialOfferContainerMessage,
+                            credentialRequestContainer = credentialRequest,
+                            credentialRequestInfo = credentialRequestInfo,
+                            credentialDefinition = credentialDefinition,
+                            thread = Thread(thid = credentialOfferContainerMessage.id)
+                        )
+                    )
+
+                    credReceiverController.onRequestSent(
+                        connection = connection,
+                        credentialRequestContainer = credentialRequest
+                    )
+                    null
+                },
+                onMessageSendingFailure = {
+                    val problemReport = ProblemReport(
+                        id = uuid4().toString(),
+                        description = DidCommProblemCodes.COULD_NOT_SEND_CREDENTIAL_REQUEST.toProblemReportDescription()
+                    )
+
+                    //TODO: make this callback async
+                    credReceiverController.onProblemReport(connection, problemReport)
+                    null
+                }
             )
 
-            credReceiverController.onRequestSent(
-                connection = connection,
-                credentialRequestContainer = credentialRequest
-            )
         } else {
             //Else Send Problem report
             TODO()
         }
-
-
-        //5. End action
-
-
-        //  TODO("Not yet implemented")
 
         return ActionResult()
     }

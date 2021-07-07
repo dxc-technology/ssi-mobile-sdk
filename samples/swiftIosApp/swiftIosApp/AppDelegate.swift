@@ -11,13 +11,13 @@ import ssi_agent
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    let myWalletName = "newWalletName4"
+    var window : UIWindow?
+    let myWalletName = "newWalletName5"
     let myWalletPassword = "newWalletPassword"
     let myDid = "4PCVFCeZbKXyvgjCedbXDx"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
+    
         let cic = ConnectionInitiatorControllerImpl()
         let crc = CredentialReceiverControllerImpl()
         let cpc = CredPresenterControllerImpl()
@@ -54,7 +54,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
             genesisFilePath: "./docker_pool_transactions_genesis.txt",
-            ipAddress: "192.168.0.116",
+            ipAddress: "20.36.7.68",
             genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
             generatedGenesysFileName: "genesis.txn",
             retryTimes: 5,
@@ -70,30 +70,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                ssiAgentApi.doInit()
 
 
-       ssiAgentApi.connect(url: "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiR2s4NWZENW1CWGVRc0dlcVpVV0NuUllnTmZ1M1AzdnVTRHQ5N1RHcEduVmsiXSwicmVjaXBpZW50S2V5cyI6WyJBOVNKZ0szakRtYWM2RE43ekp3UXJLSnBhWUtCMzJzcTROQUZGcGJITXlXRCJdLCJAaWQiOiJkNjI4ODU4Ni1kYjEzLTQyY2ItYmZlNy01MDY1NGRhNWE4ZmQiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0=")
+       let connection = ssiAgentApi.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIkhhcVVEM1Y0OEx5eGJmWWJxWE5XZ0hVdTdVS0paRmNvNmJyMjJDSEZ3dTZIIl0sInJlY2lwaWVudEtleXMiOlsiSDd4WnNoZjZhNGFEcGtNV3pZNUdDNkR2NjN1NHhLeXZWbWVpeGFVUEhkZHMiXSwiQGlkIjoiYzIwOTY3Y2QtZmIzYi00OTI2LWFlZDctZGQ5Mjc5ZTU0ZGZiIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
 
-
-               sleep(180)
+      
+        sleep(300)
+        ssiAgentApi.abandonConnection(connection: connection, force: true, notifyPeerBeforeAbandoning : false)
         ssiAgentApi.shutdown(force: true)
         // Override point for customization after application launch.
-        return true
+    
+                    if #available(iOS 13, *) {
+                        // do only pure app launch stuff, not interface stuff
+                    } else {
+                        self.window = UIWindow()
+                        let vc = ViewController()
+                        self.window!.rootViewController = vc
+                        self.window!.makeKeyAndVisible()
+                        self.window!.backgroundColor = .red
+                    }
+                    return true
+                        
     }
-
-    // MARK: UISceneSession Lifecycle
-
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-    }
-
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
-    }
-
-
+     
 }
 
 class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
@@ -116,7 +113,7 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
+    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
         
     }
@@ -125,6 +122,10 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 
 
 class CredentialReceiverControllerImpl: CredReceiverController {
+    func onProblemReport(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
+        return CallbackResult(canProceedFurther: true)
+    }
+    
     func onCredentialReceived(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }

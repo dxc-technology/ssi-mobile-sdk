@@ -9,7 +9,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 object MessagePacker {
-    //TODO: uunderstand what Message models we need and unify them
+    //TODO: understand what Message models we need and unify them
     suspend fun packAndPrepareForwardMessage(
         message: Message,
         connection: PeerConnection,
