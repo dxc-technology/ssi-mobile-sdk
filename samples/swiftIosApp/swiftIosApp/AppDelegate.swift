@@ -53,9 +53,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
         let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-            genesisFilePath: "./docker_pool_transactions_genesis.txt",
-            ipAddress: "20.36.7.68",
-            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
+            genesisFilePath: "/Users/kkamyczek/build_issue/ssi-mobile-sdk/files/docker_pool_transactions_genesis.txt",
+            ipAddress: "0.0.0.0",
+            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.file,
             generatedGenesysFileName: "genesis.txn",
             retryTimes: 5,
             retryDelayMs: 5000)
