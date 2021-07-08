@@ -37,7 +37,11 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
         try {
         val pool =
             if (indyLedgerConnectorConfiguration.genesisMode == IndyLedgerConnectorConfiguration.GenesisMode.FILE) {
-                PoolHelper.openOrCreateFromFilename(indyLedgerConnectorConfiguration.genesisFilePath)
+                PoolHelper.openOrCreateFromIp(
+                    null,
+                    EnvironmentUtils.writableUserHomePath,
+                    indyLedgerConnectorConfiguration.generatedGenesysFileName
+                )
             } else {
                 PoolHelper.openOrCreateFromIp(
                     indyLedgerConnectorConfiguration.ipAddress,
