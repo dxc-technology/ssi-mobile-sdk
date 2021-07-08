@@ -78,14 +78,14 @@ object PoolHelper {
         return openExisting(poolName, poolConfig)
     }
 
-    suspend fun openOrCreateFromFilename(filename: String): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
+    suspend fun openOrCreateFromFilename(filename: String): Pool {
         //TODO: seems that JVM version does not work on Mac OS. Ensure that it works on Ubuntu. Prepare instructions to setup macos env
         Pool.setProtocolVersion(2)
         return openOrCreate(filename)
     }
 
     suspend fun openOrCreateFromIp(
-        ipAddress: String,
+        ipAddress: String?,
         dir: String,
         generatedGenesisFileName: String = "genesis.txn"
     ): Pool {
