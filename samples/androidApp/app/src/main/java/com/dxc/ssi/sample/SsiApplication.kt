@@ -67,8 +67,8 @@ class SsiApplication : Application() {
         val indyWalletConnector = IndyWalletConnector.build(walletHolder)
 
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-            genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
-            ipAddress = "192.168.0.122")
+            genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.FILE,
+            ipAddress = "0.0.0.0")
 
         ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
