@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.ledger.indy.helpers
 
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.ledger.indy.genesis.GenesisGenerator
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool
 import com.dxc.ssi.agent.ledger.indy.libindy.PoolJSONParameters
@@ -78,18 +79,20 @@ object PoolHelper {
         return openExisting(poolName, poolConfig)
     }
 
-    suspend fun openOrCreateFromFilename(filename: String): com.dxc.ssi.agent.ledger.indy.libindy.Pool {
+    suspend fun openOrCreateFromFilename(filename: String): Pool {
         //TODO: seems that JVM version does not work on Mac OS. Ensure that it works on Ubuntu. Prepare instructions to setup macos env
         Pool.setProtocolVersion(2)
         return openOrCreate(filename)
     }
 
-    suspend fun openOrCreateFromIp(
-        ipAddress: String,
+    suspend fun openOrCreateCustomGenesis(
+        genesisMode: IndyLedgerConnectorConfiguration.GenesisMode,
+        ipAddress: String?,
         dir: String,
         generatedGenesisFileName: String = "genesis.txn"
     ): Pool {
-        val genesysGenerator = GenesisGenerator(ipAddress,dir,generatedGenesisFileName)
+        val genesysGenerator =
+            GenesisGenerator(genesisMode, ipAddress, dir, generatedGenesisFileName)
         val filename = genesysGenerator.initGenesisFile()
 
         return openOrCreateFromFilename(filename)

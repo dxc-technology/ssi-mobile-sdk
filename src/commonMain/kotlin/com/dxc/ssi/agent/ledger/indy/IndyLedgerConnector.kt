@@ -35,17 +35,18 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
     override suspend fun init() {
         //TODO: think where to store and initialize pool variable
         try {
-        val pool =
-            if (indyLedgerConnectorConfiguration.genesisMode == IndyLedgerConnectorConfiguration.GenesisMode.FILE) {
-                PoolHelper.openOrCreateFromFilename(indyLedgerConnectorConfiguration.genesisFilePath)
-            } else {
-                PoolHelper.openOrCreateFromIp(
-                    indyLedgerConnectorConfiguration.ipAddress,
-                    EnvironmentUtils.writableUserHomePath,
-                    indyLedgerConnectorConfiguration.generatedGenesysFileName
-                )
-            }
-        isoPool.access { it.obj = pool }
+            val pool =
+                if (indyLedgerConnectorConfiguration.genesisMode == IndyLedgerConnectorConfiguration.GenesisMode.FILE) {
+                    PoolHelper.openOrCreateFromFilename(indyLedgerConnectorConfiguration.genesisFilePath)
+                } else {
+                    PoolHelper.openOrCreateCustomGenesis(
+                        indyLedgerConnectorConfiguration.genesisMode,
+                        indyLedgerConnectorConfiguration.ipAddress,
+                        EnvironmentUtils.writableUserHomePath,
+                        indyLedgerConnectorConfiguration.generatedGenesysFileName
+                    )
+                }
+            isoPool.access { it.obj = pool }
         } catch (e: Exception) {
             println("An issue occurred: $e")
         }

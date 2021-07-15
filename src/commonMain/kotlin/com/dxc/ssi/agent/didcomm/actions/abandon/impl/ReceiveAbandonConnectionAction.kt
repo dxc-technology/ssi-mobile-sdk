@@ -8,7 +8,7 @@ import com.dxc.ssi.agent.model.PeerConnectionState
 class ReceiveAbandonConnectionAction(val actionParams: ActionParams) : AbandonAction {
     override suspend fun perform(): ActionResult {
 
-        actionParams.messageContext.connection?.let { connection ->
+        actionParams.context?.connection?.let { connection ->
             val storedConnection = actionParams.walletConnector.walletHolder.getConnectionRecordById(connection.id)
             when {
                 storedConnection != null -> {

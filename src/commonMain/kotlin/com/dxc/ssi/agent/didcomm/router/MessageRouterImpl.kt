@@ -12,7 +12,7 @@ import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.verify.CredVerifierProcessorImpl
 import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
-import com.dxc.ssi.agent.model.messages.MessageContext
+import com.dxc.ssi.agent.model.messages.Context
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -79,25 +79,25 @@ class MessageRouterImpl(
     }
 
     //TODO: check connection in message context and throw exception if it is not null if it is expected to be non-null
-    override suspend fun routeAndProcessMessage(messageContext: MessageContext) {
+    override suspend fun routeAndProcessMessage(context: Context) {
 
-        when (determineRoute(messageContext)) {
+        when (determineRoute(context)) {
             //TODO: add route for forward message
-            Route.DidExchange -> processors.didExchangeProcessor!!.processMessage(messageContext)
-            Route.CredIssuer -> processors.credIssuerProcessor!!.processMessage(messageContext)
-            Route.CredVerifier -> processors.credVerifierProcessor!!.processMessage(messageContext)
-            Route.TrustPing -> processors.trustPingProcessor!!.processMessage(messageContext)
-            Route.AbandonConnection -> processors.abandonConnectionProcessor!!.processMessage(messageContext)
+            Route.DidExchange -> processors.didExchangeProcessor!!.processMessage(context)
+            Route.CredIssuer -> processors.credIssuerProcessor!!.processMessage(context)
+            Route.CredVerifier -> processors.credVerifierProcessor!!.processMessage(context)
+            Route.TrustPing -> processors.trustPingProcessor!!.processMessage(context)
+            Route.AbandonConnection -> processors.abandonConnectionProcessor!!.processMessage(context)
 
         }
     }
 
-    fun determineRoute(messageContext: MessageContext): Route {
+    fun determineRoute(context: Context): Route {
         //TODO: unify this extraction of type from message. Currently it is used in sevral places
         val typeAttribute =
             Json {
                 ignoreUnknownKeys = true
-            }.decodeFromString<BasicMessageWithTypeOnly>(messageContext.receivedUnpackedMessage.message).type
+            }.decodeFromString<BasicMessageWithTypeOnly>(context.receivedUnpackedMessage!!.message).type
 
         val route = when {
             typeAttribute.contains("/issue-credential/1") -> Route.CredIssuer

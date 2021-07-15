@@ -7,12 +7,15 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.processor.Processors
 import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
+import com.dxc.ssi.agent.didcomm.actions.issue.impl.ProcessCredentialOfferAction
 import com.dxc.ssi.agent.didcomm.actions.issue.impl.ReceiveCredentialAction
 import com.dxc.ssi.agent.didcomm.actions.issue.impl.ReceiveCredentialOfferAction
+import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
 import com.dxc.ssi.agent.didcomm.processor.MessageType
-import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
 import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.model.OfferResponseAction
+import com.dxc.ssi.agent.model.messages.Context
 
 class CredIssuerProcessorImpl(
     walletConnector: WalletConnector,
@@ -50,6 +53,24 @@ class CredIssuerProcessorImpl(
 
     override fun getMessageType(message: String): MessageType {
         return getMessageTypeGeneric<CredIssueMessageType>(message)
+    }
+
+    override suspend fun processParkedCredentialOffer(
+        credentialOfferContainer: CredentialOfferContainer,
+        offerResponseAction: OfferResponseAction
+    ) {
+        val actionParams = ActionParams(
+            walletConnector = walletConnector,
+            ledgerConnector = ledgerConnector,
+            transport = transport,
+            callbacks = callbacks,
+            context = Context(),
+            processors = processors,
+            services = services
+        )
+
+        val actionResult = ProcessCredentialOfferAction(actionParams, credentialOfferContainer, offerResponseAction).perform()
+
     }
 
 }

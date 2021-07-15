@@ -21,6 +21,7 @@ DEPENDENCIES:
   - libsodium (~> 1.0.12)
   - libzmq-pw (= 4.2.2)
   - OpenSSL-XM (~> 1.0.210.1)
+  - PocketSocket (= 1.0.1)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -43,6 +44,6 @@ SPEC CHECKSUMS:
   OpenSSL-XM: f2d7697be2a4b01a2c62239fd577e4137cab4f3a
   PocketSocket: 9c6867d66fb4f962af96b9b07f4b45bb561b2c2a
 
-PODFILE CHECKSUM: c518f3018fc708376c4aea5d5af6136a398b8605
+PODFILE CHECKSUM: ee3d29c10a58f5acde307ffd3e6dab0726b99e5a
 
 COCOAPODS: 1.10.1

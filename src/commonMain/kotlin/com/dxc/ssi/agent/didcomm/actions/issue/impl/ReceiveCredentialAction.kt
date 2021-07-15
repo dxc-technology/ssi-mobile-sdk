@@ -4,6 +4,7 @@ import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.issue.CredentialIssuenceAction
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
+import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -14,19 +15,19 @@ class ReceiveCredentialAction(
 
         val walletConnector = actionParams.walletConnector
         val credReceiverController = actionParams.callbacks.credReceiverController!!
-        val connection = actionParams.messageContext.connection!!
+        val connection = actionParams.context?.connection!!
 
         val credentialContainerMessage =
             Json {
                 ignoreUnknownKeys = true
-            }.decodeFromString<CredentialContainer>(actionParams.messageContext.receivedUnpackedMessage.message)
+            }.decodeFromString<CredentialContainer>(actionParams.context.receivedUnpackedMessage!!.message)
 
 
         // 1. Check current state
 
         val existingCredentialExchangeRecord =
             walletConnector.prover!!.getCredentialExchangeRecordByThread(credentialContainerMessage.thread)
-        if (existingCredentialExchangeRecord!!.state != "CredentialRequestSent") throw IllegalStateException()
+        if (existingCredentialExchangeRecord!!.state != CredentialIssuenceState.REQUEST_SENT) throw IllegalStateException()
         // 2. Execute callback
         if (credReceiverController.onCredentialReceived(
                 connection = connection, credentialContainer = credentialContainerMessage
@@ -42,7 +43,7 @@ class ReceiveCredentialAction(
             // 3. Store credential
             walletConnector.prover.receiveCredential(
                 credential = credential,
-                credentialRequestInfo = existingCredentialExchangeRecord.credentialRequestInfo,
+                credentialRequestInfo = existingCredentialExchangeRecord.credentialRequestInfo!!,
                 credentialDefinition = existingCredentialExchangeRecord.credentialDefinition,
                 //TODO: support revokation here
                 revocationRegistryDefinition = null

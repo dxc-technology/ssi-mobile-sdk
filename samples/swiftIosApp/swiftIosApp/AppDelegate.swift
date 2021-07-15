@@ -8,6 +8,7 @@
 import UIKit
 import ssi_agent
 
+var ssiAgentApi: SsiAgentApi? = nil
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -53,29 +54,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
         let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-            genesisFilePath: "./docker_pool_transactions_genesis.txt",
-            ipAddress: "20.36.7.68",
-            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
+            genesisFilePath: "genesis.txt",
+            ipAddress: "",
+            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.sovrinBuildernet,
             generatedGenesysFileName: "genesis.txn",
             retryTimes: 5,
             retryDelayMs: 5000)
         
-        let ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
+        ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
                 .withConnectionInitiatorController(connectionInitiatorController: cic)
                 .withCredReceiverController(credReceiverController: crc)
                 .withCredPresenterController(credPresenterController: cpc)
                 .withLedgerConnector(ledgerConnector: IndyLedgerConnector(indyLedgerConnectorConfiguration: indyLedgerConnectorConfiguration))
                 .build()
         
-               ssiAgentApi.doInit()
+        ssiAgentApi.unsafelyUnwrapped.doInit()
 
 
-       let connection = ssiAgentApi.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIkhhcVVEM1Y0OEx5eGJmWWJxWE5XZ0hVdTdVS0paRmNvNmJyMjJDSEZ3dTZIIl0sInJlY2lwaWVudEtleXMiOlsiSDd4WnNoZjZhNGFEcGtNV3pZNUdDNkR2NjN1NHhLeXZWbWVpeGFVUEhkZHMiXSwiQGlkIjoiYzIwOTY3Y2QtZmIzYi00OTI2LWFlZDctZGQ5Mjc5ZTU0ZGZiIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
+        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiM3FNNzRCTmJndEtTR0ZobW16WWFNZFVFWUZrd3BtN1hBRUFHWlkzWjMzS1giXSwiQGlkIjoiOTJmMjk0ZTMtOTFkOC00ODQxLWFhZDAtYzk5ZTg2NzlhMWQ4IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9f", keepConnectionAlive: true)
 
       
-        sleep(300)
-        ssiAgentApi.abandonConnection(connection: connection, force: true, notifyPeerBeforeAbandoning : false)
-        ssiAgentApi.shutdown(force: true)
+        sleep(10000)
+        ssiAgentApi.unsafelyUnwrapped.abandonConnection(connection: connection, force: true, notifyPeerBeforeAbandoning : false)
+        ssiAgentApi.unsafelyUnwrapped.shutdown(force: true)
         // Override point for customization after application launch.
     
                     if #available(iOS 13, *) {
@@ -134,8 +135,16 @@ class CredentialReceiverControllerImpl: CredReceiverController {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> OfferResponseAction {
+        
+        DispatchQueue.global().async {
+            Sleeper().sleep(value: 10000)
+            ssiAgentApi.unsafelyUnwrapped.getParkedCredentialOffers().forEach { credentialOfferContainer in
+                ssiAgentApi.unsafelyUnwrapped.processParkedCredentialOffer(credentialOfferContainer: credentialOfferContainer, offerResponseAction: OfferResponseAction.accept)
+            }
+        }
+        
+        return OfferResponseAction.park
     }
     
     func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {

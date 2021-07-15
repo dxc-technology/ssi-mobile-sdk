@@ -5,6 +5,7 @@ import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
+import com.dxc.ssi.agent.api.pluggable.wallet.WalletCreationStrategy
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
 import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
@@ -18,12 +19,14 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestConta
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.model.DidConfig
+import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.junit.Ignore
 import org.junit.Test
@@ -46,11 +49,15 @@ class SsiAgentApiImplTest {
 
         val walletManager: WalletManager = IndyWalletManager
 
-        if (!walletManager.isWalletExistsAndOpenable(walletName, walletPassword))
-            walletManager.createWallet(walletName, walletPassword)
+      //  if (!walletManager.isWalletExistsAndOpenable(walletName, walletPassword))
+            walletManager.createWallet(walletName, walletPassword, WalletCreationStrategy.TruncateAndCreate)
 
         if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
-            val didResult = walletManager.createDid(didConfig = DidConfig(did = did),walletName = walletName, walletPassword = walletPassword)
+            val didResult = walletManager.createDid(
+                didConfig = DidConfig(did = did),
+                walletName = walletName,
+                walletPassword = walletPassword
+            )
             print("Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}")
             //Store did somewhere in your application to use it afterwards
         }
@@ -67,14 +74,14 @@ class SsiAgentApiImplTest {
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())
             .withCredPresenterController(CredPresenterControllerImpl())
-            .withLedgerConnector(IndyLedgerConnector(IndyLedgerConnectorConfiguration(genesisFilePath = "/home/ifedyanin/source/github/fedyiv/ssi-mobile-sdk-lumedic/files/docker_pool_transactions_genesis.txt")))
+            .withLedgerConnector(IndyLedgerConnector(IndyLedgerConnectorConfiguration(genesisFilePath = "/home/ivan/IdeaProjects/dxc/Lumedic/ssi-mobile-sdk/files/sovrin_buildernet_genesis.txt")))
             .build()
 
         ssiAgentApi.init()
 
 
         val invitationUrl =
-            "ws://192.168.0.117:8080/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo4MDgwL3dzIiwicm91dGluZ0tleXMiOlsiQmg4dTRqRzFheVQ1UGtEQTc3R3dRclpMN3pWS1U1SkM0andzV0FKaWFhdWYiXSwicmVjaXBpZW50S2V5cyI6WyI1MzF6bjNRdXBnM2tXc3NYOXRLemY1UVFHVndOaVlxTG1NckhleHJ2VGo1WSJdLCJAaWQiOiI3YjlhZjBiOS02OTBhLTRmNzYtOTgwZC0yZDcxM2NmM2YxN2IiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiQkVNNFkyWlZITkJYS2R1d3ZxWVNCN2FLN2hBWGRvRmhQcmI3S1cycVRKZ0IiXSwiQGlkIjoiOTg1NjlmYTAtNjVkYy00MDdmLTg4ZTEtZDg3YTJlY2QzYzM0IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
         println("Connecting to issuer")
@@ -83,11 +90,13 @@ class SsiAgentApiImplTest {
 
         Sleeper().sleep(10_000)
 
+        /*
         GlobalScope.launch {
             ssiAgentApi.getTransport().disconnect(connection)
             Sleeper().sleep(2_000)
             ssiAgentApi.reconnect(connection)
         }
+        */
 
 
         Sleeper().sleep(10000)
@@ -118,12 +127,22 @@ class SsiAgentApiImplTest {
 
     }
 
-    class CredReceiverControllerImpl : CredReceiverController {
+    inner class CredReceiverControllerImpl : CredReceiverController {
         override fun onOfferReceived(
             connection: PeerConnection,
             credentialOfferContainer: CredentialOfferContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ): OfferResponseAction {
+
+            GlobalScope.launch {
+                delay(20_000)
+                ssiAgentApi.getParkedCredentialOffers()
+                    .forEach {
+                        ssiAgentApi.processParkedCredentialOffer(it, OfferResponseAction.ACCEPT)
+                    }
+
+            }
+
+            return OfferResponseAction.PARK
         }
 
         override fun onRequestSent(

@@ -23,8 +23,7 @@ class MainActivity : AppCompatActivity() {
             val ssiAgentApi = application.getSsiAgent()
 
             val invitationUrl =
-                "ws://192.168.0.117:8080/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo4MDgwL3dzIiwicm91dGluZ0tleXMiOlsiQmg4dTRqRzFheVQ1UGtEQTc3R3dRclpMN3pWS1U1SkM0andzV0FKaWFhdWYiXSwicmVjaXBpZW50S2V5cyI6WyJBbmcyUHJrVVF0YmFYRHlBdkVFd0FSalZWZUYyeDYzVG1ENUFucDRUZkJpdyJdLCJAaWQiOiI4OWMxNzU0NS0wZGJjLTRkZjAtOTIzMy1lOWMzOTFkMzhiNWUiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
-
+                "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiNjdLdFhhV05vVnZrS3hzcEQ1cVEyaEVDU3ZQTjFHRTdicUxvOXBwbkpjSjEiXSwiQGlkIjoiNWRmMWE4NWUtMzVhZi00OGVkLWIyZDktMmE5MzA0MWExMmZiIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
             ssiAgentApi.connect(invitationUrl, true)
         }
     }

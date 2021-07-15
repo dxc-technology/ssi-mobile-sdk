@@ -8,6 +8,7 @@ import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
+import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 import com.dxc.ssi.agent.wallet.indy.model.revoke.RevocationState
 import com.dxc.ssi.agent.wallet.indy.model.verify.RevocationRegistryEntry
@@ -135,6 +136,8 @@ interface Prover {
     ): Presentation
 
     fun extractPresentationDataFromPresentation(presentation: Presentation): RawData
+    suspend fun getParkedCredentialOffers(): Set<CredentialOfferContainer>
+    suspend fun findCredentialExchangeRecordsWithState(credentialIssuenceState: CredentialIssuenceState): Set<CredentialExchangeRecord>
 
 
 }
