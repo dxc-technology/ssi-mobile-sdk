@@ -8,8 +8,10 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
+import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
 import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
 import com.dxc.ssi.agent.utils.CoroutineHelper
@@ -202,5 +204,20 @@ class SsiAgentApiImpl(
         /*
         * Currently when we disconnect a connection , we mark it as Abandoned in wallet. This function is to cleanup such connections
         * */
+    }
+
+    override fun getParkedCredentialOffers(): Set<CredentialOfferContainer> {
+        return CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                walletConnector.prover!!.getParkedCredentialOffers()
+            })
+    }
+
+    override fun processParkedCredentialOffer(credentialOfferContainer: CredentialOfferContainer, offerResponseAction: OfferResponseAction) {
+        return CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                //TODO: fix NPE
+                messageListener.messageRouter.processors.credIssuerProcessor!!.processParkedCredentialOffer(credentialOfferContainer, offerResponseAction)
+            })
     }
 }

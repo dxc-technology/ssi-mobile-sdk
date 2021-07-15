@@ -11,6 +11,9 @@ data class IndyLedgerConnectorConfiguration(
 ) {
     enum class GenesisMode {
         IP,
-        FILE
+        FILE,
+        SOVRIN_BUILDERNET,
+        SOVRIN_STAGENET,
+        SOVRIN_MAINNET
     }
 }

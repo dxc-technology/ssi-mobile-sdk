@@ -23,9 +23,9 @@ class ReceivePresentationRequestAction(
 ) : CredentialVerificationAction {
     override suspend fun perform(): ActionResult {
 
-        val messageContext = actionParams.messageContext
+        val messageContext = actionParams.context
         val credPresenterController = actionParams.callbacks.credPresenterController!!
-        val connection = actionParams.messageContext.connection!!
+        val connection = actionParams.context!!.connection!!
         val walletConnector = actionParams.walletConnector
         val ledgerConnector = actionParams.ledgerConnector
         val transport = actionParams.transport
@@ -33,7 +33,7 @@ class ReceivePresentationRequestAction(
 
         val presentationRequestMessage = Json {
             ignoreUnknownKeys = true
-        }.decodeFromString<PresentationRequestContainer>(messageContext.receivedUnpackedMessage.message)
+        }.decodeFromString<PresentationRequestContainer>(messageContext!!.receivedUnpackedMessage!!.message)
 
         if (credPresenterController
                 .onRequestReceived(connection, presentationRequestMessage).canProceedFurther

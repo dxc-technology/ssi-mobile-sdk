@@ -11,8 +11,8 @@ import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.utils.JsonUtils.extractValue
 import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
+import com.dxc.ssi.agent.wallet.indy.helpers.WalletQueryHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.*
-import com.dxc.ssi.agent.wallet.indy.model.RetrievedWalletRecords
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import io.ktor.utils.io.core.*
@@ -101,7 +101,9 @@ open class IndyWalletHolder(
     override suspend fun findConnectionByVerKey(verKey: String): PeerConnection? {
 
         val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"
-        val retrievedWalletRecords = queryWalletRecords(query)
+        val wallet = isoWallet.access { it.obj }!!
+        val retrievedWalletRecords =
+            WalletQueryHelper.queryWalletRecords(wallet, WalletRecordType.ConnectionRecord, query)
 
         if (retrievedWalletRecords.totalCount == null || retrievedWalletRecords.totalCount == 0)
             return null
@@ -124,7 +126,9 @@ open class IndyWalletHolder(
             ""
         }
 
-        val retrievedWalletRecords = queryWalletRecords(query)
+        val wallet = isoWallet.access { it.obj }!!
+        val retrievedWalletRecords =
+            WalletQueryHelper.queryWalletRecords(wallet, WalletRecordType.ConnectionRecord, query)
 
         if (retrievedWalletRecords.totalCount == null || retrievedWalletRecords.totalCount == 0)
             return emptySet()
@@ -136,26 +140,6 @@ open class IndyWalletHolder(
             }.map<String, PeerConnection> { Json.decodeFromString(it) }.toSet()
 
     }
-
-    private suspend fun queryWalletRecords(query: String): RetrievedWalletRecords {
-        println("Searching connections using query: $query")
-
-        val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
-
-        val search = WalletSearch()
-
-        val wallet = isoWallet.access { it.obj }
-        search.open(wallet!!, WalletRecordType.ConnectionRecord.name, query, options)
-        //TODO: make proper fetch in batches instead of just fetching 100 records
-        val foundRecordsJson = search.searchFetchNextRecords(wallet!!, 100)
-        search.closeSearch()
-
-        println("Fetched connections json = $foundRecordsJson")
-
-        return Json {}.decodeFromString(foundRecordsJson)
-
-    }
-
 
     //TODO: remove this fun if it is not used
     override suspend fun isWalletHolderInitialized(): Boolean {

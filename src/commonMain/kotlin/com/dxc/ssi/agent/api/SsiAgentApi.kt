@@ -3,6 +3,8 @@ package com.dxc.ssi.agent.api
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
+import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
 
@@ -30,4 +32,7 @@ interface SsiAgentApi {
     fun abandonConnection(connection: PeerConnection, force: Boolean = true, notifyPeerBeforeAbandoning: Boolean = true)
     fun abandonAllConnections(force: Boolean = true, notifyPeerBeforeAbandoning: Boolean = true)
     fun removeAbandonedConnectionsFromWallet()
+
+    fun getParkedCredentialOffers(): Set<CredentialOfferContainer>
+    fun processParkedCredentialOffer(credentialOfferContainer: CredentialOfferContainer,  offerResponseAction: OfferResponseAction)
 }

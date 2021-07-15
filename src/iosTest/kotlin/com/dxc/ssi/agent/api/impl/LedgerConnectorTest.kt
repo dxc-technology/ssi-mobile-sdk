@@ -27,7 +27,8 @@ class LedgerConnectorTest {
 
         GlobalScope.launch {
             withContext(Dispatchers.Default) {
-            PoolHelper.openOrCreateFromIp(
+            PoolHelper.openOrCreateCustomGenesis(
+                IndyLedgerConnectorConfiguration.GenesisMode.IP,
                 indyLedgerConnectorConfiguration.ipAddress,
                 EnvironmentUtils.indyHomePath
             ) }

@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
@@ -22,10 +23,14 @@ import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.DidConfig
+import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -36,6 +41,7 @@ class SsiAgentApiImplTest {
     private val walletName = "newWalletName2"
     private val walletPassword = "newWalletPassword"
     private val did = "Goci8gnhuC9vvxTWg1aFSx"
+    lateinit var ssiAgentApi: SsiAgentApi
 
     @Rule
     @JvmField
@@ -84,13 +90,12 @@ class SsiAgentApiImplTest {
         )
 
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-            genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
-            ipAddress = "192.168.0.122"
+            genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.SOVRIN_BUILDERNET,
         )
 
         val indyWalletConnector = IndyWalletConnector.build(walletHolder)
 
-        val ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
+        ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())
             .withCredPresenterController(CredPresenterControllerImpl())
@@ -101,12 +106,12 @@ class SsiAgentApiImplTest {
 
 
         val issuerInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiMkQ2TjluTFVaVXhpWWRkalZUYVlCRTNHR0JEU1VHUlRmcXhSdVg3RjU3SGciXSwicmVjaXBpZW50S2V5cyI6WyJEaE5EVXpHQXdyVUNxb1RjQkVYR3NYeEZZdU5kNHJXc05hcUZ6dWV5bXoyMiJdLCJAaWQiOiJhZDk3NDFhMS01NjQxLTQ0NDgtOTdlOC1iZDJiZGQ4NGUyZjQiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiRVVmWW5OVEpoZTdvQzJOcWhQQkdObjlablJ6WEVSeXo1eWpwdEVzaTNhZXgiXSwiQGlkIjoiOTNlYTQ2MWYtODdiMi00Y2ViLWFhOTMtNzliYzYwN2NmM2VjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
         println("Connecting to issuer")
         ssiAgentApi.connect(issuerInvitationUrl)
 
-        Sleeper().sleep(500000)
+        Sleeper().sleep(800000)
 
     }
 
@@ -128,12 +133,24 @@ class SsiAgentApiImplTest {
 
     }
 
-    class CredReceiverControllerImpl : CredReceiverController {
+    inner class CredReceiverControllerImpl : CredReceiverController {
         override fun onOfferReceived(
             connection: PeerConnection,
             credentialOfferContainer: CredentialOfferContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ): OfferResponseAction {
+
+            println("Received credential offer")
+
+            GlobalScope.launch {
+                delay(20_000)
+                ssiAgentApi.getParkedCredentialOffers()
+                    .forEach {
+                        ssiAgentApi.processParkedCredentialOffer(it, OfferResponseAction.ACCEPT)
+                    }
+
+            }
+
+            return OfferResponseAction.PARK
         }
 
         override fun onRequestSent(
@@ -155,12 +172,11 @@ class SsiAgentApiImplTest {
         }
 
         override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
-            return CallbackResult(true)
+            TODO("Not yet implemented")
         }
 
 
     }
-
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         override fun onInvitationReceived(
             connection: PeerConnection,

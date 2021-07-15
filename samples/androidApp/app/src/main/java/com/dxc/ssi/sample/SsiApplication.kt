@@ -17,6 +17,7 @@ import com.dxc.ssi.sample.controllers.CredPresenterControllerImpl
 import com.dxc.ssi.sample.controllers.CredReceiverControllerImpl
 import com.dxc.utils.EnvironmentUtils
 
+var ssiAgentApi: SsiAgentApi? = null
 class SsiApplication : Application() {
 
     private var agentInitialized: Boolean = false
@@ -24,7 +25,7 @@ class SsiApplication : Application() {
     private val walletPassword = "newWalletPassword"
     private val did = "Kg5Cq9vKv7QrLfTGUP9xbd"
 
-    private lateinit var ssiAgentApi: SsiAgentApi
+
 
     override fun onCreate() {
         super.onCreate()
@@ -37,10 +38,10 @@ class SsiApplication : Application() {
 
     fun getSsiAgent(): SsiAgentApi {
         if (agentInitialized)
-            return ssiAgentApi
+            return ssiAgentApi!!
 
         initSsiAgent()
-        return ssiAgentApi
+        return ssiAgentApi!!
     }
 
     private fun initSsiAgent() {
@@ -67,8 +68,7 @@ class SsiApplication : Application() {
         val indyWalletConnector = IndyWalletConnector.build(walletHolder)
 
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-            genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.FILE,
-            ipAddress = "0.0.0.0")
+            genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.SOVRIN_BUILDERNET)
 
         ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
@@ -77,7 +77,7 @@ class SsiApplication : Application() {
             .withLedgerConnector(IndyLedgerConnector(indyLedgerConnectorConfiguration))
             .build()
 
-        ssiAgentApi.init()
+        ssiAgentApi!!.init()
 
         agentInitialized = true
         println("Initialized SSI Agent")

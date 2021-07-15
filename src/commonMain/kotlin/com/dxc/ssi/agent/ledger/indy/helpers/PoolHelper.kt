@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.ledger.indy.helpers
 
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.ledger.indy.genesis.GenesisGenerator
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool
 import com.dxc.ssi.agent.ledger.indy.libindy.PoolJSONParameters
@@ -84,12 +85,14 @@ object PoolHelper {
         return openOrCreate(filename)
     }
 
-    suspend fun openOrCreateFromIp(
+    suspend fun openOrCreateCustomGenesis(
+        genesisMode: IndyLedgerConnectorConfiguration.GenesisMode,
         ipAddress: String?,
         dir: String,
         generatedGenesisFileName: String = "genesis.txn"
     ): Pool {
-        val genesysGenerator = GenesisGenerator(ipAddress,dir,generatedGenesisFileName)
+        val genesysGenerator =
+            GenesisGenerator(genesisMode, ipAddress, dir, generatedGenesisFileName)
         val filename = genesysGenerator.initGenesisFile()
 
         return openOrCreateFromFilename(filename)
