@@ -16,7 +16,7 @@ class ReceiveConnectionResponseAction(
     override suspend fun perform(): ActionResult {
 
         val connectionInitiatorController = actionParams.callbacks.connectionInitiatorController!!
-        val messageContext = actionParams.messageContext
+        val messageContext = actionParams.context
         val walletConnector = actionParams.walletConnector
         val trustPingProcessor = actionParams.processors.trustPingProcessor!!
 
@@ -24,7 +24,7 @@ class ReceiveConnectionResponseAction(
         val connectionResponse =
             Json {
                 ignoreUnknownKeys = true
-            }.decodeFromString<ConnectionResponse>(messageContext.receivedUnpackedMessage.message)
+            }.decodeFromString<ConnectionResponse>(messageContext!!.receivedUnpackedMessage!!.message)
 
 
         val ourConnectionId = connectionResponse.thread.thid
@@ -40,7 +40,7 @@ class ReceiveConnectionResponseAction(
                 //TODO: think how to avoid NPE here
                 val updatedConnection = ourConnection.copy(
                     state = PeerConnectionState.COMPLETED,
-                    peerVerkey = messageContext.receivedUnpackedMessage.senderVerKey
+                    peerVerkey = messageContext.receivedUnpackedMessage!!.senderVerKey
                 )
                 walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
                 trustPingProcessor.sendTrustPingOverConnection(updatedConnection)
