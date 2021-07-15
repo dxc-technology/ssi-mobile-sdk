@@ -60,7 +60,7 @@ kotlin {
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
                 val socketlib by cinterops.creating {
-                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
+                    defFile(project.file("$projectDir/socketlib/socketlib.def"))
                     extraOpts("-libraryPath", "$projectDir/socketlib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
                 }
@@ -76,7 +76,7 @@ kotlin {
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
                 val socketlib by cinterops.creating {
-                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
+                    defFile(project.file("$projectDir/socketlib/socketlib.def"))
                     extraOpts("-libraryPath", "$projectDir/socketlib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
                 }
