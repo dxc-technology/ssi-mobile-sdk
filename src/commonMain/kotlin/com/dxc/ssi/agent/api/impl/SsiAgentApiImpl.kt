@@ -9,6 +9,7 @@ import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
+import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
 import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.OfferResponseAction
@@ -218,6 +219,20 @@ class SsiAgentApiImpl(
             agentScope.async {
                 //TODO: fix NPE
                 messageListener.messageRouter.processors.credIssuerProcessor!!.processParkedCredentialOffer(credentialOfferContainer, offerResponseAction)
+            })
+    }
+
+    override fun getCredentialInfos(): Set<CredentialInfo> {
+        return CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                walletConnector.prover!!.getCredentialInfos()
+            })
+    }
+
+    override fun getCredentialInfo(localWalletCredId: String): CredentialInfo {
+        return CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                walletConnector.prover!!.getCredentialInfo(localWalletCredId)
             })
     }
 }

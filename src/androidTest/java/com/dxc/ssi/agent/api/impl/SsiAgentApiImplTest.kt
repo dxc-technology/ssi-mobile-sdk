@@ -21,9 +21,9 @@ import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
-import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.OfferResponseAction
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.utils.EnvironmentUtils
@@ -78,7 +78,11 @@ class SsiAgentApiImplTest {
             walletManager.createWallet(walletName, walletPassword)
 
         if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
-            val didResult = walletManager.createDid (didConfig = DidConfig(did = did),walletName = walletName, walletPassword = walletPassword)
+            val didResult = walletManager.createDid(
+                didConfig = DidConfig(did = did),
+                walletName = walletName,
+                walletPassword = walletPassword
+            )
             print("Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}")
             //Store did somewhere in your application to use it afterwards
         }

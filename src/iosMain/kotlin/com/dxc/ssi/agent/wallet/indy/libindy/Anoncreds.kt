@@ -108,6 +108,13 @@ actual class Anoncreds {
 
         }
 
+        actual suspend fun proverGetCredential(
+            wallet: Wallet,
+            credId: String
+        ): String {
+            TODO("Not yet implemented")
+        }
+
         actual suspend fun createRevocationState(
             blobStorageReaderHandle: Int,
             revRegDef: String,

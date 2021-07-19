@@ -23,6 +23,7 @@ import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
+import com.dxc.ssi.agent.wallet.indy.model.verify.IndyCredInfo
 import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
 import kotlinx.coroutines.GlobalScope
@@ -49,8 +50,8 @@ class SsiAgentApiImplTest {
 
         val walletManager: WalletManager = IndyWalletManager
 
-      //  if (!walletManager.isWalletExistsAndOpenable(walletName, walletPassword))
-            walletManager.createWallet(walletName, walletPassword, WalletCreationStrategy.TruncateAndCreate)
+        if (!walletManager.isWalletExistsAndOpenable(walletName, walletPassword))
+            walletManager.createWallet(walletName, walletPassword, WalletCreationStrategy.CreateOrFail)
 
         if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
             val didResult = walletManager.createDid(
@@ -81,7 +82,7 @@ class SsiAgentApiImplTest {
 
 
         val invitationUrl =
-            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiQkVNNFkyWlZITkJYS2R1d3ZxWVNCN2FLN2hBWGRvRmhQcmI3S1cycVRKZ0IiXSwiQGlkIjoiOTg1NjlmYTAtNjVkYy00MDdmLTg4ZTEtZDg3YTJlY2QzYzM0IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiM2tqcWJCOTR6UGVSN0t6RExMdUdtYndFQnpleGNTakV1NmNZaVF2SEdieWoiXSwiQGlkIjoiNTcyYzBiM2MtMzk5YS00NTRlLWEzZTEtM2FiNjM1MGY3ZDM1IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
         println("Connecting to issuer")
@@ -133,16 +134,7 @@ class SsiAgentApiImplTest {
             credentialOfferContainer: CredentialOfferContainer
         ): OfferResponseAction {
 
-            GlobalScope.launch {
-                delay(20_000)
-                ssiAgentApi.getParkedCredentialOffers()
-                    .forEach {
-                        ssiAgentApi.processParkedCredentialOffer(it, OfferResponseAction.ACCEPT)
-                    }
-
-            }
-
-            return OfferResponseAction.PARK
+            return OfferResponseAction.ACCEPT
         }
 
         override fun onRequestSent(
@@ -160,6 +152,22 @@ class SsiAgentApiImplTest {
         }
 
         override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
+            GlobalScope.launch {
+                delay(20_000)
+                println("getting stored credentials infos form wallet")
+                val credInfos = ssiAgentApi.getCredentialInfos().map { it as IndyCredInfo }
+
+
+                println("retrieved set of cred infos with size ${credInfos.size} : $credInfos")
+
+                println("retrieving one credential info by referrent Id: ${credInfos[0].referent}")
+
+                val credInfo = ssiAgentApi.getCredentialInfo(credInfos[0].referent)
+
+                println("Extracted credential: $credInfo")
+
+
+            }
             return CallbackResult(true)
         }
 
