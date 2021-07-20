@@ -112,7 +112,12 @@ actual class Anoncreds {
             wallet: Wallet,
             credId: String
         ): String {
-            TODO("Not yet implemented")
+            val commandHandle = callbackHandler.prepareCallback()
+
+            indy_prover_get_credential(commandHandle, wallet.getWalletHandle(), credId, StringCallback.callback)
+
+            val result = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
+            return result.stringResult
         }
 
         actual suspend fun createRevocationState(

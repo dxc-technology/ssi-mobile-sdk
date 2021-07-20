@@ -71,7 +71,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         ssiAgentApi.unsafelyUnwrapped.doInit()
 
 
-        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiM3FNNzRCTmJndEtTR0ZobW16WWFNZFVFWUZrd3BtN1hBRUFHWlkzWjMzS1giXSwiQGlkIjoiOTJmMjk0ZTMtOTFkOC00ODQxLWFhZDAtYzk5ZTg2NzlhMWQ4IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9f", keepConnectionAlive: true)
+        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiSGFQa3p5anFHRm9jZnlFc3ZSanFNOG9TU2Z1b0Y5TVc3dk1KS05oRTQ2QlciXSwiQGlkIjoiODlhMmZlMTUtOWZmZS00YTVlLWFlZjUtNThkOGRjM2E2MTg4IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
 
       
         sleep(10000)
@@ -132,19 +132,36 @@ class CredentialReceiverControllerImpl: CredReceiverController {
     }
     
     func onDone(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
+        
+        
+        DispatchQueue.global().async {
+            Sleeper().sleep(value: 5000)
+            
+            print("Getting credentials from wallet")
+            let credInfos = ssiAgentApi.unsafelyUnwrapped.getCredentialInfos().map {$0 as! IndyCredInfo}
+            
+            print("Got")
+            
+            print(credInfos)
+            
+            credInfos.forEach { credInfo in
+                print("retrieving first cred")
+                let cred = ssiAgentApi.unsafelyUnwrapped.getCredentialInfo(localWalletCredId: credInfo.referent)
+                
+                print(cred)
+            }
+            
+        
+        }
+        
         return CallbackResult(canProceedFurther: true)
     }
     
     func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> OfferResponseAction {
         
-        DispatchQueue.global().async {
-            Sleeper().sleep(value: 10000)
-            ssiAgentApi.unsafelyUnwrapped.getParkedCredentialOffers().forEach { credentialOfferContainer in
-                ssiAgentApi.unsafelyUnwrapped.processParkedCredentialOffer(credentialOfferContainer: credentialOfferContainer, offerResponseAction: OfferResponseAction.accept)
-            }
-        }
+       
         
-        return OfferResponseAction.park
+        return OfferResponseAction.accept
     }
     
     func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
