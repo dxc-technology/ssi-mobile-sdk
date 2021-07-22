@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.wallet.indy.model.verify
 
+import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -11,4 +12,4 @@ data class IndyCredInfo(
     @SerialName("cred_def_id") val credDefId: String,
     @SerialName("rev_reg_id") val revRegId: String?,
     @SerialName("cred_rev_id") val credRevId: String?
-)
+) : CredentialInfo

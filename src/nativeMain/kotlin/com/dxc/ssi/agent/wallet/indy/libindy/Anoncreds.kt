@@ -52,6 +52,13 @@ actual class Anoncreds {
             TODO("Not yet implemented")
         }
 
+        actual suspend fun proverGetCredential(
+            wallet: Wallet,
+            credId: String
+        ): String {
+            TODO("Not yet implemented")
+        }
+
 
     }
 }

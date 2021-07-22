@@ -1,6 +1,6 @@
 package com.dxc.ssi.agent.ledger.indy.helpers
 
-import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
+import com.dxc.ssi.agent.ledger.indy.GenesisMode
 import com.dxc.ssi.agent.ledger.indy.genesis.GenesisGenerator
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool
 import com.dxc.ssi.agent.ledger.indy.libindy.PoolJSONParameters
@@ -19,6 +19,12 @@ object PoolHelper {
         val poolDir = EnvironmentUtils.getIndyPoolPath(poolName)
 
         return FileUtils.fileExists(poolDir)
+    }
+
+    fun truncate(poolName: String) {
+        val poolDir = EnvironmentUtils.getIndyPoolPath(poolName)
+        FileUtils.deleteRecursively(poolDir)
+
     }
 
     /**
@@ -73,11 +79,27 @@ object PoolHelper {
             null
         )
     ): Pool {
+
         if (!exists(poolName))
             createNonExisting(genesisFile, poolName)
 
         return openExisting(poolName, poolConfig)
     }
+
+    suspend fun truncateCreateAndOpen(
+        genesisFile: String,
+        poolName: String = DEFAULT_POOL_NAME,
+        poolConfig: PoolJSONParameters.OpenPoolLedgerJSONParameter = PoolJSONParameters.OpenPoolLedgerJSONParameter(
+            null,
+            null
+        )
+    ): Pool {
+
+        truncate(poolName)
+        createNonExisting(genesisFile, poolName)
+        return openExisting(poolName, poolConfig)
+    }
+
 
     suspend fun openOrCreateFromFilename(filename: String): Pool {
         //TODO: seems that JVM version does not work on Mac OS. Ensure that it works on Ubuntu. Prepare instructions to setup macos env
@@ -85,8 +107,14 @@ object PoolHelper {
         return openOrCreate(filename)
     }
 
+    suspend fun truncateCreateAndOpenFromFilename(filename: String): Pool {
+        //TODO: seems that JVM version does not work on Mac OS. Ensure that it works on Ubuntu. Prepare instructions to setup macos env
+        Pool.setProtocolVersion(2)
+        return truncateCreateAndOpen(filename)
+    }
+
     suspend fun openOrCreateCustomGenesis(
-        genesisMode: IndyLedgerConnectorConfiguration.GenesisMode,
+        genesisMode: GenesisMode,
         ipAddress: String?,
         dir: String,
         generatedGenesisFileName: String = "genesis.txn"
@@ -96,5 +124,18 @@ object PoolHelper {
         val filename = genesysGenerator.initGenesisFile()
 
         return openOrCreateFromFilename(filename)
+    }
+
+    suspend fun recreateCustomGenesis(
+        genesisMode: GenesisMode,
+        ipAddress: String?,
+        dir: String,
+        generatedGenesisFileName: String = "genesis.txn"
+    ): Pool {
+        val genesysGenerator =
+            GenesisGenerator(genesisMode, ipAddress, dir, generatedGenesisFileName)
+        val filename = genesysGenerator.initGenesisFile()
+
+        return truncateCreateAndOpenFromFilename(filename)
     }
 }
