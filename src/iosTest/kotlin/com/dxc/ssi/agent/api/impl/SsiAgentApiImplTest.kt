@@ -3,6 +3,7 @@ package com.dxc.ssi.agent.api.impl
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
 import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
@@ -14,6 +15,7 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
+import com.dxc.ssi.agent.ledger.indy.GenesisMode
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.model.PeerConnection
@@ -63,7 +65,7 @@ class SsiAgentApiImplTest {
         val indyWalletConnector = IndyWalletConnector.build(walletHolder)
 
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-            genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
+            genesisMode = GenesisMode.IP,
             ipAddress = "192.168.0.117"
         )
 
@@ -74,8 +76,6 @@ class SsiAgentApiImplTest {
             .withLedgerConnector(IndyLedgerConnector(indyLedgerConnectorConfiguration))
             .build()
 
-        ssiAgentApi.init()
-
 
         val issuerInvitationUrl =
             "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIjNGV3NHOUhZbzdzYjdjeHppRVBUb3ZaRGdjbko4cGFWWmNxWkVwRUZHOVluIl0sInJlY2lwaWVudEtleXMiOlsiOVNONEJBbUZhZW1QYlloWWphRHRWVWJqRnpZR0x0aXQ5ZnVnRmo3UlREYXYiXSwiQGlkIjoiMmJlNGZmZWYtM2I1NS00MTA4LWE5ZmMtZWM2NGQ5YjZjMjdjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
@@ -83,14 +83,28 @@ class SsiAgentApiImplTest {
         val verifierInvitationUrl =
             "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiNjUyYksyZzFlS3llcFZvQTJyU2dLQzZETFVqSGpRWEpyNXQzeUdYS0d5dW0iXSwicmVjaXBpZW50S2V5cyI6WyJHSmRNSncycktjRmk4aWgydGpKcHhiVWlLbnF2VlhKM2hrRXhMUGVMTUU3VyJdLCJAaWQiOiIwODQzYzUzZC00YjYwLTRjMDUtYTg2NS1hNzVkNDRiZWM3YTYiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0=="
 
-        println("Connecting to issuer")
-        ssiAgentApi.connect(issuerInvitationUrl)
 
-        //TODO: ensure that connection can be established without delay between two connections
-        //Sleeper().sleep(4000)
 
-        println("Connecting to verifier")
-        ssiAgentApi.connect(verifierInvitationUrl)
+        ssiAgentApi.init(object : LibraryStateListener {
+            override fun initializationCompleted() {
+                println("Connecting to issuer")
+                ssiAgentApi.connect(issuerInvitationUrl)
+
+                //TODO: ensure that connection can be established without delay between two connections
+                //Sleeper().sleep(4000)
+
+                println("Connecting to verifier")
+                ssiAgentApi.connect(verifierInvitationUrl)
+            }
+
+            override fun initializationFailed() {
+                TODO("Not yet implemented")
+            }
+        })
+
+
+
+
 
         Sleeper().sleep(500000)
 

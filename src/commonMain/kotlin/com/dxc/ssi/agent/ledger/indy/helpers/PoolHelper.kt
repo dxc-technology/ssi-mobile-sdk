@@ -1,6 +1,6 @@
 package com.dxc.ssi.agent.ledger.indy.helpers
 
-import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
+import com.dxc.ssi.agent.ledger.indy.GenesisMode
 import com.dxc.ssi.agent.ledger.indy.genesis.GenesisGenerator
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool
 import com.dxc.ssi.agent.ledger.indy.libindy.PoolJSONParameters
@@ -86,7 +86,7 @@ object PoolHelper {
     }
 
     suspend fun openOrCreateCustomGenesis(
-        genesisMode: IndyLedgerConnectorConfiguration.GenesisMode,
+        genesisMode: GenesisMode,
         ipAddress: String?,
         dir: String,
         generatedGenesisFileName: String = "genesis.txn"

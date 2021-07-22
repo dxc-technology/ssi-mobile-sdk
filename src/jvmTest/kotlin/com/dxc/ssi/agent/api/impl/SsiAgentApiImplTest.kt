@@ -4,6 +4,7 @@ import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletCreationStrategy
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
@@ -78,33 +79,30 @@ class SsiAgentApiImplTest {
             .withLedgerConnector(IndyLedgerConnector(IndyLedgerConnectorConfiguration(genesisFilePath = "/home/ivan/IdeaProjects/dxc/Lumedic/ssi-mobile-sdk/files/sovrin_buildernet_genesis.txt")))
             .build()
 
-        ssiAgentApi.init()
-
-
         val invitationUrl =
             "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiM2tqcWJCOTR6UGVSN0t6RExMdUdtYndFQnpleGNTakV1NmNZaVF2SEdieWoiXSwiQGlkIjoiNTcyYzBiM2MtMzk5YS00NTRlLWEzZTEtM2FiNjM1MGY3ZDM1IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
-        println("Connecting to issuer")
-        val connection = ssiAgentApi.connect(invitationUrl, keepConnectionAlive = true)
-        println("Connected to issuer")
+        ssiAgentApi.init(object: LibraryStateListener {
+            override fun initializationCompleted() {
 
-        Sleeper().sleep(10_000)
+                println("Connecting to issuer")
+                val connection = ssiAgentApi.connect(invitationUrl, keepConnectionAlive = true)
+                println("Connected to issuer")
 
-        /*
-        GlobalScope.launch {
-            ssiAgentApi.getTransport().disconnect(connection)
-            Sleeper().sleep(2_000)
-            ssiAgentApi.reconnect(connection)
-        }
-        */
+            }
+
+            override fun initializationFailed() {
+                TODO("Not yet implemented")
+            }
+        })
 
 
-        Sleeper().sleep(10000)
-        /*
-        println("Abandoning connection")
-        ssiAgentApi.abandonConnection(connection, notifyPeerBeforeAbandoning = true)
-*/
+
+
+
+
+
 
         Sleeper().sleep(500000)
 

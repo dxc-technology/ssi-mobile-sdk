@@ -1,9 +1,9 @@
 package com.dxc.ssi.agent.api
 
+import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
-import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.model.OfferResponseAction
@@ -12,7 +12,7 @@ import com.dxc.ssi.agent.model.PeerConnectionState
 
 interface SsiAgentApi {
     // Library wide actions
-    fun init()
+    fun init(libraryStateListener: LibraryStateListener)
     fun shutdown(force: Boolean)
 
     //Get pluggable implementations

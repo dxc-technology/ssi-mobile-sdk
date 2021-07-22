@@ -1,7 +1,7 @@
 package com.dxc.ssi.agent.api.impl
 
+import co.touchlab.stately.freeze
 import com.dxc.ssi.agent.api.Callbacks
-import com.dxc.ssi.agent.api.Environment
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.SsiAgentBuilder
 import com.dxc.ssi.agent.api.callbacks.connection.StatefulConnectionController
@@ -15,11 +15,9 @@ import com.dxc.ssi.agent.api.callbacks.verification.CredVerifierController
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
-import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.transport.WebSocketTransportImpl
-import com.dxc.ssi.agent.wallet.indy.*
 
 class SsiAgentBuilderImpl(private val walletConnector: WalletConnector) : SsiAgentBuilder {
 
@@ -60,7 +58,7 @@ class SsiAgentBuilderImpl(private val walletConnector: WalletConnector) : SsiAge
             walletConnector = walletConnector!!,
             ledgerConnector = ledgerConnector!!,
             callbacks = callbacks
-        )
+        ).freeze()
 
     }
 

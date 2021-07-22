@@ -2,6 +2,7 @@ package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.SsiAgentApi
+import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
@@ -60,38 +61,52 @@ class SsiAgentApiImpl(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun init() {
+    override fun init(libraryStateListener: LibraryStateListener) {
 
         if (!EnvironmentUtils.environmentInitizlized)
             throw RuntimeException("Please initialize environment before initializing SsiAgentApiImpl")
 
 
         println("Before running agentScope.async")
-        CoroutineHelper.waitForCompletion(agentScope.async {
-            println("Before initializing ledgerConnector")
-            ledgerConnector.init()
-            //TODO: combine it into single function
-            walletConnector.walletHolder.openWalletOrFail()
-            walletConnector.walletHolder.initializeDid()
-            ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
-            println("Set ledgerConnectorDid")
-
-            if (walletConnector.prover != null) {
-                walletConnector.prover.createMasterSecret(Configuration.masterSecretId)
-            }
-        })
-
         agentScope.launch {
-            withContext(mainListenerSingleThreadDispatcher.context) {
-                messageListener.listen()
+            try {
+                println("Before initializing ledgerConnector")
+                ledgerConnector.init()
+                //TODO: combine it into single function
+                walletConnector.walletHolder.openWalletOrFail()
+                walletConnector.walletHolder.initializeDid()
+                ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
+                println("Set ledgerConnectorDid")
+
+                if (walletConnector.prover != null) {
+                    walletConnector.prover.createMasterSecret(Configuration.masterSecretId)
+                }
+
+                println("init: initialized ledger and wallet")
+
+                agentScope.launch {
+                    withContext(mainListenerSingleThreadDispatcher.context) {
+                        messageListener.listen()
+                    }
+                }
+
+                println("init: initialized message listener")
+
+                agentScope.launch {
+                    withContext(trustPingListenerSingleThreadDispatcher.context) {
+                        services.connectionsTrackerService!!.start()
+                    }
+                }
+
+                println("init: initialized trust ping tracker service")
+
+                libraryStateListener.initializationCompleted()
+            } catch (t: Throwable) {
+                libraryStateListener.initializationFailed()
             }
+
         }
 
-        agentScope.launch {
-            withContext(trustPingListenerSingleThreadDispatcher.context) {
-                services.connectionsTrackerService!!.start()
-            }
-        }
     }
 
     override fun connect(url: String, keepConnectionAlive: Boolean): PeerConnection {
@@ -214,11 +229,17 @@ class SsiAgentApiImpl(
             })
     }
 
-    override fun processParkedCredentialOffer(credentialOfferContainer: CredentialOfferContainer, offerResponseAction: OfferResponseAction) {
+    override fun processParkedCredentialOffer(
+        credentialOfferContainer: CredentialOfferContainer,
+        offerResponseAction: OfferResponseAction
+    ) {
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
                 //TODO: fix NPE
-                messageListener.messageRouter.processors.credIssuerProcessor!!.processParkedCredentialOffer(credentialOfferContainer, offerResponseAction)
+                messageListener.messageRouter.processors.credIssuerProcessor!!.processParkedCredentialOffer(
+                    credentialOfferContainer,
+                    offerResponseAction
+                )
             })
     }
 

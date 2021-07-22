@@ -1,10 +1,11 @@
 package com.dxc.ssi.agent.ledger.indy.genesis
 
+import com.dxc.ssi.agent.ledger.indy.GenesisMode
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.utils.FileUtils
 
 class GenesisGenerator(
-    private val genesisMode: IndyLedgerConnectorConfiguration.GenesisMode,
+    private val genesisMode: GenesisMode,
     private val indyPoolIp: String?,
     private val dir: String,
     private val generatedGenesisFileName: String = "genesys.txn"
@@ -13,10 +14,10 @@ class GenesisGenerator(
     fun initGenesisFile(): String {
 
         val genesisContent = when (genesisMode) {
-            IndyLedgerConnectorConfiguration.GenesisMode.IP -> buildLocalDevIndyPoolGenesisWithIp(indyPoolIp!!)
-            IndyLedgerConnectorConfiguration.GenesisMode.SOVRIN_BUILDERNET -> sovrinBuilderNetPoolGenesis
-            IndyLedgerConnectorConfiguration.GenesisMode.SOVRIN_STAGENET -> sovrinStagingNetPoolGenesis
-            IndyLedgerConnectorConfiguration.GenesisMode.SOVRIN_MAINNET -> sovrinMainNetPoolGenesis
+            GenesisMode.IP -> buildLocalDevIndyPoolGenesisWithIp(indyPoolIp!!)
+            GenesisMode.SOVRIN_BUILDERNET -> sovrinBuilderNetPoolGenesis
+            GenesisMode.SOVRIN_STAGENET -> sovrinStagingNetPoolGenesis
+            GenesisMode.SOVRIN_MAINNET -> sovrinMainNetPoolGenesis
             else -> throw IllegalArgumentException()
         }
 
