@@ -13,70 +13,117 @@ var ssiAgentApi: SsiAgentApi? = nil
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window : UIWindow?
-    let myWalletName = "newWalletName5"
-    let myWalletPassword = "newWalletPassword"
-    let myDid = "4PCVFCeZbKXyvgjCedbXDx"
+    
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     
         let cic = ConnectionInitiatorControllerImpl()
         let crc = CredentialReceiverControllerImpl()
         let cpc = CredPresenterControllerImpl()
+        let lsl = LibraryStateListenerImpl()
+       
+        
+        
+            
+            let myWalletName = "newWalletName5"
+            let myWalletPassword = "newWalletPassword"
+            let myDid = "4PCVFCeZbKXyvgjCedbXDx"
+        
+       // ToBeReworked.init().enableIndyLog()
+        
         
 
-        EnvironmentUtils().doInitEnvironment(environment: EnvironmentImpl())
-
-        let walletManager = IndyWalletManager.Companion()
-
-
-        if (!walletManager.isWalletExistsAndOpenable(walletName: myWalletName, walletPassword: myWalletPassword)) {
-            print("Recreating wallet")
-            walletManager.createWallet(walletName: myWalletName, walletPassword: myWalletPassword, walletCreationStrategy: WalletCreationStrategy.truncateandcreate)}
-
-
-        if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
-            print("Recreating did")
-            let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
-                didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
-                walletName : myWalletName, walletPassword:myWalletPassword)
-
-            print("Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())")
-            //Store did somewhere in your application to use it afterwards
-        }
-
-        let walletHolder = IndyWalletHolder(
-            walletName : myWalletName,
-            walletPassword :myWalletPassword,
-            didConfig : DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil)
-        )
-
-        let indyWalletConnector = IndyWalletConnector().build(walletHolder: walletHolder)
-
-
-        let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-            genesisFilePath: "genesis.txt",
-            ipAddress: "",
-            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.sovrinBuildernet,
-            generatedGenesysFileName: "genesis.txn",
-            retryTimes: 5,
-            retryDelayMs: 5000)
+        DispatchQueue.global().async {
+          
         
-        ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
-                .withConnectionInitiatorController(connectionInitiatorController: cic)
-                .withCredReceiverController(credReceiverController: crc)
-                .withCredPresenterController(credPresenterController: cpc)
-                .withLedgerConnector(ledgerConnector: IndyLedgerConnector(indyLedgerConnectorConfiguration: indyLedgerConnectorConfiguration))
+            let group = DispatchGroup()
+            
+            group.enter()
+            
+            DispatchQueue.main.async {
+                EnvironmentUtils().doInitEnvironment(environment:EnvironmentImpl())
+                group.leave()
+            }
+          
+           
+       
+            group.notify(queue: .main) {
+                
+                let walletManager = IndyWalletManager.Companion()
+
+                print("Before creating wallet")
+                
+              
+                let indyHomeEnv = getEnvironmentVar( "INDY_HOME")
+                print("Env INDY_HOME=", indyHomeEnv)
+                
+                if (!walletManager.isWalletExistsAndOpenable(walletName: myWalletName, walletPassword: myWalletPassword)) {
+                    print("Recreating wallet")
+                    walletManager.createWallet(walletName: myWalletName, walletPassword: myWalletPassword, walletCreationStrategy: WalletCreationStrategy.truncateandcreate)}
+
+                print("Before creating did")
+                
+                if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
+                    print("Recreating did")
+                    let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
+                        didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
+                        walletName : myWalletName, walletPassword:myWalletPassword)
+
+                    print("Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())")
+                    //Store did somewhere in your application to use it afterwards
+                }
+
+                print("Before creating wallet holder")
+                
+                
+
+                
+                let walletHolder = IndyWalletHolder(
+                    walletName : myWalletName,
+                    walletPassword :myWalletPassword,
+                    didConfig : DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil)
+                )
+                print("Before creating wallet connector")
+                
+                let indyWalletConnector = IndyWalletConnector().build(walletHolder: walletHolder)
+
+
+
+            let indyLedgerConnector = IndyLedgerConnectorBuilder()
+                .withGenesisMode(genesisMode: GenesisMode.sovrinBuildernet)
                 .build()
+                
+                print("Before creating ssiAgentApi")
+                
+                ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
+                        .withConnectionInitiatorController(connectionInitiatorController: cic)
+                        .withCredReceiverController(credReceiverController: crc)
+                        .withCredPresenterController(credPresenterController: cpc)
+                        .withLedgerConnector(ledgerConnector: indyLedgerConnector)
+                        .build()
+           
+            
         
-        ssiAgentApi.unsafelyUnwrapped.doInit()
+                print("Before initialization")
+                ssiAgentApi.unsafelyUnwrapped.doInit(libraryStateListener:lsl)
+                print("After initialize fun called")
+                
+                
+            }
+            
+           
+        }
+        
+     //   sleep(10000)
+      //  return true
 
-
-        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiM3FNNzRCTmJndEtTR0ZobW16WWFNZFVFWUZrd3BtN1hBRUFHWlkzWjMzS1giXSwiQGlkIjoiOTJmMjk0ZTMtOTFkOC00ODQxLWFhZDAtYzk5ZTg2NzlhMWQ4IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9f", keepConnectionAlive: true)
-
+        
       
-        sleep(10000)
-        ssiAgentApi.unsafelyUnwrapped.abandonConnection(connection: connection, force: true, notifyPeerBeforeAbandoning : false)
-        ssiAgentApi.unsafelyUnwrapped.shutdown(force: true)
+       // sleep(10000)
+        return true
+        /*
+        ssiAgentApi.abandonConnection(connection: connection, force: true, notifyPeerBeforeAbandoning : false)
+        ssiAgentApi.shutdown(force: true)
         // Override point for customization after application launch.
     
                     if #available(iOS 13, *) {
@@ -89,9 +136,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         self.window!.backgroundColor = .red
                     }
                     return true
-                        
+         */
     }
+
      
+}
+
+func getEnvironmentVar(_ name: String) -> String? {
+    guard let rawValue = getenv(name) else { return nil }
+    return String(utf8String: rawValue)
 }
 
 class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
@@ -122,6 +175,20 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 }
 
 
+class LibraryStateListenerImpl : LibraryStateListener {
+    func initializationCompleted()  {
+       print("Listener: Initialization completed")
+        
+        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiRHpQU2lFM2Q0ZmFOM1RBbU1EVXFNbU5wN0xzaFk1YTFOOWVXWVZrb2dncGciXSwiQGlkIjoiN2U4ZmQ1OWYtMjk3OC00ZDdlLWFmOGYtMTIwYWRhZjYzNTA3IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
+
+        
+    }
+    
+    func initializationFailed()  {
+        print("Listener: Initialization failed")
+    }
+}
+
 class CredentialReceiverControllerImpl: CredReceiverController {
     func onProblemReport(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
@@ -132,19 +199,36 @@ class CredentialReceiverControllerImpl: CredReceiverController {
     }
     
     func onDone(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
+        
+       /*
+        DispatchQueue.global().async {
+            Sleeper().sleep(value: 5000)
+            
+            print("Getting credentials from wallet")
+            let credInfos = ssiAgentApi.unsafelyUnwrapped.getCredentialInfos().map {$0 as! IndyCredInfo}
+            
+            print("Got")
+            
+            print(credInfos)
+            
+            credInfos.forEach { credInfo in
+                print("retrieving first cred")
+                let cred = ssiAgentApi.unsafelyUnwrapped.getCredentialInfo(localWalletCredId: credInfo.referent)
+                
+                print(cred)
+            }
+            
+        
+        }
+        */
         return CallbackResult(canProceedFurther: true)
     }
     
     func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> OfferResponseAction {
         
-        DispatchQueue.global().async {
-            Sleeper().sleep(value: 10000)
-            ssiAgentApi.unsafelyUnwrapped.getParkedCredentialOffers().forEach { credentialOfferContainer in
-                ssiAgentApi.unsafelyUnwrapped.processParkedCredentialOffer(credentialOfferContainer: credentialOfferContainer, offerResponseAction: OfferResponseAction.accept)
-            }
-        }
+       
         
-        return OfferResponseAction.park
+        return OfferResponseAction.accept
     }
     
     func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {

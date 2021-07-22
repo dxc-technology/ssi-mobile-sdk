@@ -92,6 +92,13 @@ actual class Anoncreds {
             ).get()
         }
 
+        actual suspend fun proverGetCredential(
+            wallet: Wallet,
+            credId: String
+        ): String {
+            return Anoncreds.proverGetCredential(wallet.wallet, credId).get()
+        }
+
 
     }
 }

@@ -3,9 +3,11 @@ package com.dxc.ssi.agent.api.pluggable.wallet
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.didcomm.model.common.RawData
 import com.dxc.ssi.agent.didcomm.model.common.Thread
+import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
+import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
 import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
@@ -138,6 +140,8 @@ interface Prover {
     fun extractPresentationDataFromPresentation(presentation: Presentation): RawData
     suspend fun getParkedCredentialOffers(): Set<CredentialOfferContainer>
     suspend fun findCredentialExchangeRecordsWithState(credentialIssuenceState: CredentialIssuenceState): Set<CredentialExchangeRecord>
+    suspend fun getCredentialInfos(): Set<CredentialInfo>
+    suspend fun getCredentialInfo(localWalletCredId: String): CredentialInfo
 
 
 }

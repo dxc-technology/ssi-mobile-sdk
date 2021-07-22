@@ -10,11 +10,12 @@ import com.dxc.ssi.agent.didcomm.model.common.Thread
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
+import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
 import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
-import com.dxc.ssi.agent.exceptions.indy.DuplicateMasterSecretNameException
 import com.dxc.ssi.agent.exceptions.common.NoCredentialToSatisfyPresentationRequestException
+import com.dxc.ssi.agent.exceptions.indy.DuplicateMasterSecretNameException
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import com.dxc.ssi.agent.ledger.indy.helpers.TailsHelper
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
@@ -22,10 +23,7 @@ import com.dxc.ssi.agent.utils.JsonUtils
 import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletQueryHelper
-import com.dxc.ssi.agent.wallet.indy.libindy.Anoncreds
-import com.dxc.ssi.agent.wallet.indy.libindy.CredentialsSearchForProofReq
-import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
-import com.dxc.ssi.agent.wallet.indy.libindy.WalletRecord
+import com.dxc.ssi.agent.wallet.indy.libindy.*
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import com.dxc.ssi.agent.wallet.indy.model.issue.*
@@ -37,7 +35,6 @@ import com.dxc.utils.Base64
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 
 class IndyProver(val walletHolder: WalletHolder) : Prover {
@@ -218,8 +215,36 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
             .map {
                 println(it.value)
                 it.value
-            }.map<String, CredentialExchangeRecord> { IndySerializationUtils.jsonProcessor.decodeFromString(it) }.toSet()
+            }.map<String, CredentialExchangeRecord> { IndySerializationUtils.jsonProcessor.decodeFromString(it) }
+            .toSet()
 
+    }
+
+    override suspend fun getCredentialInfos(): Set<CredentialInfo> {
+
+        val queryJson = "{}"
+
+        val credentialsSearch = CredentialsSearch()
+
+        credentialsSearch.open(walletHolder.getWallet() as Wallet, queryJson)
+
+        //TODO: implement batches instead of hardcoded 200 creds
+        val credentialsJson = credentialsSearch.fetchNextCredentials(200)
+
+        println("Retrieved  credentialsJson: $credentialsJson")
+
+        val credentialInfos =
+            IndySerializationUtils.jsonProcessor.decodeFromString<List<IndyCredInfo>>(credentialsJson)
+
+        credentialsSearch.closeSearch()
+
+        return credentialInfos.toSet()
+
+    }
+
+    override suspend fun getCredentialInfo(localWalletCredId: String): CredentialInfo {
+        val credentialInfoJson = Anoncreds.proverGetCredential(walletHolder.getWallet() as Wallet, localWalletCredId)
+        return IndySerializationUtils.jsonProcessor.decodeFromString<IndyCredInfo>(credentialInfoJson)
     }
 
     override fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): RawData {

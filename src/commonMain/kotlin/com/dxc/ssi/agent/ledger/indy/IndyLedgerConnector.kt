@@ -21,7 +21,7 @@ import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
 import kotlinx.serialization.decodeFromString
 
-class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnectorConfiguration) : LedgerConnector {
+class IndyLedgerConnector internal constructor(val indyLedgerConnectorConfiguration: IndyLedgerConnectorConfiguration) : LedgerConnector {
     //TODO: decide if this is proper place for storing did or it should be somewhere in common module and probably out of ledger connector at all , since our did is more than about ledger
     override var did: String
         get() = isoDid.access { it.obj }!!
@@ -36,10 +36,10 @@ class IndyLedgerConnector(val indyLedgerConnectorConfiguration: IndyLedgerConnec
         //TODO: think where to store and initialize pool variable
         try {
             val pool =
-                if (indyLedgerConnectorConfiguration.genesisMode == IndyLedgerConnectorConfiguration.GenesisMode.FILE) {
+                if (indyLedgerConnectorConfiguration.genesisMode == GenesisMode.FILE) {
                     PoolHelper.openOrCreateFromFilename(indyLedgerConnectorConfiguration.genesisFilePath)
                 } else {
-                    PoolHelper.openOrCreateCustomGenesis(
+                    PoolHelper.recreateCustomGenesis(
                         indyLedgerConnectorConfiguration.genesisMode,
                         indyLedgerConnectorConfiguration.ipAddress,
                         EnvironmentUtils.writableUserHomePath,

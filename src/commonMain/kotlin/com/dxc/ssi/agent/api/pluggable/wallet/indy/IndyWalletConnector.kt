@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.api.pluggable.wallet.indy
 
+import co.touchlab.stately.freeze
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
 import com.dxc.ssi.agent.wallet.indy.*
@@ -16,6 +17,6 @@ object IndyWalletConnector {
             verifier = IndyVerifier(walletHolder),
             trustee = IndyTrustee(walletHolder),
             walletHolder = walletHolder
-        )
+        ).freeze()
     }
 }
