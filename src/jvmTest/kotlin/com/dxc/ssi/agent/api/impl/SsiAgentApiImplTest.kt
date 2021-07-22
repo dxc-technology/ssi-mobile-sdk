@@ -17,8 +17,7 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
-import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
-import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorBuilder
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
@@ -72,18 +71,23 @@ class SsiAgentApiImplTest {
 
         val indyWalletConnector = IndyWalletConnector.build(walletHolder)
 
+
+        val indyLedgerConnector = IndyLedgerConnectorBuilder()
+            .withGenesisFilePath("/home/ivan/IdeaProjects/dxc/Lumedic/ssi-mobile-sdk/files/sovrin_buildernet_genesis.txt")
+            .build()
+
         ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())
             .withCredPresenterController(CredPresenterControllerImpl())
-            .withLedgerConnector(IndyLedgerConnector(IndyLedgerConnectorConfiguration(genesisFilePath = "/home/ivan/IdeaProjects/dxc/Lumedic/ssi-mobile-sdk/files/sovrin_buildernet_genesis.txt")))
+            .withLedgerConnector(indyLedgerConnector)
             .build()
 
         val invitationUrl =
-            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiM2tqcWJCOTR6UGVSN0t6RExMdUdtYndFQnpleGNTakV1NmNZaVF2SEdieWoiXSwiQGlkIjoiNTcyYzBiM2MtMzk5YS00NTRlLWEzZTEtM2FiNjM1MGY3ZDM1IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMlpkelVDRzJyTUhjb0Y3TjdvU2dwV2JHd3p6enA1eExReFZ2MmdFRWpveDYiXSwiQGlkIjoiYTM1MTZiNWMtYjcxOC00NDFiLWFlNTYtN2ZjODg3N2FjMTk0IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
-        ssiAgentApi.init(object: LibraryStateListener {
+        ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
 
                 println("Connecting to issuer")

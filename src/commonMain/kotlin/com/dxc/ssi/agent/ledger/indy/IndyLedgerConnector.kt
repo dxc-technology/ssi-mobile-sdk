@@ -39,7 +39,7 @@ class IndyLedgerConnector internal constructor(val indyLedgerConnectorConfigurat
                 if (indyLedgerConnectorConfiguration.genesisMode == GenesisMode.FILE) {
                     PoolHelper.openOrCreateFromFilename(indyLedgerConnectorConfiguration.genesisFilePath)
                 } else {
-                    PoolHelper.openOrCreateCustomGenesis(
+                    PoolHelper.recreateCustomGenesis(
                         indyLedgerConnectorConfiguration.genesisMode,
                         indyLedgerConnectorConfiguration.ipAddress,
                         EnvironmentUtils.writableUserHomePath,

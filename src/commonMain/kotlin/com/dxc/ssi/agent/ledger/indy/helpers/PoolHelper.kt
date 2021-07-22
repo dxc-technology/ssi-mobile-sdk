@@ -21,6 +21,12 @@ object PoolHelper {
         return FileUtils.fileExists(poolDir)
     }
 
+    fun truncate(poolName: String) {
+        val poolDir = EnvironmentUtils.getIndyPoolPath(poolName)
+        FileUtils.deleteRecursively(poolDir)
+
+    }
+
     /**
      * Creates pool ledger with [genesisFile] and [poolName]
      *
@@ -73,16 +79,38 @@ object PoolHelper {
             null
         )
     ): Pool {
+
         if (!exists(poolName))
             createNonExisting(genesisFile, poolName)
 
         return openExisting(poolName, poolConfig)
     }
 
+    suspend fun truncateCreateAndOpen(
+        genesisFile: String,
+        poolName: String = DEFAULT_POOL_NAME,
+        poolConfig: PoolJSONParameters.OpenPoolLedgerJSONParameter = PoolJSONParameters.OpenPoolLedgerJSONParameter(
+            null,
+            null
+        )
+    ): Pool {
+
+        truncate(poolName)
+        createNonExisting(genesisFile, poolName)
+        return openExisting(poolName, poolConfig)
+    }
+
+
     suspend fun openOrCreateFromFilename(filename: String): Pool {
         //TODO: seems that JVM version does not work on Mac OS. Ensure that it works on Ubuntu. Prepare instructions to setup macos env
         Pool.setProtocolVersion(2)
         return openOrCreate(filename)
+    }
+
+    suspend fun truncateCreateAndOpenFromFilename(filename: String): Pool {
+        //TODO: seems that JVM version does not work on Mac OS. Ensure that it works on Ubuntu. Prepare instructions to setup macos env
+        Pool.setProtocolVersion(2)
+        return truncateCreateAndOpen(filename)
     }
 
     suspend fun openOrCreateCustomGenesis(
@@ -96,5 +124,18 @@ object PoolHelper {
         val filename = genesysGenerator.initGenesisFile()
 
         return openOrCreateFromFilename(filename)
+    }
+
+    suspend fun recreateCustomGenesis(
+        genesisMode: GenesisMode,
+        ipAddress: String?,
+        dir: String,
+        generatedGenesisFileName: String = "genesis.txn"
+    ): Pool {
+        val genesysGenerator =
+            GenesisGenerator(genesisMode, ipAddress, dir, generatedGenesisFileName)
+        val filename = genesysGenerator.initGenesisFile()
+
+        return truncateCreateAndOpenFromFilename(filename)
     }
 }
