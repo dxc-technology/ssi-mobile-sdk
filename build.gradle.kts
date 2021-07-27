@@ -59,11 +59,9 @@ kotlin {
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
-                val socketlib by cinterops.creating {
-                    defFile(project.file("$projectDir/socketlib/socketlib.def"))
-                    extraOpts("-libraryPath", "$projectDir/socketlib")
-                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
-                }
+            }
+            binaries.all {
+                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
             }
         }
     } else {
@@ -75,11 +73,9 @@ kotlin {
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
-                val socketlib by cinterops.creating {
-                    defFile(project.file("$projectDir/socketlib/socketlib.def"))
-                    extraOpts("-libraryPath", "$projectDir/socketlib")
-                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
-                }
+            }
+            binaries.all {
+                  linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
             }
         }
     }
