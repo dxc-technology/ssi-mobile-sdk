@@ -5,10 +5,12 @@ import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
+import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
+import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 
 interface SsiAgentApi {
     // Library wide actions
@@ -44,13 +46,24 @@ interface SsiAgentApi {
     //TODO: understand proper signature for this function
     fun issueCredentialOverConnection(connection: PeerConnection)
 
+    // Presentation management
+
+    fun getParkedPresentationRequests(): Set<PresentationRequestContainer>
+
+    fun processParkedPresentationRequest(
+        presentationRequestContainer: PresentationRequestContainer,
+        presentationRequestResponseAction: PresentationRequestResponseAction
+    )
+
+    //TODO: understand proper signature for this function
+    fun requestProofOverConnection(connection: PeerConnection)
+
     // uncategorized
 
     //TODO: add timeout and sync/async modifier
     fun sendTrustPing(connection: PeerConnection): Boolean
 
-    //TODO: understand proper signature for this function
-    fun requestProofOverConnection(connection: PeerConnection)
+
 
 
 }

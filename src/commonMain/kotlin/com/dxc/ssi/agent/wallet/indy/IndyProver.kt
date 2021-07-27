@@ -10,15 +10,18 @@ import com.dxc.ssi.agent.didcomm.model.common.Thread
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
+import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
 import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
+import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationState
 import com.dxc.ssi.agent.exceptions.common.NoCredentialToSatisfyPresentationRequestException
 import com.dxc.ssi.agent.exceptions.indy.DuplicateMasterSecretNameException
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import com.dxc.ssi.agent.ledger.indy.helpers.TailsHelper
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
+import com.dxc.ssi.agent.model.PresentationExchangeRecord
 import com.dxc.ssi.agent.utils.JsonUtils
 import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
@@ -161,6 +164,49 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         }
     }
 
+    //TODO: Unify it with CredentialExchangeRecord
+    override suspend fun storePresentationExchangeRecord(presentationExchangeRecord: PresentationExchangeRecord) {
+        val existingPresentationExchangeRecord =
+            getPresentationExchangeRecordByThread(presentationExchangeRecord.thread)
+
+
+        val value = IndySerializationUtils.jsonProcessor.encodeToString(presentationExchangeRecord)
+
+        println("Serialized presentationExchange record = $value")
+
+        val tagsJson =
+            "{\"${WalletRecordTag.PresentationExchangeRecordState.name}\": \"${presentationExchangeRecord.state.name}\"}"
+
+        if (existingPresentationExchangeRecord == null) {
+
+            WalletRecord.add(
+                walletHolder.getWallet() as Wallet,
+                WalletRecordType.PresentationExchangeRecord.name,
+                presentationExchangeRecord.thread.thid,
+                value,
+                tagsJson
+            )
+
+        } else {
+
+            WalletRecord.updateValue(
+                walletHolder.getWallet() as Wallet,
+                WalletRecordType.PresentationExchangeRecord.name,
+                presentationExchangeRecord.thread.thid,
+                value
+            )
+            WalletRecord.updateTags(
+                walletHolder.getWallet() as Wallet,
+                WalletRecordType.PresentationExchangeRecord.name,
+                presentationExchangeRecord.thread.thid,
+                tagsJson
+            )
+
+
+        }
+
+    }
+
     override suspend fun getCredentialExchangeRecordByThread(thread: Thread): CredentialExchangeRecord? {
 
         //TODO: use some serializable data structure
@@ -189,14 +235,32 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
             )
         } catch (w: WalletItemNotFoundException) {
             null //this will be the case for ios
-        } catch (e: Exception) { //TODO: unify this check with the explicit exception as above. For this we will need to implement exceptions on common level for JVM and android impementations
-//this will be the case for Android and JVM. To be unified
-            if (e.message!!.contains("WalletItemNotFoundException"))
-                null
-            else
-                throw e
         }
 
+    }
+
+    //TODO: unify with credential exchange record
+    override suspend fun getPresentationExchangeRecordByThread(thread: Thread): PresentationExchangeRecord? {
+        //TODO: use some serializable data structure
+        val options = "{\"retrieveType\" : true}"
+
+        //TODO: find out better solution of looking up for connection
+        return try {
+            val retrievedValue =
+                WalletRecord.get(
+                    walletHolder.getWallet() as Wallet,
+                    WalletRecordType.PresentationExchangeRecord.name,
+                    thread.thid,
+                    options
+                )
+            IndySerializationUtils.jsonProcessor.decodeFromString<PresentationExchangeRecord>(
+                JsonUtils.extractValue(
+                    retrievedValue
+                )
+            )
+        } catch (w: WalletItemNotFoundException) {
+            null //this will be the case for ios
+        }
     }
 
     override suspend fun findCredentialExchangeRecordsWithState(credentialIssuenceState: CredentialIssuenceState): Set<CredentialExchangeRecord> {
@@ -219,6 +283,28 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
             .toSet()
 
     }
+
+    //TODO: Unify with Credential Exchange Records
+    override suspend fun findPresentationExchangeRecordsWithState(credentialVerificationState: CredentialVerificationState): Set<PresentationExchangeRecord> {
+        val query =
+            "{\"${WalletRecordTag.PresentationExchangeRecordState.name}\": \"${credentialVerificationState.name}\"}"
+        val retrievedWalletRecords = WalletQueryHelper.queryWalletRecords(
+            walletHolder.getWallet() as Wallet,
+            WalletRecordType.PresentationExchangeRecord,
+            query
+        )
+
+        if (retrievedWalletRecords.totalCount == null || retrievedWalletRecords.totalCount == 0)
+            return emptySet()
+
+        return retrievedWalletRecords.records!!
+            .map {
+                println(it.value)
+                it.value
+            }.map<String, PresentationExchangeRecord> { IndySerializationUtils.jsonProcessor.decodeFromString(it) }
+            .toSet()
+    }
+
 
     override suspend fun getCredentialInfos(): Set<CredentialInfo> {
 
@@ -591,6 +677,13 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         return findCredentialExchangeRecordsWithState(CredentialIssuenceState.OFFER_RECEIVED)
             .filter { it.isParked }
             .mapNotNull { it.credentialOfferContainer }
+            .toSet()
+    }
+
+    override suspend fun getParkedPresentationRequests(): Set<PresentationRequestContainer> {
+        return findPresentationExchangeRecordsWithState(CredentialVerificationState.REQUEST_RECEIVED)
+            .filter { it.isParked }
+            .mapNotNull { it.presentationRequestContainer }
             .toSet()
     }
 
