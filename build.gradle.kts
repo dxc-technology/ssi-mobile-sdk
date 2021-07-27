@@ -61,7 +61,7 @@ kotlin {
                 }
             }
             binaries.all {
-                linkerOpts("-L/Users/kkamyczek/client/ssi-mobile-sdk/socketlib", "-lPocketSocket")
+                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
             }
         }
     } else {
@@ -75,7 +75,7 @@ kotlin {
                 }
             }
             binaries.all {
-                  linkerOpts("-L/Users/kkamyczek/client/ssi-mobile-sdk/socketlib", "-lPocketSocket")
+                  linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
             }
         }
     }
