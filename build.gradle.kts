@@ -82,7 +82,9 @@ kotlin {
 
     cocoapods {
         pod("PocketSocket") {
-            version = "~> 1.0.1"
+            source = git("https://github.com/zwopple/PocketSocket") {
+                tag = "1.0.1"
+            }
         }
 
         summary = "Kotlin sample project with CocoaPods dependencies"
