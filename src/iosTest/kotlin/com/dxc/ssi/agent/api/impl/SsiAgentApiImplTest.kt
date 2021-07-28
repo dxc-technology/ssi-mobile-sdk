@@ -21,6 +21,7 @@ import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.OfferResponseAction
+import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.utils.ToBeReworked
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
@@ -114,8 +115,8 @@ class SsiAgentApiImplTest {
         override fun onRequestReceived(
             connection: PeerConnection,
             presentationRequest: PresentationRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ): PresentationRequestResponseAction {
+            return PresentationRequestResponseAction.ACCEPT
         }
 
         override fun onDone(connection: PeerConnection): CallbackResult {

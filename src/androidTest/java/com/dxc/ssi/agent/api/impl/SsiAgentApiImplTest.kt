@@ -25,6 +25,7 @@ import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorBuilder
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.utils.EnvironmentUtils
@@ -109,7 +110,7 @@ class SsiAgentApiImplTest {
 
 
         val issuerInvitationUrl =
-            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiNDI5dG0xZGtqd2hCS0NDa2R0WHk5ZDZGa1k4M242NG54cUxIWVptTkp3dnEiXSwiQGlkIjoiZGU3M2RkNWEtODM2NC00M2U2LTgyZDEtMTU2MDAwNWI5NzNlIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMlBVdXY3dnpEQk16b2szQUFQRThHN2dlVk5KbUVlWTdTRGlOaUhRQTFhaDgiXSwiQGlkIjoiZDBhNjcyY2YtNDczOC00NDdlLWI3MWQtYjU4NTZmYTEzMTk1IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
         ssiAgentApi.init(object : LibraryStateListener {
@@ -133,12 +134,27 @@ class SsiAgentApiImplTest {
 
     }
 
-    class CredPresenterControllerImpl : CredPresenterController {
+    inner class CredPresenterControllerImpl : CredPresenterController {
         override fun onRequestReceived(
             connection: PeerConnection,
             presentationRequest: PresentationRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ): PresentationRequestResponseAction {
+
+            GlobalScope.launch {
+                delay(10_000)
+
+                println("Woken up...")
+
+                ssiAgentApi.getParkedPresentationRequests().forEach { presentationRequestContainer ->
+                    println("Accepting parked presentation request $presentationRequestContainer")
+                    ssiAgentApi.processParkedPresentationRequest(
+                        presentationRequestContainer,
+                        PresentationRequestResponseAction.ACCEPT
+                    )
+                }
+            }
+
+            return PresentationRequestResponseAction.PARK
         }
 
         override fun onDone(connection: PeerConnection): CallbackResult {

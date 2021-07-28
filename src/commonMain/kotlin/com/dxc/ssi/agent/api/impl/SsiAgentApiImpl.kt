@@ -10,12 +10,14 @@ import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.listener.MessageListener
 import com.dxc.ssi.agent.didcomm.listener.MessageListenerImpl
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
+import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
 import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
+import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.utils.EnvironmentUtils
 import kotlinx.coroutines.*
@@ -239,6 +241,27 @@ class SsiAgentApiImpl(
                 messageListener.messageRouter.processors.credIssuerProcessor!!.processParkedCredentialOffer(
                     credentialOfferContainer,
                     offerResponseAction
+                )
+            })
+    }
+
+    override fun getParkedPresentationRequests(): Set<PresentationRequestContainer> {
+        return CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                walletConnector.prover!!.getParkedPresentationRequests()
+            })
+    }
+
+    override fun processParkedPresentationRequest(
+        presentationRequestContainer: PresentationRequestContainer,
+        presentationRequestResponseAction: PresentationRequestResponseAction
+    ) {
+        return CoroutineHelper.waitForCompletion(
+            agentScope.async {
+                //TODO: fix NPE
+                messageListener.messageRouter.processors.credVerifierProcessor!!.processParkedPresentationRequest(
+                    presentationRequestContainer,
+                    presentationRequestResponseAction
                 )
             })
     }

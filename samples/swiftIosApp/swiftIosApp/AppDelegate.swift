@@ -179,7 +179,7 @@ class LibraryStateListenerImpl : LibraryStateListener {
     func initializationCompleted()  {
        print("Listener: Initialization completed")
         
-        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiRHpQU2lFM2Q0ZmFOM1RBbU1EVXFNbU5wN0xzaFk1YTFOOWVXWVZrb2dncGciXSwiQGlkIjoiN2U4ZmQ1OWYtMjk3OC00ZDdlLWFmOGYtMTIwYWRhZjYzNTA3IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
+        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMnVWSE5tWEducmt1TFR2WnNHYXFIRjlGMUU1aEZiMVFLdFF2b3hCakZzb2UiXSwiQGlkIjoiNTZhODZjY2ItNjE4YS00ZDkzLTlmM2EtYzI0MDA1NDgxZjhjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
 
         
     }
@@ -247,8 +247,33 @@ class CredPresenterControllerImpl: CredPresenterController {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onRequestReceived(connection: PeerConnection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onRequestReceived(connection: PeerConnection,
+                           presentationRequestContainer: PresentationRequestContainer) -> PresentationRequestResponseAction {
+        
+        DispatchQueue.global().async {
+            Sleeper().sleep(value: 10000)
+            
+            print("Getting parked proof requests from wallet")
+            let credInfos = ssiAgentApi.unsafelyUnwrapped.getCredentialInfos().map {$0 as! IndyCredInfo}
+            let parketPresentationRequestContainers = ssiAgentApi.unsafelyUnwrapped.getParkedPresentationRequests()
+            
+            print("Got", parketPresentationRequestContainers)
+            
+            parketPresentationRequestContainers.forEach { presentationRequestContainer in
+                ssiAgentApi.unsafelyUnwrapped.processParkedPresentationRequest(presentationRequestContainer: presentationRequestContainer, presentationRequestResponseAction: PresentationRequestResponseAction.accept)
+            }
+           
+            credInfos.forEach { credInfo in
+                print("retrieving first cred")
+                let cred = ssiAgentApi.unsafelyUnwrapped.getCredentialInfo(localWalletCredId: credInfo.referent)
+                
+                print(cred)
+            }
+            
+        
+        }
+        
+        return PresentationRequestResponseAction.park
     }
     
     

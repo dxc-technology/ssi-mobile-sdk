@@ -61,7 +61,7 @@ kotlin {
                 }
             }
             binaries.all {
-                linkerOpts("-L/Users/kkamyczek/client/ssi-mobile-sdk/socketlib", "-lPocketSocket")
+                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
             }
         }
     } else {
@@ -75,14 +75,16 @@ kotlin {
                 }
             }
             binaries.all {
-                  linkerOpts("-L/Users/kkamyczek/client/ssi-mobile-sdk/socketlib", "-lPocketSocket")
+                  linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
             }
         }
     }
 
     cocoapods {
         pod("PocketSocket") {
-            version = "~> 1.0.1"
+            source = git("https://github.com/zwopple/PocketSocket") {
+                tag = "1.0.1"
+            }
         }
 
         summary = "Kotlin sample project with CocoaPods dependencies"

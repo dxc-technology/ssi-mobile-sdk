@@ -6,6 +6,7 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContaine
 import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialDefinition
 import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialRequestInfo
 import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
+import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
 import kotlinx.serialization.Serializable
 
 
@@ -14,11 +15,15 @@ import kotlinx.serialization.Serializable
 data class CredentialExchangeRecord(
     val state: CredentialIssuenceState,
     val connectionId: String,
-    val thread: Thread,
+    override val thread: Thread,
     val credentialOfferContainer: CredentialOfferContainer? = null,
     val credentialRequestContainer: CredentialRequestContainer? = null,
     val credentialRequestInfo: CredentialRequestInfo? = null,
     //TODO: check if this property or all othe rproperties are generic and are abstracted form Indy. Follow Container-Data pattern
     val credentialDefinition: CredentialDefinition,
     val isParked: Boolean = false
-)
+) : ExchangeRecord {
+    override fun generateTagsJson() = "{\"${WalletRecordTag.CredentialExchangeRecordState.name}\": \"${state.name}\"}"
+
+
+}
