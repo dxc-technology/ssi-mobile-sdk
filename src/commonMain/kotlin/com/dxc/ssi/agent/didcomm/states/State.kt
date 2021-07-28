@@ -1,3 +1,5 @@
 package com.dxc.ssi.agent.didcomm.states
 
-interface State
+interface State {
+    val name:String
+}
