@@ -1,3 +1,4 @@
+./gradlew clean
 ./gradlew :"BuildDevice" -PXCODE_CONFIGURATION=Release
 ./gradlew :"BuildSimulator" -PXCODE_CONFIGURATION=Release
 
