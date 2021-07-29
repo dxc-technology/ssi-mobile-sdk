@@ -2,7 +2,9 @@ package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
+import com.dxc.ssi.agent.api.callbacks.didexchange.DidExhcnageError
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.library.LibraryError
 import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
@@ -98,9 +100,11 @@ class SsiAgentApiImplTest {
                 ssiAgentApi.connect(verifierInvitationUrl)
             }
 
-            override fun initializationFailed() {
+            override fun initializationFailed(error: LibraryError, details: String) {
                 TODO("Not yet implemented")
             }
+
+
         })
 
 
@@ -188,6 +192,10 @@ class SsiAgentApiImplTest {
         override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
             println("Connection abandoned : $connection")
             return CallbackResult(true)
+        }
+
+        override fun onFailure(connection: PeerConnection?, error: DidExhcnageError, details: String) {
+            TODO("Not yet implemented")
         }
 
     }
