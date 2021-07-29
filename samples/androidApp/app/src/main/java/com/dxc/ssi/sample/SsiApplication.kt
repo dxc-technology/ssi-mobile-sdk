@@ -2,6 +2,7 @@ package com.dxc.ssi.sample
 
 import android.app.Application
 import com.dxc.ssi.agent.api.SsiAgentApi
+import com.dxc.ssi.agent.api.callbacks.library.LibraryError
 import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.impl.EnvironmentImpl
 import com.dxc.ssi.agent.api.impl.SsiAgentBuilderImpl
@@ -86,9 +87,13 @@ class SsiApplication : Application() {
 
             }
 
-            override fun initializationFailed() {
+            override fun initializationFailed(error: LibraryError, details: String) {
                 TODO("Not yet implemented")
-            }})
+            }
+
+
+        }
+        )
 
 
     }

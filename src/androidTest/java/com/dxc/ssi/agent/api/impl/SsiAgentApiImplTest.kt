@@ -7,7 +7,9 @@ import androidx.test.rule.GrantPermissionRule
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
+import com.dxc.ssi.agent.api.callbacks.didexchange.DidExhcnageError
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.library.LibraryError
 import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
@@ -64,7 +66,7 @@ class SsiAgentApiImplTest {
     }
 
     @Test
-    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
+    //@Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -125,9 +127,11 @@ class SsiAgentApiImplTest {
 
             }
 
-            override fun initializationFailed() {
+            override fun initializationFailed(error: LibraryError, details: String) {
                 TODO("Not yet implemented")
             }
+
+
         })
 
         Sleeper().sleep(800000)
@@ -238,6 +242,10 @@ class SsiAgentApiImplTest {
         override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
             println("Connection completed : $connection")
             return CallbackResult(true)
+        }
+
+        override fun onFailure(connection: PeerConnection?, error: DidExhcnageError, details: String) {
+            TODO("Not yet implemented")
         }
 
 
