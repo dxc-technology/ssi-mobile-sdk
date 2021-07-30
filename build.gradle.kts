@@ -18,6 +18,7 @@ plugins {
     kotlin("plugin.serialization") version kotlinVersion
     kotlin("native.cocoapods") version "1.4.31"
     id("maven-publish")
+
 }
 
 group = "com.dxc"
@@ -28,13 +29,15 @@ publishing {
         mavenLocal()
     }
 }
+
 repositories {
     google()
-    jcenter()
     mavenCentral()
+    jcenter()
     maven(url = "https://repo.sovrin.org/repository/maven-releases")
     maven { setUrl("https://dl.bintray.com/kotlin/kotlinx.html/") }
 }
+
 
 kotlin {
     jvm {
@@ -81,7 +84,7 @@ kotlin {
     }
 
     cocoapods {
-        pod("PocketSocket") {
+        pod("PocketSocket/Client") {
             source = git("https://github.com/zwopple/PocketSocket") {
                 tag = "1.0.1"
             }
@@ -121,6 +124,9 @@ kotlin {
                 implementation("com.benasher44:uuid:$uuidVersion")
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))
+                implementation(kotlin("stdlib-common"))
+                api("co.touchlab:kermit:0.1.9")
+                implementation("co.touchlab:kotlinnativecocoapods:0.11")
             }
         }
         val commonTest by getting {
@@ -188,6 +194,7 @@ kotlin {
         val iosMain by getting {
             dependencies {
                 implementation(files("indylib.klib"))
+                implementation("co.touchlab:crashkios:0.3.2")
                 implementation("io.ktor:ktor-client-ios:$ktorVersion")
             }
         }

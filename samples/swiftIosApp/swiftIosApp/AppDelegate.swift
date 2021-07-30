@@ -7,8 +7,34 @@
 
 import UIKit
 import ssi_agent
+import os.log
 
 var ssiAgentApi: SsiAgentApi? = nil
+
+class OSLogLogger: ssi_agent.KermitLogger {
+    override func isLoggable(severity: KermitSeverity) -> Bool {
+        OSLog.default.isEnabled(type: getSeverity(severity: severity))
+    }
+   
+    override func log(severity: KermitSeverity, message: String, tag: String, throwable: KotlinThrowable?) {
+        os_log("%@", log: OSLog(subsystem: tag ?? "default", category: tag ?? "default"), type: getSeverity(severity: severity), message)
+        if let realThrowable = throwable {
+            os_log("%@", log: OSLog(subsystem: tag ?? "default", category: tag ?? "default"), type: getSeverity(severity: severity), realThrowable.message ?? realThrowable.description)
+        }
+    }
+   
+    private func getSeverity(severity: KermitSeverity) -> OSLogType {
+        switch severity {
+            case KermitSeverity.verbose: return OSLogType.info
+            case KermitSeverity.debug: return OSLogType.debug
+            case KermitSeverity.info: return OSLogType.info
+            case KermitSeverity.warn: return OSLogType.debug
+            case KermitSeverity.error: return OSLogType.error
+            case KermitSeverity.assert: return OSLogType.fault
+            default: return OSLogType.default
+        }
+    }
+}
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,14 +43,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     
+        let kermit = Kermit(logger: OSLogLogger())
+        kermit.i(withMessage: {"\n"})
+        kermit.i(withMessage: {"loaded"})
+        
         let cic = ConnectionInitiatorControllerImpl()
         let crc = CredentialReceiverControllerImpl()
         let cpc = CredPresenterControllerImpl()
         let lsl = LibraryStateListenerImpl()
-       
+
         
-        
-            
+    
             let myWalletName = "newWalletName5"
             let myWalletPassword = "newWalletPassword"
             let myDid = "4PCVFCeZbKXyvgjCedbXDx"
