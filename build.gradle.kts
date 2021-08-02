@@ -126,7 +126,6 @@ kotlin {
                 implementation(kotlin("stdlib-jdk8"))
                 implementation(kotlin("stdlib-common"))
                 api("co.touchlab:kermit:0.1.9")
-                implementation("co.touchlab:kotlinnativecocoapods:0.11")
             }
         }
         val commonTest by getting {
@@ -194,7 +193,6 @@ kotlin {
         val iosMain by getting {
             dependencies {
                 implementation(files("indylib.klib"))
-                implementation("co.touchlab:crashkios:0.3.2")
                 implementation("io.ktor:ktor-client-ios:$ktorVersion")
             }
         }
