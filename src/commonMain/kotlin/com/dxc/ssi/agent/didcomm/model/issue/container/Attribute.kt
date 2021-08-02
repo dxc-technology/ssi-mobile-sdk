@@ -1,6 +1,6 @@
 package com.dxc.ssi.agent.didcomm.model.issue.container
 
-import com.dxc.ssi.agent.utils.AnyToStringSerializer
+import com.dxc.ssi.agent.utils.StringAsIsSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -17,6 +17,6 @@ data class Attribute(
     val name: String,
     @SerialName("mime-type")
     val mimeType: String,
-    @Serializable(with = AnyToStringSerializer::class)
+    @Serializable(with = StringAsIsSerializer::class)
     val value: String
 )
