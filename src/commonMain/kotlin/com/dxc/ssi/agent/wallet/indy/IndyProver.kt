@@ -19,11 +19,11 @@ import com.dxc.ssi.agent.exceptions.indy.DuplicateMasterSecretNameException
 import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import com.dxc.ssi.agent.ledger.indy.helpers.TailsHelper
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
-import com.dxc.ssi.agent.utils.JsonUtils
 import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletQueryHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.*
+import com.dxc.ssi.agent.wallet.indy.model.CommonWalletRecord
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import com.dxc.ssi.agent.wallet.indy.model.issue.*
@@ -124,7 +124,9 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         val existingCredentialExchangeRecord = getCredentialExchangeRecordByThread(credentialExchangeRecord.thread)
 
 
-        val value = IndySerializationUtils.jsonProcessor.encodeToString(credentialExchangeRecord)
+        val value = Base64.plainStringToBase64String(
+            IndySerializationUtils.jsonProcessor.encodeToString(credentialExchangeRecord)
+        )
 
         println("Serialized credentialExchange record = $value")
 
@@ -175,21 +177,24 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
         //TODO: find out better solution of looking up for connection
         return try {
-            val retrievedValue =
+            val retrievedWalletRecord =
                 WalletRecord.get(
                     walletHolder.getWallet() as Wallet,
                     WalletRecordType.CredentialExchangeRecord.name,
                     thread.thid,
                     options
                 )
+//TODO: reuse this approach for all wallet records to avoid issues with escaping
+            val walletRecord =
+                IndySerializationUtils.jsonProcessor.decodeFromString<CommonWalletRecord>(retrievedWalletRecord)
+
             IndySerializationUtils.jsonProcessor.decodeFromString<CredentialExchangeRecord>(
-                JsonUtils.extractValue(
-                    retrievedValue
-                )
+                Base64.base64StringToPlainString(walletRecord.value)
             )
         } catch (w: WalletItemNotFoundException) {
             null //this will be the case for ios
         } catch (e: Exception) { //TODO: unify this check with the explicit exception as above. For this we will need to implement exceptions on common level for JVM and android impementations
+            e.printStackTrace()
 //this will be the case for Android and JVM. To be unified
             if (e.message!!.contains("WalletItemNotFoundException"))
                 null
