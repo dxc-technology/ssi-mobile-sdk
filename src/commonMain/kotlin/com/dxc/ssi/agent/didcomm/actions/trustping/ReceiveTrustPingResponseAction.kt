@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.didcomm.actions.trustping
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
@@ -9,25 +12,25 @@ import kotlinx.serialization.json.Json
 
 
 class ReceiveTrustPingResponseAction(private val actionParams: ActionParams): Action {
+    private val logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
-        println("Entered perform fun")
+        logger.log(Severity.Debug,"",null) { "Entered perform fun" }
         val messageContext = actionParams.context
-        println("Got messageContext")
+        logger.log(Severity.Debug,"",null) { "Got messageContext" }
         val connection = messageContext!!.connection!!
-        println("Got connection")
+        logger.log(Severity.Debug,"",null) { "Got connection" }
         val connectionsTrackerService = actionParams.services.connectionsTrackerService!!
-        println("Got trustPingService")
-
+        logger.log(Severity.Debug,"",null) { "Got trustPingService" }
         val trustPingResponseMessage =
             Json {
                 ignoreUnknownKeys = true
             }.decodeFromString<TrustPingResponse>(messageContext.receivedUnpackedMessage!!.message)
 
-        println("Decoded trustPingResponseMessage")
+        logger.log(Severity.Debug,"",null) { "Decoded trustPingResponseMessage" }
 
         connectionsTrackerService.trustPingResponseReceivedEvent(connection)
         actionParams.callbacks.trustPingController?.onTrustPingResponseReceived(connection)
-        println("Marked ping message as received")
+        logger.log(Severity.Debug,"",null) { "Marked ping message as received" }
         return ActionResult()
     }
 }

@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.wallet.indy.helpers
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
 import com.dxc.ssi.agent.wallet.indy.libindy.WalletSearch
 import com.dxc.ssi.agent.wallet.indy.model.RetrievedWalletRecords
@@ -9,12 +12,14 @@ import kotlinx.serialization.json.Json
 
 object WalletQueryHelper {
 
+    private val logger: Kermit = Kermit(LogcatLogger())
     suspend fun queryWalletRecords(
         wallet: Wallet,
         walletRecordType: WalletRecordType,
         query: String
     ): RetrievedWalletRecords {
-        println("Searching connections using query: $query")
+
+        logger.log(Severity.Debug,"",null) { "Searching connections using query: $query" }
 
         val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
 
@@ -25,7 +30,7 @@ object WalletQueryHelper {
         val foundRecordsJson = search.searchFetchNextRecords(wallet, 200)
         search.closeSearch()
 
-        println("Fetched connections json = $foundRecordsJson")
+        logger.log(Severity.Debug,"",null) { "Fetched connections json = $foundRecordsJson" }
 
         return Json.decodeFromString(foundRecordsJson)
 

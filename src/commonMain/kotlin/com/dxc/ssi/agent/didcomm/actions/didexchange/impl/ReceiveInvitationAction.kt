@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.didcomm.actions.didexchange.impl
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.pluggable.Transport
@@ -37,6 +40,7 @@ class ReceiveInvitationAction(
     private val invitationUrl: String,
     private val keepConnectionAlive: Boolean
 ) : DidExchangeAction {
+    private val logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
         // TODO: think to only form special message here and pass it to message processor
         // Create connection and store it in wallet // Create separate action for this?
@@ -67,8 +71,7 @@ class ReceiveInvitationAction(
             //form request
             val connectionRequest = buildConnectionRequest(invitation, connectionId)
             val connectionRequestJson = Json.encodeToString(connectionRequest)
-
-            println("Connection request: $connectionRequestJson")
+            logger.log(Severity.Debug,"",null) { "Connection request: $connectionRequestJson" }
 
             MessageSender.packAndSendMessage(
                 Message(connectionRequestJson), connection, walletConnector, transport, services,
@@ -106,7 +109,7 @@ class ReceiveInvitationAction(
     @OptIn(InternalAPI::class)
     private fun parseInvitationFromInvitationUrl(encodedInvitation: String): Invitation {
         val jsonInvitation = Base64.base64StringToPlainString(encodedInvitation)
-        println("JSON invitation $jsonInvitation")
+        logger.log(Severity.Debug,"",null) { "JSON invitation $jsonInvitation" }
         return Json { ignoreUnknownKeys = true }.decodeFromString<Invitation>(jsonInvitation)
     }
 

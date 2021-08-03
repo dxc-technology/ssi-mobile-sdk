@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.didcomm.router
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
@@ -25,6 +28,7 @@ class MessageRouterImpl(
 ) :
     MessageRouter {
 
+    private val logger: Kermit = Kermit(LogcatLogger())
     override val processors = Processors()
 
     init {
@@ -108,7 +112,8 @@ class MessageRouterImpl(
             else -> throw IllegalArgumentException("Unknown message type: $typeAttribute")
         }
 
-        println("Determined route: $route")
+        logger.log(Severity.Debug,"",null) { "Determined route: $route" }
+
         return route
 
     }

@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.didcomm.actions.issue.impl
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
@@ -25,6 +28,7 @@ class ProcessCredentialOfferAction(
     private val credentialOfferContainer: CredentialOfferContainer,
     private val offerResponseAction: OfferResponseAction? = null
 ) : CredentialIssuenceAction {
+    private val logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
 
         val walletConnector = actionParams.walletConnector
@@ -80,8 +84,7 @@ class ProcessCredentialOfferAction(
                     comment = "comment"
                 )
 
-                println("Credential request created:$credentialRequest")
-
+                logger.log(Severity.Debug,"",null) { "Credential request created:$credentialRequest" }
 
                 MessageSender.packAndSendMessage(
                     Message(Json.encodeToString(credentialRequest)),

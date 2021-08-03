@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.callback.CallbackData
 import com.dxc.ssi.agent.callback.callbackHandler
 import com.dxc.ssi.agent.callback.impl.SimpleCallback
@@ -11,13 +14,15 @@ import kotlinx.cinterop.*
 actual class WalletRecord {
 
     actual companion object {
+        private val logger: Kermit = Kermit(LogcatLogger())
         actual suspend fun get(
             wallet: Wallet,
             type: String,
             id: String,
             optionsJson: String
         ): String {
-            println("Entered WalletRecord.get")
+            logger.log(Severity.Debug,"",null) { "Entered WalletRecord.get" }
+
             //TODO: check if we need memScoped here and everywhere
             memScoped {
                 val walletHandle = wallet.getWalletHandle()
@@ -46,7 +51,7 @@ actual class WalletRecord {
             value: String,
             tagsJson: String?
         ) {
-            println("Adding walletRecord: type=$type, id = $id, value = $value, tagsJson = $tagsJson")
+            logger.log(Severity.Debug,"",null) { "Adding walletRecord: type=$type, id = $id, value = $value, tagsJson = $tagsJson" }
 
             val commandHandle = callbackHandler.prepareCallback()
 

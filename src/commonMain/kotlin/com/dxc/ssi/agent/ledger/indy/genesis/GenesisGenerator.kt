@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.ledger.indy.genesis
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.ledger.indy.GenesisMode
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.utils.FileUtils
@@ -10,7 +13,7 @@ class GenesisGenerator(
     private val dir: String,
     private val generatedGenesisFileName: String = "genesys.txn"
 ) {
-
+    private val logger: Kermit = Kermit(LogcatLogger())
     fun initGenesisFile(): String {
 
         val genesisContent = when (genesisMode) {
@@ -21,7 +24,8 @@ class GenesisGenerator(
             else -> throw IllegalArgumentException()
         }
 
-        println("Generated genesys: $genesisContent")
+        logger.log(Severity.Debug,"",null) { "Generated genesys: $genesisContent" }
+
         val filePath = "$dir/$generatedGenesisFileName"
         if (FileUtils.fileExists(filePath)) {
             FileUtils.deleteRecursively(filePath)

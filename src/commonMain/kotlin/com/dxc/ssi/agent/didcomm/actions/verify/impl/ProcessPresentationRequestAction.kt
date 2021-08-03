@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.didcomm.actions.verify.impl
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
@@ -25,10 +28,10 @@ class ProcessPresentationRequestAction(
     private val presentationRequestContainer: PresentationRequestContainer,
     private val presentationRequestResponseAction: PresentationRequestResponseAction? = null
 ) : CredentialVerificationAction {
+    private val logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
 
-        println("Entered ProcessPresentationRequestAction")
-
+        logger.log(Severity.Debug,"",null) { "Entered ProcessPresentationRequestAction" }
         val messageContext = actionParams.context
         val credPresenterController = actionParams.callbacks.credPresenterController!!
         val walletConnector = actionParams.walletConnector

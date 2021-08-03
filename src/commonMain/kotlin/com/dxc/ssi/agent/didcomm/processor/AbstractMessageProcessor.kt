@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.didcomm.processor
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
@@ -20,10 +23,11 @@ abstract class AbstractMessageProcessor(
     val processors: Processors,
     val services: Services,
 ) : MessageProcessor {
-
+    var logger: Kermit = Kermit(LogcatLogger())
 
     override suspend fun processMessage(context: Context) {
-        println("Started processing message $context")
+
+        logger.log(Severity.Debug,"",null) { "Started processing message $context" }
 
         val actionParams = ActionParams(
             walletConnector = walletConnector,
@@ -40,7 +44,7 @@ abstract class AbstractMessageProcessor(
             .invoke(actionParams)
             .perform()
 
-        println("action completed with result : $actionResult")
+        logger.log(Severity.Debug,"",null) { "action completed with result : $actionResult" }
 
     }
 
@@ -51,7 +55,7 @@ abstract class AbstractMessageProcessor(
         val typeAttribute =
             Json { ignoreUnknownKeys = true }.decodeFromString<BasicMessageWithTypeOnly>(message).type
         val messageType = enumValues<T>().single { Regex((it as MessageType).getTypeString()).matches(typeAttribute) }
-        println("Determined message type: $messageType")
+        logger.log(Severity.Debug,"",null) { "Determined message type: $messageType" }
         return messageType
     }
 

@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.callback.callbackHandler
 import com.dxc.ssi.agent.callback.impl.IntCallback
 import com.dxc.ssi.agent.callback.impl.SimpleCallback
@@ -11,6 +14,8 @@ import com.indylib.indy_open_wallet
 actual class Wallet actual constructor(private var walletHandle: Int) {
 
     actual companion object {
+        private val logger: Kermit = Kermit(LogcatLogger())
+
         actual suspend fun createWallet(config: String, credentials: String) {
             val commandHandle = callbackHandler.prepareCallback()
 
@@ -34,10 +39,10 @@ actual class Wallet actual constructor(private var walletHandle: Int) {
                 credentials,
                 IntCallback.callback
             )
-            println("Before waiting for wallet opening callback result: config -> $config, credentials -> $credentials")
+            logger.log(Severity.Debug,"",null) { "\"Before waiting for wallet opening callback result: config -> $config, credentials -> $credentials\"" }
 
             val callbackResult = callbackHandler.waitForCallbackResult(commandHandle) as IntCallback.Result
-            println("After waiting for wallet opening callback result")
+            logger.log(Severity.Debug,"",null) { "After waiting for wallet opening callback result" }
             return Wallet(callbackResult.handle)
         }
     }

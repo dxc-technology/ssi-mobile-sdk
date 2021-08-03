@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.didcomm.actions.abandon.impl
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.Transport
@@ -28,6 +31,8 @@ class InitiateAbandonConnectionAction(
     val notifyPeerBeforeAbandoning: Boolean,
     val problemReport: ProblemReport?
 ) : AbandonAction {
+    private val logger: Kermit = Kermit(LogcatLogger())
+
     override suspend fun perform(): ActionResult {
 
         //1.  Check if connection is opened and active?
@@ -48,7 +53,7 @@ class InitiateAbandonConnectionAction(
                         transport,
                         services,
                         onMessageSendingFailure = {
-                            println("Warning: we could not notify remote peer that we are abandoning connection. Abandoning without notification")
+                            logger.log(Severity.Debug,"",null) { "Warning: we could not notify remote peer that we are abandoning connection. Abandoning without notification" }
                             null
                         }
                     )

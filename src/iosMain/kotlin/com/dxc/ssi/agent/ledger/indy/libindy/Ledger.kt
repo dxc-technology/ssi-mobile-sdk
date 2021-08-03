@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.ledger.indy.libindy
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.callback.CallbackData
 import com.dxc.ssi.agent.callback.callbackHandler
 import com.dxc.ssi.agent.callback.impl.StringCallback
@@ -11,7 +14,6 @@ import kotlinx.cinterop.toKString
 
 
 actual class Ledger {
-
     data class ParseGetCredDefResponseCallbackResult(
         override val commandHandle: Int,
         override val errorCode: UInt,
@@ -43,6 +45,7 @@ actual class Ledger {
 
 
     actual companion object {
+        private val logger: Kermit = Kermit(LogcatLogger())
         actual suspend fun buildGetSchemaRequest(submitterDid: String, id: String): String {
 
             val commandHandle = callbackHandler.prepareCallback()
@@ -69,7 +72,8 @@ actual class Ledger {
                 StringCallback.callback
             )
 
-            println("Pool -> Before waiting for callback")
+            logger.log(Severity.Debug,"",null) { "Pool -> Before waiting for callback" }
+
 
             val result = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
             return result.stringResult
@@ -124,7 +128,7 @@ actual class Ledger {
                 StringCallback.callback
             )
 
-            println("Pool -> Before waiting for callback")
+            logger.log(Severity.Debug,"",null) { "Pool -> Before waiting for callback" }
 
             val result = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
             return result.stringResult

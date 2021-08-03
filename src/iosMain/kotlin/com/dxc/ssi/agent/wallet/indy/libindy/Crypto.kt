@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.callback.CallbackData
 import com.dxc.ssi.agent.callback.callbackHandler
 import com.indylib.*
@@ -22,6 +25,8 @@ actual class Crypto {
     ) : CallbackData
 
     actual companion object {
+
+        private val logger: Kermit = Kermit(LogcatLogger())
 
         //@ExperimentalUnsignedTypes
         @OptIn(ExperimentalUnsignedTypes::class)
@@ -53,7 +58,7 @@ actual class Crypto {
                     }
 
 
-                println("Before calling indy_pack_message")
+                logger.log(Severity.Debug,"",null) { "Before calling indy_pack_message" }
                 indy_pack_message(
                     commandHandle,
                     wallet.getWalletHandle(),

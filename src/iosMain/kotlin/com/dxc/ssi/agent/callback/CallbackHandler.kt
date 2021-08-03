@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.callback
 
+import co.touchlab.kermit.Kermit
+import co.touchlab.kermit.LogcatLogger
+import co.touchlab.kermit.Severity
 import co.touchlab.stately.collections.sharedMutableMapOf
 import com.dxc.ssi.agent.exceptions.indy.IndyException
 import kotlinx.coroutines.CompletableDeferred
@@ -16,6 +19,7 @@ data class CallbackDataWrapper(
 
 class CallbackHandler() {
 
+    private val logger: Kermit = Kermit(LogcatLogger())
     companion object {
         val commandHandleCounter: AtomicInt = AtomicInt(1)
     }
@@ -58,7 +62,7 @@ class CallbackHandler() {
         activeCallbacksMap.remove(commandHandle)
 
         callbackDataWrapper.indyException?.let { e ->
-            println("Received IndyException $e")
+            logger.log(Severity.Error,"",null) { "Received IndyException $e" }
             throw e
         }
 
