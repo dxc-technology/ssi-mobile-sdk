@@ -104,6 +104,7 @@ class SsiAgentApiImpl(
 
                 libraryStateListener.initializationCompleted()
             } catch (t: Throwable) {
+                t.printStackTrace()
                 libraryStateListener.initializationFailed()
             }
 
