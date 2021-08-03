@@ -8,18 +8,24 @@ import com.dxc.ssi.agent.model.IdentityDetails
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
 import com.dxc.ssi.agent.model.messages.Message
-import com.dxc.ssi.agent.utils.JsonUtils.extractValue
 import com.dxc.ssi.agent.utils.ObjectHolder
+import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletQueryHelper
-import com.dxc.ssi.agent.wallet.indy.libindy.*
+import com.dxc.ssi.agent.wallet.indy.libindy.Crypto
+import com.dxc.ssi.agent.wallet.indy.libindy.Did
+import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
+import com.dxc.ssi.agent.wallet.indy.libindy.WalletRecord
+import com.dxc.ssi.agent.wallet.indy.model.CommonWalletRecord
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
+import com.dxc.utils.Base64
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 open class IndyWalletHolder(
@@ -58,15 +64,12 @@ open class IndyWalletHolder(
         val tagsJson =
             "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${connection.peerVerkey}\", \"${WalletRecordTag.ConnectionState.name}\": \"${connection.state.name}\"}"
 
+        val value = Base64.plainStringToBase64String(Json.encodeToString(connection))
         if (existingConnection == null) {
-
-            val value = connection.toJson()
-
             println("Storing connection $connection")
             val wallet = isoWallet.access { it.obj }
             WalletRecord.add(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value, tagsJson)
         } else {
-            val value = connection.toJson()
             println("Updating connection $connection")
             val wallet = isoWallet.access { it.obj }
             WalletRecord.updateValue(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value)
@@ -90,9 +93,11 @@ open class IndyWalletHolder(
         //TODO: find out better solution of looking up for connection
         return try {
             val wallet = isoWallet.access { it.obj }
-            val retrievedValue =
+            val retrievedWalletRecord =
                 WalletRecord.get(wallet!!, WalletRecordType.ConnectionRecord.name, connectionId, options)
-            PeerConnection.fromJson(extractValue(retrievedValue))
+            val walletRecord =
+                IndySerializationUtils.jsonProcessor.decodeFromString<CommonWalletRecord>(retrievedWalletRecord)
+            Json{ignoreUnknownKeys = true}.decodeFromString<PeerConnection>(Base64.base64StringToPlainString(walletRecord.value))
         } catch (e: WalletItemNotFoundException) {
             null
         }

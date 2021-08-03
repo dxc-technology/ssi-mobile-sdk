@@ -14,6 +14,7 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestConta
 import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
+import com.dxc.ssi.agent.didcomm.states.State
 import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
 import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationState
 import com.dxc.ssi.agent.exceptions.common.NoCredentialToSatisfyPresentationRequestException
@@ -28,8 +29,6 @@ import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletQueryHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.*
 import com.dxc.ssi.agent.wallet.indy.model.CommonWalletRecord
-import com.dxc.ssi.agent.wallet.indy.model.CommonWalletRecord
-import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import com.dxc.ssi.agent.wallet.indy.model.issue.*
 import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefinitionId
@@ -138,7 +137,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         val value = Base64.plainStringToBase64String(
             IndySerializationUtils.jsonProcessor.encodeToString(exchangeRecord))
 
-        println("Serialized presentationExchange record = $valueJson")
+        println("Serialized presentationExchange record = $value")
 
         val tagsJson = exchangeRecord.generateTagsJson()
 
