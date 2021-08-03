@@ -14,7 +14,6 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestConta
 import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
-import com.dxc.ssi.agent.didcomm.states.State
 import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
 import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationState
 import com.dxc.ssi.agent.exceptions.common.NoCredentialToSatisfyPresentationRequestException
@@ -24,11 +23,13 @@ import com.dxc.ssi.agent.ledger.indy.helpers.TailsHelper
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 import com.dxc.ssi.agent.model.ExchangeRecord
 import com.dxc.ssi.agent.model.PresentationExchangeRecord
-import com.dxc.ssi.agent.utils.JsonUtils
 import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletQueryHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.*
+import com.dxc.ssi.agent.wallet.indy.model.CommonWalletRecord
+import com.dxc.ssi.agent.wallet.indy.model.CommonWalletRecord
+import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import com.dxc.ssi.agent.wallet.indy.model.issue.*
 import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefinitionId
@@ -134,7 +135,8 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         val existingExchangeRecord: T? =
             getExchangeRecordByThreadId(exchangeRecord.thread)
 
-        val valueJson = IndySerializationUtils.jsonProcessor.encodeToString(exchangeRecord)
+        val value = Base64.plainStringToBase64String(
+            IndySerializationUtils.jsonProcessor.encodeToString(exchangeRecord))
 
         println("Serialized presentationExchange record = $valueJson")
 
@@ -146,7 +148,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
                 walletHolder.getWallet() as Wallet,
                 ExchangeRecord.getWalletRecordType(T::class).name,
                 exchangeRecord.thread.thid,
-                valueJson,
+                value,
                 tagsJson
             )
 
@@ -156,7 +158,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
                 walletHolder.getWallet() as Wallet,
                 ExchangeRecord.getWalletRecordType(T::class).name,
                 exchangeRecord.thread.thid,
-                valueJson
+                value
             )
             WalletRecord.updateTags(
                 walletHolder.getWallet() as Wallet,
@@ -181,17 +183,19 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         val options = "{\"retrieveType\" : true}"
 
         return try {
-            val retrievedValue =
+            val retrievedWalletRecord =
                 WalletRecord.get(
                     walletHolder.getWallet() as Wallet,
                     ExchangeRecord.getWalletRecordType(T::class).name,
                     thread.thid,
                     options
                 )
+
+            val walletRecord =
+                IndySerializationUtils.jsonProcessor.decodeFromString<CommonWalletRecord>(retrievedWalletRecord)
+
             IndySerializationUtils.jsonProcessor.decodeFromString<T>(
-                JsonUtils.extractValue(
-                    retrievedValue
-                )
+                Base64.base64StringToPlainString(walletRecord.value)
             )
         } catch (w: WalletItemNotFoundException) {
             null //this will be the case for ios
@@ -228,7 +232,6 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
             .toSet()
 
     }
-
 
     override suspend fun getCredentialInfos(): Set<CredentialInfo> {
 
