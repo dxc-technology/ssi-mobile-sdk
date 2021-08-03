@@ -9,50 +9,22 @@ import UIKit
 import ssi_agent
 import os.log
 
-var ssiAgentApi: SsiAgentApi? = nil
 
-class OSLogLogger: ssi_agent.KermitLogger {
-    override func isLoggable(severity: KermitSeverity) -> Bool {
-        OSLog.default.isEnabled(type: getSeverity(severity: severity))
-    }
-   
-    override func log(severity: KermitSeverity, message: String, tag: String, throwable: KotlinThrowable?) {
-        os_log("%@", log: OSLog(subsystem: tag ?? "default", category: tag ?? "default"), type: getSeverity(severity: severity), message)
-        if let realThrowable = throwable {
-            os_log("%@", log: OSLog(subsystem: tag ?? "default", category: tag ?? "default"), type: getSeverity(severity: severity), realThrowable.message ?? realThrowable.description)
-        }
-    }
-   
-    private func getSeverity(severity: KermitSeverity) -> OSLogType {
-        switch severity {
-            case KermitSeverity.verbose: return OSLogType.info
-            case KermitSeverity.debug: return OSLogType.debug
-            case KermitSeverity.info: return OSLogType.info
-            case KermitSeverity.warn: return OSLogType.debug
-            case KermitSeverity.error: return OSLogType.error
-            case KermitSeverity.assert: return OSLogType.fault
-            default: return OSLogType.default
-        }
-    }
-}
+var ssiAgentApi: SsiAgentApi? = nil
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window : UIWindow?
-    
+    var kermit  = Kermit(logger: OSLogLogger())
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-    
-        let kermit = Kermit(logger: OSLogLogger())
-        kermit.i(withMessage: {"\n"})
-        kermit.i(withMessage: {"loaded"})
+          
         
         let cic = ConnectionInitiatorControllerImpl()
         let crc = CredentialReceiverControllerImpl()
         let cpc = CredPresenterControllerImpl()
         let lsl = LibraryStateListenerImpl()
 
-        
     
             let myWalletName = "newWalletName5"
             let myWalletPassword = "newWalletPassword"
@@ -80,29 +52,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 
                 let walletManager = IndyWalletManager.Companion()
 
-                print("Before creating wallet")
-                
+                self.kermit.d(withMessage: {"Before creating wallet"})
               
                 let indyHomeEnv = getEnvironmentVar( "INDY_HOME")
-                print("Env INDY_HOME=", indyHomeEnv)
                 
+            
+                self.kermit.d(withMessage: {"Env INDY_HOME= \(indyHomeEnv)"})
                 if (!walletManager.isWalletExistsAndOpenable(walletName: myWalletName, walletPassword: myWalletPassword)) {
-                    print("Recreating wallet")
+                    self.kermit.d(withMessage: {"Recreating wallet"})
                     walletManager.createWallet(walletName: myWalletName, walletPassword: myWalletPassword, walletCreationStrategy: WalletCreationStrategy.truncateandcreate)}
-
-                print("Before creating did")
+                
+                self.kermit.d(withMessage: {"Before creating did"})
                 
                 if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
-                    print("Recreating did")
+                    self.kermit.d(withMessage: {"Recreating did"})
                     let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
                         didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
                         walletName : myWalletName, walletPassword:myWalletPassword)
 
-                    print("Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())")
+                    
+                    self.kermit.d(withMessage: {"Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())"})
+                    
                     //Store did somewhere in your application to use it afterwards
                 }
 
-                print("Before creating wallet holder")
+                self.kermit.d(withMessage: {"Before creating wallet holder"})
                 
                 
 
@@ -112,7 +86,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     walletPassword :myWalletPassword,
                     didConfig : DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil)
                 )
-                print("Before creating wallet connector")
+                self.kermit.d(withMessage: {"Before creating wallet connector"})
                 
                 let indyWalletConnector = IndyWalletConnector().build(walletHolder: walletHolder)
 
@@ -122,7 +96,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .withGenesisMode(genesisMode: GenesisMode.sovrinBuildernet)
                 .build()
                 
-                print("Before creating ssiAgentApi")
+                self.kermit.d(withMessage: {"Before creating ssiAgentApi"})
+         
                 
                 ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
                         .withConnectionInitiatorController(connectionInitiatorController: cic)
@@ -132,10 +107,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         .build()
            
             
-        
-                print("Before initialization")
+                self.kermit.d(withMessage: {"Before initialization"})
+         
                 ssiAgentApi.unsafelyUnwrapped.doInit(libraryStateListener:lsl)
-                print("After initialize fun called")
+                
+                self.kermit.d(withMessage: {"After initialize fun called"})
                 
                 
             }
@@ -205,6 +181,8 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 
 
 class LibraryStateListenerImpl : LibraryStateListener {
+    var kermit  = Kermit(logger: OSLogLogger())
+    
     func initializationCompleted()  {
        print("Listener: Initialization completed")
         
@@ -214,7 +192,9 @@ class LibraryStateListenerImpl : LibraryStateListener {
     }
     
     func initializationFailed()  {
-        print("Listener: Initialization failed")
+        
+        self.kermit.d(withMessage: {"Listener: Initialization failed"})
+       
     }
 }
 
@@ -268,6 +248,7 @@ class CredentialReceiverControllerImpl: CredReceiverController {
 
 
 class CredPresenterControllerImpl: CredPresenterController {
+    var kermit  = Kermit(logger: OSLogLogger())
     func onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
 
     }
@@ -282,18 +263,21 @@ class CredPresenterControllerImpl: CredPresenterController {
         DispatchQueue.global().async {
             Sleeper().sleep(value: 10000)
             
-            print("Getting parked proof requests from wallet")
+            self.kermit.d(withMessage: {"Getting parked proof requests from wallet"})
+           
+            
             let credInfos = ssiAgentApi.unsafelyUnwrapped.getCredentialInfos().map {$0 as! IndyCredInfo}
             let parketPresentationRequestContainers = ssiAgentApi.unsafelyUnwrapped.getParkedPresentationRequests()
             
-            print("Got", parketPresentationRequestContainers)
+            self.kermit.d(withMessage: {"Got \(parketPresentationRequestContainers)"})
+           
             
             parketPresentationRequestContainers.forEach { presentationRequestContainer in
                 ssiAgentApi.unsafelyUnwrapped.processParkedPresentationRequest(presentationRequestContainer: presentationRequestContainer, presentationRequestResponseAction: PresentationRequestResponseAction.accept)
             }
            
             credInfos.forEach { credInfo in
-                print("retrieving first cred")
+                self.kermit.d(withMessage: {"retrieving first cred"})
                 let cred = ssiAgentApi.unsafelyUnwrapped.getCredentialInfo(localWalletCredId: credInfo.referent)
                 
                 print(cred)

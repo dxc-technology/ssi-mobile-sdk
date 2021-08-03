@@ -117,8 +117,6 @@ class SsiAgentApiImpl(
         println("Entered connect function")
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
-                val kermit = Kermit(CommonLogger())
-                kermit.i("CustomTag") { "Message" }
                 println("Entered async connection initiation")
                 //TODO: fix NPE
                 messageListener.messageRouter.processors.didExchangeProcessor!!.initiateConnectionByInvitation(

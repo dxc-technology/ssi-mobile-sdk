@@ -12,6 +12,8 @@
 		997E8986C95B10D6E1F28682 /* Pods_swiftIosApp_swiftIosAppUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F389BED1BA12E00EA22F2BFF /* Pods_swiftIosApp_swiftIosAppUITests.framework */; };
 		A4165EAB2693540C00D9E082 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4165EAA2693540C00D9E082 /* ViewController.swift */; };
 		A47429E026666D6400F1E049 /* (null) in Embed Frameworks */ = {isa = PBXBuildFile; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A4F26C3526B84083009038F2 /* LoggerLevel.plist in Resources */ = {isa = PBXBuildFile; fileRef = A4F26C3426B84083009038F2 /* LoggerLevel.plist */; };
+		A4F26C3926B9466D009038F2 /* OSLogLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4F26C3826B9466D009038F2 /* OSLogLogger.swift */; };
 		B66DF53226386A6F0058B446 /* swiftIosAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66DF53126386A6F0058B446 /* swiftIosAppApp.swift */; };
 		B66DF53426386A6F0058B446 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B66DF53326386A6F0058B446 /* ContentView.swift */; };
 		B66DF53626386A700058B446 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B66DF53526386A700058B446 /* Assets.xcassets */; };
@@ -60,6 +62,8 @@
 		42D80EC6F80EEE5283C5E78E /* Pods-swiftIosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-swiftIosApp.debug.xcconfig"; path = "Target Support Files/Pods-swiftIosApp/Pods-swiftIosApp.debug.xcconfig"; sourceTree = "<group>"; };
 		53F7A4B2FF7F05154AB774CD /* Pods-swiftIosApp-swiftIosAppUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-swiftIosApp-swiftIosAppUITests.debug.xcconfig"; path = "Target Support Files/Pods-swiftIosApp-swiftIosAppUITests/Pods-swiftIosApp-swiftIosAppUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		A4165EAA2693540C00D9E082 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		A4F26C3426B84083009038F2 /* LoggerLevel.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = LoggerLevel.plist; sourceTree = "<group>"; };
+		A4F26C3826B9466D009038F2 /* OSLogLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogLogger.swift; sourceTree = "<group>"; };
 		B66DF52E26386A6F0058B446 /* swiftIosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = swiftIosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B66DF53126386A6F0058B446 /* swiftIosAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = swiftIosAppApp.swift; sourceTree = "<group>"; };
 		B66DF53326386A6F0058B446 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -141,6 +145,7 @@
 		B66DF53026386A6F0058B446 /* swiftIosApp */ = {
 			isa = PBXGroup;
 			children = (
+				A4F26C3426B84083009038F2 /* LoggerLevel.plist */,
 				A4165EAA2693540C00D9E082 /* ViewController.swift */,
 				B66DF53126386A6F0058B446 /* swiftIosAppApp.swift */,
 				B66DF53326386A6F0058B446 /* ContentView.swift */,
@@ -148,6 +153,7 @@
 				B66DF53A26386A700058B446 /* Info.plist */,
 				B66DF53726386A700058B446 /* Preview Content */,
 				B66DF587263889EE0058B446 /* AppDelegate.swift */,
+				A4F26C3826B9466D009038F2 /* OSLogLogger.swift */,
 			);
 			path = swiftIosApp;
 			sourceTree = "<group>";
@@ -302,6 +308,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B66DF53926386A700058B446 /* Preview Assets.xcassets in Resources */,
+				A4F26C3526B84083009038F2 /* LoggerLevel.plist in Resources */,
 				B66DF53626386A700058B446 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -448,6 +455,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A4F26C3926B9466D009038F2 /* OSLogLogger.swift in Sources */,
 				B66DF588263889EE0058B446 /* AppDelegate.swift in Sources */,
 				B66DF53426386A6F0058B446 /* ContentView.swift in Sources */,
 				A4165EAB2693540C00D9E082 /* ViewController.swift in Sources */,

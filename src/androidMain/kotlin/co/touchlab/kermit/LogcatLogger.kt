@@ -9,28 +9,33 @@
  */
 
 package co.touchlab.kermit
+
 import android.util.Log
 
 class LogcatLogger : Logger() {
 
-    private fun getSeverity(severity: Severity) = when (severity) {
-        Severity.Verbose -> 2
-        Severity.Debug -> 3
-        Severity.Info -> 4
-        Severity.Warn -> 5
-        Severity.Error -> 6
-        Severity.Assert -> 7
+    private fun getSeverity(severity: Severity): Int {
+        return when (severity) {
+            Severity.Verbose -> 2
+            Severity.Debug -> 3
+            Severity.Info -> 4
+            Severity.Warn -> 5
+            Severity.Error -> 6
+            Severity.Assert -> 7
+        }
     }
 
     override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
-        Log.println(getSeverity(severity), tag, message)
-        throwable?.let {
-            Log.println(
-                getSeverity(severity),
-                tag,
-                PlatformThrowableStringProvider().getThrowableString(it)
+            Log.println(getSeverity(severity), tag,
+                "${Thread.currentThread()}: $message"
             )
-        }
+            throwable?.let {
+                Log.println(
+                    getSeverity(severity),
+                    tag,
+                    PlatformThrowableStringProvider().getThrowableString(it)
+                )
+            }
     }
 
     override fun v(message: String, tag: String, throwable: Throwable?) {
