@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class WalletRecordType {
     ConnectionRecord,
-    CredentialExchangeRecord
+    CredentialExchangeRecord,
+    PresentationExchangeRecord
 }

@@ -21,6 +21,7 @@ import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorBuilder
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.ssi.agent.wallet.indy.model.verify.IndyCredInfo
@@ -34,7 +35,7 @@ import org.junit.Test
 
 class SsiAgentApiImplTest {
 
-    private val walletName = "newWalletName2"
+    private val walletName = "newWalletName55"
     private val walletPassword = "newWalletPassword"
     private val did = "Aj4mwDVVEh46K17Cqh4dpU"
 
@@ -84,7 +85,7 @@ class SsiAgentApiImplTest {
             .build()
 
         val invitationUrl =
-            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiNUR4YW1aZzhCdUpoZlFIU3RZQ1g3WEhwaTVWYkJLdUdiWGN5NUxpdEM3ZDQiXSwiQGlkIjoiYmNjMTU0MTktYjg1YS00YjYzLWJmNWEtODFiNzZmMjRlNmJjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiOVNFb1NpV2hZOEs4dmo0TUExYU1rNjJmQzhwaEQ5ZGFhYmRFbUN6VkF3QWgiXSwiQGlkIjoiNjJhNDJhNWYtZGY0Yi00OTJhLWI0YmMtMTk1OWVlYjkwYzkyIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
         ssiAgentApi.init(object : LibraryStateListener {
@@ -103,21 +104,31 @@ class SsiAgentApiImplTest {
 
 
 
-
-
-
-
-
-        Sleeper().sleep(5000000)
+        Sleeper().sleep(1_000_000)
 
     }
 
-    class CredPresenterControllerImpl : CredPresenterController {
+    inner class CredPresenterControllerImpl : CredPresenterController {
         override fun onRequestReceived(
             connection: PeerConnection,
             presentationRequest: PresentationRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ): PresentationRequestResponseAction {
+
+            GlobalScope.launch {
+                delay(10_000)
+
+                println("Woken up...")
+
+                ssiAgentApi.getParkedPresentationRequests().forEach { presentationRequestContainer ->
+                    println("Accepting parked presentation request $presentationRequestContainer")
+                    ssiAgentApi.processParkedPresentationRequest(
+                        presentationRequestContainer,
+                        PresentationRequestResponseAction.ACCEPT
+                    )
+                }
+            }
+
+            return PresentationRequestResponseAction.PARK
         }
 
         override fun onDone(connection: PeerConnection): CallbackResult {
