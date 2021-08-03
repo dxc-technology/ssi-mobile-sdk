@@ -1,11 +1,12 @@
 package co.touchlab.kermit
 
 import platform.Foundation.NSLog
+import platform.Foundation.NSThread
 
 actual class LogcatLogger : Logger() {
 
     actual override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
-        NSLog("%s: (%s) %s", severity.name, tag,  message)
+        NSLog("%s: (%s) %@ %s", severity.name, tag, NSThread.currentThread, message)
     }
 
     actual override fun v(

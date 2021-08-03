@@ -15,7 +15,7 @@ var ssiAgentApi: SsiAgentApi? = nil
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window : UIWindow?
-    var kermit  = Kermit(logger: OSLogLogger())
+    var logger  = Kermit(logger: OSLogLogger())
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
           
@@ -52,31 +52,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 
                 let walletManager = IndyWalletManager.Companion()
 
-                self.kermit.d(withMessage: {"Before creating wallet"})
+                self.logger.d(withMessage: {"Before creating wallet"})
               
                 let indyHomeEnv = getEnvironmentVar( "INDY_HOME")
                 
             
-                self.kermit.d(withMessage: {"Env INDY_HOME= \(indyHomeEnv)"})
+                self.logger.d(withMessage: {"Env INDY_HOME= \(indyHomeEnv)"})
                 if (!walletManager.isWalletExistsAndOpenable(walletName: myWalletName, walletPassword: myWalletPassword)) {
-                    self.kermit.d(withMessage: {"Recreating wallet"})
+                    self.logger.d(withMessage: {"Recreating wallet"})
                     walletManager.createWallet(walletName: myWalletName, walletPassword: myWalletPassword, walletCreationStrategy: WalletCreationStrategy.truncateandcreate)}
                 
-                self.kermit.d(withMessage: {"Before creating did"})
+                self.logger.d(withMessage: {"Before creating did"})
                 
                 if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
-                    self.kermit.d(withMessage: {"Recreating did"})
+                    self.logger.d(withMessage: {"Recreating did"})
                     let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
                         didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
                         walletName : myWalletName, walletPassword:myWalletPassword)
 
                     
-                    self.kermit.d(withMessage: {"Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())"})
+                    self.logger.d(withMessage: {"Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())"})
                     
                     //Store did somewhere in your application to use it afterwards
                 }
 
-                self.kermit.d(withMessage: {"Before creating wallet holder"})
+                self.logger.d(withMessage: {"Before creating wallet holder"})
                 
                 
 
@@ -86,7 +86,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     walletPassword :myWalletPassword,
                     didConfig : DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil)
                 )
-                self.kermit.d(withMessage: {"Before creating wallet connector"})
+                self.logger.d(withMessage: {"Before creating wallet connector"})
                 
                 let indyWalletConnector = IndyWalletConnector().build(walletHolder: walletHolder)
 
@@ -96,7 +96,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .withGenesisMode(genesisMode: GenesisMode.sovrinBuildernet)
                 .build()
                 
-                self.kermit.d(withMessage: {"Before creating ssiAgentApi"})
+                self.logger.d(withMessage: {"Before creating ssiAgentApi"})
          
                 
                 ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
@@ -107,11 +107,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         .build()
            
             
-                self.kermit.d(withMessage: {"Before initialization"})
+                self.logger.d(withMessage: {"Before initialization"})
          
                 ssiAgentApi.unsafelyUnwrapped.doInit(libraryStateListener:lsl)
                 
-                self.kermit.d(withMessage: {"After initialize fun called"})
+                self.logger.d(withMessage: {"After initialize fun called"})
                 
                 
             }
