@@ -61,9 +61,6 @@ kotlin {
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
             }
-            binaries.all {
-                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
-            }
         }
     } else {
         iosX64("ios") {
@@ -82,7 +79,11 @@ kotlin {
     }
 
     cocoapods {
-        pod("PocketSocket","1.0.1", file("$projectDir/samples/swiftIosApp/Pods/PocketSocket/PocketSocket"),"PocketSocket")
+        pod("PocketSocket") {
+            source = git("https://github.com/zwopple/PocketSocket") {
+                tag = "1.0.1"
+            }
+        }
 
         summary = "Kotlin sample project with CocoaPods dependencies"
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
