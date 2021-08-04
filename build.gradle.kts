@@ -82,7 +82,7 @@ kotlin {
     }
 
     cocoapods {
-        pod("PocketSocket","1.0.1", null,"PocketSocket")
+        pod("PocketSocket","1.0.1", file("$projectDir/samples/swiftIosApp/Pods/PocketSocket/PocketSocket"),"PocketSocket")
 
         summary = "Kotlin sample project with CocoaPods dependencies"
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
