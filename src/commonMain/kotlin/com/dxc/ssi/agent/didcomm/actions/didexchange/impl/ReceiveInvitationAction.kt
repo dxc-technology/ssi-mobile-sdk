@@ -2,7 +2,7 @@ package com.dxc.ssi.agent.didcomm.actions.didexchange.impl
 
 import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
-import com.dxc.ssi.agent.api.callbacks.didexchange.DidExhcnageError
+import com.dxc.ssi.agent.api.callbacks.didexchange.DidExchangeError
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
@@ -105,12 +105,16 @@ class ReceiveInvitationAction(
             }
         } catch (e: URLParserException) {
             connectionInitiatorController.onFailure(
-                connection,
-                DidExhcnageError.INVALID_INVITATION_URL,
-                invitationUrl
+                connection = connection,
+                error = DidExchangeError.INVALID_INVITATION_URL,
+                details = invitationUrl
             )
         } catch (t: Throwable) {
-            connectionInitiatorController.onFailure(connection, DidExhcnageError.UNKNOWN_ERROR, t.message.toString())
+            connectionInitiatorController.onFailure(
+                connection = connection,
+                error = DidExchangeError.UNKNOWN_ERROR,
+                stackTrace = t.message.toString()
+            )
 
         }
         return ActionResult()

@@ -13,6 +13,12 @@ interface ConnectionInitiatorController {
     fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult
     fun onCompleted(connection: PeerConnection): CallbackResult
     fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult
-    fun onFailure(connection: PeerConnection?, error: DidExhcnageError, details: String)
+    fun onFailure(
+        connection: PeerConnection?,
+        error: DidExchangeError,
+        message: String? = null,
+        details: String? = null,
+        stackTrace: String? = null
+    )
 
 }

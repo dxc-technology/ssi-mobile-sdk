@@ -2,7 +2,7 @@ package com.dxc.ssi.sample.controllers
 
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
-import com.dxc.ssi.agent.api.callbacks.didexchange.DidExhcnageError
+import com.dxc.ssi.agent.api.callbacks.didexchange.DidExchangeError
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
@@ -35,7 +35,13 @@ class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         return CallbackResult(true)
     }
 
-    override fun onFailure(connection: PeerConnection?, error: DidExhcnageError, details: String) {
+    override fun onFailure(
+        connection: PeerConnection?,
+        error: DidExchangeError,
+        message: String?,
+        details: String?,
+        stackTrace: String?
+    ) {
         TODO("Not yet implemented")
     }
 

@@ -7,7 +7,7 @@ import androidx.test.rule.GrantPermissionRule
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
-import com.dxc.ssi.agent.api.callbacks.didexchange.DidExhcnageError
+import com.dxc.ssi.agent.api.callbacks.didexchange.DidExchangeError
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
 import com.dxc.ssi.agent.api.callbacks.library.LibraryError
 import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
@@ -35,7 +35,6 @@ import com.dxc.utils.Sleeper
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -127,10 +126,14 @@ class SsiAgentApiImplTest {
 
             }
 
-            override fun initializationFailed(error: LibraryError, details: String) {
+            override fun initializationFailed(
+                error: LibraryError,
+                message: String?,
+                details: String?,
+                stackTrace: String?
+            ) {
                 TODO("Not yet implemented")
             }
-
 
         })
 
@@ -244,10 +247,15 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onFailure(connection: PeerConnection?, error: DidExhcnageError, details: String) {
+        override fun onFailure(
+            connection: PeerConnection?,
+            error: DidExchangeError,
+            message: String?,
+            details: String?,
+            stackTrace: String?
+        ) {
             TODO("Not yet implemented")
         }
-
 
     }
 }

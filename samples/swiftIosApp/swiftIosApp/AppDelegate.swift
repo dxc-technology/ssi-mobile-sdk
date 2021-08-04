@@ -149,7 +149,7 @@ func getEnvironmentVar(_ name: String) -> String? {
 
 class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 {
-    func onFailure(connection: PeerConnection?, error: DidExhcnageError, details: String) {
+    func onFailure(connection: PeerConnection?, error: DidExchangeError, details: String) {
         print("Connection failure", error)
     }
     

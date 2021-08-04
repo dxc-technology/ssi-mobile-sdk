@@ -87,7 +87,12 @@ class SsiApplication : Application() {
 
             }
 
-            override fun initializationFailed(error: LibraryError, details: String) {
+            override fun initializationFailed(
+                error: LibraryError,
+                message: String?,
+                details: String?,
+                stackTrace: String?
+            ) {
                 TODO("Not yet implemented")
             }
 

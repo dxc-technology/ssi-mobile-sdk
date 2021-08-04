@@ -78,8 +78,8 @@ class SsiAgentApiImpl(
             } catch (t: Throwable) {
                 agentScope.launch {
                     libraryStateListener.initializationFailed(
-                        LibraryError.LEDGER_CONNECTION_EXCEPTION,
-                        t.stackTraceToString()
+                        error = LibraryError.LEDGER_CONNECTION_EXCEPTION,
+                        stackTrace = t.stackTraceToString()
                     )
                 }
                 return@launch
@@ -99,8 +99,8 @@ class SsiAgentApiImpl(
 
                 agentScope.launch {
                     libraryStateListener.initializationFailed(
-                        LibraryError.WALLET_INITIALIZATION_EXCEPTION,
-                        t.stackTraceToString()
+                        error = LibraryError.WALLET_INITIALIZATION_EXCEPTION,
+                        stackTrace = t.stackTraceToString()
                     )
                 }
                 return@launch
@@ -131,8 +131,8 @@ class SsiAgentApiImpl(
             } catch (t: Throwable) {
                 agentScope.launch {
                     libraryStateListener.initializationFailed(
-                        LibraryError.LISTENER_SETUP_EXCEPTION,
-                        t.stackTraceToString()
+                        error = LibraryError.LISTENER_SETUP_EXCEPTION,
+                        stackTrace = t.stackTraceToString()
                     )
                 }
             }
