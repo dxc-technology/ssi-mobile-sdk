@@ -16,7 +16,7 @@ plugins {
     /* TODO: Deal with : The 'kotlin-android-extensions' Gradle plugin is deprecated. Please use this migration guide (https://goo.gle/kotlin-android-extensions-deprecation) to start working with View Binding (https://developer.android.com/topic/libraries/view-binding) and the 'kotlin-parcelize' plugin.*/
     id("kotlin-android-extensions")
     kotlin("plugin.serialization") version kotlinVersion
-    kotlin("native.cocoapods") version "1.4.31"
+    kotlin("native.cocoapods") version "1.5.21"
     id("maven-publish")
 }
 
