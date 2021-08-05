@@ -79,8 +79,9 @@ kotlin {
     }
 
     cocoapods {
-        pod("PocketSocket", "1.0.1",null,"PocketSocket")
-        //useLibraries()
+        pod("PocketSocket") {
+            path("$projectDir/PocketSocket/PocketSocket.podspec")
+        }
         summary = "Kotlin sample project with CocoaPods dependencies"
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
         ios.deploymentTarget = "12.2"

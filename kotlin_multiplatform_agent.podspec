@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
     spec.osx.deployment_target = '10.8'
     spec.tvos.deployment_target = '9.0'
 
-    spec.dependency 'PocketSocket', '1.0.1'
+    spec.dependency 'PocketSocket'
 
     spec.pod_target_xcconfig = {
         'KOTLIN_TARGET[sdk=iphonesimulator*]' => 'ios_x64',
