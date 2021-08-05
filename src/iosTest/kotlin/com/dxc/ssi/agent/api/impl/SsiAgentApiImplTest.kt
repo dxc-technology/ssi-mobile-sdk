@@ -2,7 +2,9 @@ package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
+import com.dxc.ssi.agent.api.callbacks.didexchange.DidExchangeError
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.library.LibraryError
 import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
@@ -18,9 +20,9 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestConta
 import com.dxc.ssi.agent.ledger.indy.GenesisMode
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
-import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.OfferResponseAction
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.utils.ToBeReworked
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
@@ -28,8 +30,8 @@ import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlin.test.Test
 import kotlin.test.Ignore
+import kotlin.test.Test
 
 //TODO: move this test to common level
 class SsiAgentApiImplTest {
@@ -98,9 +100,16 @@ class SsiAgentApiImplTest {
                 ssiAgentApi.connect(verifierInvitationUrl)
             }
 
-            override fun initializationFailed() {
+            override fun initializationFailed(
+                error: LibraryError,
+                message: String?,
+                details: String?,
+                stackTrace: String?
+            ) {
                 TODO("Not yet implemented")
             }
+
+
         })
 
 
@@ -188,6 +197,16 @@ class SsiAgentApiImplTest {
         override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
             println("Connection abandoned : $connection")
             return CallbackResult(true)
+        }
+
+        override fun onFailure(
+            connection: PeerConnection?,
+            error: DidExchangeError,
+            message: String?,
+            details: String?,
+            stackTrace: String?
+        ) {
+            TODO("Not yet implemented")
         }
 
     }
