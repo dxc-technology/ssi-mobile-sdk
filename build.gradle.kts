@@ -60,6 +60,14 @@ kotlin {
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
+                val socketlib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
+                    extraOpts("-libraryPath", "$projectDir/socketlib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
+                    includeDirs {
+                        allHeaders("${projectDir}/PocketSocket/PocketSocket")
+                    }
+                }
             }
         }
     } else {
@@ -71,16 +79,25 @@ kotlin {
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
+                val socketlib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
+                    extraOpts("-libraryPath", "$projectDir/socketlib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
+                    includeDirs {
+                        allHeaders("${projectDir}/PocketSocket/PocketSocket")
+                    }
+                }
+
             }
-            binaries.all {
-                  linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
-            }
+//               binaries.all {
+//                     linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
+//               }
         }
     }
 
     cocoapods {
         pod("PocketSocket") {
-            path("$projectDir/PocketSocket/PocketSocket.podspec")
+            version = "~> 1.0.1"
         }
 
         summary = "Kotlin sample project with CocoaPods dependencies"
@@ -90,6 +107,7 @@ kotlin {
         tvos.deploymentTarget = "9.0"
         frameworkName = "ssi_agent"
         podfile = project.file("./samples/swiftIosApp/Podfile")
+
     }
 
     val hostOs = System.getProperty("os.name")
@@ -107,10 +125,10 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 implementation("io.ktor:ktor-utils:$ktorVersion")
                 //For now we use ktor only to have common URL class. Also I assume we might extend its usage
-                implementation ("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
-                implementation ("co.touchlab:stately-iso-collections:1.1.4-a1")
-                implementation ("co.touchlab:stately-concurrency:1.1.4")
+                implementation("co.touchlab:stately-iso-collections:1.1.4-a1")
+                implementation("co.touchlab:stately-concurrency:1.1.4")
                 //TODO: check if two stately dependencies below are needed, considering that they should be included in the dependency above
                 implementation("co.touchlab:stately-isolate:1.1.4-a1")
                 implementation("co.touchlab:stately-common:1.1.4")
@@ -185,6 +203,7 @@ kotlin {
             dependencies {
                 implementation(files("indylib.klib"))
                 implementation("io.ktor:ktor-client-ios:$ktorVersion")
+
             }
         }
         val iosTest by getting {
@@ -206,7 +225,7 @@ android {
 
         //TODO: check which options below are really needed as they were added during development when doing some try and error
         ndk {
-            ndkVersion  = "21.4.7075529"
+            ndkVersion = "21.4.7075529"
             moduleName = "indy"
             abiFilters("x86", "arm64-v8a", "armeabi-v7a")
         }
@@ -240,13 +259,13 @@ dependencies {
 
 tasks.register<Exec>("PreparePods") {
     workingDir("./libindy-pod")
-    commandLine("pod","setup")
-    commandLine("pod","install")
+    commandLine("pod", "setup")
+    commandLine("pod", "install")
 }
 tasks.register<Exec>("PreparePodsSwift") {
     workingDir("./samples/swiftIosApp")
-    commandLine("pod","setup")
-    commandLine("pod","install")
+    commandLine("pod", "setup")
+    commandLine("pod", "install")
 }
 
 tasks.register<Copy>("CopyLibIndy") {
@@ -290,14 +309,16 @@ val packForXcode by tasks.creating(Sync::class) {
     val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
     val targetName = "ios"
     if (sdkName.startsWith("iphoneos")) {
-        val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
+        val framework =
+            kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
         inputs.property("mode", mode)
         dependsOn(framework.linkTask)
         val targetDir = File(buildDir, "xcode-framework-arm")
         from({ framework.outputDirectory })
         into(targetDir)
     } else {
-        val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
+        val framework =
+            kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
         inputs.property("mode", mode)
         dependsOn(framework.linkTask)
         val targetDir = File(buildDir, "xcode-framework-X64")
