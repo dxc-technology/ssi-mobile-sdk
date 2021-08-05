@@ -135,6 +135,7 @@ class SsiAgentApiImpl(
                         stackTrace = t.stackTraceToString()
                     )
                 }
+
             }
 
         }
