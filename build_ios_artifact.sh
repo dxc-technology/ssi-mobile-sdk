@@ -1,4 +1,5 @@
 ./gradlew clean
+./gradlew :"PreparePodsSwift"
 ./gradlew :"BuildDevice" -PXCODE_CONFIGURATION=Release
 ./gradlew :"BuildSimulator" -PXCODE_CONFIGURATION=Release
 

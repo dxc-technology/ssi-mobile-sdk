@@ -82,6 +82,7 @@ kotlin {
         pod("PocketSocket") {
             path("$projectDir/PocketSocket/PocketSocket.podspec")
         }
+
         summary = "Kotlin sample project with CocoaPods dependencies"
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
         ios.deploymentTarget = "12.2"
@@ -239,6 +240,11 @@ dependencies {
 
 tasks.register<Exec>("PreparePods") {
     workingDir("./libindy-pod")
+    commandLine("pod","setup")
+    commandLine("pod","install")
+}
+tasks.register<Exec>("PreparePodsSwift") {
+    workingDir("./samples/swiftIosApp")
     commandLine("pod","setup")
     commandLine("pod","install")
 }
