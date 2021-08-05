@@ -11,7 +11,7 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.jsonObject
 
-object AnyToStringSerializer : KSerializer<String> {
+object JsonElementToStringSerializer : KSerializer<String> {
     override fun deserialize(decoder: Decoder): String {
         val jsonInput = decoder as? JsonDecoder ?: error("Can be deserialized only by JSON")
         val json = jsonInput.decodeJsonElement().jsonObject.toString()

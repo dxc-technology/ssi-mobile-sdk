@@ -35,14 +35,14 @@ import org.junit.Test
 
 class SsiAgentApiImplTest {
 
-    private val walletName = "newWalletName3"
+    private val walletName = "newWalletName55"
     private val walletPassword = "newWalletPassword"
     private val did = "Aj4mwDVVEh46K17Cqh4dpU"
 
     private lateinit var ssiAgentApi: SsiAgentApi
 
     @Test
-     @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
         println("Starting test")
@@ -85,7 +85,7 @@ class SsiAgentApiImplTest {
             .build()
 
         val invitationUrl =
-            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiNDhBWUdnd2h4ekpyU0xGTTNQQnkyQlRDRmFwSnNFeGppOUNSa3dtM3hTM1kiXSwiQGlkIjoiMzE0MWI5MDAtMzZlMi00ODM2LWFmZWMtZGNkZDgzM2Y1YmQwIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiOVNFb1NpV2hZOEs4dmo0TUExYU1rNjJmQzhwaEQ5ZGFhYmRFbUN6VkF3QWgiXSwiQGlkIjoiNjJhNDJhNWYtZGY0Yi00OTJhLWI0YmMtMTk1OWVlYjkwYzkyIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
         ssiAgentApi.init(object : LibraryStateListener {
