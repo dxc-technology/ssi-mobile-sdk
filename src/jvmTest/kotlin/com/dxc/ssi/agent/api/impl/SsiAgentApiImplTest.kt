@@ -13,6 +13,7 @@ import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletCreationStrategy
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
 import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
+import com.dxc.ssi.agent.didcomm.model.ack.Ack
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
@@ -28,12 +29,8 @@ import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
-import com.dxc.ssi.agent.wallet.indy.model.verify.IndyCredInfo
 import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.junit.Ignore
 import org.junit.Test
 
@@ -89,7 +86,8 @@ class SsiAgentApiImplTest {
             .withLedgerConnector(indyLedgerConnector)
             .build()
 
-        val invitationUrl = "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiOVNFb1NpV2hZOEs4dmo0TUExYU1rNjJmQzhwaEQ5ZGFhYmRFbUN6VkF3QWgiXSwiQGlkIjoiNjJhNDJhNWYtZGY0Yi00OTJhLWI0YmMtMTk1OWVlYjkwYzkyIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+        val invitationUrl =
+            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMkxqbko3ejg2cGgzSnZxREN5WmFmeFQ4SnMxVGhxaGp3R1VVR3pvVGdjZmciXSwiQGlkIjoiMTIwYTU5NGUtYmU5Ni00ODY2LTg3MjMtODZiYTE5ODBlMmI4IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
 
@@ -142,25 +140,12 @@ class SsiAgentApiImplTest {
             presentationRequest: PresentationRequestContainer
         ): PresentationRequestResponseAction {
 
-            GlobalScope.launch {
-                delay(10_000)
 
-                println("Woken up...")
-
-                ssiAgentApi.getParkedPresentationRequests().forEach { presentationRequestContainer ->
-                    println("Accepting parked presentation request $presentationRequestContainer")
-                    ssiAgentApi.processParkedPresentationRequest(
-                        presentationRequestContainer,
-                        PresentationRequestResponseAction.ACCEPT
-                    )
-                }
-            }
-
-            return PresentationRequestResponseAction.PARK
+            return PresentationRequestResponseAction.ACCEPT
         }
 
-        override fun onDone(connection: PeerConnection): CallbackResult {
-            return CallbackResult(true)
+        override fun onDone(connection: PeerConnection) {
+
         }
 
         override fun onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
@@ -181,8 +166,8 @@ class SsiAgentApiImplTest {
         override fun onRequestSent(
             connection: PeerConnection,
             credentialRequestContainer: CredentialRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ) {
+
         }
 
         override fun onCredentialReceived(
@@ -192,28 +177,16 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
-            GlobalScope.launch {
-                delay(20_000)
-                println("getting stored credentials infos form wallet")
-                val credInfos = ssiAgentApi.getCredentialInfos().map { it as IndyCredInfo }
+        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
 
-
-                println("retrieved set of cred infos with size ${credInfos.size} : $credInfos")
-
-                println("retrieving one credential info by referrent Id: ${credInfos[0].referent}")
-
-                val credInfo = ssiAgentApi.getCredentialInfo(credInfos[0].referent)
-
-                println("Extracted credential: $credInfo")
-
-
-            }
-            return CallbackResult(true)
         }
 
         override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
             TODO("Not yet implemented")
+        }
+
+        override fun onAckSent(connection: PeerConnection, ack: Ack) {
+            println("Ack sent for credential")
         }
 
 
@@ -227,9 +200,8 @@ class SsiAgentApiImplTest {
             return CallbackResult(canProceedFurther = true)
         }
 
-        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
+        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
             println("Request sent hook called : $connection, $request")
-            return CallbackResult(true)
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
@@ -237,24 +209,12 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onCompleted(connection: PeerConnection): CallbackResult {
-            println("Connection completed : $connection")
-            GlobalScope.launch {
-                delay(5000)
-                ssiAgentApi.abandonConnection(connection)
+        override fun onCompleted(connection: PeerConnection) {
 
-            }
-            return CallbackResult(true)
         }
 
-        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
-            println("Received connection abandoned hook")
-            GlobalScope.launch {
-                delay(5000)
-                ssiAgentApi.reconnect(connection)
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
 
-            }
-            return CallbackResult(true)
         }
 
         override fun onFailure(

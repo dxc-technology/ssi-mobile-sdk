@@ -210,7 +210,7 @@ android {
 
         //TODO: check which options below are really needed as they were added during development when doing some try and error
         ndk {
-            ndkVersion  = "21.4.7075529"
+           // ndkVersion  = "21.4.7075529"
             moduleName = "indy"
             abiFilters("x86", "arm64-v8a", "armeabi-v7a")
         }

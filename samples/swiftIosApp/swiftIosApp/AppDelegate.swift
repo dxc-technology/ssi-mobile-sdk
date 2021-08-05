@@ -248,6 +248,10 @@ class CredentialReceiverControllerImpl: CredReceiverController {
     func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
+
+    func onAckSent(connection: PeerConnection, ack: Ack) {
+
+    }
     
 }
 
