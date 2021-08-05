@@ -79,11 +79,7 @@ kotlin {
     }
 
     cocoapods {
-        pod("PocketSocket") {
-            source = git("https://github.com/zwopple/PocketSocket") {
-                tag = "1.0.1"
-            }
-        }
+        pod("PocketSocket", "~> 1.0.1")
 
         summary = "Kotlin sample project with CocoaPods dependencies"
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
@@ -302,5 +298,3 @@ val packForXcode by tasks.creating(Sync::class) {
         into(targetDir)
     }
 }
-tasks.getByName("build").dependsOn(packForXcode)
-
