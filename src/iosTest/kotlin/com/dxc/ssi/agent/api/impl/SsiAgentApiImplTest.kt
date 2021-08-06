@@ -9,6 +9,7 @@ import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
 import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
+import com.dxc.ssi.agent.didcomm.model.ack.Ack
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
@@ -128,8 +129,8 @@ class SsiAgentApiImplTest {
             return PresentationRequestResponseAction.ACCEPT
         }
 
-        override fun onDone(connection: PeerConnection): CallbackResult {
-            return CallbackResult(true)
+        override fun onDone(connection: PeerConnection) {
+
         }
 
         override fun onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
@@ -149,8 +150,8 @@ class SsiAgentApiImplTest {
         override fun onRequestSent(
             connection: PeerConnection,
             credentialRequestContainer: CredentialRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ){
+
         }
 
         override fun onCredentialReceived(
@@ -160,12 +161,15 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
-            return CallbackResult(true)
+        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
         }
 
         override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
             TODO("Not yet implemented")
+        }
+
+        override fun onAckSent(connection: PeerConnection, ack: Ack) {
+            println("Ack sent for credential")
         }
 
 
@@ -179,9 +183,8 @@ class SsiAgentApiImplTest {
             return CallbackResult(canProceedFurther = true)
         }
 
-        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
+        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
             println("Request sent hook called : $connection, $request")
-            return CallbackResult(true)
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
@@ -189,14 +192,13 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onCompleted(connection: PeerConnection): CallbackResult {
+        override fun onCompleted(connection: PeerConnection) {
             println("Connection completed : $connection")
-            return CallbackResult(true)
+
         }
 
-        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
             println("Connection abandoned : $connection")
-            return CallbackResult(true)
         }
 
         override fun onFailure(

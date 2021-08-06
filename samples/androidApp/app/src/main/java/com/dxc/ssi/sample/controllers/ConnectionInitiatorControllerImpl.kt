@@ -12,9 +12,9 @@ import com.dxc.ssi.agent.model.PeerConnection
 
 class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
 
-    override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
+    override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
         println("Request sent hook called : $connection, $request")
-        return CallbackResult(true)
+
     }
 
     override fun onResponseReceived(
@@ -25,14 +25,13 @@ class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         return CallbackResult(true)
     }
 
-    override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
+    override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
         println("Connection abandoned : $connection")
-        return CallbackResult(true)
     }
 
-    override fun onCompleted(connection: PeerConnection): CallbackResult {
+    override fun onCompleted(connection: PeerConnection) {
         println("Connection completed : $connection")
-        return CallbackResult(true)
+
     }
 
     override fun onFailure(

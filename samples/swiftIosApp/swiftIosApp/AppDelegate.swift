@@ -149,12 +149,17 @@ func getEnvironmentVar(_ name: String) -> String? {
 
 class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 {
-    func onFailure(connection: PeerConnection?, error: DidExchangeError, details: String) {
+    func onFailure(connection: PeerConnection?, error: DidExchangeError, message: String?, details: String?, stackTrace: String?) {
+    
         print("Connection failure", error)
     }
     
-    func onCompleted(connection: PeerConnection) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
+    
+    }
+    
+    func onCompleted(connection: PeerConnection) {
+       
     }
     
     func onInvitationReceived(connection: PeerConnection, invitation: Invitation) -> CallbackResult {
@@ -162,27 +167,20 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
     }
     
    
-    
-    func onRequestSent(connection: PeerConnection, request: ConnectionRequest) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
+        
     }
     
     func onResponseReceived(connection: PeerConnection, response: ConnectionResponse) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-        
-    }
-    
 }
 
 
 class LibraryStateListenerImpl : LibraryStateListener {
-    func initializationFailed(error: LibraryError, details: String) {
+    func initializationFailed(error: LibraryError, message: String?, details: String?, stackTrace: String?) {
         print("Listener: Initialization failed", error)
-
     }
     
     func initializationCompleted()  {
@@ -204,6 +202,13 @@ class LibraryStateListenerImpl : LibraryStateListener {
 }
 
 class CredentialReceiverControllerImpl: CredReceiverController {
+    func onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
+        
+    }
+    
+    func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) {
+    }
+    
     func onProblemReport(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
@@ -245,8 +250,9 @@ class CredentialReceiverControllerImpl: CredReceiverController {
         return OfferResponseAction.accept
     }
     
-    func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+
+    func onAckSent(connection: PeerConnection, ack: Ack) {
+
     }
     
 }
@@ -257,8 +263,8 @@ class CredPresenterControllerImpl: CredPresenterController {
 
     }
 
-    func onDone(connection: PeerConnection) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onDone(connection: PeerConnection)  {
+       
     }
     
     func onRequestReceived(connection: PeerConnection,

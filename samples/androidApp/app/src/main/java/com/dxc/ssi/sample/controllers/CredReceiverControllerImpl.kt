@@ -2,6 +2,7 @@ package com.dxc.ssi.sample.controllers
 
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.didcomm.model.ack.Ack
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
@@ -35,14 +36,14 @@ class CredReceiverControllerImpl : CredReceiverController {
     }
 
     override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
-        return CallbackResult(true)
+     return  CallbackResult(true)
     }
 
     override fun onRequestSent(
         connection: PeerConnection,
         credentialRequestContainer: CredentialRequestContainer
-    ): CallbackResult {
-        return CallbackResult(true)
+    ) {
+
     }
 
     override fun onCredentialReceived(
@@ -52,8 +53,12 @@ class CredReceiverControllerImpl : CredReceiverController {
         return CallbackResult(true)
     }
 
-    override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
-        return CallbackResult(true)
+    override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
+
+    }
+
+    override fun onAckSent(connection: PeerConnection, ack: Ack) {
+        println("Ack sent for credential")
     }
 
 
