@@ -88,6 +88,7 @@ kotlin {
         }
     }
 
+
     cocoapods {
         pod("PocketSocket") {
             source = git("https://github.com/zwopple/PocketSocket") {
@@ -100,6 +101,7 @@ kotlin {
         ios.deploymentTarget = "12.2"
         osx.deploymentTarget = "10.8"
         tvos.deploymentTarget = "9.0"
+
         frameworkName = "ssi_agent"
         podfile = project.file("./samples/swiftIosApp/Podfile")
 
@@ -323,5 +325,13 @@ val packForXcode by tasks.creating(Sync::class) {
         val targetDir = File(buildDir, "xcode-framework-X64")
         from({ framework.outputDirectory })
         into(targetDir)
+    }
+}
+tasks.named<org.jetbrains.kotlin.gradle.tasks.DefFileTask>("generateDefPocketSocket").configure {
+    doLast {
+        outputFile.writeText("""
+            language = Objective-C
+            headers = PSWebSocket.h
+        """)
     }
 }
