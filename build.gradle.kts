@@ -331,7 +331,8 @@ tasks.named<org.jetbrains.kotlin.gradle.tasks.DefFileTask>("generateDefPocketSoc
     doLast {
         outputFile.writeText("""
             language = Objective-C
-            headers = PSWebSocket.h
+            headers = "PSWebSocket.h"
+            libraryPath = "$projectDir/PocketSocket/PocketSocket/"
         """)
     }
 }
