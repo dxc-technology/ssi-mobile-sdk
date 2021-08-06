@@ -1,5 +1,6 @@
 ./gradlew clean
 #sh run_first.sh
+./gradlew :"CopyHeader"
 ./gradlew :"PreparePodsSwift"
 ./gradlew :"BuildDevice"
 ./gradlew :"BuildSimulator"

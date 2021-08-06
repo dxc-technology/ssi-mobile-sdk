@@ -273,6 +273,10 @@ tasks.register<Copy>("CopyLibIndy") {
     from(layout.buildDirectory.dir("$projectDir/libindy-pod/Pods/libindy/libindy.a"))
     into(layout.buildDirectory.dir("$projectDir/indylib"))
 }
+tasks.register<Copy>("CopyHeader") {
+    from(layout.buildDirectory.dir("$projectDir/PocketSocket/PocketSocket/PSWebSocket.h"))
+    into("/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/")
+}
 
 tasks.register<Exec>("BuildSimulator") {
     commandLine("./gradlew", "packForXcode")
