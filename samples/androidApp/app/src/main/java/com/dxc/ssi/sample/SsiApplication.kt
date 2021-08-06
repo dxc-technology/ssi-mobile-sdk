@@ -19,13 +19,14 @@ import com.dxc.ssi.sample.controllers.CredReceiverControllerImpl
 import com.dxc.utils.EnvironmentUtils
 
 var ssiAgentApi: SsiAgentApi? = null
+
 class SsiApplication : Application() {
 
     private var agentInitialized: Boolean = false
+    private var agentInitializationInProgress = false
     private val walletName = "newWalletName2"
     private val walletPassword = "newWalletPassword"
     private val did = "Kg5Cq9vKv7QrLfTGUP9xbd"
-
 
 
     override fun onCreate() {
@@ -37,15 +38,21 @@ class SsiApplication : Application() {
         }
     }
 
-    fun getSsiAgent(): SsiAgentApi {
-        if (agentInitialized)
-            return ssiAgentApi!!
+    fun getSsiAgentIfInitialized(): SsiAgentApi? {
+        return if (agentInitialized)
+            ssiAgentApi!!
+        else if(agentInitializationInProgress == false) {
+            initSsiAgent()
+            null
+        }
+        else {
+            null
+        }
 
-        initSsiAgent()
-        return ssiAgentApi!!
     }
 
     private fun initSsiAgent() {
+        agentInitializationInProgress = true
 
         EnvironmentUtils.initEnvironment(EnvironmentImpl(this))
 
@@ -55,7 +62,11 @@ class SsiApplication : Application() {
             walletManager.createWallet(walletName, walletPassword)
 
         if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
-            val didResult = walletManager.createDid(didConfig = DidConfig(did = did),walletName = walletName, walletPassword = walletPassword)
+            val didResult = walletManager.createDid(
+                didConfig = DidConfig(did = did),
+                walletName = walletName,
+                walletPassword = walletPassword
+            )
             println("Generated didResult: $didResult")
             //Store did somewhere in your application to use it afterwards
         }
@@ -83,6 +94,7 @@ class SsiApplication : Application() {
             override fun initializationCompleted() {
 
                 agentInitialized = true
+                agentInitializationInProgress = true
                 println("Initialized SSI Agent")
 
             }
@@ -93,7 +105,14 @@ class SsiApplication : Application() {
                 details: String?,
                 stackTrace: String?
             ) {
-                TODO("Not yet implemented")
+                agentInitializationInProgress = true
+                println(
+                    "Failure to initialize library:" +
+                            "error -> $error" +
+                            "message -> $message" +
+                            "details -> $details" +
+                            "stackTrace -> $stackTrace"
+                )
             }
 
 
