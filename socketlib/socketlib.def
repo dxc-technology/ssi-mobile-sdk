@@ -1,5 +1,5 @@
 package = com.socketlib
 language = Objective-C
-depends =  Foundation
+depends = Foundation
 linkerOpts =-framework Security -framework CFNetwork
 staticLibraries = libPocketSocket.a

@@ -60,6 +60,11 @@ kotlin {
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
+                val socketlib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
+                    extraOpts("-libraryPath", "$projectDir/socketlib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
+                }
             }
         }
     } else {
@@ -70,6 +75,11 @@ kotlin {
                     defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+                }
+                val socketlib by cinterops.creating {
+                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
+                    extraOpts("-libraryPath", "$projectDir/socketlib")
+                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
                 }
             }
             binaries.all {
@@ -187,6 +197,8 @@ kotlin {
         val iosMain by getting {
             dependencies {
                 implementation(files("indylib.klib"))
+                implementation(files("PocketSocket.klib"))
+                implementation(files("socketlib.klib"))
                 implementation("io.ktor:ktor-client-ios:$ktorVersion")
 
             }
@@ -194,6 +206,8 @@ kotlin {
         val iosTest by getting {
             dependencies {
                 implementation(files("indylib.klib"))
+                implementation(files("PocketSocket.klib"))
+                implementation(files("socketlib.klib"))
             }
         }
     }
