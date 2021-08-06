@@ -60,14 +60,6 @@ kotlin {
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
-                val socketlib by cinterops.creating {
-                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
-                    extraOpts("-libraryPath", "$projectDir/socketlib")
-                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
-                    includeDirs {
-                        allHeaders("${projectDir}/PocketSocket/PocketSocket")
-                    }
-                }
             }
         }
     } else {
@@ -79,25 +71,18 @@ kotlin {
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
-                val socketlib by cinterops.creating {
-                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
-                    extraOpts("-libraryPath", "$projectDir/socketlib")
-                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
-                    includeDirs {
-                        allHeaders("${projectDir}/PocketSocket/PocketSocket")
-                    }
-                }
-
             }
-//               binaries.all {
-//                     linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
-//               }
+            binaries.all {
+                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
+            }
         }
     }
 
     cocoapods {
         pod("PocketSocket") {
-            version = "~> 1.0.1"
+            source = git("https://github.com/zwopple/PocketSocket") {
+                tag = "1.0.1"
+            }
         }
 
         summary = "Kotlin sample project with CocoaPods dependencies"
