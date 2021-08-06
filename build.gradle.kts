@@ -273,12 +273,12 @@ tasks.register<Copy>("CopyLibIndy") {
 }
 
 tasks.register<Exec>("BuildSimulator") {
-    commandLine("./gradlew", "build")
+    commandLine("./gradlew", "packForXcode")
 }
 
 tasks.register<Exec>("BuildDevice") {
     environment(mapOf("SDK_NAME" to "iphoneos"))
-    commandLine("./gradlew", "build") //REAL DEVICE
+    commandLine("./gradlew", "packForXcode") //REAL DEVICE
 }
 
 tasks.register<Copy>("CopyKlibToPods") {
