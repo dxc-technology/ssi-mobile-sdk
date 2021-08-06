@@ -41,7 +41,12 @@ class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         details: String?,
         stackTrace: String?
     ) {
-        TODO("Not yet implemented")
+        println("Failure to establish connection:" +
+                "connection -> $connection" +
+                "error -> $error" +
+                "message -> $message" +
+                "details -> $details" +
+                "stackTrace -> $stackTrace")
     }
 
     override fun onInvitationReceived(connection: PeerConnection, invitation: Invitation): CallbackResult {

@@ -113,7 +113,7 @@ class ReceiveInvitationAction(
             connectionInitiatorController.onFailure(
                 connection = connection,
                 error = DidExchangeError.UNKNOWN_ERROR,
-                stackTrace = t.message.toString()
+                stackTrace = t.stackTraceToString()
             )
 
         }
