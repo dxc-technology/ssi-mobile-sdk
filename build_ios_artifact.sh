@@ -1,7 +1,7 @@
 ./gradlew clean
 ./gradlew :"PreparePodsSwift"
 ./gradlew :"BuildDevice" -PXCODE_CONFIGURATION=Release
-./gradlew :"BuildSimulator" -PXCODE_CONFIGURATION=Release
+#./gradlew :"BuildSimulator" -PXCODE_CONFIGURATION=Release
 sh display_files.sh
 
 lipo build/xcode-framework-arm/ssi_agent.framework/ssi_agent -extract arm64 -output build/xcode-framework-arm/ssi_agent.framework/ssi_agent
