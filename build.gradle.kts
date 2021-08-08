@@ -60,11 +60,6 @@ kotlin {
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
-                val socketlib by cinterops.creating {
-                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
-                    extraOpts("-libraryPath", "$projectDir/socketlib")
-                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
-                }
             }
         }
     } else {
@@ -75,11 +70,6 @@ kotlin {
                     defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
                     extraOpts("-libraryPath", "$projectDir/indylib")
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
-                }
-                val socketlib by cinterops.creating {
-                    defFile(project.file("../ssi-mobile-sdk/socketlib/socketlib.def"))
-                    extraOpts("-libraryPath", "$projectDir/socketlib")
-                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/socketlib")
                 }
             }
             binaries.all {
@@ -199,17 +189,12 @@ kotlin {
         val iosMain by getting {
             dependencies {
                 implementation(files("indylib.klib"))
-                implementation(files("PocketSocket.klib"))
-                implementation(files("socketlib.klib"))
                 implementation("io.ktor:ktor-client-ios:$ktorVersion")
-
             }
         }
         val iosTest by getting {
             dependencies {
                 implementation(files("indylib.klib"))
-                implementation(files("PocketSocket.klib"))
-                implementation(files("socketlib.klib"))
             }
         }
     }
@@ -263,19 +248,10 @@ tasks.register<Exec>("PreparePods") {
     commandLine("pod", "setup")
     commandLine("pod", "install")
 }
-tasks.register<Exec>("PreparePodsSwift") {
-    workingDir("./samples/swiftIosApp")
-    commandLine("pod", "setup")
-    commandLine("pod", "install")
-}
 
 tasks.register<Copy>("CopyLibIndy") {
     from(layout.buildDirectory.dir("$projectDir/libindy-pod/Pods/libindy/libindy.a"))
     into(layout.buildDirectory.dir("$projectDir/indylib"))
-}
-tasks.register<Copy>("CopyHeader") {
-    from(layout.buildDirectory.dir("$projectDir/PocketSocket/PocketSocket/PSWebSocket.h"))
-    into("/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/")
 }
 
 tasks.register<Exec>("BuildSimulator") {

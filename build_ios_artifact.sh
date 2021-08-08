@@ -1,10 +1,6 @@
 ./gradlew clean
-#sh run_first.sh
-./gradlew :"CopyHeader"
-./gradlew :"PreparePodsSwift"
 ./gradlew :"BuildDevice"
 ./gradlew :"BuildSimulator"
-#sh display_files.sh
 
 lipo build/xcode-framework-arm/ssi_agent.framework/ssi_agent -extract arm64 -output build/xcode-framework-arm/ssi_agent.framework/ssi_agent
 lipo -info build/xcode-framework-arm/ssi_agent.framework/ssi_agent
