@@ -21,12 +21,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 
 open class IndyWalletHolder(
     private val walletName: String,
     private val walletPassword: String,
     private val didConfig: DidConfig
 ) : WalletHolder {
+    var logger: Kermit = Kermit(LogcatLogger())
     //TODO: think how to avoid optionals here
     private var isoDid = IsolateState { ObjectHolder<String?>() }
     private var isoVerkey = IsolateState { ObjectHolder<String?>() }
@@ -62,12 +66,12 @@ open class IndyWalletHolder(
 
             val value = connection.toJson()
 
-            println("Storing connection $connection")
+            logger.log(Severity.Debug,"",null) { "Storing connection $connection" }
             val wallet = isoWallet.access { it.obj }
             WalletRecord.add(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value, tagsJson)
         } else {
             val value = connection.toJson()
-            println("Updating connection $connection")
+            logger.log(Severity.Debug,"",null) { "Updating connection $connection" }
             val wallet = isoWallet.access { it.obj }
             WalletRecord.updateValue(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value)
             //TODO: check if there are cases when we really need to update tags
@@ -111,7 +115,7 @@ open class IndyWalletHolder(
         //TODO: consider case when we received several records. Is it ok? What do do in this case? Need to make some robust solution instead of taking first one
         return retrievedWalletRecords.records!!
             .map {
-                println(it.value)
+                logger.log(Severity.Debug,"",null) { it.value }
                 it.value
             }.map<String, PeerConnection> { Json.decodeFromString(it) }
             .firstOrNull()
@@ -135,7 +139,7 @@ open class IndyWalletHolder(
 
         return retrievedWalletRecords.records!!
             .map {
-                println(it.value)
+                logger.log(Severity.Debug,"",null) { it.value }
                 it.value
             }.map<String, PeerConnection> { Json.decodeFromString(it) }.toSet()
 
@@ -157,7 +161,7 @@ open class IndyWalletHolder(
         val byteArrayMessage = message.payload.toByteArray()
         val recipientVk = recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
         //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
-        println("recipientKeys = $recipientVk")
+        logger.log(Severity.Debug,"",null) { "recipientKeys = $recipientVk" }
 
         val senderVk = if (useAnonCrypt) null else isoVerkey.access { it.obj }
         val wallet = isoWallet.access { it.obj }
@@ -165,7 +169,7 @@ open class IndyWalletHolder(
 
         val decodedString = String(byteArrayPackedMessage)
 
-        println("Decoded packed message = $decodedString")
+        logger.log(Severity.Debug,"",null) { "Decoded packed message = $decodedString" }
 
         return decodedString
     }
@@ -180,7 +184,7 @@ open class IndyWalletHolder(
 
         val decodedString = String(byteArrayUnpackedMessage)
 
-        println("Decoded packed message = $decodedString")
+        logger.log(Severity.Debug,"",null) { "Decoded packed message = $decodedString" }
 
         return Message(decodedString)
 

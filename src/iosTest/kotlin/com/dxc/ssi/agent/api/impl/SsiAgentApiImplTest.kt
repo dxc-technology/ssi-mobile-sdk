@@ -15,6 +15,9 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.ledger.indy.GenesisMode
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
@@ -37,7 +40,7 @@ class SsiAgentApiImplTest {
     private val walletName = "newWalletName2"
     private val walletPassword = "newWalletPassword"
     private val did = "4PCVFCeZbKXyvgjCedbXDx"
-
+    var logger: Kermit = Kermit(LogcatLogger())
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     @Ignore
@@ -88,13 +91,13 @@ class SsiAgentApiImplTest {
 
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
-                println("Connecting to issuer")
+                logger.log(Severity.Debug,"",null) { "Connecting to issuer" }
                 ssiAgentApi.connect(issuerInvitationUrl)
 
                 //TODO: ensure that connection can be established without delay between two connections
                 //Sleeper().sleep(4000)
 
-                println("Connecting to verifier")
+                logger.log(Severity.Debug,"",null) { "Connecting to verifier" }
                 ssiAgentApi.connect(verifierInvitationUrl)
             }
 
@@ -163,6 +166,8 @@ class SsiAgentApiImplTest {
     }
 
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
+        var logger: Kermit = Kermit(LogcatLogger())
+
         override fun onInvitationReceived(
             connection: PeerConnection,
             invitation: Invitation
@@ -171,22 +176,22 @@ class SsiAgentApiImplTest {
         }
 
         override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
-            println("Request sent hook called : $connection, $request")
+            logger.log(Severity.Debug,"",null) { "Request sent hook called : $connection, $request"}
             return CallbackResult(true)
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
-            println("Response received hook called : $connection, $response")
+            logger.log(Severity.Debug,"",null) { "Response received hook called : $connection, $response"}
             return CallbackResult(true)
         }
 
         override fun onCompleted(connection: PeerConnection): CallbackResult {
-            println("Connection completed : $connection")
+            logger.log(Severity.Debug,"",null) { "Connection completed : $connection" }
             return CallbackResult(true)
         }
 
         override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
-            println("Connection abandoned : $connection")
+            logger.log(Severity.Debug,"",null) { "Connection abandoned : $connection" }
             return CallbackResult(true)
         }
 

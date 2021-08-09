@@ -12,14 +12,18 @@ import com.dxc.ssi.sample.ssiAgentApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 
 class CredReceiverControllerImpl : CredReceiverController {
+    var logger: Kermit = Kermit(LogcatLogger())
     override fun onOfferReceived(
         connection: PeerConnection,
         credentialOfferContainer: CredentialOfferContainer
     ): OfferResponseAction {
 
-        println("Received credential offer")
+        logger.log(Severity.Debug,"",null) { "Received credential offer" }
 
         GlobalScope.launch {
 

@@ -1,4 +1,4 @@
-package co.touchlab.kermit
+package com.dxc.ssi.agent.kermit
 
 import java.io.PrintWriter
 import java.io.StringWriter

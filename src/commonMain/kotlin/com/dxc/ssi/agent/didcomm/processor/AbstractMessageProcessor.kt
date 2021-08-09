@@ -1,14 +1,14 @@
 package com.dxc.ssi.agent.didcomm.processor
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
 import com.dxc.ssi.agent.model.messages.Context
 import kotlinx.serialization.decodeFromString

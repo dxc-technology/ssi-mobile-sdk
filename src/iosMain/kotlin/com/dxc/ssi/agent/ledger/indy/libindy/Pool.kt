@@ -1,11 +1,11 @@
 package com.dxc.ssi.agent.ledger.indy.libindy
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.callback.callbackHandler
 import com.dxc.ssi.agent.callback.impl.IntCallback
 import com.dxc.ssi.agent.callback.impl.SimpleCallback
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.indylib.indy_create_pool_ledger_config
 import com.indylib.indy_open_pool_ledger
 import com.indylib.indy_set_protocol_version

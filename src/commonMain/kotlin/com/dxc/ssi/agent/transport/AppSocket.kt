@@ -1,9 +1,9 @@
 package com.dxc.ssi.agent.transport
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
 import co.touchlab.stately.isolate.IsolateState
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.ssi.agent.utils.ObjectHolder

@@ -1,4 +1,4 @@
-package co.touchlab.kermit
+package com.dxc.ssi.agent.kermit
 
 actual class LogcatLogger : Logger() {
     actual override fun log(

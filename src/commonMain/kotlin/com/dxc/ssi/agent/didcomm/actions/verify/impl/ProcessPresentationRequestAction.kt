@@ -1,8 +1,5 @@
 package com.dxc.ssi.agent.didcomm.actions.verify.impl
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
 import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
@@ -17,6 +14,9 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationContainer
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationState
 import com.dxc.ssi.agent.exceptions.common.NoCredentialToSatisfyPresentationRequestException
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.PresentationExchangeRecord
 import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.model.messages.Message

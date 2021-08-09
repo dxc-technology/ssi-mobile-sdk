@@ -1,11 +1,11 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.callback.CallbackData
 import com.dxc.ssi.agent.callback.callbackHandler
 import com.dxc.ssi.agent.callback.impl.StringCallback
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.indylib.*
 import kotlinx.cinterop.ByteVarOf
 import kotlinx.cinterop.CPointer

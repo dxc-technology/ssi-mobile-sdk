@@ -1,9 +1,9 @@
 package com.dxc.ssi.agent.transport
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
 import co.touchlab.stately.collections.sharedMutableMapOf
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import com.dxc.utils.System
 import kotlinx.coroutines.*

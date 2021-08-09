@@ -1,4 +1,4 @@
-package co.touchlab.kermit
+package com.dxc.ssi.agent.kermit
 
 import platform.Foundation.NSLog
 import platform.Foundation.NSThread

@@ -1,11 +1,11 @@
 package com.dxc.ssi.agent.transport
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
 import co.touchlab.stately.isolate.IsolateState
 import cocoapods.PocketSocket.PSWebSocket
 import cocoapods.PocketSocket.PSWebSocketDelegateProtocol
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import platform.Foundation.NSError
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLRequest
@@ -47,7 +47,7 @@ internal actual class PlatformSocket actual constructor(url: String) : NSObject(
         }
         sleep(1)
 
-        println("PlatformSocket: constructed receiverHandler")
+        logger.log(Severity.Debug,"",null) { "PlatformSocket: constructed receiverHandler" }
     }
     actual fun closeSocket(code: Int, reason: String) {
         isolatedWebSocket.access { it.websocket?.closeWithCode(code.toLong(), null) }

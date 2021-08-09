@@ -1,8 +1,8 @@
 package com.dxc.ssi.agent.wallet.indy.helpers
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
 import com.dxc.ssi.agent.wallet.indy.libindy.WalletSearch
 import com.dxc.ssi.agent.wallet.indy.model.RetrievedWalletRecords

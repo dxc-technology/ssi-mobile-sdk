@@ -1,8 +1,5 @@
 package com.dxc.ssi.agent.didcomm.actions.issue.impl
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
 import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.config.Configuration
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
@@ -17,6 +14,9 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.messages.Message

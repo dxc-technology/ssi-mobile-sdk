@@ -1,8 +1,5 @@
 package com.dxc.ssi.agent.api.impl
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
@@ -17,6 +14,9 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestConta
 import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
 import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
@@ -32,7 +32,7 @@ class SsiAgentApiImpl(
     private val callbacks: Callbacks,
 ) : SsiAgentApi {
 
-    private var logger:Kermit = Kermit(LogcatLogger())
+    private var logger: Kermit = Kermit(LogcatLogger())
     private var job = Job()
     private val agentScope = CoroutineScope(Dispatchers.Default + job)
 

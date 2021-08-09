@@ -14,6 +14,7 @@ import com.dxc.ssi.agent.didcomm.processor.MessageType
 import com.dxc.ssi.agent.didcomm.processor.Processors
 import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationStateMachine
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.model.messages.Context
 
@@ -56,7 +57,7 @@ class CredVerifierProcessorImpl(
         presentationRequestContainer: PresentationRequestContainer,
         presentationRequestResponseAction: PresentationRequestResponseAction
     ) {
-        println("Preparing to process parked presentation request")
+        logger.log(Severity.Debug,"",null) { "Preparing to process parked presentation request" }
 
         val actionParams = ActionParams(
             walletConnector = walletConnector,

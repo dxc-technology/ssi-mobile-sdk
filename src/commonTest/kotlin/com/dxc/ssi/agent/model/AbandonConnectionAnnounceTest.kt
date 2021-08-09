@@ -1,6 +1,9 @@
 package com.dxc.ssi.agent.model
 
 import com.dxc.ssi.agent.didcomm.model.abandon.AbandonConnectionAnnounce
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import io.ktor.http.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -9,6 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class AbandonConnectionAnnounceTest {
+    var logger: Kermit = Kermit(LogcatLogger())
     @Test
     fun testSerialization() {
 
@@ -19,7 +23,7 @@ class AbandonConnectionAnnounceTest {
 
         val jsonString = Json.encodeToString(abandonConnectionAnnounce)
 
-        println(jsonString)
+        logger.log(Severity.Debug,"",null) { jsonString }
 
         val abandonConnectionAnnounce2 = Json.decodeFromString<AbandonConnectionAnnounce>(jsonString)
 
@@ -38,7 +42,7 @@ class AbandonConnectionAnnounceTest {
 
         val abandonConnectionAnnounce2 = Json.decodeFromString<AbandonConnectionAnnounce>(jsonString)
 
-        println(abandonConnectionAnnounce2)
+        logger.log(Severity.Debug,"",null) { abandonConnectionAnnounce2.toString() }
 
         assertEquals("c17147d2-ada6-4d3c-a489-dc1e1bf778ab", abandonConnectionAnnounce2.id)
 

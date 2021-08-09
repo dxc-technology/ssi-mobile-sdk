@@ -17,6 +17,9 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorBuilder
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.OfferResponseAction
@@ -40,12 +43,12 @@ class SsiAgentApiImplTest {
     private val did = "Aj4mwDVVEh46K17Cqh4dpU"
 
     private lateinit var ssiAgentApi: SsiAgentApi
-
+    var logger: Kermit = Kermit(LogcatLogger())
     @Test
      @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
-        println("Starting test")
+        logger.log(Severity.Debug,"",null) { "Starting test" }
 
         EnvironmentUtils.initEnvironment(EnvironmentImpl())
 
@@ -91,9 +94,9 @@ class SsiAgentApiImplTest {
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
 
-                println("Connecting to issuer")
+                logger.log(Severity.Debug,"",null) { "Connecting to issuer" }
                 val connection = ssiAgentApi.connect(invitationUrl, keepConnectionAlive = true)
-                println("Connected to issuer")
+                logger.log(Severity.Debug,"",null) { "Connected to issuer" }
 
             }
 
@@ -117,10 +120,10 @@ class SsiAgentApiImplTest {
             GlobalScope.launch {
                 delay(10_000)
 
-                println("Woken up...")
+                logger.log(Severity.Debug,"",null) { "Woken up..." }
 
                 ssiAgentApi.getParkedPresentationRequests().forEach { presentationRequestContainer ->
-                    println("Accepting parked presentation request $presentationRequestContainer")
+                    logger.log(Severity.Debug,"",null) { "Accepting parked presentation request $presentationRequestContainer" }
                     ssiAgentApi.processParkedPresentationRequest(
                         presentationRequestContainer,
                         PresentationRequestResponseAction.ACCEPT
@@ -167,17 +170,17 @@ class SsiAgentApiImplTest {
         override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
             GlobalScope.launch {
                 delay(20_000)
-                println("getting stored credentials infos form wallet")
+                logger.log(Severity.Debug,"",null) { "getting stored credentials infos form wallet" }
                 val credInfos = ssiAgentApi.getCredentialInfos().map { it as IndyCredInfo }
 
 
-                println("retrieved set of cred infos with size ${credInfos.size} : $credInfos")
+                logger.log(Severity.Debug,"",null) { "retrieved set of cred infos with size ${credInfos.size} : $credInfos" }
 
-                println("retrieving one credential info by referrent Id: ${credInfos[0].referent}")
+                logger.log(Severity.Debug,"",null) { "retrieving one credential info by referrent Id: ${credInfos[0].referent}" }
 
                 val credInfo = ssiAgentApi.getCredentialInfo(credInfos[0].referent)
 
-                println("Extracted credential: $credInfo")
+                logger.log(Severity.Debug,"",null) { "Extracted credential: $credInfo" }
 
 
             }
@@ -200,22 +203,22 @@ class SsiAgentApiImplTest {
         }
 
         override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
-            println("Request sent hook called : $connection, $request")
+            logger.log(Severity.Debug,"",null) { "Request sent hook called : $connection, $request" }
             return CallbackResult(true)
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
-            println("Response received hook called : $connection, $response")
+            logger.log(Severity.Debug,"",null) { "Response received hook called : $connection, $response" }
             return CallbackResult(true)
         }
 
         override fun onCompleted(connection: PeerConnection): CallbackResult {
-            println("Connection completed : $connection")
+            logger.log(Severity.Debug,"",null) { "Connection completed : $connection" }
             return CallbackResult(true)
         }
 
         override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
-            println("Received connection abandoned hook")
+            logger.log(Severity.Debug,"",null) { "Received connection abandoned hook" }
             return CallbackResult(true)
         }
 

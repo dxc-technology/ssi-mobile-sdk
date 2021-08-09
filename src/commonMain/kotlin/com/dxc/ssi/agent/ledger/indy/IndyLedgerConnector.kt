@@ -1,8 +1,5 @@
 package com.dxc.ssi.agent.ledger.indy
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
 import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialDefinition
@@ -10,6 +7,9 @@ import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialDefinitionId
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
 import com.dxc.ssi.agent.didcomm.model.verify.data.Schema
 import com.dxc.ssi.agent.didcomm.model.verify.data.SchemaId
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.ledger.indy.helpers.PoolHelper
 import com.dxc.ssi.agent.ledger.indy.libindy.Ledger
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool

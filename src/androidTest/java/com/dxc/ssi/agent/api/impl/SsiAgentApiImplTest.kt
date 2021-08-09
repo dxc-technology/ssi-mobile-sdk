@@ -35,6 +35,9 @@ import kotlinx.coroutines.launch
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 
 //TODO: if we can use some common kotlin tests to have common tests for all platforms
 class SsiAgentApiImplTest {
@@ -43,6 +46,7 @@ class SsiAgentApiImplTest {
     private val walletPassword = "newWalletPassword"
     private val did = "Goci8gnhuC9vvxTWg1aFSx"
     lateinit var ssiAgentApi: SsiAgentApi
+    var logger: Kermit = Kermit(LogcatLogger())
 
     @Rule
     @JvmField
@@ -69,7 +73,7 @@ class SsiAgentApiImplTest {
 
         val instrumentation = InstrumentationRegistry.getInstrumentation()
 
-        println("Starting test")
+        logger.log(Severity.Debug,"",null) { "Starting test" }
 
         EnvironmentUtils.initEnvironment(EnvironmentImpl(instrumentation.context))
 
@@ -84,7 +88,7 @@ class SsiAgentApiImplTest {
                 walletName = walletName,
                 walletPassword = walletPassword
             )
-            print("Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}")
+            logger.log(Severity.Debug,"",null) { "Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}" }
             //Store did somewhere in your application to use it afterwards
         }
 
@@ -118,9 +122,9 @@ class SsiAgentApiImplTest {
                 ssiAgentApi.abandonAllConnections(force = true, notifyPeerBeforeAbandoning = false)
 
 
-                println("Connecting to issuer")
+                logger.log(Severity.Debug,"",null) { "Connecting to issuer" }
                 val connection = ssiAgentApi.connect(issuerInvitationUrl, keepConnectionAlive = true)
-                println("Connected to issuer")
+                logger.log(Severity.Debug,"",null) { "Connected to issuer" }
 
             }
 
@@ -152,12 +156,14 @@ class SsiAgentApiImplTest {
     }
 
     inner class CredReceiverControllerImpl : CredReceiverController {
+        var logger: Kermit = Kermit(LogcatLogger())
+
         override fun onOfferReceived(
             connection: PeerConnection,
             credentialOfferContainer: CredentialOfferContainer
         ): OfferResponseAction {
 
-            println("Received credential offer")
+            logger.log(Severity.Debug,"",null) { "Received credential offer" }
 
             GlobalScope.launch {
                 delay(20_000)
@@ -197,6 +203,7 @@ class SsiAgentApiImplTest {
     }
 
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
+        var logger: Kermit = Kermit(LogcatLogger())
         override fun onInvitationReceived(
             connection: PeerConnection,
             invitation: Invitation
@@ -205,22 +212,22 @@ class SsiAgentApiImplTest {
         }
 
         override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
-            println("Request sent hook called : $connection, $request")
+            logger.log(Severity.Debug,"",null) { "Request sent hook called : $connection, $request" }
             return CallbackResult(true)
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
-            println("Response received hook called : $connection, $response")
+            logger.log(Severity.Debug,"",null) {"Response received hook called : $connection, $response" }
             return CallbackResult(true)
         }
 
         override fun onCompleted(connection: PeerConnection): CallbackResult {
-            println("Connection completed : $connection")
+            logger.log(Severity.Debug,"",null) {"Connection completed : $connection" }
             return CallbackResult(true)
         }
 
         override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
-            println("Connection completed : $connection")
+            logger.log(Severity.Debug,"",null) { "Connection completed : $connection" }
             return CallbackResult(true)
         }
 

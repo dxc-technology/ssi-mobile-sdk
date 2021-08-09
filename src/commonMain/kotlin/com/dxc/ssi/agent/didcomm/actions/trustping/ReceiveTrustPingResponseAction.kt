@@ -1,12 +1,12 @@
 package com.dxc.ssi.agent.didcomm.actions.trustping
 
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
-import co.touchlab.kermit.Severity
 import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.model.trustping.TrustPingResponse
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
