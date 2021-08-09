@@ -7,16 +7,24 @@
 
 import UIKit
 import ssi_agent
-import os.log
 
+
+class Logger{
+    static var logger: LogcatLogger = LogcatLogger()
+    static func logMessageDebug(message: String, tag: String, throwable: KotlinThrowable?){
+        DispatchQueue.main.async {
+            logger.log(severity: Severity.debug, message: message, tag: tag, throwable: throwable)
+        }
+    }
+}
 
 var ssiAgentApi: SsiAgentApi? = nil
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window : UIWindow?
-    var logger  = Kermit(logger: OSLogLogger())
-
+    
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
           
         
@@ -32,7 +40,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
        // ToBeReworked.init().enableIndyLog()
         
-        
 
         DispatchQueue.global().async {
           
@@ -45,40 +52,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 EnvironmentUtils().doInitEnvironment(environment:EnvironmentImpl())
                 group.leave()
             }
-          
            
        
             group.notify(queue: .main) {
                 
                 let walletManager = IndyWalletManager.Companion()
 
-                self.logger.d(withMessage: {"Before creating wallet"})
+                Logger.logMessageDebug(message: "Before creating wallet", tag: "INIT", throwable: nil)
               
                 let indyHomeEnv = getEnvironmentVar( "INDY_HOME")
                 
-            
-                self.logger.d(withMessage: {"Env INDY_HOME= \(indyHomeEnv)"})
+                Logger.logMessageDebug(message: "Env INDY_HOME= \(indyHomeEnv)", tag: "INIT", throwable: nil)
                 if (!walletManager.isWalletExistsAndOpenable(walletName: myWalletName, walletPassword: myWalletPassword)) {
-                    self.logger.d(withMessage: {"Recreating wallet"})
+                    Logger.logMessageDebug(message: "Recreating wallet", tag: "INIT", throwable: nil)
                     walletManager.createWallet(walletName: myWalletName, walletPassword: myWalletPassword, walletCreationStrategy: WalletCreationStrategy.truncateandcreate)}
                 
-                self.logger.d(withMessage: {"Before creating did"})
-                
+                Logger.logMessageDebug(message: "Before creating did", tag: "INIT", throwable: nil)
                 if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
-                    self.logger.d(withMessage: {"Recreating did"})
+                    Logger.logMessageDebug(message: "Recreating did", tag: "INIT", throwable: nil)
+                    
                     let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
                         didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
                         walletName : myWalletName, walletPassword:myWalletPassword)
 
                     
-                    self.logger.d(withMessage: {"Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())"})
+                    Logger.logMessageDebug(message: "Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())", tag: "INIT", throwable: nil)
+            
                     
                     //Store did somewhere in your application to use it afterwards
                 }
-
-                self.logger.d(withMessage: {"Before creating wallet holder"})
                 
-                
+                Logger.logMessageDebug(message: "Before creating wallet holder", tag: "INIT", throwable: nil)
+    
 
                 
                 let walletHolder = IndyWalletHolder(
@@ -86,7 +91,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     walletPassword :myWalletPassword,
                     didConfig : DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil)
                 )
-                self.logger.d(withMessage: {"Before creating wallet connector"})
+                Logger.logMessageDebug(message: "Before creating wallet connector", tag: "INIT", throwable: nil)
                 
                 let indyWalletConnector = IndyWalletConnector().build(walletHolder: walletHolder)
 
@@ -96,7 +101,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .withGenesisMode(genesisMode: GenesisMode.sovrinBuildernet)
                 .build()
                 
-                self.logger.d(withMessage: {"Before creating ssiAgentApi"})
+                Logger.logMessageDebug(message: "Before creating ssiAgentApi", tag: "INIT", throwable: nil)
          
                 
                 ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
@@ -107,12 +112,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         .build()
            
             
-                self.logger.d(withMessage: {"Before initialization"})
+                Logger.logMessageDebug(message: "Before initialization", tag: "INIT", throwable: nil)
          
                 ssiAgentApi.unsafelyUnwrapped.doInit(libraryStateListener:lsl)
                 
-                self.logger.d(withMessage: {"After initialize fun called"})
-                
+                Logger.logMessageDebug(message: "After initialize fun called", tag: "INIT", throwable: nil)
                 
             }
             
@@ -162,8 +166,6 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
         return CallbackResult(canProceedFurther: true)
     }
     
-   
-    
     func onRequestSent(connection: PeerConnection, request: ConnectionRequest) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
@@ -181,19 +183,21 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 
 
 class LibraryStateListenerImpl : LibraryStateListener {
-    var kermit  = Kermit(logger: OSLogLogger())
     
     func initializationCompleted()  {
-       print("Listener: Initialization completed")
+        Logger.logMessageDebug(message: "Listener: Initialization completed", tag: "INIT", throwable: nil)
         
-        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMnVWSE5tWEducmt1TFR2WnNHYXFIRjlGMUU1aEZiMVFLdFF2b3hCakZzb2UiXSwiQGlkIjoiNTZhODZjY2ItNjE4YS00ZDkzLTlmM2EtYzI0MDA1NDgxZjhjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
+        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiOTRtV0tudTY2Q1JNZTVDcFE4bml6cG1TVW50Tk5UWFZvUVp3R3B1Ylo2emciXSwiQGlkIjoiMjczYzUyMDYtZGFlMi00ZGI0LWFiZGQtNWMwZTc1NmViNjU2IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
 
+        
+        Logger.logMessageDebug(message: "Listener: ConnectionStarted", tag: "INIT", throwable: nil)
+    
         
     }
     
     func initializationFailed()  {
         
-        self.kermit.d(withMessage: {"Listener: Initialization failed"})
+        Logger.logMessageDebug(message: "Listener: Initialization failed", tag: "INIT", throwable: nil)
        
     }
 }
@@ -234,9 +238,7 @@ class CredentialReceiverControllerImpl: CredReceiverController {
     }
     
     func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> OfferResponseAction {
-        
-       
-        
+    
         return OfferResponseAction.accept
     }
     
@@ -248,7 +250,6 @@ class CredentialReceiverControllerImpl: CredReceiverController {
 
 
 class CredPresenterControllerImpl: CredPresenterController {
-    var kermit  = Kermit(logger: OSLogLogger())
     func onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
 
     }
@@ -263,13 +264,14 @@ class CredPresenterControllerImpl: CredPresenterController {
         DispatchQueue.global().async {
             Sleeper().sleep(value: 10000)
             
-            self.kermit.d(withMessage: {"Getting parked proof requests from wallet"})
+            Logger.logMessageDebug(message: "Getting parked proof requests from wallet", tag: "INIT", throwable: nil)
+            
            
             
             let credInfos = ssiAgentApi.unsafelyUnwrapped.getCredentialInfos().map {$0 as! IndyCredInfo}
             let parketPresentationRequestContainers = ssiAgentApi.unsafelyUnwrapped.getParkedPresentationRequests()
             
-            self.kermit.d(withMessage: {"Got \(parketPresentationRequestContainers)"})
+            Logger.logMessageDebug(message: "Got \(parketPresentationRequestContainers)", tag: "INIT", throwable: nil)
            
             
             parketPresentationRequestContainers.forEach { presentationRequestContainer in
@@ -277,10 +279,11 @@ class CredPresenterControllerImpl: CredPresenterController {
             }
            
             credInfos.forEach { credInfo in
-                self.kermit.d(withMessage: {"retrieving first cred"})
+                            
+                Logger.logMessageDebug(message: "retrieving first cred", tag: "INIT", throwable: nil)
                 let cred = ssiAgentApi.unsafelyUnwrapped.getCredentialInfo(localWalletCredId: credInfo.referent)
                 
-                print(cred)
+                Logger.logMessageDebug(message: "\(cred)", tag: "INIT", throwable: nil)
             }
             
         

@@ -1,14 +1,9 @@
 package com.dxc.ssi.agent.transport
 
-
-import co.touchlab.kermit.CommonLogger
-import co.touchlab.kermit.Kermit
-import co.touchlab.kermit.LogcatLogger
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
-import java.io.FileReader
 
 internal actual class PlatformSocket actual constructor(url: String) {
     private val socketEndpoint = url

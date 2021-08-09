@@ -125,7 +125,6 @@ kotlin {
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))
                 implementation(kotlin("stdlib-common"))
-                api("co.touchlab:kermit:0.1.9")
             }
         }
         val commonTest by getting {

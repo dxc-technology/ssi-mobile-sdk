@@ -12,7 +12,7 @@ package co.touchlab.kermit
 
 class Kermit(
     private val loggerList: List<Logger> = listOf(
-        CommonLogger()
+        LogcatLogger()
     ), private val defaultTag: String = "Logger"
 ) {
 
@@ -118,7 +118,6 @@ class Kermit(
     fun wtf(withTag: String, message: () -> String) {
         wtf(tag = withTag, message = message)
     }
-
     fun log(
         severity: Severity,
         tag: String = defaultTag,
