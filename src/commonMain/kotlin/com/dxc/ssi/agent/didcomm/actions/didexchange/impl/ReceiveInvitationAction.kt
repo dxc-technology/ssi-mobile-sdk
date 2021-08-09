@@ -7,9 +7,16 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
 import com.dxc.ssi.agent.didcomm.commoon.MessageSender
+import com.dxc.ssi.agent.didcomm.constants.DidCommProblemCodes
+import com.dxc.ssi.agent.didcomm.constants.toProblemReportDescription
 import com.dxc.ssi.agent.didcomm.model.common.Service
 import com.dxc.ssi.agent.didcomm.model.didexchange.*
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
+import com.dxc.ssi.agent.didcomm.processor.Processors
+import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.model.ConnectionTransportState
 import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PeerConnectionState
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.utils.Base64
 import io.ktor.http.*
@@ -24,8 +31,11 @@ import kotlin.random.Random
 class ReceiveInvitationAction(
     val walletConnector: WalletConnector,
     val transport: Transport,
+    val processors: Processors,
+    val services: Services,
     val connectionInitiatorController: ConnectionInitiatorController,
-    private val invitationUrl: String
+    private val invitationUrl: String,
+    private val keepConnectionAlive: Boolean
 ) : DidExchangeAction {
     override suspend fun perform(): ActionResult {
         // TODO: think to only form special message here and pass it to message processor
@@ -39,16 +49,16 @@ class ReceiveInvitationAction(
         val connectionId = uuid4().toString()
 
         val connection = PeerConnection(
-            id = connectionId, state = "START",
+            id = connectionId, state = PeerConnectionState.INVITATION_RECEIVED,
             invitation = this.invitationUrl,
             isSelfInitiated = true,
             peerRecipientKeys = invitation.recipientKeys,
-            endpoint = invitation.serviceEndpoint
-        )
+            endpoint = invitation.serviceEndpoint,
+            keepTransportAlive = keepConnectionAlive,
+            transportState = ConnectionTransportState.INITIALIZATION)
 
 
         //TODO: before storing record check if there were record with the same invitation and reuse it
-        //TODO: think about not storing connection object at all untill callback result is received
         walletConnector.walletHolder.storeConnectionRecord(connection)
         val callbackResult = connectionInitiatorController.onInvitationReceived(connection, invitation)
 
@@ -60,22 +70,30 @@ class ReceiveInvitationAction(
 
             println("Connection request: $connectionRequestJson")
 
-            //TODO: ensure that transport function is synchronous here because we will save new status to wallet only after actual message was sent
-            MessageSender.packAndSendMessage(Message(connectionRequestJson), connection, walletConnector, transport)
+            MessageSender.packAndSendMessage(
+                Message(connectionRequestJson), connection, walletConnector, transport, services,
+                onMessageSendingFailure = {
+                    val problemReport = ProblemReport(
+                        id = uuid4().toString(),
+                        description = DidCommProblemCodes.COULD_NOT_DELIVER_MESSAGE.toProblemReportDescription()
+                    )
+                    processors.abandonConnectionProcessor!!.abandonConnection(connection, false, problemReport)
+                    null
+                },
+                onMessageSent = {
+                    val updatedConnection = connection.copy(state = PeerConnectionState.REQUEST_SENT)
+                    walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
+                    connectionInitiatorController.onRequestSent(updatedConnection, connectionRequest)
+                    null
+                }
+            )
 
-            //TODO: set proper state here
-            val updatedConnection = connection.copy(state = "RequestSent")
-            walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
-
-            connectionInitiatorController.onRequestSent(updatedConnection, connectionRequest)
-
-            //update status to request sent
-            return ActionResult(updatedConnection)
+            return ActionResult(walletConnector.walletHolder.getConnectionRecordById(connection.id))
 
         } else {
             //TODO: handle this situation here
             //update status to abandoned
-            val updatedConnection = connection.copy(state = "Abandoned")
+            val updatedConnection = connection.copy(state = PeerConnectionState.ABANDONED)
             //TODO: see if we need to store it at all
             walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
             return ActionResult(updatedConnection)
@@ -97,8 +115,6 @@ class ReceiveInvitationAction(
         return ConnectionRequest(
             //TODO: understand how to populate id properly
             id = connectionId,
-            //TODO: create enum or other holder for message type, replace hardocde and move it inside of the message, as the template will suit only this particular request
-            type = "https://didcomm.org/connections/1.0/request",
             //TODO: understand what label should be
             label = "Holder",
             connection = buildConnection(),

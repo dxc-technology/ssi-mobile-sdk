@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.didcomm.model.trustping
 
+import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -20,7 +21,8 @@ import kotlinx.serialization.Serializable
 //TODO: support other fields of TrustPing
 @Serializable
 data class TrustPingRequest(
-    @SerialName("@type") val type: String,
+    //TODO: validate defaults on deserialization
+    @Required @SerialName("@type") val type: String = "https://didcomm.org/trust_ping/1.0/ping",
     @SerialName("@id") val id: String,
     @SerialName("response_requested") val responseRequested: Boolean
 )

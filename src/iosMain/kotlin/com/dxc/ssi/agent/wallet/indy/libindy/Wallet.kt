@@ -34,8 +34,10 @@ actual class Wallet actual constructor(private var walletHandle: Int) {
                 credentials,
                 IntCallback.callback
             )
+            println("Before waiting for wallet opening callback result: config -> $config, credentials -> $credentials")
 
             val callbackResult = callbackHandler.waitForCallbackResult(commandHandle) as IntCallback.Result
+            println("After waiting for wallet opening callback result")
             return Wallet(callbackResult.handle)
         }
     }

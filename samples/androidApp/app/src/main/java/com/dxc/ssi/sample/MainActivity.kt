@@ -22,16 +22,9 @@ class MainActivity : AppCompatActivity() {
 
             val ssiAgentApi = application.getSsiAgent()
 
-            val issuerInvitationUrl =
-                    "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkVSak42cGpCM0NIcjFhYTlxTlRLdlFudzc1WHpCVEZWaUd4TWFITHRRNDVaIl0sInJlY2lwaWVudEtleXMiOlsiRzVCRUpuaG5pd1U2V3ZjemNYN2s0bWpjR0dRVVBoUXlMRmtvWDIya0tKUHoiXSwiQGlkIjoiMWUzMjRmZDEtOWI5Ni00YzY0LTg0NmItMzE3MDVjNzJlNjEwIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
-
-            val verifierInvitationUrl =
-                    "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiSjVDa25XNDVycTd2azlxQkN5Rk1yaTd2WlVRd2ZEalNFOWlQZm4zZ3VLRTciXSwicmVjaXBpZW50S2V5cyI6WyIyRDV6SEZpZEVrNFpob1AzUm50dG54eXhXYjZ5TVNtWXFoWWtvZWtRbTdLNCJdLCJAaWQiOiJhOGIwN2MwYS1jYjUzLTRhYzEtODBmNS0zNzY0ZDgxYWNiOWQiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
-
-
-            ssiAgentApi.connect(issuerInvitationUrl)
-            ssiAgentApi.connect(verifierInvitationUrl)
-
+            val invitationUrl =
+                "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiNlg3WUxjUjdOcDhyZlNIWHdaUGJpdE5iNkVFRzJyOGZveFhpcXFnNFFCbjciXSwiQGlkIjoiOWNiYzEzMDgtMTY4ZC00NjkyLTk4YjAtZGJiZjdkMzIxYTM4IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            ssiAgentApi.connect(invitationUrl, true)
         }
     }
 

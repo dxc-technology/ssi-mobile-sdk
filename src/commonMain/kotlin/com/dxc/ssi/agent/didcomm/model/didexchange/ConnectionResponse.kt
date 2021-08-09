@@ -24,6 +24,7 @@ import kotlinx.serialization.Serializable
 //TODO: think about some model types instead of just strings
 @Serializable
 data class ConnectionResponse(
+    //TODO: set default type here
     @SerialName("@type") val type: String,
     @SerialName("@id") val id :String,
     @SerialName("~thread") val thread: Thread,

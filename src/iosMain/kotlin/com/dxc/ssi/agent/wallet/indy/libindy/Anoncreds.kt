@@ -108,6 +108,18 @@ actual class Anoncreds {
 
         }
 
+        actual suspend fun proverGetCredential(
+            wallet: Wallet,
+            credId: String
+        ): String {
+            val commandHandle = callbackHandler.prepareCallback()
+
+            indy_prover_get_credential(commandHandle, wallet.getWalletHandle(), credId, StringCallback.callback)
+
+            val result = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
+            return result.stringResult
+        }
+
         actual suspend fun createRevocationState(
             blobStorageReaderHandle: Int,
             revRegDef: String,

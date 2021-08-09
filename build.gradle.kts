@@ -4,7 +4,7 @@ val serializationVersion: String = "1.0.1"
 val indyVersion: String = "1.16.0"
 val jacksonVersion: String = "2.9.7"
 val ktorVersion: String = "1.5.1"
-val okhttpVersion: String = "3.5.0"
+val okhttpVersion: String = "4.9.1"
 val kotlinxCoroutinesVersion = "1.4.2-native-mt"
 val uuidVersion = "0.2.3"
 val junitVersion = "4.13"
@@ -19,6 +19,7 @@ plugins {
     kotlin("native.cocoapods") version "1.4.31"
     id("maven-publish")
 }
+
 
 group = "com.dxc"
 version = "1.0-SNAPSHOT"
@@ -60,6 +61,9 @@ kotlin {
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
             }
+            binaries.all {
+                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
+            }
         }
     } else {
         iosX64("ios") {
@@ -71,13 +75,23 @@ kotlin {
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
             }
+            binaries.all {
+                  linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
+            }
         }
     }
 
     cocoapods {
+        pod("PocketSocket/Client") {
+            source = git("https://github.com/zwopple/PocketSocket") {
+                tag = "1.0.1"
+            }
+        }
         summary = "Kotlin sample project with CocoaPods dependencies"
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
-        ios.deploymentTarget = "10.2"
+        ios.deploymentTarget = "12.2"
+        osx.deploymentTarget = "10.8"
+        tvos.deploymentTarget = "9.0"
         frameworkName = "ssi_agent"
         podfile = project.file("./samples/swiftIosApp/Podfile")
     }
@@ -196,6 +210,7 @@ android {
 
         //TODO: check which options below are really needed as they were added during development when doing some try and error
         ndk {
+            ndkVersion  = "21.4.7075529"
             moduleName = "indy"
             abiFilters("x86", "arm64-v8a", "armeabi-v7a")
         }
@@ -225,6 +240,17 @@ android {
 //TODO: check if this section is needed at all or it should be moved to JVM and Android packages
 dependencies {
     implementation("junit:junit:$junitVersion")
+}
+
+tasks.register<Exec>("PreparePods") {
+    workingDir("./libindy-pod")
+    commandLine("pod","setup")
+    commandLine("pod","install")
+}
+
+tasks.register<Copy>("CopyLibIndy") {
+    from(layout.buildDirectory.dir("$projectDir/libindy-pod/Pods/libindy/libindy.a"))
+    into(layout.buildDirectory.dir("$projectDir/indylib"))
 }
 
 tasks.register<Exec>("BuildSimulator") {

@@ -1,6 +1,9 @@
 package com.dxc.ssi.agent.model
 
 import io.ktor.http.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -11,18 +14,20 @@ class ConnectionTest {
 
         val connection = PeerConnection(
             id = "id",
-            state = "state",
-            invitation = "invitati",
+            state = PeerConnectionState.INVITATION_RECEIVED,
+            invitation = "invitation",
             isSelfInitiated = true,
             peerRecipientKeys = listOf("keys"),
-            endpoint = Url("ws:\\endpoint:111\\ws")
+            endpoint = Url("ws:\\endpoint:111\\ws"),
+            keepTransportAlive = true,
+            transportState = ConnectionTransportState.CONNECTED
         )
 
-        val jsonString = connection.toJson()
+        val jsonString = Json.encodeToString(connection)
 
         println(jsonString)
 
-        val connection2 = PeerConnection.fromJson(jsonString)
+        val connection2 = Json { ignoreUnknownKeys = true }.decodeFromString<PeerConnection>(jsonString)
 
         assertEquals(connection, connection2)
 

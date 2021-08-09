@@ -5,19 +5,25 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
 import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialDefinition
 import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialRequestInfo
+import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
+import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
 import kotlinx.serialization.Serializable
 
 
 @Serializable
 //TODO: understand which of those fields we really need
 data class CredentialExchangeRecord(
-    //TODO:replace state data type to enum
-    val state: String,
+    val state: CredentialIssuenceState,
     val connectionId: String,
-    val thread: Thread,
-    val credentialOfferContainer: CredentialOfferContainer,
-    val credentialRequestContainer: CredentialRequestContainer,
-    val credentialRequestInfo: CredentialRequestInfo,
+    override val thread: Thread,
+    val credentialOfferContainer: CredentialOfferContainer? = null,
+    val credentialRequestContainer: CredentialRequestContainer? = null,
+    val credentialRequestInfo: CredentialRequestInfo? = null,
     //TODO: check if this property or all othe rproperties are generic and are abstracted form Indy. Follow Container-Data pattern
-    val credentialDefinition: CredentialDefinition
-)
+    val credentialDefinition: CredentialDefinition,
+    val isParked: Boolean = false
+) : ExchangeRecord {
+    override fun generateTagsJson() = "{\"${WalletRecordTag.CredentialExchangeRecordState.name}\": \"${state.name}\"}"
+
+
+}

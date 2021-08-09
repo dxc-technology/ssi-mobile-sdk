@@ -4,9 +4,11 @@ import android.Manifest
 import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
 import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
@@ -18,14 +20,19 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
-import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
-import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
-import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.ledger.indy.GenesisMode
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorBuilder
 import com.dxc.ssi.agent.model.DidConfig
+import com.dxc.ssi.agent.model.OfferResponseAction
+import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -33,9 +40,10 @@ import org.junit.Test
 //TODO: if we can use some common kotlin tests to have common tests for all platforms
 class SsiAgentApiImplTest {
 
-    private val walletName = "newWalletName"
+    private val walletName = "newWalletName2"
     private val walletPassword = "newWalletPassword"
     private val did = "Goci8gnhuC9vvxTWg1aFSx"
+    lateinit var ssiAgentApi: SsiAgentApi
 
     @Rule
     @JvmField
@@ -56,7 +64,7 @@ class SsiAgentApiImplTest {
     }
 
     @Test
-    @Ignore("Ignored because it is actually integration test which should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -72,7 +80,11 @@ class SsiAgentApiImplTest {
             walletManager.createWallet(walletName, walletPassword)
 
         if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
-            val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
+            val didResult = walletManager.createDid(
+                didConfig = DidConfig(did = did),
+                walletName = walletName,
+                walletPassword = walletPassword
+            )
             print("Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}")
             //Store did somewhere in your application to use it afterwards
         }
@@ -83,39 +95,66 @@ class SsiAgentApiImplTest {
             didConfig = DidConfig(did = did)
         )
 
-        val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-            genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
-            ipAddress = "192.168.0.122"
-        )
+        val indyLedgerConnector = IndyLedgerConnectorBuilder()
+            .withGenesisMode(GenesisMode.SOVRIN_BUILDERNET)
+            .build()
 
         val indyWalletConnector = IndyWalletConnector.build(walletHolder)
 
-        val ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
+        ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())
             .withCredPresenterController(CredPresenterControllerImpl())
-            .withLedgerConnector(IndyLedgerConnector(indyLedgerConnectorConfiguration))
+            .withLedgerConnector(indyLedgerConnector)
             .build()
-
-        ssiAgentApi.init()
 
 
         val issuerInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRVk0ZFZSUjZVb0Q5WWN5SkQ5VURZUmd6QnI3SDZFeEhGUTdxWEJkaHVKUXQiXSwicmVjaXBpZW50S2V5cyI6WyJIWWFCS3pGVVVWaTk2aGlkeFh4Q3RocWJSTVQyd3lyYm5OZTFCV1VUV3V6QyJdLCJAaWQiOiJhMGY4NjUwOC1kZDdjLTQxNGUtODA1Zi1kNGRhMTRhODc0YjUiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMlBVdXY3dnpEQk16b2szQUFQRThHN2dlVk5KbUVlWTdTRGlOaUhRQTFhaDgiXSwiQGlkIjoiZDBhNjcyY2YtNDczOC00NDdlLWI3MWQtYjU4NTZmYTEzMTk1IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
-        println("Connecting to issuer")
-        ssiAgentApi.connect(issuerInvitationUrl)
 
-        Sleeper().sleep(500000)
+        ssiAgentApi.init(object : LibraryStateListener {
+            override fun initializationCompleted() {
+
+                ssiAgentApi.abandonAllConnections(force = true, notifyPeerBeforeAbandoning = false)
+
+
+                println("Connecting to issuer")
+                val connection = ssiAgentApi.connect(issuerInvitationUrl, keepConnectionAlive = true)
+                println("Connected to issuer")
+
+            }
+
+            override fun initializationFailed() {
+                TODO("Not yet implemented")
+            }
+        })
+
+        Sleeper().sleep(800000)
 
     }
 
-    class CredPresenterControllerImpl : CredPresenterController {
+    inner class CredPresenterControllerImpl : CredPresenterController {
         override fun onRequestReceived(
             connection: PeerConnection,
             presentationRequest: PresentationRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ): PresentationRequestResponseAction {
+
+            GlobalScope.launch {
+                delay(10_000)
+
+                println("Woken up...")
+
+                ssiAgentApi.getParkedPresentationRequests().forEach { presentationRequestContainer ->
+                    println("Accepting parked presentation request $presentationRequestContainer")
+                    ssiAgentApi.processParkedPresentationRequest(
+                        presentationRequestContainer,
+                        PresentationRequestResponseAction.ACCEPT
+                    )
+                }
+            }
+
+            return PresentationRequestResponseAction.PARK
         }
 
         override fun onDone(connection: PeerConnection): CallbackResult {
@@ -128,12 +167,24 @@ class SsiAgentApiImplTest {
 
     }
 
-    class CredReceiverControllerImpl : CredReceiverController {
+    inner class CredReceiverControllerImpl : CredReceiverController {
         override fun onOfferReceived(
             connection: PeerConnection,
             credentialOfferContainer: CredentialOfferContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ): OfferResponseAction {
+
+            println("Received credential offer")
+
+            GlobalScope.launch {
+                delay(20_000)
+                ssiAgentApi.getParkedCredentialOffers()
+                    .forEach {
+                        ssiAgentApi.processParkedCredentialOffer(it, OfferResponseAction.ACCEPT)
+                    }
+
+            }
+
+            return OfferResponseAction.PARK
         }
 
         override fun onRequestSent(
@@ -152,6 +203,10 @@ class SsiAgentApiImplTest {
 
         override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
             return CallbackResult(true)
+        }
+
+        override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
+            TODO("Not yet implemented")
         }
 
 
@@ -180,10 +235,11 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
-            println("Connection abandoned : $connection")
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
+            println("Connection completed : $connection")
             return CallbackResult(true)
         }
+
 
     }
 }

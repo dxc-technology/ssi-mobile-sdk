@@ -5,10 +5,9 @@ import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
-import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessor
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
-import com.dxc.ssi.agent.model.messages.MessageContext
+import com.dxc.ssi.agent.model.messages.Context
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -18,25 +17,25 @@ abstract class AbstractMessageProcessor(
     val ledgerConnector: LedgerConnector,
     val transport: Transport,
     val callbacks: Callbacks,
-    val trustPingProcessor: TrustPingProcessor?,
-    val trustPingTrackerService: TrustPingTrackerService?
+    val processors: Processors,
+    val services: Services,
 ) : MessageProcessor {
 
 
-    override suspend fun processMessage(messageContext: MessageContext) {
-        println("Started processing message $messageContext")
+    override suspend fun processMessage(context: Context) {
+        println("Started processing message $context")
 
         val actionParams = ActionParams(
             walletConnector = walletConnector,
             ledgerConnector = ledgerConnector,
             transport = transport,
             callbacks = callbacks,
-            messageContext = messageContext,
-            trustPingProcessor = trustPingProcessor,
-            trustPingTrackerService = trustPingTrackerService
+            context = context,
+            processors = processors,
+            services = services
         )
 
-        val actionResult = getMessageType(messageContext.receivedUnpackedMessage.message)
+        val actionResult = getMessageType(context.receivedUnpackedMessage!!.message)
             .getMessageHandler()
             .invoke(actionParams)
             .perform()

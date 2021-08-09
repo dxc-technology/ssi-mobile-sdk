@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.didcomm.model.didexchange
 
+import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -47,8 +48,10 @@ import kotlinx.serialization.Serializable
 //TODO: think about some model types instead of just strings
 @Serializable
 data class ConnectionRequest(
-    @SerialName("@type") val type: String,
-    @SerialName("@id") val id :String,
+    //TODO: create enum or other holder for message type, replace hardocde and move it inside of the message, as the template will suit only this particular request
+
+    @Required @SerialName("@type") val type: String = "https://didcomm.org/connections/1.0/request",
+    @SerialName("@id") val id: String,
     val label: String,
     val imageUrl: String?,
     val connection: Connection

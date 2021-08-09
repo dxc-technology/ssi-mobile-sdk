@@ -22,6 +22,11 @@ expect class Anoncreds {
             revRegDefJson: String?
         ): String
 
+        suspend fun proverGetCredential(
+            wallet: Wallet,
+            credId: String
+        ): String
+
         suspend fun createRevocationState(
             blobStorageReaderHandle: Int,
             revRegDef: String,

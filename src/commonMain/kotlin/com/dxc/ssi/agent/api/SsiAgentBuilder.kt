@@ -1,9 +1,11 @@
 package com.dxc.ssi.agent.api
 
+import com.dxc.ssi.agent.api.callbacks.connection.StatefulConnectionController
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionResponderController
 import com.dxc.ssi.agent.api.callbacks.issue.CredIssuerController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.trustping.TrustPingController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.callbacks.verification.CredVerifierController
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
@@ -20,6 +22,7 @@ interface SsiAgentBuilder {
     fun withCredIssuerController(credIssuerController: CredIssuerController): SsiAgentBuilder
     fun withCredPresenterController(credPresenterController: CredPresenterController): SsiAgentBuilder
     fun withCredVerifierController(credVerifierController: CredVerifierController): SsiAgentBuilder
-
+    fun withStatefulConnectionController(statefulConnectionController: StatefulConnectionController): SsiAgentBuilder
+    fun withTrustPingController(trustPingController: TrustPingController): SsiAgentBuilder
 
 }

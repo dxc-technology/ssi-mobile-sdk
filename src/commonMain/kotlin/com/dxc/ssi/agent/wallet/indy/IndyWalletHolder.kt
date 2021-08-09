@@ -2,24 +2,19 @@ package com.dxc.ssi.agent.wallet.indy
 
 import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
-import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
-import com.dxc.ssi.agent.model.PeerConnection
-import com.dxc.ssi.agent.model.DidConfig
-import com.dxc.ssi.agent.model.IdentityDetails
+import com.dxc.ssi.agent.model.*
 import com.dxc.ssi.agent.model.messages.Message
-import com.dxc.ssi.agent.utils.JsonUtils.extractValue
 import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
-import com.dxc.ssi.agent.wallet.indy.libindy.*
-import com.dxc.ssi.agent.wallet.indy.model.RetrievedWalletRecords
+import com.dxc.ssi.agent.wallet.indy.helpers.WalletCustomRecordsRepository
+import com.dxc.ssi.agent.wallet.indy.libindy.Crypto
+import com.dxc.ssi.agent.wallet.indy.libindy.Did
+import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordTag
-import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
 open class IndyWalletHolder(
     private val walletName: String,
@@ -52,83 +47,42 @@ open class IndyWalletHolder(
     }
 
     override suspend fun storeConnectionRecord(connection: PeerConnection) {
-        //TODO: check if we need to check wallet health status before using it
-        val existingConnection = getConnectionRecordById(connection.id)
-        val tagsJson = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${connection.peerVerkey}\"}"
-
-        if (existingConnection == null) {
-
-            val value = connection.toJson()
-
-            println("Storing connection $connection")
-            val wallet = isoWallet.access { it.obj }
-            WalletRecord.add(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value, tagsJson)
-        } else {
-            val value = connection.toJson()
-            println("Updating connection $connection")
-            val wallet = isoWallet.access { it.obj }
-            WalletRecord.updateValue(wallet!!, WalletRecordType.ConnectionRecord.name, connection.id, value)
-            //TODO: check if there are cases when we really need to update tags
-            WalletRecord.updateTags(wallet, WalletRecordType.ConnectionRecord.name, connection.id, tagsJson)
-        }
+        val wallet = isoWallet.access { it.obj }!!
+        WalletCustomRecordsRepository.upsertWalletRecord(wallet, PeerConnectionRecord(connection))
     }
 
     override suspend fun getConnectionRecordById(connectionId: String): PeerConnection? {
 
-        //TODO: use some serializable data structure
-        val options = "{\"retrieveType\" : true}"
-        /*
-        *  retrieveType: (optional, false by default) Retrieve record type,
-        * retrieveValue: (optional, true by default) Retrieve record value,
-        * retrieveTags: (optional, true by default) Retrieve record tags }
-        *
-        * */
+        val wallet = isoWallet.access { it.obj }!!
+        val peerConnectionRecord: PeerConnectionRecord? =
+            WalletCustomRecordsRepository.getWalletRecordById(wallet, connectionId)
 
-
-        //TODO: find out better solution of looking up for connection
-        return try {
-            val wallet = isoWallet.access { it.obj }
-            val retrievedValue =
-                WalletRecord.get(wallet!!, WalletRecordType.ConnectionRecord.name, connectionId, options)
-            PeerConnection.fromJson(extractValue(retrievedValue))
-        } catch (e: WalletItemNotFoundException) {
-            null
-        }
+        return peerConnectionRecord?.peerConnection
     }
 
     override suspend fun findConnectionByVerKey(verKey: String): PeerConnection? {
 
-
         val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"
-        val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
+        val wallet = isoWallet.access { it.obj }!!
 
-        println("Searching connections using query: $query")
-
-        val search = WalletSearch()
-
-        val wallet = isoWallet.access { it.obj }
-        search.open(wallet!!, WalletRecordType.ConnectionRecord.name, query, options)
-        //TODO: make proper fetch in batches instead of just fetching 100 records
-        val foundRecordsJson = search.searchFetchNextRecords(wallet!!, 100)
-        search.closeSearch()
-
-        println("Fetched connections json = $foundRecordsJson")
-
-        val retrievedWalletRecords = Json {}.decodeFromString<RetrievedWalletRecords>(foundRecordsJson)
-
-        if (retrievedWalletRecords.totalCount == null || retrievedWalletRecords.totalCount == 0)
-            return null
-
-        //TODO: consider case when we received several records. Is it ok? What do do in this case? Need to make some robust solution instead of taking first one
-        return retrievedWalletRecords.records!!
-            .map {
-                println(it.value)
-                it.value
-            }.map<String, PeerConnection> { Json.decodeFromString(it) }
-            .firstOrNull()
-
+        return WalletCustomRecordsRepository.getWalletRecordsByQuery<PeerConnectionRecord>(wallet, query)
+            .map { it.peerConnection }.firstOrNull()
     }
 
+    override suspend fun getConnections(connectionState: PeerConnectionState?): Set<PeerConnection> {
+
+        val query = if (connectionState != null) {
+            "{\"${WalletRecordTag.ConnectionState.name}\": \"${connectionState!!.name}\"}"
+        } else {
+            ""
+        }
+
+        val wallet = isoWallet.access { it.obj }!!
+
+        return WalletCustomRecordsRepository.getWalletRecordsByQuery<PeerConnectionRecord>(wallet, query)
+            .map { it.peerConnection }.toSet()
+
+    }
 
     //TODO: remove this fun if it is not used
     override suspend fun isWalletHolderInitialized(): Boolean {

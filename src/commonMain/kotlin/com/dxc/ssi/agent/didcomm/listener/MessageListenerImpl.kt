@@ -6,10 +6,10 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.router.MessageRouter
 import com.dxc.ssi.agent.didcomm.router.MessageRouterImpl
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
-import com.dxc.ssi.agent.model.messages.MessageContext
+import com.dxc.ssi.agent.model.messages.Context
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import com.dxc.ssi.agent.model.messages.ReceivedUnpackedMessage
 import kotlinx.serialization.decodeFromString
@@ -19,14 +19,14 @@ class MessageListenerImpl(
     private val transport: Transport,
     private val walletConnector: WalletConnector,
     private val ledgerConnector: LedgerConnector,
-    private val trustPingTrackerService: TrustPingTrackerService,
+    private val services: Services,
     callbacks: Callbacks
 ) :
     MessageListener {
 
     private var isShutdown: Boolean = false
     override val messageRouter: MessageRouter =
-        MessageRouterImpl(walletConnector, ledgerConnector, trustPingTrackerService, transport, callbacks)
+        MessageRouterImpl(walletConnector, ledgerConnector, services, transport, callbacks)
 
     override fun shutdown() {
         isShutdown = true
@@ -54,7 +54,7 @@ class MessageListenerImpl(
     }
 
 
-    suspend fun unpackAndBuildMesageContext(receivedMessage: MessageEnvelop): MessageContext {
+    suspend fun unpackAndBuildMesageContext(receivedMessage: MessageEnvelop): Context {
 
         val unpackedMessage = walletConnector.walletHolder.unPackMessage(Message(receivedMessage.payload))
         val receivedUnpackedMessage = Json.decodeFromString<ReceivedUnpackedMessage>(unpackedMessage.payload)
@@ -66,7 +66,7 @@ class MessageListenerImpl(
         )
         val connection = getConnectionByVerkey(receivedUnpackedMessage.senderVerKey)
 
-        return MessageContext(connection, receivedUnpackedMessage)
+        return Context(connection, receivedUnpackedMessage)
 
     }
 

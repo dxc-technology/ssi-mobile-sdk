@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.didcomm.model.problem
 
 import com.dxc.ssi.agent.didcomm.model.common.Thread
+import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -24,7 +25,7 @@ import kotlinx.serialization.Serializable
 * */
 @Serializable
 data class ProblemReport(
-    @SerialName("@type") val type: String = "https://didcomm.org/report-problem/1.0/problem-report",
+    @Required @SerialName("@type") val type: String = "https://didcomm.org/report-problem/1.0/problem-report",
     @SerialName("@id") val id: String,
     @SerialName("~thread") val thread: Thread? = null,
     val description: ProblemReportDescription,
