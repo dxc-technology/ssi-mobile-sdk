@@ -61,6 +61,9 @@ kotlin {
                     extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
                 }
             }
+            binaries.all {
+                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
+            }
         }
     } else {
         iosX64("ios") {
