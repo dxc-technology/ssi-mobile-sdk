@@ -143,6 +143,7 @@ class SsiAgentApiImplTest {
     }
 
     class CredReceiverControllerImpl : CredReceiverController {
+        var logger: Kermit = Kermit(LogcatLogger())
         override fun onOfferReceived(
             connection: PeerConnection,
             credentialOfferContainer: CredentialOfferContainer

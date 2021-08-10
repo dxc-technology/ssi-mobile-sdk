@@ -127,6 +127,7 @@ class SsiAgentApiImplTest {
     }
 
     class StatefulConnectionControllerImpl : StatefulConnectionController {
+        var logger: Kermit = Kermit(LogcatLogger())
         override fun onReconnected(connection: PeerConnection) {
             TODO("Not yet implemented")
         }
