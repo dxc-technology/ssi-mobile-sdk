@@ -4,6 +4,9 @@ import com.dxc.ssi.agent.kermit.Kermit
 import com.dxc.ssi.agent.kermit.LogcatLogger
 import com.dxc.ssi.agent.kermit.Severity
 import io.ktor.http.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -23,11 +26,11 @@ class ConnectionTest {
             transportState = ConnectionTransportState.CONNECTED
         )
 
-        val jsonString = connection.toJson()
+        val jsonString = Json.encodeToString(connection)
 
         logger.log(Severity.Debug,"",null) { jsonString }
 
-        val connection2 = PeerConnection.fromJson(jsonString)
+        val connection2 = Json { ignoreUnknownKeys = true }.decodeFromString<PeerConnection>(jsonString)
 
         assertEquals(connection, connection2)
 

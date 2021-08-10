@@ -21,6 +21,7 @@ plugins {
 
 }
 
+
 group = "com.dxc"
 version = "1.0-SNAPSHOT"
 
@@ -89,7 +90,6 @@ kotlin {
                 tag = "1.0.1"
             }
         }
-
         summary = "Kotlin sample project with CocoaPods dependencies"
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
         ios.deploymentTarget = "12.2"
@@ -217,7 +217,7 @@ android {
 
         //TODO: check which options below are really needed as they were added during development when doing some try and error
         ndk {
-            ndkVersion  = "21.1.6352462"
+            ndkVersion  = "21.4.7075529"
             moduleName = "indy"
             abiFilters("x86", "arm64-v8a", "armeabi-v7a")
         }

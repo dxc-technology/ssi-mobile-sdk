@@ -7,11 +7,14 @@ import androidx.test.rule.GrantPermissionRule
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
+import com.dxc.ssi.agent.api.callbacks.didexchange.DidExchangeError
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.library.LibraryError
 import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
 import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
+import com.dxc.ssi.agent.didcomm.model.ack.Ack
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
@@ -25,6 +28,7 @@ import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorBuilder
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.utils.EnvironmentUtils
@@ -67,7 +71,7 @@ class SsiAgentApiImplTest {
     }
 
     @Test
-    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
+    //@Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
@@ -113,7 +117,7 @@ class SsiAgentApiImplTest {
 
 
         val issuerInvitationUrl =
-            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiODh1YUFQNm1wUEh5VHJwNGVudTNFVlI0N0VwQVpVN2hTSGpOOERRcEMydmIiXSwiQGlkIjoiYTk1MjQyYjctYTNmOS00NTVjLTgzYWItODM5YzUyMzUyNTgwIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMlBVdXY3dnpEQk16b2szQUFQRThHN2dlVk5KbUVlWTdTRGlOaUhRQTFhaDgiXSwiQGlkIjoiZDBhNjcyY2YtNDczOC00NDdlLWI3MWQtYjU4NTZmYTEzMTk1IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
         ssiAgentApi.init(object : LibraryStateListener {
@@ -128,25 +132,46 @@ class SsiAgentApiImplTest {
 
             }
 
-            override fun initializationFailed() {
+            override fun initializationFailed(
+                error: LibraryError,
+                message: String?,
+                details: String?,
+                stackTrace: String?
+            ) {
                 TODO("Not yet implemented")
             }
+
         })
 
         Sleeper().sleep(800000)
 
     }
 
-    class CredPresenterControllerImpl : CredPresenterController {
+    inner class CredPresenterControllerImpl : CredPresenterController {
         override fun onRequestReceived(
             connection: PeerConnection,
             presentationRequest: PresentationRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ): PresentationRequestResponseAction {
+
+            GlobalScope.launch {
+                delay(10_000)
+
+                logger.log(Severity.Debug,"",null) { "Woken up..." }
+
+                ssiAgentApi.getParkedPresentationRequests().forEach { presentationRequestContainer ->
+                    logger.log(Severity.Debug,"",null) { "Accepting parked presentation request $presentationRequestContainer" }
+                    ssiAgentApi.processParkedPresentationRequest(
+                        presentationRequestContainer,
+                        PresentationRequestResponseAction.ACCEPT
+                    )
+                }
+            }
+
+            return PresentationRequestResponseAction.PARK
         }
 
-        override fun onDone(connection: PeerConnection): CallbackResult {
-            return CallbackResult(true)
+        override fun onDone(connection: PeerConnection) {
+
         }
 
         override fun onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
@@ -180,8 +205,8 @@ class SsiAgentApiImplTest {
         override fun onRequestSent(
             connection: PeerConnection,
             credentialRequestContainer: CredentialRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ){
+
         }
 
         override fun onCredentialReceived(
@@ -191,12 +216,16 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
-            return CallbackResult(true)
+        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
+
         }
 
         override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
             TODO("Not yet implemented")
+        }
+
+        override fun onAckSent(connection: PeerConnection, ack: Ack) {
+            logger.log(Severity.Debug,"",null) { "Ack sent for credential" }
         }
 
 
@@ -211,9 +240,8 @@ class SsiAgentApiImplTest {
             return CallbackResult(canProceedFurther = true)
         }
 
-        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
+        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
             logger.log(Severity.Debug,"",null) { "Request sent hook called : $connection, $request" }
-            return CallbackResult(true)
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
@@ -221,16 +249,23 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onCompleted(connection: PeerConnection): CallbackResult {
-            logger.log(Severity.Debug,"",null) {"Connection completed : $connection" }
-            return CallbackResult(true)
-        }
-
-        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
+        override fun onCompleted(connection: PeerConnection) {
             logger.log(Severity.Debug,"",null) { "Connection completed : $connection" }
-            return CallbackResult(true)
         }
 
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
+            logger.log(Severity.Debug,"",null) { "Connection completed : $connection" }
+        }
+
+        override fun onFailure(
+            connection: PeerConnection?,
+            error: DidExchangeError,
+            message: String?,
+            details: String?,
+            stackTrace: String?
+        ) {
+            TODO("Not yet implemented")
+        }
 
     }
 }

@@ -11,26 +11,35 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 
-class ReceiveTrustPingResponseAction(private val actionParams: ActionParams): Action {
+class ReceiveTrustPingResponseAction(private val actionParams: ActionParams) : Action {
     private val logger: Kermit = Kermit(LogcatLogger())
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     override suspend fun perform(): ActionResult {
         logger.log(Severity.Debug,"",null) { "Entered perform fun" }
         val messageContext = actionParams.context
         logger.log(Severity.Debug,"",null) { "Got messageContext" }
-        val connection = messageContext!!.connection!!
-        logger.log(Severity.Debug,"",null) { "Got connection" }
-        val connectionsTrackerService = actionParams.services.connectionsTrackerService!!
-        logger.log(Severity.Debug,"",null) { "Got trustPingService" }
-        val trustPingResponseMessage =
-            Json {
-                ignoreUnknownKeys = true
-            }.decodeFromString<TrustPingResponse>(messageContext.receivedUnpackedMessage!!.message)
 
-        logger.log(Severity.Debug,"",null) { "Decoded trustPingResponseMessage" }
 
-        connectionsTrackerService.trustPingResponseReceivedEvent(connection)
-        actionParams.callbacks.trustPingController?.onTrustPingResponseReceived(connection)
-        logger.log(Severity.Debug,"",null) { "Marked ping message as received" }
+        messageContext!!.connection?.let { connection ->
+            logger.log(Severity.Debug,"",null) { "Got connection" }
+            val connectionsTrackerService = actionParams.services.connectionsTrackerService!!
+            logger.log(Severity.Debug,"",null) { "Got trustPingService" }
+
+            val trustPingResponseMessage =
+                json.decodeFromString<TrustPingResponse>(messageContext.receivedUnpackedMessage!!.message)
+
+            logger.log(Severity.Debug,"",null) { "Decoded trustPingResponseMessage" }
+
+            connectionsTrackerService.trustPingResponseReceivedEvent(connection)
+            actionParams.callbacks.trustPingController?.onTrustPingResponseReceived(connection)
+            logger.log(Severity.Debug,"",null) { "Marked ping message as received" }
+
+        }
+
+
         return ActionResult()
     }
 }

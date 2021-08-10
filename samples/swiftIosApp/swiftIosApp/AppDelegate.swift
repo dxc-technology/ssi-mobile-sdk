@@ -24,22 +24,21 @@ var ssiAgentApi: SsiAgentApi? = nil
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window : UIWindow?
     
-    
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-          
-        
+    
         let cic = ConnectionInitiatorControllerImpl()
         let crc = CredentialReceiverControllerImpl()
         let cpc = CredPresenterControllerImpl()
         let lsl = LibraryStateListenerImpl()
 
-    
+
             let myWalletName = "newWalletName5"
             let myWalletPassword = "newWalletPassword"
             let myDid = "4PCVFCeZbKXyvgjCedbXDx"
         
        // ToBeReworked.init().enableIndyLog()
-        
+
 
         DispatchQueue.global().async {
           
@@ -70,20 +69,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 Logger.logMessageDebug(message: "Before creating did", tag: "INIT", throwable: nil)
                 if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
                     Logger.logMessageDebug(message: "Recreating did", tag: "INIT", throwable: nil)
-                    
+
                     let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
                         didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
                         walletName : myWalletName, walletPassword:myWalletPassword)
 
-                    
+
                     Logger.logMessageDebug(message: "Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())", tag: "INIT", throwable: nil)
-            
-                    
+
+
                     //Store did somewhere in your application to use it afterwards
                 }
                 
                 Logger.logMessageDebug(message: "Before creating wallet holder", tag: "INIT", throwable: nil)
-    
+
 
                 
                 let walletHolder = IndyWalletHolder(
@@ -102,7 +101,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 .build()
                 
                 Logger.logMessageDebug(message: "Before creating ssiAgentApi", tag: "INIT", throwable: nil)
-         
+
                 
                 ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
                         .withConnectionInitiatorController(connectionInitiatorController: cic)
@@ -113,11 +112,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
            
             
                 Logger.logMessageDebug(message: "Before initialization", tag: "INIT", throwable: nil)
-         
+
                 ssiAgentApi.unsafelyUnwrapped.doInit(libraryStateListener:lsl)
                 
                 Logger.logMessageDebug(message: "After initialize fun called", tag: "INIT", throwable: nil)
-                
+
             }
             
            
@@ -158,51 +157,69 @@ func getEnvironmentVar(_ name: String) -> String? {
 
 class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 {
-    func onCompleted(connection: PeerConnection) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onFailure(connection: PeerConnection?, error: DidExchangeError, message: String?, details: String?, stackTrace: String?) {
+
+        print("Connection failure", error)
+    }
+
+    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
+
+    }
+
+    func onCompleted(connection: PeerConnection) {
+
     }
     
     func onInvitationReceived(connection: PeerConnection, invitation: Invitation) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onRequestSent(connection: PeerConnection, request: ConnectionRequest) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+   
+    func onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
+
     }
     
     func onResponseReceived(connection: PeerConnection, response: ConnectionResponse) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-        
-    }
-    
 }
 
 
 class LibraryStateListenerImpl : LibraryStateListener {
-    
+    func initializationFailed(error: LibraryError, message: String?, details: String?, stackTrace: String?) {
+        print("Listener: Initialization failed", error)
+    }
+
     func initializationCompleted()  {
         Logger.logMessageDebug(message: "Listener: Initialization completed", tag: "INIT", throwable: nil)
         
-        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiOTRtV0tudTY2Q1JNZTVDcFE4bml6cG1TVW50Tk5UWFZvUVp3R3B1Ylo2emciXSwiQGlkIjoiMjczYzUyMDYtZGFlMi00ZGI0LWFiZGQtNWMwZTc1NmViNjU2IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
+        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMnBCazdnMWhCNU5qWTlnbTJteVBObkc3cUh1c0VEVEplZ0hmenJRVlpOWDIiXSwiQGlkIjoiODMxMzIyYWMtMmY1Yy00N2M2LWIyNTAtMzU3YjlkOTlkYTQ3IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
+
+        Sleeper().sleep(value: 5000)
+        ssiAgentApi.unsafelyUnwrapped.abandonConnection(connection: connection.unsafelyUnwrapped, force: true, notifyPeerBeforeAbandoning: false)
+
+        Sleeper().sleep(value: 5000)
+
+        ssiAgentApi.unsafelyUnwrapped.reconnect(connection: connection.unsafelyUnwrapped, keepConnectionAlive: true)
 
         
         Logger.logMessageDebug(message: "Listener: ConnectionStarted", tag: "INIT", throwable: nil)
-    
-        
+
+
     }
     
-    func initializationFailed()  {
-        
-        Logger.logMessageDebug(message: "Listener: Initialization failed", tag: "INIT", throwable: nil)
-       
-    }
+
 }
 
 class CredentialReceiverControllerImpl: CredReceiverController {
+    func onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
+
+    }
+
+    func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) {
+    }
+
     func onProblemReport(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
@@ -238,12 +255,13 @@ class CredentialReceiverControllerImpl: CredReceiverController {
     }
     
     func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> OfferResponseAction {
-    
+
         return OfferResponseAction.accept
     }
     
-    func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+
+    func onAckSent(connection: PeerConnection, ack: Ack) {
+
     }
     
 }
@@ -254,8 +272,8 @@ class CredPresenterControllerImpl: CredPresenterController {
 
     }
 
-    func onDone(connection: PeerConnection) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onDone(connection: PeerConnection)  {
+
     }
     
     func onRequestReceived(connection: PeerConnection,
@@ -265,21 +283,21 @@ class CredPresenterControllerImpl: CredPresenterController {
             Sleeper().sleep(value: 10000)
             
             Logger.logMessageDebug(message: "Getting parked proof requests from wallet", tag: "INIT", throwable: nil)
-            
-           
-            
+
+
+
             let credInfos = ssiAgentApi.unsafelyUnwrapped.getCredentialInfos().map {$0 as! IndyCredInfo}
             let parketPresentationRequestContainers = ssiAgentApi.unsafelyUnwrapped.getParkedPresentationRequests()
             
             Logger.logMessageDebug(message: "Got \(parketPresentationRequestContainers)", tag: "INIT", throwable: nil)
-           
+
             
             parketPresentationRequestContainers.forEach { presentationRequestContainer in
                 ssiAgentApi.unsafelyUnwrapped.processParkedPresentationRequest(presentationRequestContainer: presentationRequestContainer, presentationRequestResponseAction: PresentationRequestResponseAction.accept)
             }
            
             credInfos.forEach { credInfo in
-                            
+
                 Logger.logMessageDebug(message: "retrieving first cred", tag: "INIT", throwable: nil)
                 let cred = ssiAgentApi.unsafelyUnwrapped.getCredentialInfo(localWalletCredId: credInfo.referent)
                 

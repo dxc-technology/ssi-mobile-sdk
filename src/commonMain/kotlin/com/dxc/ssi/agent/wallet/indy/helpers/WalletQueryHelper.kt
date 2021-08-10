@@ -12,13 +12,12 @@ import kotlinx.serialization.json.Json
 
 object WalletQueryHelper {
 
-    private val logger: Kermit = Kermit(LogcatLogger())
+    var logger: Kermit = Kermit(LogcatLogger())
     suspend fun queryWalletRecords(
         wallet: Wallet,
         walletRecordType: WalletRecordType,
         query: String
     ): RetrievedWalletRecords {
-
         logger.log(Severity.Debug,"",null) { "Searching connections using query: $query" }
 
         val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"

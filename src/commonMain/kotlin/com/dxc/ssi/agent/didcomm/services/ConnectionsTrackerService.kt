@@ -3,6 +3,7 @@ package com.dxc.ssi.agent.didcomm.services
 import co.touchlab.stately.collections.IsoMutableMap
 import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.api.Callbacks
+import com.dxc.ssi.agent.api.callbacks.connection.ReconnectionError
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.processor.Processors
 import com.dxc.ssi.agent.kermit.Kermit
@@ -123,10 +124,31 @@ class ConnectionsTrackerService(
     fun reconnect(connection: PeerConnection, keepConnectionAlive: Boolean) {
 
         serviceScope.launch {
-            logger.log(Severity.Debug,"",null) { "generating trust ping for connection $connection" }
-            processors.trustPingProcessor!!.sendTrustPingOverConnection(connection)
-            val actualConnection = walletConnector.walletHolder.getConnectionRecordById(connection.id)!!
-            callbacks.statefulConnectionController?.onReconnected(actualConnection)
+
+            walletConnector.walletHolder.getConnectionRecordById(connection.id)?.let { existingConnection ->
+
+                if (existingConnection.state == PeerConnectionState.ABANDONED) {
+                    callbacks.statefulConnectionController?.onReconnectFailed(
+                        ReconnectionError.ATTEMPT_TO_RECONNECT_ABANDONED_CONNECTION,
+                        "It is not allowed to reconnect on abandoned connections"
+                    )
+
+                } else {
+                    try {
+                        logger.log(Severity.Debug,"",null) { "generating trust ping for connection $connection" }
+                        processors.trustPingProcessor!!.sendTrustPingOverConnection(connection)
+                        val actualConnection = walletConnector.walletHolder.getConnectionRecordById(connection.id)!!
+                        callbacks.statefulConnectionController?.onReconnected(actualConnection)
+                    } catch (t: Throwable) {
+                        callbacks.statefulConnectionController?.onReconnectFailed(
+                            ReconnectionError.UNKNOWN_ERROR,
+                            t.toString()
+                        )
+                    }
+                }
+
+            }
+
         }
 
     }

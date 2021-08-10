@@ -17,6 +17,10 @@ class ReceiveConnectionResponseAction(
     private val actionParams: ActionParams
 ) : DidExchangeAction {
     private val logger: Kermit = Kermit(LogcatLogger())
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     override suspend fun perform(): ActionResult {
 
         val connectionInitiatorController = actionParams.callbacks.connectionInitiatorController!!
@@ -26,9 +30,7 @@ class ReceiveConnectionResponseAction(
 
 
         val connectionResponse =
-            Json {
-                ignoreUnknownKeys = true
-            }.decodeFromString<ConnectionResponse>(messageContext!!.receivedUnpackedMessage!!.message)
+            json.decodeFromString<ConnectionResponse>(messageContext!!.receivedUnpackedMessage!!.message)
 
 
         val ourConnectionId = connectionResponse.thread.thid
@@ -54,6 +56,7 @@ class ReceiveConnectionResponseAction(
                 return ActionResult(updatedConnection)
             }
 
+            PeerConnectionState.ABANDONED -> return ActionResult(ourConnection)
             else -> TODO("Not implemented") // process different possibilities here according to state diagram
 
         }

@@ -9,8 +9,16 @@ import com.dxc.ssi.agent.model.PeerConnection
 
 interface ConnectionInitiatorController {
     fun onInvitationReceived(connection: PeerConnection, invitation: Invitation): CallbackResult
-    fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult
+    fun onRequestSent(connection: PeerConnection, request: ConnectionRequest)
     fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult
-    fun onCompleted(connection: PeerConnection): CallbackResult
-    fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult
+    fun onCompleted(connection: PeerConnection)
+    fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?)
+    fun onFailure(
+        connection: PeerConnection?,
+        error: DidExchangeError,
+        message: String? = null,
+        details: String? = null,
+        stackTrace: String? = null
+    )
+
 }
