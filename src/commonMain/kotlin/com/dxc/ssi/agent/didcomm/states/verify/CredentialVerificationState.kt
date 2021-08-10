@@ -7,6 +7,7 @@ enum class CredentialVerificationState:State {
     PROPOSAL_RECEIVED,
     REQUEST_SENT,
     REQUEST_RECEIVED,
+    REQUEST_REJECTED,
     PRESENTATION_SENT,
     PRESENTATION_RECEIVED,
     REJECT_SENT,

@@ -127,9 +127,30 @@ class ProcessCredentialOfferAction(
                     )
                 }
                 OfferResponseAction.REJECT -> {
+
+                    walletConnector.prover.storeCredentialExchangeRecord(
+                        //TODO: allow to store only changed fields
+                        CredentialExchangeRecord(
+                            state = CredentialIssuenceState.OFFER_REJECTED,
+                            connectionId = connection.id,
+                            credentialOfferContainer = credentialOfferContainer,
+                            credentialDefinition = credentialDefinition,
+                            thread = Thread(thid = credentialOfferContainer.id),
+                            isParked = false
+                        )
+                    )
+
                     val problemReport = ProblemReport(
                         id = uuid4().toString(),
                         description = DidCommProblemCodes.COULD_NOT_SEND_CREDENTIAL_REQUEST.toProblemReportDescription()
+                    )
+
+                    MessageSender.packAndSendMessage(
+                        Message(Json.encodeToString(problemReport)),
+                        connection,
+                        walletConnector,
+                        transport,
+                        services
                     )
                 }
                 OfferResponseAction.PARK -> {

@@ -7,6 +7,7 @@ enum class CredentialIssuenceState: State {
     PROPOSAL_RECEIVED,
     OFFER_SENT,
     OFFER_RECEIVED,
+    OFFER_REJECTED,
     REQUEST_SENT,
     REQUEST_RECEIVED,
     CREDENTIAL_SENT,
