@@ -47,8 +47,8 @@ class ProcessPresentationRequestAction(
             walletConnector.walletHolder.getConnectionRecordById(existingPresentationExchangeRecord.connectionId)!!
 
         val presentationRequest =
-            walletConnector.prover!!.buildPresentationRequestObjectFromRawData(
-                //TODO: deal with several attachemnts
+            walletConnector.prover.buildPresentationRequestObjectFromRawData(
+                //TODO: deal with several attachments
                 presentationRequestContainer.presentationRequestAttach[0].data
             )
 
@@ -63,17 +63,16 @@ class ProcessPresentationRequestAction(
             PresentationRequestResponseAction.ACCEPT -> {
                 try {
                     val presentationData =
-                        walletConnector.prover!!.createPresentation(presentationRequest, ledgerConnector)
+                        walletConnector.prover.createPresentation(presentationRequest, ledgerConnector)
 
                     val presentation = PresentationContainer(
-                        //TODO: set proper id
                         id = uuid4().toString(),
                         thread = Thread(thid = presentationRequestContainer.id),
                         presentationAttach = listOf(
                             Attach(
                                 id = "libindy-presentation-0",
                                 mimeType = "application/json",
-                                data = walletConnector.prover!!.extractPresentationDataFromPresentation(presentationData)
+                                data = walletConnector.prover.extractPresentationDataFromPresentation(presentationData)
 
                             )
                         ),
