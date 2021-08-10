@@ -8,12 +8,14 @@ import com.dxc.ssi.agent.utils.indy.IndySerializationUtils.jsonProcessor
 import com.dxc.ssi.agent.wallet.indy.model.issue.IndyCredentialDefinition
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class CredentialContainerDefinitionTest {
     var logger: Kermit = Kermit(LogcatLogger())
     @Test
+    @Ignore
     fun testDeserialization() {
 
         val credDefJson =

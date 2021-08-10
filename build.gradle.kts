@@ -206,6 +206,9 @@ kotlin {
 android {
     compileSdkVersion(29)
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
     defaultConfig {
         minSdkVersion(24)
         //TODO: understand why websockets stop working when changing targetSDKVersion above 27
