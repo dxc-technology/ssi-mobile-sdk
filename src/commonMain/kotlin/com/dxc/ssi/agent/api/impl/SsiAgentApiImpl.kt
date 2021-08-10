@@ -2,6 +2,7 @@ package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.SsiAgentApi
+import com.dxc.ssi.agent.api.callbacks.library.LibraryError
 import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
@@ -74,6 +75,17 @@ class SsiAgentApiImpl(
             try {
                 println("Before initializing ledgerConnector")
                 ledgerConnector.init()
+            } catch (t: Throwable) {
+                agentScope.launch {
+                    libraryStateListener.initializationFailed(
+                        error = LibraryError.LEDGER_CONNECTION_EXCEPTION,
+                        stackTrace = t.stackTraceToString()
+                    )
+                }
+                return@launch
+
+            }
+            try {
                 //TODO: combine it into single function
                 walletConnector.walletHolder.openWalletOrFail()
                 walletConnector.walletHolder.initializeDid()
@@ -83,6 +95,18 @@ class SsiAgentApiImpl(
                 if (walletConnector.prover != null) {
                     walletConnector.prover.createMasterSecret(Configuration.masterSecretId)
                 }
+            } catch (t: Throwable) {
+
+                agentScope.launch {
+                    libraryStateListener.initializationFailed(
+                        error = LibraryError.WALLET_INITIALIZATION_EXCEPTION,
+                        stackTrace = t.stackTraceToString()
+                    )
+                }
+                return@launch
+
+            }
+            try {
 
                 println("init: initialized ledger and wallet")
 
@@ -102,16 +126,23 @@ class SsiAgentApiImpl(
 
                 println("init: initialized trust ping tracker service")
 
-                libraryStateListener.initializationCompleted()
+                agentScope.launch { libraryStateListener.initializationCompleted() }
+
             } catch (t: Throwable) {
-                libraryStateListener.initializationFailed()
+                agentScope.launch {
+                    libraryStateListener.initializationFailed(
+                        error = LibraryError.LISTENER_SETUP_EXCEPTION,
+                        stackTrace = t.stackTraceToString()
+                    )
+                }
+
             }
 
         }
 
     }
 
-    override fun connect(url: String, keepConnectionAlive: Boolean): PeerConnection {
+    override fun connect(url: String, keepConnectionAlive: Boolean): PeerConnection? {
         println("Entered connect function")
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
@@ -150,6 +181,7 @@ class SsiAgentApiImpl(
         CoroutineHelper.waitForCompletion(
             agentScope.async {
                 println("Entered async disconnect")
+                services.connectionsTrackerService!!.keepConnectionAlive(connection, false)
                 transport.disconnect(connection)
 
             })

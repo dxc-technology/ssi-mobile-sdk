@@ -34,8 +34,8 @@ class CredPresenterControllerImpl : CredPresenterController {
         return PresentationRequestResponseAction.PARK
     }
 
-    override fun onDone(connection: PeerConnection): CallbackResult {
-        return CallbackResult(true)
+    override fun onDone(connection: PeerConnection) {
+
     }
 
     override fun onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {

@@ -25,7 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
             
-            let myWalletName = "newWalletName5"
+            let myWalletName = "newWalletName6"
             let myWalletPassword = "newWalletPassword"
             let myDid = "4PCVFCeZbKXyvgjCedbXDx"
         
@@ -149,8 +149,17 @@ func getEnvironmentVar(_ name: String) -> String? {
 
 class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 {
-    func onCompleted(connection: PeerConnection) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onFailure(connection: PeerConnection?, error: DidExchangeError, message: String?, details: String?, stackTrace: String?) {
+    
+        print("Connection failure", error)
+    }
+    
+    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
+    
+    }
+    
+    func onCompleted(connection: PeerConnection) {
+       
     }
     
     func onInvitationReceived(connection: PeerConnection, invitation: Invitation) -> CallbackResult {
@@ -158,38 +167,48 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
     }
     
    
-    
-    func onRequestSent(connection: PeerConnection, request: ConnectionRequest) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
+        
     }
     
     func onResponseReceived(connection: PeerConnection, response: ConnectionResponse) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-        
-    }
-    
 }
 
 
 class LibraryStateListenerImpl : LibraryStateListener {
+    func initializationFailed(error: LibraryError, message: String?, details: String?, stackTrace: String?) {
+        print("Listener: Initialization failed", error)
+    }
+    
     func initializationCompleted()  {
        print("Listener: Initialization completed")
         
-        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMnVWSE5tWEducmt1TFR2WnNHYXFIRjlGMUU1aEZiMVFLdFF2b3hCakZzb2UiXSwiQGlkIjoiNTZhODZjY2ItNjE4YS00ZDkzLTlmM2EtYzI0MDA1NDgxZjhjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
+        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMnBCazdnMWhCNU5qWTlnbTJteVBObkc3cUh1c0VEVEplZ0hmenJRVlpOWDIiXSwiQGlkIjoiODMxMzIyYWMtMmY1Yy00N2M2LWIyNTAtMzU3YjlkOTlkYTQ3IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
+        
+        Sleeper().sleep(value: 5000)
+        ssiAgentApi.unsafelyUnwrapped.abandonConnection(connection: connection.unsafelyUnwrapped, force: true, notifyPeerBeforeAbandoning: false)
+        
+        Sleeper().sleep(value: 5000)
+        
+        ssiAgentApi.unsafelyUnwrapped.reconnect(connection: connection.unsafelyUnwrapped, keepConnectionAlive: true)
 
         
     }
     
-    func initializationFailed()  {
-        print("Listener: Initialization failed")
-    }
+
 }
 
 class CredentialReceiverControllerImpl: CredReceiverController {
+    func onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
+        
+    }
+    
+    func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) {
+    }
+    
     func onProblemReport(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
         return CallbackResult(canProceedFurther: true)
     }
@@ -231,8 +250,9 @@ class CredentialReceiverControllerImpl: CredReceiverController {
         return OfferResponseAction.accept
     }
     
-    func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+
+    func onAckSent(connection: PeerConnection, ack: Ack) {
+
     }
     
 }
@@ -243,8 +263,8 @@ class CredPresenterControllerImpl: CredPresenterController {
 
     }
 
-    func onDone(connection: PeerConnection) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onDone(connection: PeerConnection)  {
+       
     }
     
     func onRequestReceived(connection: PeerConnection,
