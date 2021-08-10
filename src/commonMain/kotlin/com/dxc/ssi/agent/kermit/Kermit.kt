@@ -1,5 +1,10 @@
 package com.dxc.ssi.agent.kermit
 
+//The broader explanation of why I have introduced Kermit code instead of using the library is that we need to have a library available on Kotlin Multiplatform world.
+// We can use the android library in such a way (there is a touch lib), and for IOS, we need a cocoapod that is not available.
+// Right now library supports pod source code or the ability to use external-cocoapods plugin, which can't be applied in Kotlin Multiplatform.
+// We need a library that will reside in one place and be easier to maintain, however, it's worth to reintroduce it when both parts will be working in Kotlin Multiplatform.
+// TODO Re-introduce *Kermit* as a common library for both platform IOS and Android
 class Kermit(
     private val loggerList: List<Logger> = listOf(
         LogcatLogger()
