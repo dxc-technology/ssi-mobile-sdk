@@ -245,7 +245,7 @@ dependencies {
     implementation("junit:junit:$junitVersion")
 }
 
-tasks.register<Exec>("BuildCommon") { // Workaround for issue with KMP
+tasks.register<Exec>("BuildCommon") {  // Workaround for issue with KMP, build with this command when facing an issue with jvmTest
     commandLine("./gradlew -x jvmTest", "build")
 }
 
@@ -265,16 +265,6 @@ tasks.register<Exec>("BuildSimulator") {
 }
 
 tasks.register<Exec>("BuildDevice") {
-    tasks.named<org.jetbrains.kotlin.gradle.tasks.DefFileTask>("generateDefPocketSocket").configure {
-        doLast {
-            outputFile.writeText(
-                """
-            language = Objective-C
-            headers = "$projectDir/socketlib/PocketSocketHeaders/PSWebSocket.h"
-            """
-            )
-        }
-    }
     environment(mapOf("SDK_NAME" to "iphoneos"))
     commandLine("./gradlew", "packForXcode") //REAL DEVICE
 }
@@ -321,5 +311,16 @@ val packForXcode by tasks.creating(Sync::class) {
         val targetDir = File(buildDir, "xcode-framework-X64")
         from({ framework.outputDirectory })
         into(targetDir)
+    }
+}
+
+tasks.named<org.jetbrains.kotlin.gradle.tasks.DefFileTask>("generateDefPocketSocket").configure {
+    doLast {
+        outputFile.writeText(
+            """
+            language = Objective-C
+            headers = "$projectDir/socketlib/PocketSocketHeaders/PSWebSocket.h"
+            """
+        )
     }
 }
