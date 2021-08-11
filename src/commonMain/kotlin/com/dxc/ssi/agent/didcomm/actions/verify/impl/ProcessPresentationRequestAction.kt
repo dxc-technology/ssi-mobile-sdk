@@ -153,6 +153,16 @@ class ProcessPresentationRequestAction(
             PresentationRequestResponseAction.REJECT -> {
                 //TODO: Consider an option to send Send PresentationProposal here instead of ProblemReport, depending on user input
 
+                walletConnector.prover.storePresentationExchangeRecord(
+                    PresentationExchangeRecord(
+                        state = CredentialVerificationState.REQUEST_REJECTED,
+                        connectionId = connection.id,
+                        presentationRequestContainer = presentationRequestContainer,
+                        thread = Thread(thid = presentationRequestContainer.id),
+                        isParked = false
+                    )
+                )
+
                 val problemReport = ProblemReport(
                     id = uuid4().toString(),
                     description = DidCommProblemCodes.USER_REJECTED_PRESENTATION_REQUEST.toProblemReportDescription(),
@@ -167,6 +177,8 @@ class ProcessPresentationRequestAction(
                     transport,
                     services
                 )
+
+
             }
             PresentationRequestResponseAction.PARK -> {
                 walletConnector.prover.storePresentationExchangeRecord(
