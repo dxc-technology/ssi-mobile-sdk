@@ -6,6 +6,9 @@ import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.callbacks.connection.ReconnectionError
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.processor.Processors
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.ConnectionTransportState
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
@@ -19,6 +22,7 @@ class ConnectionsTrackerService(
     val callbacks: Callbacks,
     val processors: Processors
 ) {
+    private val logger: Kermit = Kermit(LogcatLogger())
 
     private var job = Job()
     private val serviceScope = CoroutineScope(Dispatchers.Default + job)
@@ -36,7 +40,8 @@ class ConnectionsTrackerService(
     private val sentPingsMap = IsoMutableMap<String/*ConnectionId*/, Long /*Timestamp when ping was sent*/>()
 
     suspend fun start() {
-        println("Started listener")
+        logger.log(Severity.Debug,"",null) { "Started listener" }
+
         serviceScope.launch {
             trackTrustPingStatuses()
         }
@@ -48,18 +53,18 @@ class ConnectionsTrackerService(
 
     private suspend fun generateKeepAliveTrustPings() {
         while (!isShutdown) {
-            println("Trust Ping Generator woken up")
+            logger.log(Severity.Debug,"",null) { "Trust Ping Generator woken up" }
 
             //TODO: also introduce somewhere removal of outdated IN Progress connection records
             walletConnector.walletHolder.getConnections(PeerConnectionState.COMPLETED).filter { it.keepTransportAlive }
                 .forEach {
                     serviceScope.launch {
-                        println("generating trust ping for connection $it")
+                        logger.log(Severity.Debug,"",null) { "generating trust ping for connection $it" }
                         processors.trustPingProcessor!!.sendTrustPingOverConnection(it)
                     }
                 }
             delay(sendTrustPingIntervalMs)
-            println("Sent trust pings for connections")
+            logger.log(Severity.Debug,"",null) { "Sent trust pings for connections" }
         }
 
     }
@@ -67,7 +72,8 @@ class ConnectionsTrackerService(
 
     private suspend fun trackTrustPingStatuses() {
         while (!isShutdown) {
-            println("Checking trust pings states")
+            logger.log(Severity.Debug,"",null) { "Checking trust pings states" }
+
             getNotResponsiveConnections().forEach {
                 sentPingsMap.remove(it.id)
                 callbacks.trustPingController?.onTrustPingResponseDidNotReceived(it)
@@ -75,7 +81,8 @@ class ConnectionsTrackerService(
             }
 
             delay(maxTimeoutForTrustPingResponseMs)
-            println("Done checking trust pings states")
+            logger.log(Severity.Debug,"",null) { "Done checking trust pings states" }
+
         }
 
     }
@@ -90,12 +97,12 @@ class ConnectionsTrackerService(
     }
 
     fun trustPingSentOverConnectionEvent(connection: PeerConnection) {
-        println("TrustPing sent for connectionId = ${connection.id}")
+        logger.log(Severity.Debug,"",null) { "TrustPing sent for connectionId = ${connection.id}" }
         sentPingsMap[connection.id] = System.currentTimeMillis()
     }
 
     fun trustPingResponseReceivedEvent(connection: PeerConnection) {
-        println("TrustPing received for connectionId = ${connection.id}")
+        logger.log(Severity.Debug,"",null) { "TrustPing received for connectionId = ${connection.id}" }
         sentPingsMap.remove(connection.id)
     }
 
@@ -128,7 +135,7 @@ class ConnectionsTrackerService(
 
                 } else {
                     try {
-                        println("generating trust ping for connection $connection")
+                        logger.log(Severity.Debug,"",null) { "generating trust ping for connection $connection" }
                         processors.trustPingProcessor!!.sendTrustPingOverConnection(connection)
                         val actualConnection = walletConnector.walletHolder.getConnectionRecordById(connection.id)!!
                         callbacks.statefulConnectionController?.onReconnected(actualConnection)

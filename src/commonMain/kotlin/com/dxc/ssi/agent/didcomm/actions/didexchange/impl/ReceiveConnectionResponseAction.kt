@@ -4,6 +4,9 @@ import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.PeerConnectionState
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -13,6 +16,7 @@ import kotlinx.serialization.json.Json
 class ReceiveConnectionResponseAction(
     private val actionParams: ActionParams
 ) : DidExchangeAction {
+    private val logger: Kermit = Kermit(LogcatLogger())
     private val json = Json {
         ignoreUnknownKeys = true
     }
@@ -32,7 +36,7 @@ class ReceiveConnectionResponseAction(
         val ourConnectionId = connectionResponse.thread.thid
         val ourConnection = walletConnector.walletHolder.getConnectionRecordById(ourConnectionId)
 
-        println("Existing connection record $ourConnection")
+        logger.log(Severity.Debug,"",null) { "Existing connection record $ourConnection" }
 
         //TODO: move the decision below to some abstraction layer? StateMahine?
         when (ourConnection!!.state) {
@@ -47,7 +51,8 @@ class ReceiveConnectionResponseAction(
                 walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
                 trustPingProcessor.sendTrustPingOverConnection(updatedConnection)
                 connectionInitiatorController.onCompleted(updatedConnection)
-                println("ReceiveConnectionResponseAction: after completed callback")
+                logger.log(Severity.Debug,"",null) { "ReceiveConnectionResponseAction: after completed callback" }
+
                 return ActionResult(updatedConnection)
             }
 

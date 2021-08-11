@@ -15,12 +15,16 @@ import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 
 open class IndyWalletHolder(
     private val walletName: String,
     private val walletPassword: String,
     private val didConfig: DidConfig
 ) : WalletHolder {
+    var logger: Kermit = Kermit(LogcatLogger())
     //TODO: think how to avoid optionals here
     private var isoDid = IsolateState { ObjectHolder<String?>() }
     private var isoVerkey = IsolateState { ObjectHolder<String?>() }
@@ -100,7 +104,7 @@ open class IndyWalletHolder(
         val byteArrayMessage = message.payload.toByteArray()
         val recipientVk = recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
         //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
-        println("recipientKeys = $recipientVk")
+        logger.log(Severity.Debug,"",null) { "recipientKeys = $recipientVk" }
 
         val senderVk = if (useAnonCrypt) null else isoVerkey.access { it.obj }
         val wallet = isoWallet.access { it.obj }
@@ -108,7 +112,7 @@ open class IndyWalletHolder(
 
         val decodedString = String(byteArrayPackedMessage)
 
-        println("Decoded packed message = $decodedString")
+        logger.log(Severity.Debug,"",null) { "Decoded packed message = $decodedString" }
 
         return decodedString
     }
@@ -123,7 +127,7 @@ open class IndyWalletHolder(
 
         val decodedString = String(byteArrayUnpackedMessage)
 
-        println("Decoded packed message = $decodedString")
+        logger.log(Severity.Debug,"",null) { "Decoded packed message = $decodedString" }
 
         return Message(decodedString)
 

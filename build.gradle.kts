@@ -18,6 +18,7 @@ plugins {
     kotlin("plugin.serialization") version kotlinVersion
     kotlin("native.cocoapods") version "1.4.31"
     id("maven-publish")
+
 }
 
 
@@ -29,13 +30,15 @@ publishing {
         mavenLocal()
     }
 }
+
 repositories {
     google()
-    jcenter()
     mavenCentral()
+    jcenter()
     maven(url = "https://repo.sovrin.org/repository/maven-releases")
     maven { setUrl("https://dl.bintray.com/kotlin/kotlinx.html/") }
 }
+
 
 kotlin {
     jvm {
@@ -121,6 +124,7 @@ kotlin {
                 implementation("com.benasher44:uuid:$uuidVersion")
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))
+                implementation(kotlin("stdlib-common"))
             }
         }
         val commonTest by getting {
@@ -202,6 +206,9 @@ kotlin {
 android {
     compileSdkVersion(29)
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
     defaultConfig {
         minSdkVersion(24)
         //TODO: understand why websockets stop working when changing targetSDKVersion above 27

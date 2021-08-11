@@ -17,6 +17,9 @@ import com.dxc.ssi.sample.controllers.ConnectionInitiatorControllerImpl
 import com.dxc.ssi.sample.controllers.CredPresenterControllerImpl
 import com.dxc.ssi.sample.controllers.CredReceiverControllerImpl
 import com.dxc.utils.EnvironmentUtils
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 
 var ssiAgentApi: SsiAgentApi? = null
 
@@ -27,11 +30,11 @@ class SsiApplication : Application() {
     private val walletName = "newWalletName2"
     private val walletPassword = "newWalletPassword"
     private val did = "Kg5Cq9vKv7QrLfTGUP9xbd"
-
+    var logger: Kermit = Kermit(LogcatLogger())
 
     override fun onCreate() {
         super.onCreate()
-        println("Created SSI Application")
+        logger.log(Severity.Debug,"",null) { "Created SSI Application" }
 
         if (PermissionManager.getMissingPermissions(PermissionManager.requiredPermissions, this).isEmpty()) {
             initSsiAgent()
@@ -67,7 +70,7 @@ class SsiApplication : Application() {
                 walletName = walletName,
                 walletPassword = walletPassword
             )
-            println("Generated didResult: $didResult")
+            logger.log(Severity.Debug,"",null) { "Generated didResult: $didResult" }
             //Store did somewhere in your application to use it afterwards
         }
 
@@ -95,7 +98,7 @@ class SsiApplication : Application() {
 
                 agentInitialized = true
                 agentInitializationInProgress = true
-                println("Initialized SSI Agent")
+                logger.log(Severity.Debug,"",null) { "Initialized SSI Agent" }
 
             }
 
@@ -106,13 +109,13 @@ class SsiApplication : Application() {
                 stackTrace: String?
             ) {
                 agentInitializationInProgress = true
-                println(
+                logger.log(Severity.Debug,"",null) {
                     "Failure to initialize library:" +
                             "error -> $error" +
                             "message -> $message" +
                             "details -> $details" +
                             "stackTrace -> $stackTrace"
-                )
+                }
             }
 
 

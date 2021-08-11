@@ -14,6 +14,9 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationContainer
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationState
 import com.dxc.ssi.agent.exceptions.common.NoCredentialToSatisfyPresentationRequestException
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.PresentationExchangeRecord
 import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.model.messages.Message
@@ -25,10 +28,11 @@ class ProcessPresentationRequestAction(
     private val presentationRequestContainer: PresentationRequestContainer,
     private val presentationRequestResponseAction: PresentationRequestResponseAction? = null
 ) : CredentialVerificationAction {
+    private val logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
 
-        println("Entered ProcessPresentationRequestAction")
-
+        logger.log(Severity.Debug,"",null) { "Entered ProcessPresentationRequestAction" }
+        val messageContext = actionParams.context
         val credPresenterController = actionParams.callbacks.credPresenterController!!
         val walletConnector = actionParams.walletConnector
         val ledgerConnector = actionParams.ledgerConnector

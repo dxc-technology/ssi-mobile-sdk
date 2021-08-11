@@ -3,13 +3,16 @@ package com.dxc.ssi.agent.ledger.indy.libindy
 import com.dxc.ssi.agent.callback.callbackHandler
 import com.dxc.ssi.agent.callback.impl.IntCallback
 import com.dxc.ssi.agent.callback.impl.SimpleCallback
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.indylib.indy_create_pool_ledger_config
 import com.indylib.indy_open_pool_ledger
 import com.indylib.indy_set_protocol_version
 
 actual class Pool actual constructor(private val poolHandle: Int) {
-
     actual companion object {
+        private val logger: Kermit = Kermit(LogcatLogger())
         actual suspend fun setProtocolVersion(protocolVersion: Long) {
 
             val commandHandle = callbackHandler.prepareCallback()
@@ -21,7 +24,9 @@ actual class Pool actual constructor(private val poolHandle: Int) {
         }
 
         actual suspend fun createPoolLedgerConfig(configName: String, config: String) {
-            println("Pool -> In createPoolLedgerConfig")
+
+            logger.log(Severity.Debug,"",null) { "Pool -> In createPoolLedgerConfig" }
+
             val commandHandle = callbackHandler.prepareCallback()
 
             indy_create_pool_ledger_config(commandHandle, configName, config, SimpleCallback.callback)
@@ -32,17 +37,19 @@ actual class Pool actual constructor(private val poolHandle: Int) {
 
         @OptIn(ExperimentalUnsignedTypes::class)
         actual suspend fun openPoolLedger(configName: String, config: String): Pool {
-            println("Pool -> In openPoolLedger: configName = $configName, config = $config")
+            logger.log(Severity.Debug,"",null) { "Pool -> In openPoolLedger: configName = $configName, config = $config" }
 
             val commandHandle = callbackHandler.prepareCallback()
 
             //TODO: add proper config here
             indy_open_pool_ledger(commandHandle, configName, config, IntCallback.callback)
-            println("Pool -> Before waiting for callback")
+
+            logger.log(Severity.Debug,"",null) { "Pool -> Before waiting for callback" }
+
             val openPoolLedgerConfigCallbackResult =
                 callbackHandler.waitForCallbackResult(commandHandle) as IntCallback.Result
 
-            println("Pool -> Out of  openPoolLedger")
+            logger.log(Severity.Debug,"",null) { "Pool -> Out of  openPoolLedger" }
             return Pool(openPoolLedgerConfigCallbackResult.handle)
         }
 

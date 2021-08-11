@@ -8,6 +8,9 @@ import io.ktor.http.*
 import io.ktor.util.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 
 //TODO: handle closing websocket correctly
 //TODO: cleanup websockets cache with time to avoid memory leak
@@ -19,11 +22,11 @@ class WebSocketTransportImpl : Transport {
 
     private val incomingMessagesChannel: Channel<MessageEnvelop> = Channel()
     private val appSocketThreadSafeProvider = AppSocketThreadSafeProvider(incomingMessagesChannel)
-
+    var logger: Kermit = Kermit(LogcatLogger())
 
     @OptIn(InternalAPI::class)
     override suspend fun sendMessage(connection: PeerConnection, message: MessageEnvelop) {
-        println("Before sending message to endpoint: ${connection.endpoint}")
+        logger.log(Severity.Debug,"",null) { "Before sending message to endpoint: ${connection.endpoint}" }
         if (!(connection.endpoint.protocol == URLProtocol.WS || connection.endpoint.protocol == URLProtocol.WSS))
             throw IllegalArgumentException("Only websockets are supported by WebSocketTransportImpl!")
 
@@ -39,13 +42,13 @@ class WebSocketTransportImpl : Transport {
                 //TODO: check somewhere if connection already abandoned, do not retry
                 numberOfRetries++
                 appSocketThreadSafeProvider.disconnectAndDropAppSocket(connection.endpoint.toString())
-                println("Error happened while sending message")
+                logger.log(Severity.Debug,"",null) { "Error happened while sending message" }
                 if (numberOfRetries == maxNumberOfRetries) {
-                    println("Retry limit exceeded. Won't try")
+                    logger.log(Severity.Debug,"",null) {"Retry limit exceeded. Won't try" }
                     throw MessageCouldNotBeDeliveredException("Could not deliver message $message after $maxNumberOfRetries retires")
                 }
                 delay(initialDelay * numberOfRetries)
-                println("Reconnecting...")
+                logger.log(Severity.Debug,"",null) { "Reconnecting..." }
 
             }
         }

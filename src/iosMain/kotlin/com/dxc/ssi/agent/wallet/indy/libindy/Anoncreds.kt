@@ -3,6 +3,9 @@ package com.dxc.ssi.agent.wallet.indy.libindy
 import com.dxc.ssi.agent.callback.CallbackData
 import com.dxc.ssi.agent.callback.callbackHandler
 import com.dxc.ssi.agent.callback.impl.StringCallback
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.indylib.*
 import kotlinx.cinterop.ByteVarOf
 import kotlinx.cinterop.CPointer
@@ -19,6 +22,8 @@ actual class Anoncreds {
     ) : CallbackData
 
     actual companion object {
+        private val logger: Kermit = Kermit(LogcatLogger())
+
         actual suspend fun proverCreateCredentialReq(
             wallet: Wallet,
             proverDid: String,
@@ -88,6 +93,7 @@ actual class Anoncreds {
             revRegDefJson: String?
         ): String {
 
+
             val commandHandle = callbackHandler.prepareCallback()
 
             indy_prover_store_credential(
@@ -101,8 +107,7 @@ actual class Anoncreds {
                 StringCallback.callback
             )
 
-            println("Pool -> Before waiting for callback")
-
+            logger.log(Severity.Debug,"",null) { "Pool -> Before waiting for callback" }
             val result = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
             return result.stringResult
 

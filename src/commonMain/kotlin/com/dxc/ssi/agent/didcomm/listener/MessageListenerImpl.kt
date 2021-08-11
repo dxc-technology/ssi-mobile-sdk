@@ -7,6 +7,9 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.router.MessageRouter
 import com.dxc.ssi.agent.didcomm.router.MessageRouterImpl
 import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.Context
@@ -24,6 +27,7 @@ class MessageListenerImpl(
 ) :
     MessageListener {
 
+    private val logger: Kermit = Kermit(LogcatLogger())
     private var isShutdown: Boolean = false
     override val messageRouter: MessageRouter =
         MessageRouterImpl(walletConnector, ledgerConnector, services, transport, callbacks)
@@ -34,21 +38,21 @@ class MessageListenerImpl(
 
     override suspend fun listen() {
 
-        println("Started listener")
-
+        logger.log(Severity.Debug,"",null) { "Started listener" }
         while (!isShutdown) {
 
-            println("Message Listener: Checking for new messages")
+            logger.log(Severity.Debug,"",null) { "Message Listener: Checking for new messages" }
 
             val receivedMessage = transport.receiveNextMessage()
 
-            println("Message Listener: Received message")
+            logger.log(Severity.Debug,"",null) { "Message Listener: Received message" }
 
             val messageContext = unpackAndBuildMesageContext(receivedMessage)
 
 
             messageRouter.routeAndProcessMessage(messageContext)
-            println("Message Listener: : procesed message")
+            logger.log(Severity.Debug,"",null) { "Message Listener: : procesed message" }
+
         }
 
     }
@@ -58,12 +62,12 @@ class MessageListenerImpl(
 
         val unpackedMessage = walletConnector.walletHolder.unPackMessage(Message(receivedMessage.payload))
         val receivedUnpackedMessage = Json.decodeFromString<ReceivedUnpackedMessage>(unpackedMessage.payload)
-        println("Received Unpacked message: $receivedUnpackedMessage")
 
-        println(
-            "sender verkey = ${receivedUnpackedMessage.senderVerKey}" +
-                    "receiver_verkey = ${receivedUnpackedMessage.recipientVerKey}"
-        )
+        logger.log(Severity.Debug,"",null) { "Received Unpacked message: $receivedUnpackedMessage" }
+
+        logger.log(Severity.Debug,"",null) {  "sender verkey = ${receivedUnpackedMessage.senderVerKey}" +
+                "receiver_verkey = ${receivedUnpackedMessage.recipientVerKey}" }
+
         val connection = getConnectionByVerkey(receivedUnpackedMessage.senderVerKey)
 
         return Context(connection, receivedUnpackedMessage)

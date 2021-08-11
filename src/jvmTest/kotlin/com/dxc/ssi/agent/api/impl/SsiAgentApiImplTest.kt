@@ -22,6 +22,9 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorBuilder
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.OfferResponseAction
@@ -29,8 +32,12 @@ import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
+import com.dxc.ssi.agent.wallet.indy.model.verify.IndyCredInfo
 import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.junit.Ignore
 import org.junit.Test
 
@@ -41,12 +48,12 @@ class SsiAgentApiImplTest {
     private val did = "Aj4mwDVVEh46K17Cqh4dpU"
 
     private lateinit var ssiAgentApi: SsiAgentApi
-
+    var logger: Kermit = Kermit(LogcatLogger())
     @Test
     @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
-        println("Starting test")
+        logger.log(Severity.Debug,"",null) { "Starting test" }
 
         EnvironmentUtils.initEnvironment(EnvironmentImpl())
 
@@ -94,11 +101,11 @@ class SsiAgentApiImplTest {
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
 
-                println("Connecting to issuer")
+                logger.log(Severity.Debug,"",null) { "Connecting to issuer" }
                 ssiAgentApi.abandonAllConnections()
                 val connection = ssiAgentApi.connect(invitationUrl, keepConnectionAlive = true)
 
-                println("Connected to issuer")
+                logger.log(Severity.Debug,"",null) { "Connected to issuer" }
 
             }
 
@@ -108,7 +115,7 @@ class SsiAgentApiImplTest {
                 details: String?,
                 stackTrace: String?
             ) {
-                println("Received error from library: $error with details: $details")
+                logger.log(Severity.Debug,"",null) { "Received error from library: $error with details: $details" }
             }
 
         })
@@ -120,12 +127,13 @@ class SsiAgentApiImplTest {
     }
 
     class StatefulConnectionControllerImpl : StatefulConnectionController {
+        var logger: Kermit = Kermit(LogcatLogger())
         override fun onReconnected(connection: PeerConnection) {
             TODO("Not yet implemented")
         }
 
         override fun onReconnectFailed(reconnectionError: ReconnectionError, reason: String?) {
-            println("Failed to reconnect: $reconnectionError ")
+            logger.log(Severity.Debug,"",null) { "Failed to reconnect: $reconnectionError " }
         }
 
         override fun onDisconnected(connection: PeerConnection) {
@@ -186,7 +194,7 @@ class SsiAgentApiImplTest {
         }
 
         override fun onAckSent(connection: PeerConnection, ack: Ack) {
-            println("Ack sent for credential")
+            logger.log(Severity.Debug,"",null) { "Ack sent for credential" }
         }
 
 
@@ -201,11 +209,11 @@ class SsiAgentApiImplTest {
         }
 
         override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
-            println("Request sent hook called : $connection, $request")
+            logger.log(Severity.Debug,"",null) { "Request sent hook called : $connection, $request" }
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
-            println("Response received hook called : $connection, $response")
+            logger.log(Severity.Debug,"",null) { "Response received hook called : $connection, $response" }
             return CallbackResult(true)
         }
 
@@ -224,7 +232,7 @@ class SsiAgentApiImplTest {
             details: String?,
             stackTrace: String?
         ) {
-            println("Failure occured for connection $connection, error-> $error, details -> $details")
+            logger.log(Severity.Debug,"",null) { "Failure occured for connection $connection, error-> $error, details -> $details" }
         }
 
     }

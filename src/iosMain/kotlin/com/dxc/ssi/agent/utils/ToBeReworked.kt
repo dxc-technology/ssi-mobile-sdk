@@ -5,8 +5,12 @@ import com.indylib.indy_set_logger
 import com.indylib.indy_u32_t
 import kotlinx.cinterop.*
 import platform.posix.sleep
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 
 object ToBeReworked {
+    var logger: Kermit = Kermit(LogcatLogger())
 //TODO: place it in to appropriate package
     //TODO: rewrite this functions to use kotlin data types
     fun enableIndyLog() {
@@ -26,10 +30,10 @@ object ToBeReworked {
             number: indy_u32_t,
         ) {
             initRuntimeIfNeeded()
-            println(pointer?.toKString())
-            println(val1?.toKString())
-            println(val2?.toKString())
-            println(val3?.toKString())
+            logger.log(Severity.Debug,"",null) { pointer?.toKString()!! }
+            logger.log(Severity.Debug,"",null) { val1?.toKString()!! }
+            logger.log(Severity.Debug,"",null) { val2?.toKString()!! }
+            logger.log(Severity.Debug,"",null) { val3?.toKString()!! }
             return
         })
         indy_set_logger(

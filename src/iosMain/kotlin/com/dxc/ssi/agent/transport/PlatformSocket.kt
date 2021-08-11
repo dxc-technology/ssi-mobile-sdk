@@ -3,6 +3,9 @@ package com.dxc.ssi.agent.transport
 import co.touchlab.stately.isolate.IsolateState
 import cocoapods.PocketSocket.PSWebSocket
 import cocoapods.PocketSocket.PSWebSocketDelegateProtocol
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import platform.Foundation.NSError
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLRequest
@@ -19,15 +22,18 @@ internal actual class PlatformSocket actual constructor(url: String) : NSObject(
     private val socketEndpoint = NSURL.URLWithString(url)!!
     private val isolatedWebSocket = IsolateState { WebSocketWrapper() }
     private var psl: PlatformSocketListener? = null
+    private val logger: Kermit = Kermit(LogcatLogger())
     actual fun openSocket(
         platformSocketListener: PlatformSocketListener
     ) {
         psl = platformSocketListener
-        println("PlatformSocket.isFrozen = ${this.isFrozen}")
+
+        logger.log(Severity.Debug,"",null) { "PlatformSocket.isFrozen = ${this.isFrozen}" }
 
         isolatedWebSocket.access {
             val request = NSURLRequest.requestWithURL(socketEndpoint)
-            println(socketEndpoint)
+            logger.log(Severity.Debug,"",null) { socketEndpoint.toString() }
+
             it.websocket =
                 PSWebSocket.clientSocketWithRequest(request)
             it.websocket?.delegateQueue = dispatch_queue_create(null, null)
@@ -37,11 +43,11 @@ internal actual class PlatformSocket actual constructor(url: String) : NSObject(
 
         isolatedWebSocket.access {
             val status = it.websocket?.readyState
-            println(status)
+            logger.log(Severity.Debug,"",null) { status.toString() }
         }
         sleep(1)
 
-        println("PlatformSocket: constructed receiverHandler")
+        logger.log(Severity.Debug,"",null) { "PlatformSocket: constructed receiverHandler" }
     }
     actual fun closeSocket(code: Int, reason: String) {
         isolatedWebSocket.access { it.websocket?.closeWithCode(code.toLong(), null) }
@@ -49,29 +55,29 @@ internal actual class PlatformSocket actual constructor(url: String) : NSObject(
     }
 
     actual fun sendMessage(msg: String) {
-        println("In platform sendMessage")
+        logger.log(Severity.Debug,"",null) { "In platform sendMessage" }
         isolatedWebSocket.access {
             it.websocket!!.send(msg)
         }
     }
 
     override fun webSocket(webSocket: PSWebSocket?, didFailWithError: NSError?) {
-        println("PlatformSocket: error")
+        logger.log(Severity.Debug,"",null) { "PlatformSocket: error" }
         psl?.onFailure(Throwable(didFailWithError?.description))
     }
 
     override fun webSocket(webSocket: PSWebSocket?, didReceiveMessage: Any?) {
-        println("PlatformSocket: message")
+        logger.log(Severity.Debug,"",null) { "PlatformSocket: message" }
         psl?.onMessage(didReceiveMessage.toString())
     }
 
     override fun webSocket(webSocket: PSWebSocket?, didCloseWithCode: NSInteger, reason: String?, wasClean: Boolean) {
-        println("PlatformSocket: closed")
+        logger.log(Severity.Debug,"",null) { "PlatformSocket: closed" }
         psl?.onClosed(didCloseWithCode.toInt(), reason.toString())
     }
 
     override fun webSocketDidOpen(webSocket: PSWebSocket?) {
-        println("PlatformSocket: open")
+        logger.log(Severity.Debug,"",null) { "PlatformSocket: open" }
         psl?.onOpen()
     }
 }

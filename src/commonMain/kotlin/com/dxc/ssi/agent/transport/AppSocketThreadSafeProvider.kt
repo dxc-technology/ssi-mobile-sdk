@@ -1,6 +1,9 @@
 package com.dxc.ssi.agent.transport
 
 import co.touchlab.stately.collections.sharedMutableMapOf
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import com.dxc.utils.System
 import kotlinx.coroutines.*
@@ -11,6 +14,7 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
 
     private var job = Job()
     private val providerScope = CoroutineScope(Dispatchers.Default + job)
+    private val logger: Kermit = Kermit(LogcatLogger())
 
     //TODO: looks like we need to deal with handling of closed sockets and with reconnects
 
@@ -18,7 +22,7 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
     private val channel = Channel<ControlMessage>()
 
     suspend fun provideAppSocket(endpoint: String): AppSocket {
-        println("AppSocketThreadSafeProvider - socket for $endpoint requested")
+        logger.log(Severity.Debug,"",null) { "AppSocketThreadSafeProvider - socket for $endpoint requested" }
         val appSocketResultDeferred = CompletableDeferred<Result<AppSocket>>()
         channel.send(GetAppSocketMessage(endpoint, appSocketResultDeferred))
 
@@ -33,7 +37,7 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
     }
 
     suspend fun disconnectAndDropAppSocket(endpoint: String) {
-        println("AppSocketThreadSafeProvider - removal of socket for $endpoint requested")
+        logger.log(Severity.Debug,"",null) { "AppSocketThreadSafeProvider - removal of socket for $endpoint requested" }
         val disposalStatus = CompletableDeferred<Unit>()
         channel.send(DisposeAppSocketMessage(endpoint, disposalStatus))
     }
@@ -55,12 +59,12 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
                     if (appSocketsMap[endpoint] != null) {
                         msg.appSocketResult.complete(Result.Success(appSocketsMap[endpoint]!!))
                     } else {
-                        println("${System.getCurrentThread()} - opening socket for $endpoint")
+                        logger.log(Severity.Debug,"",null) { "${System.getCurrentThread()} - opening socket for $endpoint" }
                         try {
                             val appSocket = openConnection(endpoint)
-                            println("${System.getCurrentThread()} - opened socket for $endpoint")
+                            logger.log(Severity.Debug,"",null) { "${System.getCurrentThread()} - opened socket for $endpoint" }
                             appSocketsMap[endpoint] = appSocket
-                            println("${System.getCurrentThread()} - placed websocket in a map")
+                            logger.log(Severity.Debug,"",null) { "${System.getCurrentThread()} - placed websocket in a map" }
                             msg.appSocketResult.complete(Result.Success(appSocketsMap[endpoint]!!))
                         } catch (t: Throwable) {
                             msg.appSocketResult.complete(Result.Error(t))
@@ -72,7 +76,7 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
                 is DisposeAppSocketMessage -> {
                     val endpoint = msg.endpoint
 
-                    println("Received dispose message for $endpoint")
+                    logger.log(Severity.Debug,"",null) { "Received dispose message for $endpoint" }
 
                     if (appSocketsMap[endpoint] != null) {
                         val appSocket = appSocketsMap[endpoint]!!
@@ -80,7 +84,7 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
                         //TODO: there is a bug currently, when we disconnect, there is an exception in logs. Ignoring it for now, but will need to raise a bug
                         appSocket.disconnect()
                         appSocketsMap.remove(endpoint)
-                        println("Disconnected and removed WS from map for $endpoint")
+                        logger.log(Severity.Debug,"",null) { "Disconnected and removed WS from map for $endpoint" }
                     }
                     msg.disposalStatus.complete(Unit)
                 }

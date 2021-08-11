@@ -14,6 +14,9 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.messages.Message
@@ -25,10 +28,11 @@ class ProcessCredentialOfferAction(
     private val credentialOfferContainer: CredentialOfferContainer,
     private val offerResponseAction: OfferResponseAction? = null
 ) : CredentialIssuenceAction {
+    private val logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
 
         try {
-            println("Entered ProcessCredentialOfferAction")
+            logger.log(Severity.Debug,"",null) { "Entered ProcessCredentialOfferAction" }
             val walletConnector = actionParams.walletConnector
             val transport = actionParams.transport
             val services = actionParams.services
@@ -38,7 +42,8 @@ class ProcessCredentialOfferAction(
             val existingCredentialExchangeRecord =
                 walletConnector.prover!!.getCredentialExchangeRecordByThread(Thread(thid = credentialOfferContainer.id))
 
-            println("Got existingCredentialExhcangeRecord=$existingCredentialExchangeRecord")
+
+            logger.log(Severity.Debug,"",null) { "Got existingCredentialExhcangeRecord=$existingCredentialExchangeRecord" }
 
             if (existingCredentialExchangeRecord?.state != CredentialIssuenceState.OFFER_RECEIVED) throw IllegalStateException()
 
@@ -85,7 +90,7 @@ class ProcessCredentialOfferAction(
                         comment = "comment"
                     )
 
-                    println("Credential request created:$credentialRequest")
+                    logger.log(Severity.Debug,"",null) { "Credential request created:$credentialRequest" }
 
 
                     MessageSender.packAndSendMessage(
@@ -148,10 +153,10 @@ class ProcessCredentialOfferAction(
                 }
             }
 
-            println("Exited ProcessCredentialOfferAction")
+            logger.log(Severity.Debug,"",null) { "Exited ProcessCredentialOfferAction" }
             return ActionResult()
         } catch (t: Throwable) {
-            println("Got exception ${t.stackTraceToString()}")
+            logger.log(Severity.Debug,"",null) { "Got exception ${t.stackTraceToString()}" }
             throw t
         }
     }

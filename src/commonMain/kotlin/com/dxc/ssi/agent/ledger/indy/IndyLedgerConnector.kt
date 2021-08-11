@@ -7,6 +7,9 @@ import com.dxc.ssi.agent.didcomm.model.issue.data.CredentialDefinitionId
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
 import com.dxc.ssi.agent.didcomm.model.verify.data.Schema
 import com.dxc.ssi.agent.didcomm.model.verify.data.SchemaId
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.ledger.indy.helpers.PoolHelper
 import com.dxc.ssi.agent.ledger.indy.libindy.Ledger
 import com.dxc.ssi.agent.ledger.indy.libindy.Pool
@@ -23,6 +26,8 @@ import kotlinx.serialization.decodeFromString
 
 class IndyLedgerConnector internal constructor(val indyLedgerConnectorConfiguration: IndyLedgerConnectorConfiguration) :
     LedgerConnector {
+    var logger: Kermit = Kermit(LogcatLogger())
+
     //TODO: decide if this is proper place for storing did or it should be somewhere in common module and probably out of ledger connector at all , since our did is more than about ledger
     override var did: String
         get() = isoDid.access { it.obj }!!
@@ -60,11 +65,11 @@ class IndyLedgerConnector internal constructor(val indyLedgerConnectorConfigurat
                 val schemaRes = Ledger.submitRequest(pool!!, schemaReq)
                 val parsedRes = Ledger.parseGetSchemaResponse(schemaRes)
 
-                println("parsedRes.objectJson = ${parsedRes.objectJson}")
+                logger.log(Severity.Debug,"",null) { "parsedRes.objectJson = ${parsedRes.objectJson}" }
 
                 return IndySerializationUtils.jsonProcessor.decodeFromString<IndySchema>(parsedRes.objectJson)
             } catch (e: Exception) {
-                println("Schema retrieving failed (id: $id). Retry attempt $it")
+                logger.log(Severity.Error,"",null) { "Schema retrieving failed (id: $id). Retry attempt $it" }
                 Sleeper().sleep((indyLedgerConnectorConfiguration.retryDelayMs * it) as Int)
             }
         }
@@ -82,8 +87,8 @@ class IndyLedgerConnector internal constructor(val indyLedgerConnectorConfigurat
                 val getCredDefResponse = Ledger.submitRequest(pool!!, getCredDefRequest)
                 val credDefIdInfo = Ledger.parseGetCredDefResponse(getCredDefResponse)
 
-                println("retrieved credDefInfo = $credDefIdInfo")
-                println("retrieved credDefInfo object JSON = ${credDefIdInfo.objectJson}")
+                logger.log(Severity.Debug,"",null) { "retrieved credDefInfo = $credDefIdInfo" }
+                logger.log(Severity.Debug,"",null) { "retrieved credDefInfo object JSON = ${credDefIdInfo.objectJson}" }
 
                 //TODO: see if we can remove ignoring unknown keys from here
                 //TODO: see if "isLenient" is needed here. Maybe instead we can just improve model?
@@ -94,8 +99,9 @@ class IndyLedgerConnector internal constructor(val indyLedgerConnectorConfigurat
                 )*/
             } catch (e: Exception) {
                 //TODO: make retry only ledger related operations, there is no point to retry deserialization
-                println("Exception $e")
-                println { "Credential definition retrieving failed (id: $id). Retry attempt $it" }
+
+                logger.log(Severity.Error,"",null) { "Exception $e" }
+                logger.log(Severity.Error,"",null) { "Credential definition retrieving failed (id: $id). Retry attempt $it" }
 
                 Sleeper().sleep((indyLedgerConnectorConfiguration.retryDelayMs * it) as Int)
             }
@@ -117,7 +123,7 @@ class IndyLedgerConnector internal constructor(val indyLedgerConnectorConfigurat
                 return IndySerializationUtils.jsonProcessor.decodeFromString<RevocationRegistryDefinition>(revRegDefJson)
 
             } catch (e: Exception) {
-                println("Revocation registry definition retrieving failed (id: $id). Retry attempt $it")
+                logger.log(Severity.Error,"",null) { "Revocation registry definition retrieving failed (id: $id). Retry attempt $it" }
                 Sleeper().sleep((indyLedgerConnectorConfiguration.retryDelayMs * it) as Int)
             }
         }
@@ -145,7 +151,7 @@ class IndyLedgerConnector internal constructor(val indyLedgerConnectorConfigurat
 
                 return Pair(timestamp, revRegDelta)
             } catch (e: Exception) {
-                println("Revocation registry delta retrieving failed (id: $id, interval: $interval). Retry attempt $it")
+                logger.log(Severity.Error,"",null) { "Revocation registry delta retrieving failed (id: $id, interval: $interval). Retry attempt $it" }
                 Sleeper().sleep((indyLedgerConnectorConfiguration.retryDelayMs * it) as Int)
             }
         }

@@ -15,6 +15,9 @@ import com.dxc.ssi.agent.didcomm.model.didexchange.*
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.processor.Processors
 import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.ConnectionTransportState
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
@@ -38,6 +41,7 @@ class ReceiveInvitationAction(
     private val invitationUrl: String,
     private val keepConnectionAlive: Boolean
 ) : DidExchangeAction {
+    private val logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
         // TODO: think to only form special message here and pass it to message processor
         // Create connection and store it in wallet // Create separate action for this?
@@ -72,7 +76,7 @@ class ReceiveInvitationAction(
                 val connectionRequest = buildConnectionRequest(invitation, connectionId)
                 val connectionRequestJson = Json.encodeToString(connectionRequest)
 
-                println("Connection request: $connectionRequestJson")
+                logger.log(Severity.Debug,"",null) { "Connection request: $connectionRequestJson" }
 
                 MessageSender.packAndSendMessage(
                     Message(connectionRequestJson), connection, walletConnector, transport, services,
@@ -124,7 +128,7 @@ class ReceiveInvitationAction(
     @OptIn(InternalAPI::class)
     private fun parseInvitationFromInvitationUrl(encodedInvitation: String): Invitation {
         val jsonInvitation = Base64.base64StringToPlainString(encodedInvitation)
-        println("JSON invitation $jsonInvitation")
+        logger.log(Severity.Debug,"",null) { "JSON invitation $jsonInvitation" }
         return Json { ignoreUnknownKeys = true }.decodeFromString<Invitation>(jsonInvitation)
     }
 
