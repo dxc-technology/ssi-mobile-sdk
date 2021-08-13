@@ -29,7 +29,7 @@ class OtherTests {
 
         val base64EncodedString = Base64.plainStringToBase64String(plainString)
 
-        logger.log(Severity.Debug,"",null) { "base64EncodedString($plainString) = $base64EncodedString" }
+        logger.d { "base64EncodedString($plainString) = $base64EncodedString" }
 
         val expectedBase64 = "SGVsbG8="
 
@@ -43,7 +43,7 @@ class OtherTests {
         val base64EncodedString = "SGVsbG8="
         val plainString = Base64.base64StringToPlainString(base64EncodedString)
         val expectedPlainString = "Hello"
-        logger.log(Severity.Debug,"",null) { "plainString($base64EncodedString)= $plainString" }
+        logger.d { "plainString($base64EncodedString)= $plainString" }
 
         assertEquals(expectedPlainString, plainString)
 

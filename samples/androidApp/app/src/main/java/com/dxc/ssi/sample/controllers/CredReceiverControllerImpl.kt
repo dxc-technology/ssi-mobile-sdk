@@ -24,7 +24,7 @@ class CredReceiverControllerImpl : CredReceiverController {
         credentialOfferContainer: CredentialOfferContainer
     ): OfferResponseAction {
 
-        logger.log(Severity.Debug,"",null) { "Received credential offer" }
+        logger.d { "Received credential offer" }
 
         GlobalScope.launch {
 
@@ -62,7 +62,7 @@ class CredReceiverControllerImpl : CredReceiverController {
     }
 
     override fun onAckSent(connection: PeerConnection, ack: Ack) {
-        logger.log(Severity.Debug,"",null) { "Ack sent for credential" }
+        logger.d { "Ack sent for credential" }
     }
 
 

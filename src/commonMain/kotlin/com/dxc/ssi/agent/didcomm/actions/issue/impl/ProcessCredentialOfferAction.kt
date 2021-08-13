@@ -32,7 +32,7 @@ class ProcessCredentialOfferAction(
     override suspend fun perform(): ActionResult {
 
         try {
-            logger.log(Severity.Debug,"",null) { "Entered ProcessCredentialOfferAction" }
+            logger.d { "Entered ProcessCredentialOfferAction" }
             val walletConnector = actionParams.walletConnector
             val transport = actionParams.transport
             val services = actionParams.services
@@ -43,7 +43,7 @@ class ProcessCredentialOfferAction(
                 walletConnector.prover!!.getCredentialExchangeRecordByThread(Thread(thid = credentialOfferContainer.id))
 
 
-            logger.log(Severity.Debug,"",null) { "Got existingCredentialExhcangeRecord=$existingCredentialExchangeRecord" }
+            logger.d { "Got existingCredentialExhcangeRecord=$existingCredentialExchangeRecord" }
 
             if (existingCredentialExchangeRecord?.state != CredentialIssuenceState.OFFER_RECEIVED) throw IllegalStateException()
 
@@ -90,7 +90,7 @@ class ProcessCredentialOfferAction(
                         comment = "comment"
                     )
 
-                    logger.log(Severity.Debug,"",null) { "Credential request created:$credentialRequest" }
+                    logger.d { "Credential request created:$credentialRequest" }
 
 
                     MessageSender.packAndSendMessage(
@@ -174,10 +174,10 @@ class ProcessCredentialOfferAction(
                 }
             }
 
-            logger.log(Severity.Debug,"",null) { "Exited ProcessCredentialOfferAction" }
+            logger.d { "Exited ProcessCredentialOfferAction" }
             return ActionResult()
         } catch (t: Throwable) {
-            logger.log(Severity.Debug,"",null) { "Got exception ${t.stackTraceToString()}" }
+            logger.d { "Got exception ${t.stackTraceToString()}" }
             throw t
         }
     }

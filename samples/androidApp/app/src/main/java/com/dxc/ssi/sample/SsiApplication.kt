@@ -34,7 +34,7 @@ class SsiApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        logger.log(Severity.Debug,"",null) { "Created SSI Application" }
+        logger.d { "Created SSI Application" }
 
         if (PermissionManager.getMissingPermissions(PermissionManager.requiredPermissions, this).isEmpty()) {
             initSsiAgent()
@@ -70,7 +70,7 @@ class SsiApplication : Application() {
                 walletName = walletName,
                 walletPassword = walletPassword
             )
-            logger.log(Severity.Debug,"",null) { "Generated didResult: $didResult" }
+            logger.d { "Generated didResult: $didResult" }
             //Store did somewhere in your application to use it afterwards
         }
 
@@ -98,7 +98,7 @@ class SsiApplication : Application() {
 
                 agentInitialized = true
                 agentInitializationInProgress = true
-                logger.log(Severity.Debug,"",null) { "Initialized SSI Agent" }
+                logger.d { "Initialized SSI Agent" }
 
             }
 
@@ -109,7 +109,7 @@ class SsiApplication : Application() {
                 stackTrace: String?
             ) {
                 agentInitializationInProgress = true
-                logger.log(Severity.Debug,"",null) {
+                logger.d {
                     "Failure to initialize library:" +
                             "error -> $error" +
                             "message -> $message" +

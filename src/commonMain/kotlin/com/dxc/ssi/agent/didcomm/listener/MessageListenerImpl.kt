@@ -38,20 +38,20 @@ class MessageListenerImpl(
 
     override suspend fun listen() {
 
-        logger.log(Severity.Debug,"",null) { "Started listener" }
+        logger.d { "Started listener" }
         while (!isShutdown) {
 
-            logger.log(Severity.Debug,"",null) { "Message Listener: Checking for new messages" }
+            logger.d { "Message Listener: Checking for new messages" }
 
             val receivedMessage = transport.receiveNextMessage()
 
-            logger.log(Severity.Debug,"",null) { "Message Listener: Received message" }
+            logger.d { "Message Listener: Received message" }
 
             val messageContext = unpackAndBuildMesageContext(receivedMessage)
 
 
             messageRouter.routeAndProcessMessage(messageContext)
-            logger.log(Severity.Debug,"",null) { "Message Listener: : procesed message" }
+            logger.d { "Message Listener: : procesed message" }
 
         }
 
@@ -63,9 +63,9 @@ class MessageListenerImpl(
         val unpackedMessage = walletConnector.walletHolder.unPackMessage(Message(receivedMessage.payload))
         val receivedUnpackedMessage = Json.decodeFromString<ReceivedUnpackedMessage>(unpackedMessage.payload)
 
-        logger.log(Severity.Debug,"",null) { "Received Unpacked message: $receivedUnpackedMessage" }
+        logger.d { "Received Unpacked message: $receivedUnpackedMessage" }
 
-        logger.log(Severity.Debug,"",null) {  "sender verkey = ${receivedUnpackedMessage.senderVerKey}" +
+        logger.d {  "sender verkey = ${receivedUnpackedMessage.senderVerKey}" +
                 "receiver_verkey = ${receivedUnpackedMessage.recipientVerKey}" }
 
         val connection = getConnectionByVerkey(receivedUnpackedMessage.senderVerKey)

@@ -58,7 +58,7 @@ actual class Crypto {
                     }
 
 
-                logger.log(Severity.Debug,"",null) { "Before calling indy_pack_message" }
+                logger.d { "Before calling indy_pack_message" }
                 indy_pack_message(
                     commandHandle,
                     wallet.getWalletHandle(),

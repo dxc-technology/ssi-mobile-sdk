@@ -21,16 +21,16 @@ class IndyPresentationRequestTest {
         val presentationRequestJson =
             "{\"name\":\"ProofReq\",\"version\":\"2.0\",\"nonce\":\"886317418316603832867162\",\"requested_attributes\":{\"first-name-requirement\":{\"name\":\"name\",\"restrictions\":[{\"schema_name\":\"vaccination-schema\"}]},\"age-requirement\":{\"name\":\"age\",\"restrictions\":[{\"schema_name\":\"vaccination-schema\"}]},\"vaccination-requirement\":{\"name\":\"vaccination\",\"restrictions\":[{\"schema_name\":\"vaccination-schema\"}]}},\"requested_predicates\":{},\"nonRevoked\":null}"
 
-        logger.log(Severity.Debug,"",null) { "raw presentationRequestJson: $presentationRequestJson" }
+        logger.d { "raw presentationRequestJson: $presentationRequestJson" }
 
 
         val presentationRequest = jsonProcessor.decodeFromString<IndyPresentationRequest>(presentationRequestJson)
 
-        logger.log(Severity.Debug,"",null) { "parsed presentation request: $presentationRequest" }
+        logger.d { "parsed presentation request: $presentationRequest" }
 
         val encodeToString = jsonProcessor.encodeToString(presentationRequest)
 
-        logger.log(Severity.Debug,"",null) { "serialized back presentation request: $presentationRequest" }
+        logger.d { "serialized back presentation request: $presentationRequest" }
 
         assertEquals(presentationRequestJson, encodeToString)
     }

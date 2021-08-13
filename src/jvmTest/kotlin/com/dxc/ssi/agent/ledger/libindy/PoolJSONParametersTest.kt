@@ -19,8 +19,8 @@ class PoolJSONParametersTest {
         val expectedValue = PoolJSONParameters.CreatePoolLedgerConfigJSONParameter(genesisTxn).toJson()
         val actualValue = Json {  }.encodeToString (com.dxc.ssi.agent.ledger.indy.libindy.PoolJSONParameters.CreatePoolLedgerConfigJSONParameter(genesisTxn))
 
-        logger.log(Severity.Debug,"",null) { "Expected: $expectedValue" }
-        logger.log(Severity.Debug,"",null) { "Actual: $actualValue" }
+        logger.d { "Expected: $expectedValue" }
+        logger.d { "Actual: $actualValue" }
 
         assertEquals(expectedValue, actualValue)
 

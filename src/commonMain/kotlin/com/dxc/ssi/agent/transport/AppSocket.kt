@@ -37,14 +37,14 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
             CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
                 socketOpenedChannel.send(SocketOpenedMessage())
             })
-            logger.log(Severity.Debug,"",null) { "PlatformSocketListener: ${System.getCurrentThread()} - Opened socket" }
+            logger.d { "PlatformSocketListener: ${System.getCurrentThread()} - Opened socket" }
 
         }
 
         override fun onFailure(t: Throwable) {
             socketError = t
             currentState = State.CLOSED
-            logger.log(Severity.Debug,"",null) { "PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}" }
+            logger.d { "PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}" }
             CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
                 socketOpenedChannel.send(SocketFailureMessage())
             })
@@ -52,7 +52,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
         }
 
         override fun onMessage(msg: String) {
-            logger.log(Severity.Debug,"",null) { "${System.getCurrentThread()} - Received message: $msg" }
+            logger.d { "${System.getCurrentThread()} - Received message: $msg" }
             CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
                 incomingMessagesChannel.send(MessageEnvelop(msg))
             })
@@ -62,13 +62,13 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
         override fun onClosing(code: Int, reason: String) {
             currentState = State.CLOSING
             CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketClosingChannel.send(Unit) })
-            logger.log(Severity.Debug,"",null) { "PlatformSocketListener: Closing socket: code = $code, reason = $reason" }
+            logger.d { "PlatformSocketListener: Closing socket: code = $code, reason = $reason" }
         }
 
         override fun onClosed(code: Int, reason: String) {
             currentState = State.CLOSED
 
-            logger.log(Severity.Debug,"",null) { "PlatformSocketListener: Closed socket: code = $code, reason = $reason" }
+            logger.d { "PlatformSocketListener: Closed socket: code = $code, reason = $reason" }
             job.complete()
         }
     }
@@ -86,10 +86,10 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
 
         ws.openSocket(socketListener)
 
-        logger.log(Severity.Debug,"",null) { "Thread = ${System.getCurrentThread()} awaiting while websocket is opened" }
+        logger.d { "Thread = ${System.getCurrentThread()} awaiting while websocket is opened" }
         when (socketOpenedChannel.receive()) {
             is SocketOpenedMessage -> {
-                logger.log(Severity.Debug,"",null) { "After socketListener.onOpen" }
+                logger.d { "After socketListener.onOpen" }
 
                 if (currentState != State.CONNECTED)
                     throw IllegalStateException("Could not be opened")
@@ -114,9 +114,9 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
 
     fun send(msg: String) {
         if (currentState != State.CONNECTED) throw IllegalStateException("The connection is lost.")
-        logger.log(Severity.Debug,"",null) { "Sending message to websocket" }
+        logger.d { "Sending message to websocket" }
         ws.sendMessage(msg)
-        logger.log(Severity.Debug,"",null) { "Sent message to websocket" }
+        logger.d { "Sent message to websocket" }
     }
 
     enum class State {

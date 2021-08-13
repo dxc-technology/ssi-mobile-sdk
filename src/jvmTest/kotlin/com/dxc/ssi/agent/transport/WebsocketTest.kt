@@ -20,24 +20,24 @@ class WebsocketTest {
             socketRequest,
             object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
-                    logger.log(Severity.Debug,"",null) { "Opened websocket" }
+                    logger.d { "Opened websocket" }
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    logger.log(Severity.Debug,"",null) { "Failure websocket" }
+                    logger.d { "Failure websocket" }
                 }
 
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
-                    logger.log(Severity.Debug,"",null) { "OnMessage" }
+                    logger.d { "OnMessage" }
                 }
 
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                    logger.log(Severity.Debug,"",null) { "Closing websocket" }
+                    logger.d { "Closing websocket" }
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                    logger.log(Severity.Debug,"",null) { "Closed websocket" }
+                    logger.d { "Closed websocket" }
                 }
 
             }

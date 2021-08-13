@@ -27,7 +27,7 @@ abstract class AbstractMessageProcessor(
 
     override suspend fun processMessage(context: Context) {
 
-        logger.log(Severity.Debug,"",null) { "Started processing message $context" }
+        logger.d { "Started processing message $context" }
 
         val actionParams = ActionParams(
             walletConnector = walletConnector,
@@ -44,7 +44,7 @@ abstract class AbstractMessageProcessor(
             .invoke(actionParams)
             .perform()
 
-        logger.log(Severity.Debug,"",null) { "action completed with result : $actionResult" }
+        logger.d { "action completed with result : $actionResult" }
 
     }
 
@@ -55,7 +55,7 @@ abstract class AbstractMessageProcessor(
         val typeAttribute =
             Json { ignoreUnknownKeys = true }.decodeFromString<BasicMessageWithTypeOnly>(message).type
         val messageType = enumValues<T>().single { Regex((it as MessageType).getTypeString()).matches(typeAttribute) }
-        logger.log(Severity.Debug,"",null) { "Determined message type: $messageType" }
+        logger.d { "Determined message type: $messageType" }
         return messageType
     }
 
