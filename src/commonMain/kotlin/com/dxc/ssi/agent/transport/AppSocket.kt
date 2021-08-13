@@ -31,45 +31,86 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
     private val isoSocketError = IsolateState { ObjectHolder<Throwable?>(null) }
 
     private val socketListener: PlatformSocketListener = object : PlatformSocketListener {
+
         override fun onOpen() {
-
-            currentState = State.CONNECTED
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
-                socketOpenedChannel.send(SocketOpenedMessage())
-            })
-            logger.log(Severity.Debug,"",null) { "PlatformSocketListener: ${System.getCurrentThread()} - Opened socket" }
-
+            try {
+                currentState = State.CONNECTED
+                CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                    socketOpenedChannel.send(SocketOpenedMessage())
+                })
+                logger.log(
+                    Severity.Debug,
+                    "",
+                    null
+                ) { "PlatformSocketListener: ${System.getCurrentThread()} - Opened socket" }
+            } catch (t: Throwable) {
+                logger.e("Error from library", t) { t.message.toString() }
+            }
         }
 
         override fun onFailure(t: Throwable) {
-            socketError = t
-            currentState = State.CLOSED
-            logger.log(Severity.Debug,"",null) { "PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}" }
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
-                socketOpenedChannel.send(SocketFailureMessage())
-            })
-
+            try {
+                socketError = t
+                currentState = State.CLOSED
+                logger.log(
+                    Severity.Debug,
+                    "",
+                    null
+                ) { "PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}" }
+                CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                    socketOpenedChannel.send(SocketFailureMessage())
+                })
+            } catch (t: Throwable) {
+                logger.e("Error from library", t) { t.message.toString() }
+            }
         }
 
         override fun onMessage(msg: String) {
-            logger.log(Severity.Debug,"",null) { "${System.getCurrentThread()} - Received message: $msg" }
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
-                incomingMessagesChannel.send(MessageEnvelop(msg))
-            })
+            try {
+                logger.log(
+                    Severity.Debug,
+                    "",
+                    null
+                ) { "${System.getCurrentThread()} - Received message: $msg" }
+                CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                    incomingMessagesChannel.send(MessageEnvelop(msg))
+                })
 
+            } catch (t: Throwable) {
+                logger.e("Error from library", t) { t.message.toString() }
+            }
         }
 
         override fun onClosing(code: Int, reason: String) {
-            currentState = State.CLOSING
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketClosingChannel.send(Unit) })
-            logger.log(Severity.Debug,"",null) { "PlatformSocketListener: Closing socket: code = $code, reason = $reason" }
+            try {
+                currentState = State.CLOSING
+                CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                    socketClosingChannel.send(
+                        Unit
+                    )
+                })
+                logger.log(
+                    Severity.Debug,
+                    "",
+                    null
+                ) { "PlatformSocketListener: Closing socket: code = $code, reason = $reason" }
+            } catch (t: Throwable) {
+                logger.e("Error from library", t) { t.message.toString() }
+            }
         }
 
         override fun onClosed(code: Int, reason: String) {
-            currentState = State.CLOSED
-
-            logger.log(Severity.Debug,"",null) { "PlatformSocketListener: Closed socket: code = $code, reason = $reason" }
-            job.complete()
+            try {
+                currentState = State.CLOSED
+                logger.log(
+                    Severity.Debug,
+                    "",
+                    null
+                ) { "PlatformSocketListener: Closed socket: code = $code, reason = $reason" }
+                job.complete()
+            } catch (t: Throwable) {
+                logger.e( "Error from library", t) { t.message.toString() }
+            }
         }
     }
 
@@ -77,46 +118,61 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
     val socketClosingChannel: Channel<Unit> = Channel()
 
     suspend fun connect() {
-        if (currentState != State.CLOSED) {
-            throw IllegalStateException("The socket is available.")
-        }
-        socketError = null
-        currentState = State.CONNECTING
+        try {
+            if (currentState != State.CLOSED) {
+                throw IllegalStateException("The socket is available.")
+            }
+            socketError = null
+            currentState = State.CONNECTING
 
 
-        ws.openSocket(socketListener)
+            ws.openSocket(socketListener)
 
-        logger.log(Severity.Debug,"",null) { "Thread = ${System.getCurrentThread()} awaiting while websocket is opened" }
-        when (socketOpenedChannel.receive()) {
-            is SocketOpenedMessage -> {
-                logger.log(Severity.Debug,"",null) { "After socketListener.onOpen" }
+            logger.log(
+                Severity.Debug,
+                "",
+                null
+            ) { "Thread = ${System.getCurrentThread()} awaiting while websocket is opened" }
+            when (socketOpenedChannel.receive()) {
+                is SocketOpenedMessage -> {
+                    logger.log(Severity.Debug, "", null) { "After socketListener.onOpen" }
 
-                if (currentState != State.CONNECTED)
+                    if (currentState != State.CONNECTED)
+                        throw IllegalStateException("Could not be opened")
+                }
+                is SocketFailureMessage -> {
+                    //TODO: make the exception more meaningful allowing to differentiate between different types of errors
                     throw IllegalStateException("Could not be opened")
-            }
-            is SocketFailureMessage -> {
-                //TODO: make the exception more meaningful allowing to differentiate between different types of errors
-                throw IllegalStateException("Could not be opened")
-            }
+                }
 
+            }
+        } catch (t: Throwable) {
+            logger.e( "Error from library", t) { t.message.toString() }
         }
-
     }
 
     suspend fun disconnect() {
-        if (currentState != State.CLOSED) {
-            currentState = State.CLOSING
-            ws.closeSocket(1000, "The user has closed the connection.")
-            //TODO: if we try to do it it hangs currently
-            //socketClosingChannel.receive()
+        try {
+            if (currentState != State.CLOSED) {
+                currentState = State.CLOSING
+                ws.closeSocket(1000, "The user has closed the connection.")
+                //TODO: if we try to do it it hangs currently
+                //socketClosingChannel.receive()
+            }
+        } catch (t: Throwable) {
+            logger.e("Error from library", t) { t.message.toString() }
         }
     }
 
     fun send(msg: String) {
-        if (currentState != State.CONNECTED) throw IllegalStateException("The connection is lost.")
-        logger.log(Severity.Debug,"",null) { "Sending message to websocket" }
-        ws.sendMessage(msg)
-        logger.log(Severity.Debug,"",null) { "Sent message to websocket" }
+        try {
+            if (currentState != State.CONNECTED) throw IllegalStateException("The connection is lost.")
+            logger.log(Severity.Debug, "", null) { "Sending message to websocket" }
+            ws.sendMessage(msg)
+            logger.log(Severity.Debug, "", null) { "Sent message to websocket" }
+        } catch (t: Throwable) {
+            logger.e( "Error from library", t) { t.message.toString() }
+        }
     }
 
     enum class State {

@@ -22,7 +22,11 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
     private val channel = Channel<ControlMessage>()
 
     suspend fun provideAppSocket(endpoint: String): AppSocket {
-        logger.log(Severity.Debug,"",null) { "AppSocketThreadSafeProvider - socket for $endpoint requested" }
+        logger.log(
+            Severity.Debug,
+            "",
+            null
+        ) { "AppSocketThreadSafeProvider - socket for $endpoint requested" }
         val appSocketResultDeferred = CompletableDeferred<Result<AppSocket>>()
         channel.send(GetAppSocketMessage(endpoint, appSocketResultDeferred))
 
@@ -37,7 +41,11 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
     }
 
     suspend fun disconnectAndDropAppSocket(endpoint: String) {
-        logger.log(Severity.Debug,"",null) { "AppSocketThreadSafeProvider - removal of socket for $endpoint requested" }
+        logger.log(
+            Severity.Debug,
+            "",
+            null
+        ) { "AppSocketThreadSafeProvider - removal of socket for $endpoint requested" }
         val disposalStatus = CompletableDeferred<Unit>()
         channel.send(DisposeAppSocketMessage(endpoint, disposalStatus))
     }
@@ -49,46 +57,70 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
     }
 
     private suspend fun processRequests() {
-        //TODO: Looks like we can switch from shared mutable map to regular map
-        val appSocketsMap = sharedMutableMapOf<String, AppSocket>()
+        try {
+            //TODO: Looks like we can switch from shared mutable map to regular map
+            val appSocketsMap = sharedMutableMapOf<String, AppSocket>()
 
-        for (msg in channel) {
-            when (msg) {
-                is GetAppSocketMessage -> {
-                    val endpoint = msg.endpoint
-                    if (appSocketsMap[endpoint] != null) {
-                        msg.appSocketResult.complete(Result.Success(appSocketsMap[endpoint]!!))
-                    } else {
-                        logger.log(Severity.Debug,"",null) { "${System.getCurrentThread()} - opening socket for $endpoint" }
-                        try {
-                            val appSocket = openConnection(endpoint)
-                            logger.log(Severity.Debug,"",null) { "${System.getCurrentThread()} - opened socket for $endpoint" }
-                            appSocketsMap[endpoint] = appSocket
-                            logger.log(Severity.Debug,"",null) { "${System.getCurrentThread()} - placed websocket in a map" }
+            for (msg in channel) {
+                when (msg) {
+                    is GetAppSocketMessage -> {
+                        val endpoint = msg.endpoint
+                        if (appSocketsMap[endpoint] != null) {
                             msg.appSocketResult.complete(Result.Success(appSocketsMap[endpoint]!!))
-                        } catch (t: Throwable) {
-                            msg.appSocketResult.complete(Result.Error(t))
+                        } else {
+                            logger.log(
+                                Severity.Debug,
+                                "",
+                                null
+                            ) { "${System.getCurrentThread()} - opening socket for $endpoint" }
+                            try {
+                                val appSocket = openConnection(endpoint)
+                                logger.log(
+                                    Severity.Debug,
+                                    "",
+                                    null
+                                ) { "${System.getCurrentThread()} - opened socket for $endpoint" }
+                                appSocketsMap[endpoint] = appSocket
+                                logger.log(
+                                    Severity.Debug,
+                                    "",
+                                    null
+                                ) { "${System.getCurrentThread()} - placed websocket in a map" }
+                                msg.appSocketResult.complete(Result.Success(appSocketsMap[endpoint]!!))
+                            } catch (t: Throwable) {
+                                msg.appSocketResult.complete(Result.Error(t))
+                            }
                         }
+
                     }
 
-                }
+                    is DisposeAppSocketMessage -> {
+                        val endpoint = msg.endpoint
 
-                is DisposeAppSocketMessage -> {
-                    val endpoint = msg.endpoint
+                        logger.log(
+                            Severity.Debug,
+                            "",
+                            null
+                        ) { "Received dispose message for $endpoint" }
 
-                    logger.log(Severity.Debug,"",null) { "Received dispose message for $endpoint" }
-
-                    if (appSocketsMap[endpoint] != null) {
-                        val appSocket = appSocketsMap[endpoint]!!
-                        //TODO: do we need to handle case if socket can not be closed or it is impossible?
-                        //TODO: there is a bug currently, when we disconnect, there is an exception in logs. Ignoring it for now, but will need to raise a bug
-                        appSocket.disconnect()
-                        appSocketsMap.remove(endpoint)
-                        logger.log(Severity.Debug,"",null) { "Disconnected and removed WS from map for $endpoint" }
+                        if (appSocketsMap[endpoint] != null) {
+                            val appSocket = appSocketsMap[endpoint]!!
+                            //TODO: do we need to handle case if socket can not be closed or it is impossible?
+                            //TODO: there is a bug currently, when we disconnect, there is an exception in logs. Ignoring it for now, but will need to raise a bug
+                            appSocket.disconnect()
+                            appSocketsMap.remove(endpoint)
+                            logger.log(
+                                Severity.Debug,
+                                "",
+                                null
+                            ) { "Disconnected and removed WS from map for $endpoint" }
+                        }
+                        msg.disposalStatus.complete(Unit)
                     }
-                    msg.disposalStatus.complete(Unit)
                 }
             }
+        } catch (t: Throwable) {
+            logger.e( "Error from library", t) { t.message.toString() }
         }
     }
 
