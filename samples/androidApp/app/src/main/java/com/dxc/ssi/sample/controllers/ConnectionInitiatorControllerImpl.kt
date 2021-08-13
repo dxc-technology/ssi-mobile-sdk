@@ -16,7 +16,7 @@ class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
     var logger: Kermit = Kermit(LogcatLogger())
 
     override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
-        logger.log(Severity.Debug,"",null) {"Request sent hook called : $connection, $request" }
+        logger.d {"Request sent hook called : $connection, $request" }
 
     }
 
@@ -24,16 +24,16 @@ class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         connection: PeerConnection,
         response: ConnectionResponse
     ): CallbackResult {
-        logger.log(Severity.Debug,"",null) { "Response received hook called : $connection, $response" }
+        logger.d { "Response received hook called : $connection, $response" }
         return CallbackResult(true)
     }
 
     override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
-        logger.log(Severity.Debug,"",null) { "Connection abandoned : $connection" }
+        logger.d { "Connection abandoned : $connection" }
     }
 
     override fun onCompleted(connection: PeerConnection) {
-        logger.log(Severity.Debug,"",null) { "Connection completed : $connection" }
+        logger.d { "Connection completed : $connection" }
     }
 
     override fun onFailure(
@@ -43,7 +43,7 @@ class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         details: String?,
         stackTrace: String?
     ) {
-        logger.log(Severity.Debug,"",null){ "Failure to establish connection:" +
+        logger.d{ "Failure to establish connection:" +
                 "connection -> $connection" +
                 "error -> $error" +
                 "message -> $message" +
@@ -52,7 +52,7 @@ class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
     }
 
     override fun onInvitationReceived(connection: PeerConnection, invitation: Invitation): CallbackResult {
-        logger.log(Severity.Debug,"",null) { "Invitation received hook called : $connection, $invitation" }
+        logger.d { "Invitation received hook called : $connection, $invitation" }
         return CallbackResult(canProceedFurther = true)
     }
 

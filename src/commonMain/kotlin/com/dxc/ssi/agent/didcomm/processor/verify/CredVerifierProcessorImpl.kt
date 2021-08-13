@@ -57,7 +57,7 @@ class CredVerifierProcessorImpl(
         presentationRequestContainer: PresentationRequestContainer,
         presentationRequestResponseAction: PresentationRequestResponseAction
     ) {
-        logger.log(Severity.Debug,"",null) { "Preparing to process parked presentation request" }
+        logger.d { "Preparing to process parked presentation request" }
 
         val actionParams = ActionParams(
             walletConnector = walletConnector,

@@ -112,7 +112,7 @@ class MessageRouterImpl(
             else -> throw IllegalArgumentException("Unknown message type: $typeAttribute")
         }
 
-        logger.log(Severity.Debug,"",null) { "Determined route: $route" }
+        logger.d { "Determined route: $route" }
 
         return route
 

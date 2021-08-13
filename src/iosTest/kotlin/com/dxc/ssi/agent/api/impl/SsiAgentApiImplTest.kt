@@ -94,13 +94,13 @@ class SsiAgentApiImplTest {
 
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
-                logger.log(Severity.Debug,"",null) { "Connecting to issuer" }
+                logger.d { "Connecting to issuer" }
                 ssiAgentApi.connect(issuerInvitationUrl)
 
                 //TODO: ensure that connection can be established without delay between two connections
                 //Sleeper().sleep(4000)
 
-                logger.log(Severity.Debug,"",null) { "Connecting to verifier" }
+                logger.d { "Connecting to verifier" }
                 ssiAgentApi.connect(verifierInvitationUrl)
             }
 
@@ -173,7 +173,7 @@ class SsiAgentApiImplTest {
         }
 
         override fun onAckSent(connection: PeerConnection, ack: Ack) {
-            logger.log(Severity.Debug,"",null) {"Ack sent for credential" }
+            logger.d {"Ack sent for credential" }
         }
 
 
@@ -190,21 +190,21 @@ class SsiAgentApiImplTest {
         }
 
         override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
-            logger.log(Severity.Debug,"",null) { "Request sent hook called : $connection, $request" }
+            logger.d { "Request sent hook called : $connection, $request" }
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
-            logger.log(Severity.Debug,"",null) { "Response received hook called : $connection, $response"}
+            logger.d { "Response received hook called : $connection, $response"}
             return CallbackResult(true)
         }
 
         override fun onCompleted(connection: PeerConnection) {
-            logger.log(Severity.Debug,"",null) { "Connection completed : $connection" }
+            logger.d { "Connection completed : $connection" }
 
         }
 
         override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
-            logger.log(Severity.Debug,"",null) { "Connection abandoned : $connection" }
+            logger.d { "Connection abandoned : $connection" }
         }
 
         override fun onFailure(

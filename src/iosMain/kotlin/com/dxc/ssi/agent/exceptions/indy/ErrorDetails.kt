@@ -25,7 +25,7 @@ data class ErrorDetails(
                 errorDetailsJson.usePinned { pinned ->
                     indy_get_current_error(error_json_p = pinned.get())
                     rawErrorDetails = pinned.get().getPointer(memScope)[0]!!.toKString()
-                   // logger.log(Severity.Debug,"",null) { "${pinned.get().getPointer(memScope)[0]!!.toKString()}" }
+                   // logger.d { "${pinned.get().getPointer(memScope)[0]!!.toKString()}" }
                     //TODO: check if it is safe to make return from usePinned and from memScoped
                     return Json.decodeFromString(rawErrorDetails)
                 }

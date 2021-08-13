@@ -93,7 +93,7 @@ object WalletCustomRecordsRepository {
 
         return retrievedWalletRecords.records!!
             .map {
-                logger.log(Severity.Debug,"",null) { it.value }
+                logger.d { it.value }
                 Base64.base64StringToPlainString(it.value)
             }.map<String, T> { IndySerializationUtils.jsonProcessor.decodeFromString(it) }
             .toSet()
@@ -106,7 +106,7 @@ object WalletCustomRecordsRepository {
         walletRecordType: WalletRecordType,
         query: String
     ): RetrievedWalletRecords {
-        logger.log(Severity.Debug,"",null) { "Searching connections using query: $query" }
+        logger.d { "Searching connections using query: $query" }
 
         val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
 
@@ -117,7 +117,7 @@ object WalletCustomRecordsRepository {
         val foundRecordsJson = search.searchFetchNextRecords(wallet, 200)
         search.closeSearch()
 
-        logger.log(Severity.Debug,"",null) { "Fetched connections json = $foundRecordsJson" }
+        logger.d { "Fetched connections json = $foundRecordsJson" }
 
         return Json.decodeFromString(foundRecordsJson)
 
