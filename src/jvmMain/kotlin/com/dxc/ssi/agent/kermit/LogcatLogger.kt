@@ -7,6 +7,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
+        println("$severity $message")
     }
 
     actual override fun v(
@@ -14,6 +15,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
+        log(Severity.Verbose,message, tag, throwable)
     }
 
     actual override fun d(
@@ -21,6 +23,8 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
+        log(Severity.Debug,message, tag, throwable)
+
     }
 
     actual override fun i(
@@ -28,6 +32,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
+        log(Severity.Info,message, tag, throwable)
     }
 
     actual override fun w(
@@ -35,6 +40,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
+        log(Severity.Warn,message, tag, throwable)
     }
 
     actual override fun e(
@@ -42,6 +48,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
+        log(Severity.Error,message, tag, throwable)
     }
 
     actual override fun wtf(
@@ -49,6 +56,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
+        log(Severity.Assert,message, tag, throwable)
     }
 
 }

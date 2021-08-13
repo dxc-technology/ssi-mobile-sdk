@@ -53,6 +53,27 @@ class IndyWalletManager {
 
         }
 
+        override fun getAllMyDidsWithMeta(walletName: String, walletPassword: String): Set<DidWithMetadataResult> {
+            val walletManagerScope = CoroutineScope(Dispatchers.Default)
+
+            return CoroutineHelper.waitForCompletion(walletManagerScope.async {
+
+                var myDidsWithMeta: Set<DidWithMetadataResult>?
+                val wallet = WalletHelper.openExisting(walletName, walletPassword)
+
+                myDidsWithMeta = try {
+                    Did.getListMyDidsWithMeta(wallet)
+                } catch (e: WalletItemNotFoundException) {
+                    null
+                }
+
+                wallet.closeWallet()
+
+                myDidsWithMeta
+            }) ?: emptySet()
+        }
+
+
         override fun createWallet(
             walletName: String,
             walletPassword: String,
