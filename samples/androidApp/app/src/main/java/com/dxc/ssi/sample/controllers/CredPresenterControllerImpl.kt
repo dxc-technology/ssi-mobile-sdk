@@ -24,11 +24,11 @@ class CredPresenterControllerImpl : CredPresenterController {
         GlobalScope.launch {
             delay(10_000)
 
-            logger.log(Severity.Debug,"",null) { "Woken up..." }
+            logger.d { "Woken up..." }
 
             ssiAgentApi!!.getParkedPresentationRequests().forEach { presentationRequestContainer ->
 
-                logger.log(Severity.Debug,"",null) { "Accepting parked presentation request $presentationRequestContainer"}
+                logger.d { "Accepting parked presentation request $presentationRequestContainer"}
 
                 ssiAgentApi!!.processParkedPresentationRequest(
                     presentationRequestContainer,

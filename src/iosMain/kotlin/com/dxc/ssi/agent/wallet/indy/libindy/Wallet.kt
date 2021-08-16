@@ -39,10 +39,10 @@ actual class Wallet actual constructor(private var walletHandle: Int) {
                 credentials,
                 IntCallback.callback
             )
-            logger.log(Severity.Debug,"",null) { "\"Before waiting for wallet opening callback result: config -> $config, credentials -> $credentials\"" }
+            logger.d { "\"Before waiting for wallet opening callback result: config -> $config, credentials -> $credentials\"" }
 
             val callbackResult = callbackHandler.waitForCallbackResult(commandHandle) as IntCallback.Result
-            logger.log(Severity.Debug,"",null) { "After waiting for wallet opening callback result" }
+            logger.d { "After waiting for wallet opening callback result" }
             return Wallet(callbackResult.handle)
         }
     }

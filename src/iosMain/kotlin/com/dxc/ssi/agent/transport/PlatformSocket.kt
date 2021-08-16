@@ -28,11 +28,11 @@ internal actual class PlatformSocket actual constructor(url: String) : NSObject(
     ) {
         psl = platformSocketListener
 
-        logger.log(Severity.Debug,"",null) { "PlatformSocket.isFrozen = ${this.isFrozen}" }
+        logger.d { "PlatformSocket.isFrozen = ${this.isFrozen}" }
 
         isolatedWebSocket.access {
             val request = NSURLRequest.requestWithURL(socketEndpoint)
-            logger.log(Severity.Debug,"",null) { socketEndpoint.toString() }
+            logger.d { socketEndpoint.toString() }
 
             it.websocket =
                 PSWebSocket.clientSocketWithRequest(request)
@@ -43,11 +43,11 @@ internal actual class PlatformSocket actual constructor(url: String) : NSObject(
 
         isolatedWebSocket.access {
             val status = it.websocket?.readyState
-            logger.log(Severity.Debug,"",null) { status.toString() }
+            logger.d { status.toString() }
         }
         sleep(1)
 
-        logger.log(Severity.Debug,"",null) { "PlatformSocket: constructed receiverHandler" }
+        logger.d { "PlatformSocket: constructed receiverHandler" }
     }
     actual fun closeSocket(code: Int, reason: String) {
         isolatedWebSocket.access { it.websocket?.closeWithCode(code.toLong(), null) }
@@ -55,29 +55,29 @@ internal actual class PlatformSocket actual constructor(url: String) : NSObject(
     }
 
     actual fun sendMessage(msg: String) {
-        logger.log(Severity.Debug,"",null) { "In platform sendMessage" }
+        logger.d { "In platform sendMessage" }
         isolatedWebSocket.access {
             it.websocket!!.send(msg)
         }
     }
 
     override fun webSocket(webSocket: PSWebSocket?, didFailWithError: NSError?) {
-        logger.log(Severity.Debug,"",null) { "PlatformSocket: error" }
+        logger.d { "PlatformSocket: error" }
         psl?.onFailure(Throwable(didFailWithError?.description))
     }
 
     override fun webSocket(webSocket: PSWebSocket?, didReceiveMessage: Any?) {
-        logger.log(Severity.Debug,"",null) { "PlatformSocket: message" }
+        logger.d { "PlatformSocket: message" }
         psl?.onMessage(didReceiveMessage.toString())
     }
 
     override fun webSocket(webSocket: PSWebSocket?, didCloseWithCode: NSInteger, reason: String?, wasClean: Boolean) {
-        logger.log(Severity.Debug,"",null) { "PlatformSocket: closed" }
+        logger.d { "PlatformSocket: closed" }
         psl?.onClosed(didCloseWithCode.toInt(), reason.toString())
     }
 
     override fun webSocketDidOpen(webSocket: PSWebSocket?) {
-        logger.log(Severity.Debug,"",null) { "PlatformSocket: open" }
+        logger.d { "PlatformSocket: open" }
         psl?.onOpen()
     }
 }

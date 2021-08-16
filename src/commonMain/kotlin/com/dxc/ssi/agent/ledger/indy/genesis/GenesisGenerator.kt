@@ -24,7 +24,7 @@ class GenesisGenerator(
             else -> throw IllegalArgumentException()
         }
 
-        logger.log(Severity.Debug,"",null) { "Generated genesys: $genesisContent" }
+        logger.d { "Generated genesys: $genesisContent" }
 
         val filePath = "$dir/$generatedGenesisFileName"
         if (FileUtils.fileExists(filePath)) {

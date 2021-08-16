@@ -19,7 +19,7 @@ class ReceiveCredentialOfferAction(
     override suspend fun perform(): ActionResult {
         try {
 
-            logger.log(Severity.Debug,"",null) { "Entered ReceiveCredentialOfferAction" }
+            logger.d { "Entered ReceiveCredentialOfferAction" }
 
             val walletConnector = actionParams.walletConnector
             val ledgerConnector = actionParams.ledgerConnector
@@ -59,10 +59,10 @@ class ReceiveCredentialOfferAction(
             )
 
 
-            logger.log(Severity.Debug,"",null) { "Exited ReceiveCredentialOfferAction" }
+            logger.d { "Exited ReceiveCredentialOfferAction" }
             return ProcessCredentialOfferAction(actionParams, credentialOfferContainerMessage).perform()
         } catch (t: Throwable) {
-            logger.log(Severity.Debug,"",null) { "Got exception ${t.stackTraceToString()}" }
+            logger.d { "Got exception ${t.stackTraceToString()}" }
             throw t
         }
 

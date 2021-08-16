@@ -73,10 +73,10 @@ class SsiAgentApiImpl(
         if (!EnvironmentUtils.environmentInitizlized)
             throw RuntimeException("Please initialize environment before initializing SsiAgentApiImpl")
 
-        logger.log(Severity.Debug,"",null) { "Before running agentScope.async" }
+        logger.d { "Before running agentScope.async" }
         agentScope.launch {
             try {
-                logger.log(Severity.Debug,"",null) { "Before initializing ledgerConnector" }
+                logger.d { "Before initializing ledgerConnector" }
                 ledgerConnector.init()
             } catch (t: Throwable) {
                 agentScope.launch {
@@ -93,7 +93,7 @@ class SsiAgentApiImpl(
                 walletConnector.walletHolder.openWalletOrFail()
                 walletConnector.walletHolder.initializeDid()
                 ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
-                logger.log(Severity.Debug,"",null) { "Set ledgerConnectorDid" }
+                logger.d { "Set ledgerConnectorDid" }
 
                 if (walletConnector.prover != null) {
                     walletConnector.prover.createMasterSecret(Configuration.masterSecretId)
@@ -111,7 +111,7 @@ class SsiAgentApiImpl(
             }
             try {
 
-                logger.log(Severity.Debug,"",null) { "init: initialized ledger and wallet" }
+                logger.d { "init: initialized ledger and wallet" }
 
                 agentScope.launch {
                     withContext(mainListenerSingleThreadDispatcher.context) {
@@ -119,14 +119,14 @@ class SsiAgentApiImpl(
                     }
                 }
 
-                logger.log(Severity.Debug,"",null) { "init: initialized message listener" }
+                logger.d { "init: initialized message listener" }
 
                 agentScope.launch {
                     withContext(trustPingListenerSingleThreadDispatcher.context) {
                         services.connectionsTrackerService!!.start()
                     }
                 }
-                logger.log(Severity.Debug,"",null) { "init: initialized trust ping tracker service" }
+                logger.d { "init: initialized trust ping tracker service" }
 
                 agentScope.launch { libraryStateListener.initializationCompleted() }
 
@@ -145,10 +145,10 @@ class SsiAgentApiImpl(
     }
 
     override fun connect(url: String, keepConnectionAlive: Boolean): PeerConnection? {
-        logger.log(Severity.Debug,"",null) { "Entered connect function" }
+        logger.d { "Entered connect function" }
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
-                logger.log(Severity.Debug,"",null) { "Entered async connection initiation" }
+                logger.d { "Entered async connection initiation" }
                 //TODO: fix NPE
                 messageListener.messageRouter.processors.didExchangeProcessor!!.initiateConnectionByInvitation(
                     url,
@@ -162,7 +162,7 @@ class SsiAgentApiImpl(
 
         CoroutineHelper.waitForCompletion(
             agentScope.async {
-                logger.log(Severity.Debug,"",null) { "Entered async keepAlive connection status change" }
+                logger.d { "Entered async keepAlive connection status change" }
                 //TODO: think about avoiding NPE
                 services.connectionsTrackerService!!.reconnect(connection, keepConnectionAlive)
 
@@ -172,7 +172,7 @@ class SsiAgentApiImpl(
     override fun keepConnectionAlive(connection: PeerConnection, keepConnectionAlive: Boolean) {
         CoroutineHelper.waitForCompletion(
             agentScope.async {
-                logger.log(Severity.Debug,"",null) { "Entered async keepAlive connection status change" }
+                logger.d { "Entered async keepAlive connection status change" }
                 //TODO: think about avoiding NPE
                 services.connectionsTrackerService!!.keepConnectionAlive(connection, keepConnectionAlive)
 
@@ -182,7 +182,7 @@ class SsiAgentApiImpl(
     override fun disconnect(connection: PeerConnection) {
         CoroutineHelper.waitForCompletion(
             agentScope.async {
-                logger.log(Severity.Debug,"",null) { "Entered async disconnect" }
+                logger.d { "Entered async disconnect" }
                 services.connectionsTrackerService!!.keepConnectionAlive(connection, false)
                 transport.disconnect(connection)
 
@@ -222,7 +222,7 @@ class SsiAgentApiImpl(
             transport.shutdown()
             logger.log(Severity.Debug, "", null) { "Stopped the agent" }
         } catch (t: Throwable) {
-        logger.e("Error from library", t) { t.message.toString() }
+            logger.e("Error from library", t) { t.message.toString() }
         }
     }
 

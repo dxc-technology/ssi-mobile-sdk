@@ -25,7 +25,7 @@ actual class Pool actual constructor(private val poolHandle: Int) {
 
         actual suspend fun createPoolLedgerConfig(configName: String, config: String) {
 
-            logger.log(Severity.Debug,"",null) { "Pool -> In createPoolLedgerConfig" }
+            logger.d { "Pool -> In createPoolLedgerConfig" }
 
             val commandHandle = callbackHandler.prepareCallback()
 
@@ -37,19 +37,19 @@ actual class Pool actual constructor(private val poolHandle: Int) {
 
         @OptIn(ExperimentalUnsignedTypes::class)
         actual suspend fun openPoolLedger(configName: String, config: String): Pool {
-            logger.log(Severity.Debug,"",null) { "Pool -> In openPoolLedger: configName = $configName, config = $config" }
+            logger.d { "Pool -> In openPoolLedger: configName = $configName, config = $config" }
 
             val commandHandle = callbackHandler.prepareCallback()
 
             //TODO: add proper config here
             indy_open_pool_ledger(commandHandle, configName, config, IntCallback.callback)
 
-            logger.log(Severity.Debug,"",null) { "Pool -> Before waiting for callback" }
+            logger.d { "Pool -> Before waiting for callback" }
 
             val openPoolLedgerConfigCallbackResult =
                 callbackHandler.waitForCallbackResult(commandHandle) as IntCallback.Result
 
-            logger.log(Severity.Debug,"",null) { "Pool -> Out of  openPoolLedger" }
+            logger.d { "Pool -> Out of  openPoolLedger" }
             return Pool(openPoolLedgerConfigCallbackResult.handle)
         }
 

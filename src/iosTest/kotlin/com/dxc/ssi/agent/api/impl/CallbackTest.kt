@@ -39,6 +39,6 @@ class CallbackTest {
             callbackHandler.waitForCallbackResult(commandHandle)
         }
 
-        logger.log(Severity.Debug,"",null) { "Test finished" }
+        logger.d { "Test finished" }
     }
 }

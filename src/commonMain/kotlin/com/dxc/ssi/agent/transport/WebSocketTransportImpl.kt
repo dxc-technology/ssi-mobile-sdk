@@ -26,7 +26,7 @@ class WebSocketTransportImpl : Transport {
 
     @OptIn(InternalAPI::class)
     override suspend fun sendMessage(connection: PeerConnection, message: MessageEnvelop) {
-        logger.log(Severity.Debug,"",null) { "Before sending message to endpoint: ${connection.endpoint}" }
+        logger.d { "Before sending message to endpoint: ${connection.endpoint}" }
         if (!(connection.endpoint.protocol == URLProtocol.WS || connection.endpoint.protocol == URLProtocol.WSS))
             throw IllegalArgumentException("Only websockets are supported by WebSocketTransportImpl!")
 
@@ -42,13 +42,13 @@ class WebSocketTransportImpl : Transport {
                 //TODO: check somewhere if connection already abandoned, do not retry
                 numberOfRetries++
                 appSocketThreadSafeProvider.disconnectAndDropAppSocket(connection.endpoint.toString())
-                logger.log(Severity.Debug,"",null) { "Error happened while sending message" }
+                logger.d { "Error happened while sending message" }
                 if (numberOfRetries == maxNumberOfRetries) {
-                    logger.log(Severity.Debug,"",null) {"Retry limit exceeded. Won't try" }
+                    logger.d {"Retry limit exceeded. Won't try" }
                     throw MessageCouldNotBeDeliveredException("Could not deliver message $message after $maxNumberOfRetries retires")
                 }
                 delay(initialDelay * numberOfRetries)
-                logger.log(Severity.Debug,"",null) { "Reconnecting..." }
+                logger.d { "Reconnecting..." }
 
             }
         }

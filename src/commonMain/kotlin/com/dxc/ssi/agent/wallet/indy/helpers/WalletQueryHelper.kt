@@ -18,7 +18,7 @@ object WalletQueryHelper {
         walletRecordType: WalletRecordType,
         query: String
     ): RetrievedWalletRecords {
-        logger.log(Severity.Debug,"",null) { "Searching connections using query: $query" }
+        logger.d { "Searching connections using query: $query" }
 
         val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
 
@@ -29,7 +29,7 @@ object WalletQueryHelper {
         val foundRecordsJson = search.searchFetchNextRecords(wallet, 200)
         search.closeSearch()
 
-        logger.log(Severity.Debug,"",null) { "Fetched connections json = $foundRecordsJson" }
+        logger.d { "Fetched connections json = $foundRecordsJson" }
 
         return Json.decodeFromString(foundRecordsJson)
 

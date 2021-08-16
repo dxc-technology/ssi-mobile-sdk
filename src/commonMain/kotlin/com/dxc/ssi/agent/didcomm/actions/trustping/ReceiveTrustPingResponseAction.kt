@@ -18,24 +18,24 @@ class ReceiveTrustPingResponseAction(private val actionParams: ActionParams) : A
     }
 
     override suspend fun perform(): ActionResult {
-        logger.log(Severity.Debug,"",null) { "Entered perform fun" }
+        logger.d { "Entered perform fun" }
         val messageContext = actionParams.context
-        logger.log(Severity.Debug,"",null) { "Got messageContext" }
+        logger.d { "Got messageContext" }
 
 
         messageContext!!.connection?.let { connection ->
-            logger.log(Severity.Debug,"",null) { "Got connection" }
+            logger.d { "Got connection" }
             val connectionsTrackerService = actionParams.services.connectionsTrackerService!!
-            logger.log(Severity.Debug,"",null) { "Got trustPingService" }
+            logger.d { "Got trustPingService" }
 
             val trustPingResponseMessage =
                 json.decodeFromString<TrustPingResponse>(messageContext.receivedUnpackedMessage!!.message)
 
-            logger.log(Severity.Debug,"",null) { "Decoded trustPingResponseMessage" }
+            logger.d { "Decoded trustPingResponseMessage" }
 
             connectionsTrackerService.trustPingResponseReceivedEvent(connection)
             actionParams.callbacks.trustPingController?.onTrustPingResponseReceived(connection)
-            logger.log(Severity.Debug,"",null) { "Marked ping message as received" }
+            logger.d { "Marked ping message as received" }
 
         }
 

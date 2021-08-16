@@ -108,7 +108,7 @@ open class IndyWalletHolder(
         val byteArrayMessage = message.payload.toByteArray()
         val recipientVk = recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
         //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
-        logger.log(Severity.Debug,"",null) { "recipientKeys = $recipientVk" }
+        logger.d { "recipientKeys = $recipientVk" }
 
         val senderVk = if (useAnonCrypt) null else isoVerkey.access { it.obj }
         val wallet = isoWallet.access { it.obj }
@@ -116,7 +116,7 @@ open class IndyWalletHolder(
 
         val decodedString = String(byteArrayPackedMessage)
 
-        logger.log(Severity.Debug,"",null) { "Decoded packed message = $decodedString" }
+        logger.d { "Decoded packed message = $decodedString" }
 
         return decodedString
     }
@@ -131,7 +131,7 @@ open class IndyWalletHolder(
 
         val decodedString = String(byteArrayUnpackedMessage)
 
-        logger.log(Severity.Debug,"",null) { "Decoded packed message = $decodedString" }
+        logger.d { "Decoded packed message = $decodedString" }
 
         return Message(decodedString)
 

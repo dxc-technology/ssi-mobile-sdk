@@ -64,7 +64,7 @@ class DidDocumentTest {
         )
 
         val ourDidDocument = Json.encodeToString(didDocument)
-        logger.log(Severity.Debug,"",null) { ourDidDocument }
+        logger.d { ourDidDocument }
 
         assertEquals(exampleDidDocument, ourDidDocument, "DID Document does not match expected one after serialization")
 

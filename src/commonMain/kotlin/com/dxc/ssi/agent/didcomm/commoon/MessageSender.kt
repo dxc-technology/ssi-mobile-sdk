@@ -26,13 +26,13 @@ object MessageSender {
         onMessageSent: (suspend () -> Result<Any>?)? = null
     ): Result<Any>? {
 
-        logger.log(Severity.Debug,"",null) { "MessageSender: preparing to pack and send message: $message" }
+        logger.d { "MessageSender: preparing to pack and send message: $message" }
         val messageToSend = MessagePacker.packAndPrepareForwardMessage(message, connection, walletConnector)
 
         return try {
             transport.sendMessage(connection, messageToSend)
             services.connectionsTrackerService!!.setConnectionTransportState(connection, ConnectionTransportState.CONNECTED)
-            logger.log(Severity.Debug,"",null) { "MessageSender: sent message: $message" }
+            logger.d { "MessageSender: sent message: $message" }
             onMessageSent?.invoke()
         } catch (e: MessageCouldNotBeDeliveredException) {
             services.connectionsTrackerService!!.setConnectionTransportState(connection, ConnectionTransportState.DISCONNECTED)

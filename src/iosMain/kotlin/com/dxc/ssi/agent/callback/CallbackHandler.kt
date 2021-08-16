@@ -62,7 +62,7 @@ class CallbackHandler() {
         activeCallbacksMap.remove(commandHandle)
 
         callbackDataWrapper.indyException?.let { e ->
-            logger.log(Severity.Error,"",null) { "Received IndyException $e" }
+            logger.e { "Received IndyException $e" }
             throw e
         }
 

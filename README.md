@@ -88,7 +88,7 @@ reuse it on application restart.
 
     if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
         val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
-        logger.log(Severity.Debug,"",null) { "Generated didResult: $didResult" }
+        logger.d { "Generated didResult: $didResult" }
     //Store did somewhere in your application to use it afterwards
     }
 ```
@@ -253,7 +253,7 @@ if (!walletManager.isWalletExistsAndOpenable(walletName, walletPassword))
 
 if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
     val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
-    logger.log(Severity.Debug,"",null) { "Generated didResult: $didResult")
+    logger.d { "Generated didResult: $didResult")
     //Store did somewhere in your application to use it afterwards
 }
 

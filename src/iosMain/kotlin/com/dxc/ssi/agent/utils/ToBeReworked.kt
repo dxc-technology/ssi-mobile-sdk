@@ -30,10 +30,10 @@ object ToBeReworked {
             number: indy_u32_t,
         ) {
             initRuntimeIfNeeded()
-            logger.log(Severity.Debug,"",null) { pointer?.toKString()!! }
-            logger.log(Severity.Debug,"",null) { val1?.toKString()!! }
-            logger.log(Severity.Debug,"",null) { val2?.toKString()!! }
-            logger.log(Severity.Debug,"",null) { val3?.toKString()!! }
+            logger.d { pointer?.toKString()!! }
+            logger.d { val1?.toKString()!! }
+            logger.d { val2?.toKString()!! }
+            logger.d { val3?.toKString()!! }
             return
         })
         indy_set_logger(

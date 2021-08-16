@@ -40,7 +40,7 @@ class ConnectionsTrackerService(
     private val sentPingsMap = IsoMutableMap<String/*ConnectionId*/, Long /*Timestamp when ping was sent*/>()
 
     suspend fun start() {
-        logger.log(Severity.Debug,"",null) { "Started listener" }
+        logger.d { "Started listener" }
 
         serviceScope.launch {
             trackTrustPingStatuses()
@@ -53,18 +53,18 @@ class ConnectionsTrackerService(
 
     private suspend fun generateKeepAliveTrustPings() {
         while (!isShutdown) {
-            logger.log(Severity.Debug,"",null) { "Trust Ping Generator woken up" }
+            logger.d { "Trust Ping Generator woken up" }
 
             //TODO: also introduce somewhere removal of outdated IN Progress connection records
             walletConnector.walletHolder.getConnections(PeerConnectionState.COMPLETED).filter { it.keepTransportAlive }
                 .forEach {
                     serviceScope.launch {
-                        logger.log(Severity.Debug,"",null) { "generating trust ping for connection $it" }
+                        logger.d { "generating trust ping for connection $it" }
                         processors.trustPingProcessor!!.sendTrustPingOverConnection(it)
                     }
                 }
             delay(sendTrustPingIntervalMs)
-            logger.log(Severity.Debug,"",null) { "Sent trust pings for connections" }
+            logger.d { "Sent trust pings for connections" }
         }
 
     }
@@ -72,7 +72,7 @@ class ConnectionsTrackerService(
 
     private suspend fun trackTrustPingStatuses() {
         while (!isShutdown) {
-            logger.log(Severity.Debug,"",null) { "Checking trust pings states" }
+            logger.d { "Checking trust pings states" }
 
             getNotResponsiveConnections().forEach {
                 sentPingsMap.remove(it.id)
@@ -81,7 +81,7 @@ class ConnectionsTrackerService(
             }
 
             delay(maxTimeoutForTrustPingResponseMs)
-            logger.log(Severity.Debug,"",null) { "Done checking trust pings states" }
+            logger.d { "Done checking trust pings states" }
 
         }
 
@@ -97,12 +97,12 @@ class ConnectionsTrackerService(
     }
 
     fun trustPingSentOverConnectionEvent(connection: PeerConnection) {
-        logger.log(Severity.Debug,"",null) { "TrustPing sent for connectionId = ${connection.id}" }
+        logger.d { "TrustPing sent for connectionId = ${connection.id}" }
         sentPingsMap[connection.id] = System.currentTimeMillis()
     }
 
     fun trustPingResponseReceivedEvent(connection: PeerConnection) {
-        logger.log(Severity.Debug,"",null) { "TrustPing received for connectionId = ${connection.id}" }
+        logger.d { "TrustPing received for connectionId = ${connection.id}" }
         sentPingsMap.remove(connection.id)
     }
 
@@ -135,7 +135,7 @@ class ConnectionsTrackerService(
 
                 } else {
                     try {
-                        logger.log(Severity.Debug,"",null) { "generating trust ping for connection $connection" }
+                        logger.d { "generating trust ping for connection $connection" }
                         processors.trustPingProcessor!!.sendTrustPingOverConnection(connection)
                         val actualConnection = walletConnector.walletHolder.getConnectionRecordById(connection.id)!!
                         callbacks.statefulConnectionController?.onReconnected(actualConnection)

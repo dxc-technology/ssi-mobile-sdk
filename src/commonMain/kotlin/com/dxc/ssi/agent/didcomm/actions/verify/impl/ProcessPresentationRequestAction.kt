@@ -31,7 +31,7 @@ class ProcessPresentationRequestAction(
     private val logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
 
-        logger.log(Severity.Debug,"",null) { "Entered ProcessPresentationRequestAction" }
+        logger.d { "Entered ProcessPresentationRequestAction" }
         val messageContext = actionParams.context
         val credPresenterController = actionParams.callbacks.credPresenterController!!
         val walletConnector = actionParams.walletConnector

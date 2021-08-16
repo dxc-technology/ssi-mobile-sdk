@@ -28,7 +28,7 @@ object MessagePacker {
             )
         )
 
-        logger.log(Severity.Debug,"",null) { "Packed message: ${messageEnvelop.payload}" }
+        logger.d { "Packed message: ${messageEnvelop.payload}" }
 
         //TODO: understand how to handle case with multiple recepient keys. Should we form forward message for each of those keys?
         val forwardMessage = BuildForwardMessage.buildForwardMessage(messageEnvelop, connection.peerRecipientKeys.first())
@@ -41,7 +41,7 @@ object MessagePacker {
             )
         )
 
-        logger.log(Severity.Debug,"",null) { "Packed forward message: ${outerMessageEnvelop.payload}" }
+        logger.d { "Packed forward message: ${outerMessageEnvelop.payload}" }
 
         return  outerMessageEnvelop
 

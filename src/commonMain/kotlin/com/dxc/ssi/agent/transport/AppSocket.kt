@@ -31,7 +31,6 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
     private val isoSocketError = IsolateState { ObjectHolder<Throwable?>(null) }
 
     private val socketListener: PlatformSocketListener = object : PlatformSocketListener {
-
         override fun onOpen() {
             try {
                 currentState = State.CONNECTED
@@ -128,14 +127,10 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
 
             ws.openSocket(socketListener)
 
-            logger.log(
-                Severity.Debug,
-                "",
-                null
-            ) { "Thread = ${System.getCurrentThread()} awaiting while websocket is opened" }
-            when (socketOpenedChannel.receive()) {
-                is SocketOpenedMessage -> {
-                    logger.log(Severity.Debug, "", null) { "After socketListener.onOpen" }
+        logger.d { "Thread = ${System.getCurrentThread()} awaiting while websocket is opened" }
+        when (socketOpenedChannel.receive()) {
+            is SocketOpenedMessage -> {
+                logger.d { "After socketListener.onOpen" }
 
                     if (currentState != State.CONNECTED)
                         throw IllegalStateException("Could not be opened")
@@ -149,6 +144,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
         } catch (t: Throwable) {
             logger.e( "Error from library", t) { t.message.toString() }
         }
+
     }
 
     suspend fun disconnect() {
@@ -167,9 +163,9 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
     fun send(msg: String) {
         try {
             if (currentState != State.CONNECTED) throw IllegalStateException("The connection is lost.")
-            logger.log(Severity.Debug, "", null) { "Sending message to websocket" }
+            logger.d { "Sending message to websocket" }
             ws.sendMessage(msg)
-            logger.log(Severity.Debug, "", null) { "Sent message to websocket" }
+            logger.d { "Sent message to websocket" }
         } catch (t: Throwable) {
             logger.e( "Error from library", t) { t.message.toString() }
         }
