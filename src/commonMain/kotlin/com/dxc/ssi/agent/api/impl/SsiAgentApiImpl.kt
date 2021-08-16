@@ -214,12 +214,16 @@ class SsiAgentApiImpl(
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun shutdown(force: Boolean) {
         //TODO: make some intelligence and control cancellation behaviour. Make cancellation graceful and controllable. Understand what force parameter would mean
-        job.cancel()
-        mainListenerSingleThreadDispatcher.closeContext()
-        trustPingListenerSingleThreadDispatcher.closeContext()
-        services.connectionsTrackerService!!.shutdown()
-        transport.shutdown()
-        logger.log(Severity.Debug,"",null) { "Stopped the agent" }
+        try {
+            job.cancel()
+            mainListenerSingleThreadDispatcher.closeContext()
+            trustPingListenerSingleThreadDispatcher.closeContext()
+            services.connectionsTrackerService!!.shutdown()
+            transport.shutdown()
+            logger.log(Severity.Debug, "", null) { "Stopped the agent" }
+        } catch (t: Throwable) {
+        logger.e("Error from library", t) { t.message.toString() }
+        }
     }
 
     override fun getConnection(connectionId: String): PeerConnection? {

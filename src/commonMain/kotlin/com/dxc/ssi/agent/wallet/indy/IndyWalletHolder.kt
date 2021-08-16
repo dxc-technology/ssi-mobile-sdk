@@ -56,12 +56,16 @@ open class IndyWalletHolder(
     }
 
     override suspend fun getConnectionRecordById(connectionId: String): PeerConnection? {
-
-        val wallet = isoWallet.access { it.obj }!!
-        val peerConnectionRecord: PeerConnectionRecord? =
-            WalletCustomRecordsRepository.getWalletRecordById(wallet, connectionId)
-
-        return peerConnectionRecord?.peerConnection
+        var result: PeerConnection? = null
+        try {
+            val wallet = isoWallet.access { it.obj }!!
+            val peerConnectionRecord: PeerConnectionRecord? =
+                WalletCustomRecordsRepository.getWalletRecordById(wallet, connectionId)
+            result = peerConnectionRecord?.peerConnection
+        } catch (t: Throwable) {
+            logger.e("Error from library", t) { t.message.toString() }
+        }
+        return result
     }
 
     override suspend fun findConnectionByVerKey(verKey: String): PeerConnection? {
