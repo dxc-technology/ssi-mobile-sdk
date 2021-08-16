@@ -3,7 +3,6 @@ package com.dxc.ssi.agent.transport
 import co.touchlab.stately.collections.sharedMutableMapOf
 import com.dxc.ssi.agent.kermit.Kermit
 import com.dxc.ssi.agent.kermit.LogcatLogger
-import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import com.dxc.utils.System
 import kotlinx.coroutines.*
@@ -49,8 +48,9 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
     }
 
     private suspend fun processRequests() {
-        //TODO: Looks like we can switch from shared mutable map to regular map
-        val appSocketsMap = sharedMutableMapOf<String, AppSocket>()
+        try {
+            //TODO: Looks like we can switch from shared mutable map to regular map
+            val appSocketsMap = sharedMutableMapOf<String, AppSocket>()
 
         for (msg in channel) {
             when (msg) {
@@ -89,6 +89,9 @@ class AppSocketThreadSafeProvider(private val incomingMessagesChannel: Channel<M
                     msg.disposalStatus.complete(Unit)
                 }
             }
+        }
+        } catch (t: Throwable) {
+            logger.e( "Error from library", t) { t.message.toString() }
         }
     }
 

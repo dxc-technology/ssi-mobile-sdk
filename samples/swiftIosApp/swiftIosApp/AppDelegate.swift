@@ -163,23 +163,25 @@ class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
     }
 
     func onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
-
+        Logger.logMessageDebug(message: "onAbandoned", tag: "INIT", throwable: nil)
     }
 
     func onCompleted(connection: PeerConnection) {
-
+        Logger.logMessageDebug(message: "onCompleted", tag: "INIT", throwable: nil)
     }
     
     func onInvitationReceived(connection: PeerConnection, invitation: Invitation) -> CallbackResult {
+        Logger.logMessageDebug(message: "onInvitationReceived", tag: "INIT", throwable: nil)
         return CallbackResult(canProceedFurther: true)
     }
     
    
     func onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
-
+        Logger.logMessageDebug(message: "onRequestSent", tag: "INIT", throwable: nil)
     }
     
     func onResponseReceived(connection: PeerConnection, response: ConnectionResponse) -> CallbackResult {
+        Logger.logMessageDebug(message: "onResponseReceived", tag: "INIT", throwable: nil)
         return CallbackResult(canProceedFurther: true)
     }
     
@@ -194,7 +196,7 @@ class LibraryStateListenerImpl : LibraryStateListener {
     func initializationCompleted()  {
         Logger.logMessageDebug(message: "Listener: Initialization completed", tag: "INIT", throwable: nil)
         
-        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMnBCazdnMWhCNU5qWTlnbTJteVBObkc3cUh1c0VEVEplZ0hmenJRVlpOWDIiXSwiQGlkIjoiODMxMzIyYWMtMmY1Yy00N2M2LWIyNTAtMzU3YjlkOTlkYTQ3IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
+        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMldEWnZhNGZMendHdFJ5UW5EdVFBbUdYTTRBb3p3TTl5NEV0TG1RTkNGOVQiXSwiQGlkIjoiMzhmNzk1YmUtNjkzZC00MWE3LTlkMmQtMzNhNDE4NmY3NDFmIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
 
         Sleeper().sleep(value: 5000)
         ssiAgentApi.unsafelyUnwrapped.abandonConnection(connection: connection.unsafelyUnwrapped, force: true, notifyPeerBeforeAbandoning: false)
@@ -214,17 +216,21 @@ class LibraryStateListenerImpl : LibraryStateListener {
 
 class CredentialReceiverControllerImpl: CredReceiverController {
     func onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onDone", tag: "INIT", throwable: nil)
 
     }
 
     func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onRequestSent", tag: "INIT", throwable: nil)
     }
 
     func onProblemReport(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onProblemReport", tag: "INIT", throwable: nil)
         return CallbackResult(canProceedFurther: true)
     }
     
     func onCredentialReceived(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onCredentialReceived", tag: "INIT", throwable: nil)
         return CallbackResult(canProceedFurther: true)
     }
     
@@ -255,13 +261,13 @@ class CredentialReceiverControllerImpl: CredReceiverController {
     }
     
     func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> OfferResponseAction {
-
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onOfferReceived", tag: "INIT", throwable: nil)
         return OfferResponseAction.accept
     }
     
 
     func onAckSent(connection: PeerConnection, ack: Ack) {
-
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onAckSent", tag: "INIT", throwable: nil)
     }
     
 }
@@ -269,16 +275,16 @@ class CredentialReceiverControllerImpl: CredReceiverController {
 
 class CredPresenterControllerImpl: CredPresenterController {
     func onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
-
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onProblemReportGenerated", tag: "INIT", throwable: nil)
     }
 
     func onDone(connection: PeerConnection)  {
-
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onDone", tag: "INIT", throwable: nil)
     }
     
     func onRequestReceived(connection: PeerConnection,
                            presentationRequestContainer: PresentationRequestContainer) -> PresentationRequestResponseAction {
-        
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onRequestReceived", tag: "INIT", throwable: nil)
         DispatchQueue.global().async {
             Sleeper().sleep(value: 10000)
             
