@@ -285,11 +285,7 @@ class UseThirdPartyWalletTest {
             details: String?,
             stackTrace: String?
         ) {
-            logger.log(
-                Severity.Debug,
-                "",
-                null
-            ) { "Failure occured for connection $connection, error-> $error, details -> $details" }
+            logger.d{ "Failure occured for connection $connection, error-> $error, details -> $details" }
         }
 
     }
