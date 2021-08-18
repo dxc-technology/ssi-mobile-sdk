@@ -245,7 +245,7 @@ class SsiAgentApiImpl(
             trustPingListenerSingleThreadDispatcher.closeContext()
             services.connectionsTrackerService!!.shutdown()
             transport.shutdown()
-            logger.log(Severity.Debug, "", null) { "Stopped the agent" }
+            logger.d { "Stopped the agent" }
         } catch (t: Throwable) {
             logger.e("Error in shutdown inside library", t) { t.message.toString() }
         }

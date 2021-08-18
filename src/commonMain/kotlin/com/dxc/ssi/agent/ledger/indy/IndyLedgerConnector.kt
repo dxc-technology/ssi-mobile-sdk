@@ -60,9 +60,15 @@ class IndyLedgerConnector internal constructor(val indyLedgerConnectorConfigurat
         repeat(indyLedgerConnectorConfiguration.retryTimes) {
             try {
 
+                logger.d { "Before retrieving schema $id from ledger" }
+
                 val pool = isoPool.access { it.obj }
                 val schemaReq = Ledger.buildGetSchemaRequest(did, id.toString())
+                logger.d { "Prepared schema request $schemaReq" }
+
                 val schemaRes = Ledger.submitRequest(pool!!, schemaReq)
+                logger.d { "Got schema response $schemaRes" }
+
                 val parsedRes = Ledger.parseGetSchemaResponse(schemaRes)
 
                 logger.d { "parsedRes.objectJson = ${parsedRes.objectJson}" }

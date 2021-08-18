@@ -4,11 +4,11 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 
-actual class CoroutineHelper {
 
+actual class CoroutineHelper {
     actual companion object {
-        actual fun <T> waitForCompletion(deferred: Deferred<T>): T {
-            return runBlocking {
+        actual fun <T> waitForCompletion(deferred: Deferred<T>):T {
+            return  runBlocking {
                 deferred.await()
             }
         }
