@@ -53,7 +53,7 @@ class SsiAgentApiImplTest {
     //@Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
-        logger.log(Severity.Debug,"",null) { "Starting test" }
+        logger.d { "Starting test" }
 
         EnvironmentUtils.initEnvironment(EnvironmentImpl())
 
@@ -101,11 +101,11 @@ class SsiAgentApiImplTest {
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
 
-                logger.log(Severity.Debug,"",null) { "Connecting to issuer" }
+                logger.d { "Connecting to issuer" }
                 ssiAgentApi.abandonAllConnections()
                 val connection = ssiAgentApi.connect(invitationUrl, keepConnectionAlive = true)
 
-                logger.log(Severity.Debug,"",null) { "Connected to issuer" }
+                logger.d { "Connected to issuer" }
 
             }
 
@@ -115,7 +115,7 @@ class SsiAgentApiImplTest {
                 details: String?,
                 stackTrace: String?
             ) {
-                logger.log(Severity.Debug,"",null) { "Received error from library: $error with details: $details" }
+                logger.d { "Received error from library: $error with details: $details" }
             }
 
         })
@@ -133,7 +133,7 @@ class SsiAgentApiImplTest {
         }
 
         override fun onReconnectFailed(reconnectionError: ReconnectionError, reason: String?) {
-            logger.log(Severity.Debug,"",null) { "Failed to reconnect: $reconnectionError " }
+            logger.d { "Failed to reconnect: $reconnectionError " }
         }
 
         override fun onDisconnected(connection: PeerConnection) {
@@ -194,7 +194,7 @@ class SsiAgentApiImplTest {
         }
 
         override fun onAckSent(connection: PeerConnection, ack: Ack) {
-            logger.log(Severity.Debug,"",null) { "Ack sent for credential" }
+            logger.d { "Ack sent for credential" }
         }
 
 
@@ -209,11 +209,11 @@ class SsiAgentApiImplTest {
         }
 
         override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
-            logger.log(Severity.Debug,"",null) { "Request sent hook called : $connection, $request" }
+            logger.d { "Request sent hook called : $connection, $request" }
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
-            logger.log(Severity.Debug,"",null) { "Response received hook called : $connection, $response" }
+            logger.d { "Response received hook called : $connection, $response" }
             return CallbackResult(true)
         }
 
@@ -232,7 +232,7 @@ class SsiAgentApiImplTest {
             details: String?,
             stackTrace: String?
         ) {
-            logger.log(Severity.Debug,"",null) { "Failure occured for connection $connection, error-> $error, details -> $details" }
+            logger.d { "Failure occured for connection $connection, error-> $error, details -> $details" }
         }
 
     }

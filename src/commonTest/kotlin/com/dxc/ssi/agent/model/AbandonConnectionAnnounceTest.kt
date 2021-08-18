@@ -23,7 +23,7 @@ class AbandonConnectionAnnounceTest {
 
         val jsonString = Json.encodeToString(abandonConnectionAnnounce)
 
-        logger.log(Severity.Debug,"",null) { jsonString }
+        logger.d { jsonString }
 
         val abandonConnectionAnnounce2 = Json.decodeFromString<AbandonConnectionAnnounce>(jsonString)
 
@@ -42,7 +42,7 @@ class AbandonConnectionAnnounceTest {
 
         val abandonConnectionAnnounce2 = Json.decodeFromString<AbandonConnectionAnnounce>(jsonString)
 
-        logger.log(Severity.Debug,"",null) { abandonConnectionAnnounce2.toString() }
+        logger.d { abandonConnectionAnnounce2.toString() }
 
         assertEquals("c17147d2-ada6-4d3c-a489-dc1e1bf778ab", abandonConnectionAnnounce2.id)
 

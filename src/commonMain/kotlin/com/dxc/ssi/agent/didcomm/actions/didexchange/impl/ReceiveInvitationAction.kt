@@ -76,7 +76,7 @@ class ReceiveInvitationAction(
                 val connectionRequest = buildConnectionRequest(invitation, connectionId)
                 val connectionRequestJson = Json.encodeToString(connectionRequest)
 
-                logger.log(Severity.Debug,"",null) { "Connection request: $connectionRequestJson" }
+                logger.d { "Connection request: $connectionRequestJson" }
 
                 MessageSender.packAndSendMessage(
                     Message(connectionRequestJson), connection, walletConnector, transport, services,
@@ -128,7 +128,7 @@ class ReceiveInvitationAction(
     @OptIn(InternalAPI::class)
     private fun parseInvitationFromInvitationUrl(encodedInvitation: String): Invitation {
         val jsonInvitation = Base64.base64StringToPlainString(encodedInvitation)
-        logger.log(Severity.Debug,"",null) { "JSON invitation $jsonInvitation" }
+        logger.d { "JSON invitation $jsonInvitation" }
         return Json { ignoreUnknownKeys = true }.decodeFromString<Invitation>(jsonInvitation)
     }
 

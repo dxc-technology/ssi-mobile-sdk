@@ -21,7 +21,7 @@ actual class WalletRecord {
             id: String,
             optionsJson: String
         ): String {
-            logger.log(Severity.Debug,"",null) { "Entered WalletRecord.get" }
+            logger.d { "Entered WalletRecord.get" }
 
             //TODO: check if we need memScoped here and everywhere
             memScoped {
@@ -51,7 +51,7 @@ actual class WalletRecord {
             value: String,
             tagsJson: String?
         ) {
-            logger.log(Severity.Debug,"",null) { "Adding walletRecord: type=$type, id = $id, value = $value, tagsJson = $tagsJson" }
+            logger.d { "Adding walletRecord: type=$type, id = $id, value = $value, tagsJson = $tagsJson" }
 
             val commandHandle = callbackHandler.prepareCallback()
 

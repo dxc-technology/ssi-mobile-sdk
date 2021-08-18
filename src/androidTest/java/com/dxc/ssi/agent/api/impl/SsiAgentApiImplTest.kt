@@ -77,7 +77,7 @@ class SsiAgentApiImplTest {
 
         val instrumentation = InstrumentationRegistry.getInstrumentation()
 
-        logger.log(Severity.Debug,"",null) { "Starting test" }
+        logger.d { "Starting test" }
 
         EnvironmentUtils.initEnvironment(EnvironmentImpl(instrumentation.context))
 
@@ -92,7 +92,7 @@ class SsiAgentApiImplTest {
                 walletName = walletName,
                 walletPassword = walletPassword
             )
-            logger.log(Severity.Debug,"",null) { "Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}" }
+            logger.d { "Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}" }
             //Store did somewhere in your application to use it afterwards
         }
 
@@ -125,9 +125,9 @@ class SsiAgentApiImplTest {
                 ssiAgentApi.abandonAllConnections(force = true, notifyPeerBeforeAbandoning = false)
 
 
-                logger.log(Severity.Debug,"",null) { "Connecting to issuer" }
+                logger.d { "Connecting to issuer" }
                 val connection = ssiAgentApi.connect(issuerInvitationUrl, keepConnectionAlive = true)
-                logger.log(Severity.Debug,"",null) { "Connected to issuer" }
+                logger.d { "Connected to issuer" }
 
             }
 
@@ -155,10 +155,10 @@ class SsiAgentApiImplTest {
             GlobalScope.launch {
                 delay(10_000)
 
-                logger.log(Severity.Debug,"",null) { "Woken up..." }
+                logger.d { "Woken up..." }
 
                 ssiAgentApi.getParkedPresentationRequests().forEach { presentationRequestContainer ->
-                    logger.log(Severity.Debug,"",null) { "Accepting parked presentation request $presentationRequestContainer" }
+                    logger.d { "Accepting parked presentation request $presentationRequestContainer" }
                     ssiAgentApi.processParkedPresentationRequest(
                         presentationRequestContainer,
                         PresentationRequestResponseAction.ACCEPT
@@ -187,7 +187,7 @@ class SsiAgentApiImplTest {
             credentialOfferContainer: CredentialOfferContainer
         ): OfferResponseAction {
 
-            logger.log(Severity.Debug,"",null) { "Received credential offer" }
+            logger.d { "Received credential offer" }
 
             GlobalScope.launch {
                 delay(20_000)
@@ -224,7 +224,7 @@ class SsiAgentApiImplTest {
         }
 
         override fun onAckSent(connection: PeerConnection, ack: Ack) {
-            logger.log(Severity.Debug,"",null) { "Ack sent for credential" }
+            logger.d { "Ack sent for credential" }
         }
 
 
@@ -240,20 +240,20 @@ class SsiAgentApiImplTest {
         }
 
         override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
-            logger.log(Severity.Debug,"",null) { "Request sent hook called : $connection, $request" }
+            logger.d { "Request sent hook called : $connection, $request" }
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
-            logger.log(Severity.Debug,"",null) {"Response received hook called : $connection, $response" }
+            logger.d {"Response received hook called : $connection, $response" }
             return CallbackResult(true)
         }
 
         override fun onCompleted(connection: PeerConnection) {
-            logger.log(Severity.Debug,"",null) { "Connection completed : $connection" }
+            logger.d { "Connection completed : $connection" }
         }
 
         override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
-            logger.log(Severity.Debug,"",null) { "Connection completed : $connection" }
+            logger.d { "Connection completed : $connection" }
         }
 
         override fun onFailure(

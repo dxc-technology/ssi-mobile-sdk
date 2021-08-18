@@ -36,7 +36,7 @@ class ReceiveConnectionResponseAction(
         val ourConnectionId = connectionResponse.thread.thid
         val ourConnection = walletConnector.walletHolder.getConnectionRecordById(ourConnectionId)
 
-        logger.log(Severity.Debug,"",null) { "Existing connection record $ourConnection" }
+        logger.d { "Existing connection record $ourConnection" }
 
         //TODO: move the decision below to some abstraction layer? StateMahine?
         when (ourConnection!!.state) {
@@ -51,7 +51,7 @@ class ReceiveConnectionResponseAction(
                 walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
                 trustPingProcessor.sendTrustPingOverConnection(updatedConnection)
                 connectionInitiatorController.onCompleted(updatedConnection)
-                logger.log(Severity.Debug,"",null) { "ReceiveConnectionResponseAction: after completed callback" }
+                logger.d { "ReceiveConnectionResponseAction: after completed callback" }
 
                 return ActionResult(updatedConnection)
             }

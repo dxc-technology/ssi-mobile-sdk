@@ -19,16 +19,16 @@ class RequestedCredentialsTest {
         val requestedCredentialsJson =
             "{\"requested_attributes\":{\"first-name-requirement\":{\"cred_id\":\"bf2a266a-cc45-40a6-ad3f-9f65408f5c34\",\"revealed\":true,\"timestamp\":null},\"age-requirement\":{\"cred_id\":\"bf2a266a-cc45-40a6-ad3f-9f65408f5c34\",\"revealed\":true,\"timestamp\":null},\"vaccination-requirement\":{\"cred_id\":\"bf2a266a-cc45-40a6-ad3f-9f65408f5c34\",\"revealed\":true,\"timestamp\":null}},\"requested_predicates\":{},\"self_attested_attributes\":{}}"
 
-        logger.log(Severity.Debug,"",null) { "raw requestedCredentialsJson: $requestedCredentialsJson" }
+        logger.d { "raw requestedCredentialsJson: $requestedCredentialsJson" }
 
 
         val presentedCredentials = jsonProcessor.decodeFromString<RequestedCredentials>(requestedCredentialsJson)
 
-        logger.log(Severity.Debug,"",null) { "parsed presentation request: $presentedCredentials" }
+        logger.d { "parsed presentation request: $presentedCredentials" }
 
         val encodeToString = jsonProcessor.encodeToString(presentedCredentials)
 
-        logger.log(Severity.Debug,"",null) { "serialized back presentation request: $presentedCredentials" }
+        logger.d { "serialized back presentation request: $presentedCredentials" }
 
         assertEquals(requestedCredentialsJson, encodeToString)
     }

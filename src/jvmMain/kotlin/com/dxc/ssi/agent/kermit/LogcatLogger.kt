@@ -1,13 +1,29 @@
 package com.dxc.ssi.agent.kermit
 
+import org.apache.log4j.Level
+import org.apache.log4j.Logger as myLogger
+
 actual class LogcatLogger : Logger() {
+    private val logger: myLogger = myLogger.getLogger("myLogger")
+
+    private fun getSeverity(severity: Severity): Level {
+        return when (severity) {
+            Severity.Verbose -> Level.TRACE
+            Severity.Debug -> Level.DEBUG
+            Severity.Info -> Level.INFO
+            Severity.Warn -> Level.WARN
+            Severity.Error -> Level.ERROR
+            Severity.Assert -> Level.FATAL
+        }
+    }
+
     actual override fun log(
         severity: Severity,
         message: String,
         tag: String,
         throwable: Throwable?
     ) {
-        println("$severity $message")
+        logger.log(tag, getSeverity(severity), message, throwable)
     }
 
     actual override fun v(
@@ -15,7 +31,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
-        log(Severity.Verbose,message, tag, throwable)
+        logger.log(tag, Level.TRACE, message, throwable)
     }
 
     actual override fun d(
@@ -23,8 +39,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
-        log(Severity.Debug,message, tag, throwable)
-
+        logger.log(tag, Level.DEBUG, message, throwable)
     }
 
     actual override fun i(
@@ -32,7 +47,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
-        log(Severity.Info,message, tag, throwable)
+        logger.log(tag, Level.INFO, message, throwable)
     }
 
     actual override fun w(
@@ -40,7 +55,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
-        log(Severity.Warn,message, tag, throwable)
+        logger.log(tag, Level.WARN, message, throwable)
     }
 
     actual override fun e(
@@ -48,7 +63,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
-        log(Severity.Error,message, tag, throwable)
+        logger.log(tag, Level.ERROR, message, throwable)
     }
 
     actual override fun wtf(
@@ -56,7 +71,7 @@ actual class LogcatLogger : Logger() {
         tag: String,
         throwable: Throwable?
     ) {
-        log(Severity.Assert,message, tag, throwable)
+        logger.log(tag, Level.FATAL, message, throwable)
     }
 
 }

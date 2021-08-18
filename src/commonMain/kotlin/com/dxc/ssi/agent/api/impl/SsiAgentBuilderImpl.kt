@@ -15,12 +15,15 @@ import com.dxc.ssi.agent.api.callbacks.verification.CredVerifierController
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.transport.WebSocketTransportImpl
 
 class SsiAgentBuilderImpl(private val walletConnector: WalletConnector) : SsiAgentBuilder {
 
+    var logger: Kermit = Kermit(LogcatLogger())
     private var transport: Transport? = null
     private var ledgerConnector: LedgerConnector? = null
     private var connectionInitiatorController: ConnectionInitiatorController? = null
@@ -34,32 +37,37 @@ class SsiAgentBuilderImpl(private val walletConnector: WalletConnector) : SsiAge
 
     override fun build(): SsiAgentApi {
 
-        if (transport == null) {
-            transport = WebSocketTransportImpl()
+        var result: SsiAgentApiImpl? = null
+        try {
+            if (transport == null) {
+                transport = WebSocketTransportImpl()
+            }
+
+
+            if (ledgerConnector == null)
+                ledgerConnector = IndyLedgerConnector(IndyLedgerConnectorConfiguration())
+
+            //TODO: think about some sensible defaults for those callbacks
+            val callbacks = Callbacks(
+                connectionInitiatorController,
+                connectionResponderController,
+                credReceiverController,
+                credIssuerController,
+                credPresenterController,
+                credVerifierController,
+                statefulConnectionController,
+                trustPingController
+            )
+            result = SsiAgentApiImpl(
+                transport = transport!!,
+                walletConnector = walletConnector!!,
+                ledgerConnector = ledgerConnector!!,
+                callbacks = callbacks
+            )
+        } catch (t: Throwable) {
+            logger.e("Error from library", t) { t.message.toString() }
         }
-
-        if (ledgerConnector == null)
-            ledgerConnector = IndyLedgerConnector(IndyLedgerConnectorConfiguration())
-
-        //TODO: think about some sensible defaults for those callbacks
-        val callbacks = Callbacks(
-            connectionInitiatorController,
-            connectionResponderController,
-            credReceiverController,
-            credIssuerController,
-            credPresenterController,
-            credVerifierController,
-            statefulConnectionController,
-            trustPingController
-        )
-
-        return SsiAgentApiImpl(
-            transport = transport!!,
-            walletConnector = walletConnector!!,
-            ledgerConnector = ledgerConnector!!,
-            callbacks = callbacks
-        ).freeze()
-
+        return result!!.freeze()
     }
 
     override fun withTransport(transport: Transport): SsiAgentBuilder {

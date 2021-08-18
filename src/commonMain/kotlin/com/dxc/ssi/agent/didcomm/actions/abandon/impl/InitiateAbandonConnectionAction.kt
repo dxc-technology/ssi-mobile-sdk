@@ -53,7 +53,7 @@ class InitiateAbandonConnectionAction(
                         transport,
                         services,
                         onMessageSendingFailure = {
-                            logger.log(Severity.Debug,"",null) { "Warning: we could not notify remote peer that we are abandoning connection. Abandoning without notification" }
+                            logger.d { "Warning: we could not notify remote peer that we are abandoning connection. Abandoning without notification" }
                             null
                         }
                     )

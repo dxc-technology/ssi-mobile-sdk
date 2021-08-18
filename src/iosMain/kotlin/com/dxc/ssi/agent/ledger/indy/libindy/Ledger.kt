@@ -72,7 +72,7 @@ actual class Ledger {
                 StringCallback.callback
             )
 
-            logger.log(Severity.Debug,"",null) { "Pool -> Before waiting for callback" }
+            logger.d { "Pool -> Before waiting for callback" }
 
 
             val result = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
@@ -128,7 +128,7 @@ actual class Ledger {
                 StringCallback.callback
             )
 
-            logger.log(Severity.Debug,"",null) { "Pool -> Before waiting for callback" }
+            logger.d { "Pool -> Before waiting for callback" }
 
             val result = callbackHandler.waitForCallbackResult(commandHandle) as StringCallback.Result
             return result.stringResult

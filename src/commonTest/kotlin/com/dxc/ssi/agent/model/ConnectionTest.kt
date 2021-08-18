@@ -28,7 +28,7 @@ class ConnectionTest {
 
         val jsonString = Json.encodeToString(connection)
 
-        logger.log(Severity.Debug,"",null) { jsonString }
+        logger.d { jsonString }
 
         val connection2 = Json { ignoreUnknownKeys = true }.decodeFromString<PeerConnection>(jsonString)
 

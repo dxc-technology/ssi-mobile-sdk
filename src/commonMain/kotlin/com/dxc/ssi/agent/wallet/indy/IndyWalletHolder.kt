@@ -25,6 +25,7 @@ open class IndyWalletHolder(
     private val didConfig: DidConfig
 ) : WalletHolder {
     var logger: Kermit = Kermit(LogcatLogger())
+
     //TODO: think how to avoid optionals here
     private var isoDid = IsolateState { ObjectHolder<String?>() }
     private var isoVerkey = IsolateState { ObjectHolder<String?>() }
@@ -39,7 +40,12 @@ open class IndyWalletHolder(
     }
 
     override fun getIdentityDetails(): IdentityDetails {
-        return IdentityDetails(isoDid.access { it.obj }!!, isoVerkey.access { it.obj }!!, null, null)
+        return IdentityDetails(
+            isoDid.access { it.obj }!!,
+            isoVerkey.access { it.obj }!!,
+            null,
+            null
+        )
     }
 
     override fun getIdentityDetails(did: String): IdentityDetails {
@@ -56,12 +62,16 @@ open class IndyWalletHolder(
     }
 
     override suspend fun getConnectionRecordById(connectionId: String): PeerConnection? {
-
-        val wallet = isoWallet.access { it.obj }!!
-        val peerConnectionRecord: PeerConnectionRecord? =
-            WalletCustomRecordsRepository.getWalletRecordById(wallet, connectionId)
-
-        return peerConnectionRecord?.peerConnection
+        var result: PeerConnection? = null
+        try {
+            val wallet = isoWallet.access { it.obj }!!
+            val peerConnectionRecord: PeerConnectionRecord? =
+                WalletCustomRecordsRepository.getWalletRecordById(wallet, connectionId)
+            result = peerConnectionRecord?.peerConnection
+        } catch (t: Throwable) {
+            logger.e("Error from library", t) { t.message.toString() }
+        }
+        return result
     }
 
     override suspend fun findConnectionByVerKey(verKey: String): PeerConnection? {
@@ -69,7 +79,10 @@ open class IndyWalletHolder(
         val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"
         val wallet = isoWallet.access { it.obj }!!
 
-        return WalletCustomRecordsRepository.getWalletRecordsByQuery<PeerConnectionRecord>(wallet, query)
+        return WalletCustomRecordsRepository.getWalletRecordsByQuery<PeerConnectionRecord>(
+            wallet,
+            query
+        )
             .map { it.peerConnection }.firstOrNull()
     }
 
@@ -83,7 +96,10 @@ open class IndyWalletHolder(
 
         val wallet = isoWallet.access { it.obj }!!
 
-        return WalletCustomRecordsRepository.getWalletRecordsByQuery<PeerConnectionRecord>(wallet, query)
+        return WalletCustomRecordsRepository.getWalletRecordsByQuery<PeerConnectionRecord>(
+            wallet,
+            query
+        )
             .map { it.peerConnection }.toSet()
 
     }
@@ -100,37 +116,50 @@ open class IndyWalletHolder(
     }
 
     //TODO: remove all unnecessary code and beautify this function
-    override suspend fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
-        val byteArrayMessage = message.payload.toByteArray()
-        val recipientVk = recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
-        //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
-        logger.log(Severity.Debug,"",null) { "recipientKeys = $recipientVk" }
+    override suspend fun packMessage(
+        message: Message,
+        recipientKeys: List<String>,
+        useAnonCrypt: Boolean
+    ): String {
+        var decodedString: String? = null
+        try {
+            val byteArrayMessage = message.payload.toByteArray()
+            val recipientVk =
+                recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
+            //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
+            logger.d { "recipientKeys = $recipientVk" }
 
-        val senderVk = if (useAnonCrypt) null else isoVerkey.access { it.obj }
-        val wallet = isoWallet.access { it.obj }
-        val byteArrayPackedMessage = Crypto.packMessage(wallet!!, recipientVk, senderVk, byteArrayMessage)
+            val senderVk = if (useAnonCrypt) null else isoVerkey.access { it.obj }
+            val wallet = isoWallet.access { it.obj }
+            val byteArrayPackedMessage =
+                Crypto.packMessage(wallet!!, recipientVk, senderVk, byteArrayMessage)
 
-        val decodedString = String(byteArrayPackedMessage)
+            decodedString = String(byteArrayPackedMessage)
 
-        logger.log(Severity.Debug,"",null) { "Decoded packed message = $decodedString" }
-
-        return decodedString
+            logger.d { "Decoded packed message = $decodedString" }
+        } catch (t: Throwable) {
+            logger.e("Error from library", t) { t.message.toString() }
+        }
+        return decodedString!!
     }
 
     //TODO: remove all unnecessary code and beautify this function
     override suspend fun unPackMessage(packedMessage: Message): Message {
+        var decodedString: String? = null
+        try {
+            val byteArrayMessage = packedMessage.payload.toByteArray()
 
-        val byteArrayMessage = packedMessage.payload.toByteArray()
+            val wallet = isoWallet.access { it.obj }
+            val byteArrayUnpackedMessage = Crypto.unpackMessage(wallet!!, byteArrayMessage)
 
-        val wallet = isoWallet.access { it.obj }
-        val byteArrayUnpackedMessage = Crypto.unpackMessage(wallet!!, byteArrayMessage)
+            val decodedString = String(byteArrayUnpackedMessage)
 
-        val decodedString = String(byteArrayUnpackedMessage)
+            logger.d { "Decoded packed message = $decodedString" }
 
-        logger.log(Severity.Debug,"",null) { "Decoded packed message = $decodedString" }
-
-        return Message(decodedString)
-
+        } catch (t: Throwable) {
+            logger.e("Error from library", t) { t.message.toString() }
+        }
+        return Message(decodedString!!)
     }
 
     override suspend fun openWalletOrFail() {

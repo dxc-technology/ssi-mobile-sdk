@@ -19,17 +19,17 @@ class ConcurrencyTest {
     @Test
     // @Ignore
     fun test() {
-        logger.log(Severity.Debug,"",null) { "starting test" }
+        logger.d { "starting test" }
         runBlocking {
-            logger.log(Severity.Debug,"",null) { "starting runBlocking" }
+            logger.d { "starting runBlocking" }
             agentScope.async {
-                logger.log(Severity.Debug,"",null) { "starting async" }
+                logger.d { "starting async" }
 
-                logger.log(Severity.Debug,"",null) { "end async" }
+                logger.d { "end async" }
             }.await()
-            logger.log(Severity.Debug,"",null) { "end runBlocking" }
+            logger.d { "end runBlocking" }
         }
-        logger.log(Severity.Debug,"",null) { "end test" }
+        logger.d { "end test" }
     }
 
     @Test
@@ -38,55 +38,55 @@ class ConcurrencyTest {
 
 
 
-        logger.log(Severity.Debug,"",null) { "starting test" }
+        logger.d { "starting test" }
 
         agentScope.launch {
-            logger.log(Severity.Debug,"",null) { "start sleeping in first sleeper" }
+            logger.d { "start sleeping in first sleeper" }
             while (true) {
                 sleep(10)
-                logger.log(Severity.Debug,"",null) { "call delay in first sleeper" }
+                logger.d { "call delay in first sleeper" }
                 delay(10)
             }
-            logger.log(Severity.Debug,"",null) { "end sleeping in first sleeper" }
+            logger.d { "end sleeping in first sleeper" }
         }
 
-        logger.log(Severity.Debug,"",null) { "after first launch" }
+        logger.d { "after first launch" }
 
         agentScope.launch {
-            logger.log(Severity.Debug,"",null) { "start sleeping in second sleeper" }
+            logger.d { "start sleeping in second sleeper" }
             while (true) {
                 sleep(10)
-                logger.log(Severity.Debug,"",null) { "call delay in second sleeper" }
+                logger.d { "call delay in second sleeper" }
                 delay(10)
             }
-            logger.log(Severity.Debug,"",null) { "end sleeping in second sleeper" }
+            logger.d { "end sleeping in second sleeper" }
         }
 
         CoroutineHelper.waitForCompletion(agentScope.async {
-            logger.log(Severity.Debug,"",null) { "starting async" }
+            logger.d { "starting async" }
 
-            logger.log(Severity.Debug,"",null) { "end async" }
+            logger.d { "end async" }
         })
 
-        logger.log(Severity.Debug,"",null) { "end test" }
+        logger.d { "end test" }
     }
 
 
     @Test
     @Ignore
     fun testCustomCoroutineScope() {
-        logger.log(Severity.Debug,"",null) { "Test started" }
+        logger.d { "Test started" }
 
 
         val async = agentScope.async {
-            logger.log(Severity.Debug,"",null) { "executing agentScope.async" }
+            logger.d { "executing agentScope.async" }
         }
 
-        logger.log(Severity.Debug,"",null) { "Waiting for async result" }
+        logger.d { "Waiting for async result" }
         runBlocking {
             async.await()
         }
-        logger.log(Severity.Debug,"",null) { "Got async result" }
+        logger.d { "Got async result" }
 
         sleep(1000)
     }
@@ -94,18 +94,18 @@ class ConcurrencyTest {
     @Test
     @Ignore
     fun testGlobalScope() {
-        logger.log(Severity.Debug,"",null) { "Test started" }
+        logger.d { "Test started" }
 
 
         val async = GlobalScope.async {
-            logger.log(Severity.Debug,"",null) { "executing agentScope.async" }
+            logger.d { "executing agentScope.async" }
         }
 
-        logger.log(Severity.Debug,"",null) { "Waiting for async result" }
+        logger.d { "Waiting for async result" }
         runBlocking {
             async.await()
         }
-        logger.log(Severity.Debug,"",null) { "Got async result" }
+        logger.d { "Got async result" }
 
         sleep(1000)
     }
@@ -115,15 +115,15 @@ class ConcurrencyTest {
 
         //TODO: check how to close this context afterwards to avoid leaking native threads
         withContext(newSingleThreadContext("listen for messages thread")) {
-            logger.log(Severity.Debug,"",null) { "IN listenForMessages function" }
+            logger.d { "IN listenForMessages function" }
             //TODO: change to smth like while CONNECTED
             //    withContext(newSingleThreadContext("Thread 2")) {
             async {
                 Sleeper().sleep(10000)
-                logger.log(Severity.Debug,"",null) { "stop listening for messages" }
+                logger.d { "stop listening for messages" }
             }
 
-            logger.log(Severity.Debug,"",null) { "after async" }
+            logger.d { "after async" }
             //     }
 
 
@@ -134,15 +134,15 @@ class ConcurrencyTest {
 
         //TODO: check how to close this context afterwards to avoid leaking native threads
         withContext(newSingleThreadContext("listen for failures thread")) {
-            logger.log(Severity.Debug,"",null) { "IN listenForFailures function" }
+            logger.d { "IN listenForFailures function" }
             //TODO: change to smth like while CONNECTED
             //    withContext(newSingleThreadContext("Thread 2")) {
             async {
                 Sleeper().sleep(10000)
-                logger.log(Severity.Debug,"",null) { "stop listening for failures" }
+                logger.d { "stop listening for failures" }
             }
 
-            logger.log(Severity.Debug,"",null) { "after async failures" }
+            logger.d { "after async failures" }
             //     }
 
 

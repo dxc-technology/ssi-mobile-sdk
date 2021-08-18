@@ -27,7 +27,7 @@ class AttributeTest {
         val attribute = Json.decodeFromString<Attribute>(attributeJson)
 
         val serializedAttributeJson = Json.encodeToString(attribute)
-        logger.log(Severity.Debug,"",null) { "Serialized attribute: $serializedAttributeJson" }
+        logger.d { "Serialized attribute: $serializedAttributeJson" }
         assertEquals(attributeJson.replace("\n","").replace(" ",""), serializedAttributeJson)
 
     }
@@ -43,16 +43,16 @@ class AttributeTest {
                 "        }"
 
 
-        logger.log(Severity.Debug,"",null) { "Initial attributeJson: $attributeJson" }
+        logger.d { "Initial attributeJson: $attributeJson" }
 
         val attribute = Json.decodeFromString<Attribute>(attributeJson)
 
 
-        logger.log(Severity.Debug,"",null) { "decoded attribute: $attribute" }
+        logger.d { "decoded attribute: $attribute" }
 
         val serializedAttributeJson = Json.encodeToString(attribute)
 
-        logger.log(Severity.Debug,"",null) { "Serialized attributeJson: $attributeJson" }
+        logger.d { "Serialized attributeJson: $attributeJson" }
 
         assertEquals(attributeJson.replace("\n","").replace(" ",""), serializedAttributeJson)
 
