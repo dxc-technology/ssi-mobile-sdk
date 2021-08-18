@@ -32,84 +32,44 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
 
     private val socketListener: PlatformSocketListener = object : PlatformSocketListener {
         override fun onOpen() {
-            try {
-                currentState = State.CONNECTED
-                CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
-                    socketOpenedChannel.send(SocketOpenedMessage())
-                })
-                logger.log(
-                    Severity.Debug,
-                    "",
-                    null
-                ) { "PlatformSocketListener: ${System.getCurrentThread()} - Opened socket" }
-            } catch (t: Throwable) {
-                logger.e("Error from library", t) { t.message.toString() }
-            }
+
+            currentState = State.CONNECTED
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                socketOpenedChannel.send(SocketOpenedMessage())
+            })
+            logger.d { "PlatformSocketListener: ${System.getCurrentThread()} - Opened socket" }
+
         }
 
         override fun onFailure(t: Throwable) {
-            try {
-                socketError = t
-                currentState = State.CLOSED
-                logger.log(
-                    Severity.Debug,
-                    "",
-                    null
-                ) { "PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}" }
-                CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
-                    socketOpenedChannel.send(SocketFailureMessage())
-                })
-            } catch (t: Throwable) {
-                logger.e("Error from library", t) { t.message.toString() }
-            }
+            socketError = t
+            currentState = State.CLOSED
+            logger.d { "PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}" }
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                socketOpenedChannel.send(SocketFailureMessage())
+            })
+
         }
 
         override fun onMessage(msg: String) {
-            try {
-                logger.log(
-                    Severity.Debug,
-                    "",
-                    null
-                ) { "${System.getCurrentThread()} - Received message: $msg" }
-                CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
-                    incomingMessagesChannel.send(MessageEnvelop(msg))
-                })
+            logger.d { "${System.getCurrentThread()} - Received message: $msg" }
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                incomingMessagesChannel.send(MessageEnvelop(msg))
+            })
 
-            } catch (t: Throwable) {
-                logger.e("Error from library", t) { t.message.toString() }
-            }
         }
 
         override fun onClosing(code: Int, reason: String) {
-            try {
-                currentState = State.CLOSING
-                CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
-                    socketClosingChannel.send(
-                        Unit
-                    )
-                })
-                logger.log(
-                    Severity.Debug,
-                    "",
-                    null
-                ) { "PlatformSocketListener: Closing socket: code = $code, reason = $reason" }
-            } catch (t: Throwable) {
-                logger.e("Error from library", t) { t.message.toString() }
-            }
+            currentState = State.CLOSING
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketClosingChannel.send(Unit) })
+            logger.d { "PlatformSocketListener: Closing socket: code = $code, reason = $reason" }
         }
 
         override fun onClosed(code: Int, reason: String) {
-            try {
-                currentState = State.CLOSED
-                logger.log(
-                    Severity.Debug,
-                    "",
-                    null
-                ) { "PlatformSocketListener: Closed socket: code = $code, reason = $reason" }
-                job.complete()
-            } catch (t: Throwable) {
-                logger.e( "Error from library", t) { t.message.toString() }
-            }
+            currentState = State.CLOSED
+
+            logger.d { "PlatformSocketListener: Closed socket: code = $code, reason = $reason" }
+            job.complete()
         }
     }
 
@@ -117,58 +77,46 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
     val socketClosingChannel: Channel<Unit> = Channel()
 
     suspend fun connect() {
-        try {
-            if (currentState != State.CLOSED) {
-                throw IllegalStateException("The socket is available.")
-            }
-            socketError = null
-            currentState = State.CONNECTING
+        if (currentState != State.CLOSED) {
+            throw IllegalStateException("The socket is available.")
+        }
+        socketError = null
+        currentState = State.CONNECTING
 
 
-            ws.openSocket(socketListener)
+        ws.openSocket(socketListener)
 
         logger.d { "Thread = ${System.getCurrentThread()} awaiting while websocket is opened" }
         when (socketOpenedChannel.receive()) {
             is SocketOpenedMessage -> {
                 logger.d { "After socketListener.onOpen" }
 
-                    if (currentState != State.CONNECTED)
-                        throw IllegalStateException("Could not be opened")
-                }
-                is SocketFailureMessage -> {
-                    //TODO: make the exception more meaningful allowing to differentiate between different types of errors
+                if (currentState != State.CONNECTED)
                     throw IllegalStateException("Could not be opened")
-                }
-
             }
-        } catch (t: Throwable) {
-            logger.e( "Error from library", t) { t.message.toString() }
+            is SocketFailureMessage -> {
+                //TODO: make the exception more meaningful allowing to differentiate between different types of errors
+                throw IllegalStateException("Could not be opened")
+            }
+
         }
 
     }
 
     suspend fun disconnect() {
-        try {
-            if (currentState != State.CLOSED) {
-                currentState = State.CLOSING
-                ws.closeSocket(1000, "The user has closed the connection.")
-                //TODO: if we try to do it it hangs currently
-                //socketClosingChannel.receive()
-            }
-        } catch (t: Throwable) {
-            logger.e("Error from library", t) { t.message.toString() }
+        if (currentState != State.CLOSED) {
+            currentState = State.CLOSING
+            ws.closeSocket(1000, "The user has closed the connection.")
+            //TODO: if we try to do it it hangs currently
+            //socketClosingChannel.receive()
         }
     }
 
     fun send(msg: String) {
-        try {
-            if (currentState != State.CONNECTED) throw IllegalStateException("The connection is lost.")
-            logger.d { "Sending message to websocket" }
-            ws.sendMessage(msg)
-            logger.d { "Sent message to websocket" }
-        } catch (t: Throwable) {
-            logger.e( "Error from library", t) { t.message.toString() }
-        }
+        if (currentState != State.CONNECTED) throw IllegalStateException("The connection is lost.")
+        logger.d { "Sending message to websocket" }
+        ws.sendMessage(msg)
+        logger.d { "Sent message to websocket" }
     }
 
     enum class State {
