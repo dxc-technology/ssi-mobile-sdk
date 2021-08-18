@@ -79,10 +79,10 @@ class UseThirdPartyWalletTest {
     var logger: Kermit = Kermit(LogcatLogger())
 
     @Test
-    //@Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun openThirdPartyWalletTest() {
-        logger.log(Severity.Debug, "", null) { "Starting test" }
+        logger.d { "Starting test" }
 
         EnvironmentUtils.initEnvironment(EnvironmentImpl())
 
@@ -186,7 +186,7 @@ class UseThirdPartyWalletTest {
         }
 
         override fun onReconnectFailed(reconnectionError: ReconnectionError, reason: String?) {
-            logger.log(Severity.Debug, "", null) { "Failed to reconnect: $reconnectionError " }
+            logger.d { "Failed to reconnect: $reconnectionError " }
         }
 
         override fun onDisconnected(connection: PeerConnection) {
@@ -247,7 +247,7 @@ class UseThirdPartyWalletTest {
         }
 
         override fun onAckSent(connection: PeerConnection, ack: Ack) {
-            logger.log(Severity.Debug, "", null) { "Ack sent for credential" }
+            logger.d { "Ack sent for credential" }
         }
 
 
@@ -262,11 +262,11 @@ class UseThirdPartyWalletTest {
         }
 
         override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
-            logger.log(Severity.Debug, "", null) { "Request sent hook called : $connection, $request" }
+            logger.d { "Request sent hook called : $connection, $request" }
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
-            logger.log(Severity.Debug, "", null) { "Response received hook called : $connection, $response" }
+            logger.d { "Response received hook called : $connection, $response" }
             return CallbackResult(true)
         }
 
