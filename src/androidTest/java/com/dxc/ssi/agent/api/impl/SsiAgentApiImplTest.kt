@@ -46,7 +46,7 @@ import com.dxc.ssi.agent.kermit.Severity
 //TODO: if we can use some common kotlin tests to have common tests for all platforms
 class SsiAgentApiImplTest {
 
-    private val walletName = "newWalletName2"
+    private val walletName = "newWalletName60"
     private val walletPassword = "newWalletPassword"
     private val did = "Goci8gnhuC9vvxTWg1aFSx"
     lateinit var ssiAgentApi: SsiAgentApi
@@ -116,13 +116,13 @@ class SsiAgentApiImplTest {
             .build()
 
 
-        val issuerInvitationUrl = "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiRVBUeXMydzI3Z1NDTlc5U2lObktjTFNoeHdDdlBMSndMejNKa21nUER3MUciXSwiQGlkIjoiY2I2Y2QwN2QtNWMxYi00NTIyLWI1ZWItYWVlYjFlZTRiMjgxIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+        val issuerInvitationUrl = "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiM2E3dmQ0eEhnS1lUN2Q0NkhaMldXekYxdXJQY1ZTbWdyZHVZWEZoRXYyTG4iXSwiQGlkIjoiYTExMWMzODQtODAwMi00YzMyLTlkZTktZWFhYjQwMGVhMjcxIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
 
-                ssiAgentApi.abandonAllConnections(force = true, notifyPeerBeforeAbandoning = false)
+//                ssiAgentApi.abandonAllConnections(force = true, notifyPeerBeforeAbandoning = false)
 
 
                 logger.d { "Connecting to issuer" }
@@ -189,16 +189,16 @@ class SsiAgentApiImplTest {
 
             logger.d { "Received credential offer" }
 
-            GlobalScope.launch {
+           /* GlobalScope.launch {
                 delay(20_000)
                 ssiAgentApi.getParkedCredentialOffers()
                     .forEach {
                         ssiAgentApi.processParkedCredentialOffer(it, OfferResponseAction.ACCEPT)
                     }
 
-            }
+            }*/
 
-            return OfferResponseAction.PARK
+            return OfferResponseAction.ACCEPT
         }
 
         override fun onRequestSent(

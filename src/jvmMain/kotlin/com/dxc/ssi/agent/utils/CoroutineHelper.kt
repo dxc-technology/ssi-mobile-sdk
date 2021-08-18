@@ -1,24 +1,16 @@
 package com.dxc.ssi.agent.utils
 
-import com.dxc.ssi.agent.kermit.Kermit
-import com.dxc.ssi.agent.kermit.LogcatLogger
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 
+
 actual class CoroutineHelper {
     actual companion object {
-        private val logger: Kermit = Kermit(LogcatLogger())
-        actual fun <T> waitForCompletion(deferred: Deferred<T>): T {
-            var result: T? = null
-            try {
-                runBlocking {
-                    deferred.await()
-                }.also { result = it }
-            } catch (t: Throwable) {
-                logger.e("Error from library", t) { t.message.toString() }
+        actual fun <T> waitForCompletion(deferred: Deferred<T>):T {
+            return  runBlocking {
+                deferred.await()
             }
-            return result!!
         }
 
         actual fun singleThreadCoroutineContext(threadName: String): SingleThreadContext =
