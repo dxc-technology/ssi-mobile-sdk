@@ -158,35 +158,57 @@ class SsiAgentApiImpl(
     }
 
     override fun reconnect(connection: PeerConnection, keepConnectionAlive: Boolean) {
+        try {
+            CoroutineHelper.waitForCompletion(
+                agentScope.async {
+                    logger.d { "Entered async keepAlive connection status change" }
+                    //TODO: think about avoiding NPE
+                    services.connectionsTrackerService!!.reconnect(connection, keepConnectionAlive)
 
-
-        CoroutineHelper.waitForCompletion(
-            agentScope.async {
-                logger.d { "Entered async keepAlive connection status change" }
-                //TODO: think about avoiding NPE
-                services.connectionsTrackerService!!.reconnect(connection, keepConnectionAlive)
-
-            })
+                })
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in reconnect inside library with $connection",
+                t
+            ) { t.message.toString() }
+        }
     }
 
     override fun keepConnectionAlive(connection: PeerConnection, keepConnectionAlive: Boolean) {
-        CoroutineHelper.waitForCompletion(
-            agentScope.async {
-                logger.d { "Entered async keepAlive connection status change" }
-                //TODO: think about avoiding NPE
-                services.connectionsTrackerService!!.keepConnectionAlive(connection, keepConnectionAlive)
+        try {
+            CoroutineHelper.waitForCompletion(
+                agentScope.async {
+                    logger.d { "Entered async keepAlive connection status change" }
+                    //TODO: think about avoiding NPE
+                    services.connectionsTrackerService!!.keepConnectionAlive(
+                        connection,
+                        keepConnectionAlive
+                    )
 
-            })
+                })
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in keepConnectionAlive inside library",
+                t
+            ) { t.message.toString() }
+        }
     }
 
     override fun disconnect(connection: PeerConnection) {
-        CoroutineHelper.waitForCompletion(
-            agentScope.async {
-                logger.d { "Entered async disconnect" }
-                services.connectionsTrackerService!!.keepConnectionAlive(connection, false)
-                transport.disconnect(connection)
+        try {
+            CoroutineHelper.waitForCompletion(
+                agentScope.async {
+                    logger.d { "Entered async disconnect" }
+                    services.connectionsTrackerService!!.keepConnectionAlive(connection, false)
+                    transport.disconnect(connection)
 
-            })
+                })
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in disconnect inside library with $connection",
+                t
+            ) { t.message.toString() }
+        }
     }
 
     //TODO: current function is synchronous with hardcoded timeout, generalize it
@@ -194,8 +216,11 @@ class SsiAgentApiImpl(
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
                 //TODO: fix NPE
-                messageListener.messageRouter.processors.trustPingProcessor!!.sendTrustPingOverConnection(connection)
+                messageListener.messageRouter.processors.trustPingProcessor!!.sendTrustPingOverConnection(
+                    connection
+                )
             })
+
     }
 
     override fun issueCredentialOverConnection(connection: PeerConnection) {
@@ -222,7 +247,7 @@ class SsiAgentApiImpl(
             transport.shutdown()
             logger.log(Severity.Debug, "", null) { "Stopped the agent" }
         } catch (t: Throwable) {
-            logger.e("Error from library", t) { t.message.toString() }
+            logger.e("Error in shutdown inside library", t) { t.message.toString() }
         }
     }
 
@@ -238,21 +263,40 @@ class SsiAgentApiImpl(
             agentScope.async {
                 walletConnector.walletHolder.getConnections(connectionState)
             })
+
     }
 
-    override fun abandonConnection(connection: PeerConnection, force: Boolean, notifyPeerBeforeAbandoning: Boolean) {
-        CoroutineHelper.waitForCompletion(
-            agentScope.async {
-                //TODO: fix NPE
-                messageListener.messageRouter.processors.abandonConnectionProcessor!!.abandonConnection(
-                    connection,
-                    notifyPeerBeforeAbandoning
-                )
-            })
+    override fun abandonConnection(
+        connection: PeerConnection,
+        force: Boolean,
+        notifyPeerBeforeAbandoning: Boolean
+    ) {
+        try {
+            CoroutineHelper.waitForCompletion(
+                agentScope.async {
+                    //TODO: fix NPE
+                    messageListener.messageRouter.processors.abandonConnectionProcessor!!.abandonConnection(
+                        connection,
+                        notifyPeerBeforeAbandoning
+                    )
+                })
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in abandonConnection inside library with $connection",
+                t
+            ) { t.message.toString() }
+        }
     }
 
     override fun abandonAllConnections(force: Boolean, notifyPeerBeforeAbandoning: Boolean) {
-        getConnections().forEach { abandonConnection(it, force, notifyPeerBeforeAbandoning) }
+        try {
+            getConnections().forEach { abandonConnection(it, force, notifyPeerBeforeAbandoning) }
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in abandonAllConnections inside library",
+                t
+            ) { t.message.toString() }
+        }
     }
 
     override fun removeAbandonedConnectionsFromWallet() {
@@ -288,6 +332,7 @@ class SsiAgentApiImpl(
             agentScope.async {
                 walletConnector.prover!!.getParkedPresentationRequests()
             })
+
     }
 
     override fun processParkedPresentationRequest(

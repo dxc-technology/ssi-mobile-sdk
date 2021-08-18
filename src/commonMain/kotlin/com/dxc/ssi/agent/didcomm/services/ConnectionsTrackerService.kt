@@ -40,49 +40,69 @@ class ConnectionsTrackerService(
     private val sentPingsMap = IsoMutableMap<String/*ConnectionId*/, Long /*Timestamp when ping was sent*/>()
 
     suspend fun start() {
-        logger.d { "Started listener" }
+        try {
+            logger.d { "Started listener" }
 
-        serviceScope.launch {
-            trackTrustPingStatuses()
-        }
+            serviceScope.launch {
+                trackTrustPingStatuses()
+            }
 
-        serviceScope.launch {
-            generateKeepAliveTrustPings()
+            serviceScope.launch {
+                generateKeepAliveTrustPings()
+            }
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in start inside library",
+                t
+            ) { t.message.toString() }
         }
     }
 
     private suspend fun generateKeepAliveTrustPings() {
         while (!isShutdown) {
-            logger.d { "Trust Ping Generator woken up" }
+            try {
+                logger.d { "Trust Ping Generator woken up" }
 
-            //TODO: also introduce somewhere removal of outdated IN Progress connection records
-            walletConnector.walletHolder.getConnections(PeerConnectionState.COMPLETED).filter { it.keepTransportAlive }
-                .forEach {
-                    serviceScope.launch {
-                        logger.d { "generating trust ping for connection $it" }
-                        processors.trustPingProcessor!!.sendTrustPingOverConnection(it)
+                //TODO: also introduce somewhere removal of outdated IN Progress connection records
+                walletConnector.walletHolder.getConnections(PeerConnectionState.COMPLETED)
+                    .filter { it.keepTransportAlive }
+                    .forEach {
+                        serviceScope.launch {
+                            logger.d { "generating trust ping for connection $it" }
+                            processors.trustPingProcessor!!.sendTrustPingOverConnection(it)
+                        }
                     }
-                }
-            delay(sendTrustPingIntervalMs)
-            logger.d { "Sent trust pings for connections" }
+                delay(sendTrustPingIntervalMs)
+                logger.d { "Sent trust pings for connections" }
+            } catch (t: Throwable) {
+                logger.e(
+                    "Error in generateKeepAliveTrustPings inside library",
+                    t
+                ) { t.message.toString() }
+            }
         }
-
     }
 
 
     private suspend fun trackTrustPingStatuses() {
         while (!isShutdown) {
-            logger.d { "Checking trust pings states" }
+            try {
+                logger.d { "Checking trust pings states" }
 
-            getNotResponsiveConnections().forEach {
-                sentPingsMap.remove(it.id)
-                callbacks.trustPingController?.onTrustPingResponseDidNotReceived(it)
+                getNotResponsiveConnections().forEach {
+                    sentPingsMap.remove(it.id)
+                    callbacks.trustPingController?.onTrustPingResponseDidNotReceived(it)
 
+                }
+
+                delay(maxTimeoutForTrustPingResponseMs)
+                logger.d { "Done checking trust pings states" }
+            } catch (t: Throwable) {
+                logger.e(
+                    "Error in trackTrustPingStatuses inside library",
+                    t
+                ) { t.message.toString() }
             }
-
-            delay(maxTimeoutForTrustPingResponseMs)
-            logger.d { "Done checking trust pings states" }
-
         }
 
     }

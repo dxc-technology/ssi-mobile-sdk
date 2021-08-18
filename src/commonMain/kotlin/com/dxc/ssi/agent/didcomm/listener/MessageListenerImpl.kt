@@ -40,19 +40,24 @@ class MessageListenerImpl(
 
         logger.d { "Started listener" }
         while (!isShutdown) {
+            try {
 
-            logger.d { "Message Listener: Checking for new messages" }
+                logger.d { "Message Listener: Checking for new messages" }
 
-            val receivedMessage = transport.receiveNextMessage()
+                val receivedMessage = transport.receiveNextMessage()
 
-            logger.d { "Message Listener: Received message" }
+                logger.d { "Message Listener: Received message" }
 
-            val messageContext = unpackAndBuildMesageContext(receivedMessage)
+                val messageContext = unpackAndBuildMesageContext(receivedMessage)
 
-
-            messageRouter.routeAndProcessMessage(messageContext)
-            logger.d { "Message Listener: : procesed message" }
-
+                messageRouter.routeAndProcessMessage(messageContext)
+                logger.d { "Message Listener: : procesed message" }
+            } catch (t: Throwable) {
+                logger.e(
+                    "Error in listen inside library",
+                    t
+                ) { t.message.toString() }
+            }
         }
 
     }

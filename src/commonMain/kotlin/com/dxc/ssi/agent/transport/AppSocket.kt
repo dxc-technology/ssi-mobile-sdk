@@ -43,7 +43,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
                     null
                 ) { "PlatformSocketListener: ${System.getCurrentThread()} - Opened socket" }
             } catch (t: Throwable) {
-                logger.e("Error from library", t) { t.message.toString() }
+                logger.e("Error onOpen inside library", t) { t.message.toString() }
             }
         }
 
@@ -60,7 +60,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
                     socketOpenedChannel.send(SocketFailureMessage())
                 })
             } catch (t: Throwable) {
-                logger.e("Error from library", t) { t.message.toString() }
+                logger.e("Error onFailure inside library", t) { t.message.toString() }
             }
         }
 
@@ -76,7 +76,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
                 })
 
             } catch (t: Throwable) {
-                logger.e("Error from library", t) { t.message.toString() }
+                logger.e("Error onMessage inside library", t) { t.message.toString() }
             }
         }
 
@@ -94,7 +94,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
                     null
                 ) { "PlatformSocketListener: Closing socket: code = $code, reason = $reason" }
             } catch (t: Throwable) {
-                logger.e("Error from library", t) { t.message.toString() }
+                logger.e("Error onClosing inside library", t) { t.message.toString() }
             }
         }
 
@@ -108,7 +108,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
                 ) { "PlatformSocketListener: Closed socket: code = $code, reason = $reason" }
                 job.complete()
             } catch (t: Throwable) {
-                logger.e( "Error from library", t) { t.message.toString() }
+                logger.e( "Error onClosed inside library", t) { t.message.toString() }
             }
         }
     }
@@ -142,7 +142,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
 
             }
         } catch (t: Throwable) {
-            logger.e( "Error from library", t) { t.message.toString() }
+            logger.e( "Error on connect inside library", t) { t.message.toString() }
         }
 
     }
@@ -156,7 +156,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
                 //socketClosingChannel.receive()
             }
         } catch (t: Throwable) {
-            logger.e("Error from library", t) { t.message.toString() }
+            logger.e("Error on disconnect inside library", t) { t.message.toString() }
         }
     }
 
@@ -167,7 +167,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
             ws.sendMessage(msg)
             logger.d { "Sent message to websocket" }
         } catch (t: Throwable) {
-            logger.e( "Error from library", t) { t.message.toString() }
+            logger.e( "Error on send inside library", t) { t.message.toString() }
         }
     }
 
