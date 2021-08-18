@@ -2,11 +2,13 @@ package com.dxc.ssi.agent.wallet.indy
 
 import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
 import com.dxc.ssi.agent.model.*
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.utils.ObjectHolder
-import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletCustomRecordsRepository
+import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.Crypto
 import com.dxc.ssi.agent.wallet.indy.libindy.Did
 import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
@@ -15,9 +17,6 @@ import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import com.dxc.ssi.agent.kermit.Kermit
-import com.dxc.ssi.agent.kermit.LogcatLogger
-import com.dxc.ssi.agent.kermit.Severity
 
 open class IndyWalletHolder(
     private val walletName: String,
@@ -121,45 +120,34 @@ open class IndyWalletHolder(
         recipientKeys: List<String>,
         useAnonCrypt: Boolean
     ): String {
-        var decodedString: String? = null
-        try {
-            val byteArrayMessage = message.payload.toByteArray()
-            val recipientVk =
-                recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
-            //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
-            logger.d { "recipientKeys = $recipientVk" }
 
-            val senderVk = if (useAnonCrypt) null else isoVerkey.access { it.obj }
-            val wallet = isoWallet.access { it.obj }
-            val byteArrayPackedMessage =
-                Crypto.packMessage(wallet!!, recipientVk, senderVk, byteArrayMessage)
+        val byteArrayMessage = message.payload.toByteArray()
+        val recipientVk =
+            recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
+        //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
+        logger.d { "recipientKeys = $recipientVk" }
 
-            decodedString = String(byteArrayPackedMessage)
+        val senderVk = if (useAnonCrypt) null else isoVerkey.access { it.obj }
+        val wallet = isoWallet.access { it.obj }
+        val byteArrayPackedMessage =
+            Crypto.packMessage(wallet!!, recipientVk, senderVk, byteArrayMessage)
 
-            logger.d { "Decoded packed message = $decodedString" }
-        } catch (t: Throwable) {
-            logger.e("Error from library", t) { t.message.toString() }
-        }
-        return decodedString!!
+        val decodedString = String(byteArrayPackedMessage)
+
+        logger.d { "Decoded packed message = $decodedString" }
+
+        return decodedString
     }
 
     //TODO: remove all unnecessary code and beautify this function
     override suspend fun unPackMessage(packedMessage: Message): Message {
-        var decodedString: String? = null
-        try {
-            val byteArrayMessage = packedMessage.payload.toByteArray()
 
-            val wallet = isoWallet.access { it.obj }
-            val byteArrayUnpackedMessage = Crypto.unpackMessage(wallet!!, byteArrayMessage)
-
-            val decodedString = String(byteArrayUnpackedMessage)
-
-            logger.d { "Decoded packed message = $decodedString" }
-
-        } catch (t: Throwable) {
-            logger.e("Error from library", t) { t.message.toString() }
-        }
-        return Message(decodedString!!)
+        val byteArrayMessage = packedMessage.payload.toByteArray()
+        val wallet = isoWallet.access { it.obj }
+        val byteArrayUnpackedMessage = Crypto.unpackMessage(wallet!!, byteArrayMessage)
+        val decodedString = String(byteArrayUnpackedMessage)
+        logger.d { "Decoded packed message = $decodedString" }
+        return Message(decodedString)
     }
 
     override suspend fun openWalletOrFail() {
