@@ -154,11 +154,11 @@ class UseThirdPartyWalletTest {
                     logger.i { "Got credential: $it" }
                 }
 
-                logger.log(Severity.Debug,"",null) { "Connecting to issuer" }
+                logger.d { "Connecting to issuer" }
 
                 val connection = ssiAgentApi.connect(invitationUrl, keepConnectionAlive = true)
 
-                logger.log(Severity.Debug,"",null) { "Connected to issuer" }
+                logger.d { "Connected to issuer" }
 
             }
 
@@ -168,7 +168,7 @@ class UseThirdPartyWalletTest {
                 details: String?,
                 stackTrace: String?
             ) {
-                logger.log(Severity.Debug,"",null) { "Received error from library: $error with details: $details" }
+                logger.d { "Received error from library: $error with details: $details" }
             }
 
         })
