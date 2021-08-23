@@ -33,12 +33,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let lsl = LibraryStateListenerImpl()
 
 
-            let myWalletName = "newWalletName5"
+            let myWalletName = "newWalletName6"
             let myWalletPassword = "newWalletPassword"
             let myDid = "4PCVFCeZbKXyvgjCedbXDx"
         
-       // ToBeReworked.init().enableIndyLog()
+        //ToBeReworked.init().enableIndyLog()
 
+        print("Starting AppDelegate")
 
         DispatchQueue.global().async {
           
@@ -48,12 +49,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             group.enter()
             
             DispatchQueue.main.async {
+                print("Before initializing env")
                 EnvironmentUtils().doInitEnvironment(environment:EnvironmentImpl())
                 group.leave()
             }
            
        
             group.notify(queue: .main) {
+                
+                print("Strting wallet init")
                 
                 let walletManager = IndyWalletManager.Companion()
 
@@ -122,29 +126,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
            
         }
         
-     //   sleep(10000)
-      //  return true
-
-        
-      
        // sleep(10000)
+ 
         return true
-        /*
-        ssiAgentApi.abandonConnection(connection: connection, force: true, notifyPeerBeforeAbandoning : false)
-        ssiAgentApi.shutdown(force: true)
-        // Override point for customization after application launch.
-    
-                    if #available(iOS 13, *) {
-                        // do only pure app launch stuff, not interface stuff
-                    } else {
-                        self.window = UIWindow()
-                        let vc = ViewController()
-                        self.window!.rootViewController = vc
-                        self.window!.makeKeyAndVisible()
-                        self.window!.backgroundColor = .red
-                    }
-                    return true
-         */
+      
     }
 
      
@@ -194,16 +179,18 @@ class LibraryStateListenerImpl : LibraryStateListener {
     }
 
     func initializationCompleted()  {
+        
+        print("Library initialized")
         Logger.logMessageDebug(message: "Listener: Initialization completed", tag: "INIT", throwable: nil)
         
-        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMldEWnZhNGZMendHdFJ5UW5EdVFBbUdYTTRBb3p3TTl5NEV0TG1RTkNGOVQiXSwiQGlkIjoiMzhmNzk1YmUtNjkzZC00MWE3LTlkMmQtMzNhNDE4NmY3NDFmIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
+        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiRkdTOXZYTm1lMWQydVozV1BDcDdFZXJzd1A1MUI5M1k0RllvdGJaSmZKcXoiXSwiQGlkIjoiYWY2MTE4ZWMtNDk1Yi00ZjU1LWFmNGUtYzA3OTk0ZDA4MDMxIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
 
-        Sleeper().sleep(value: 5000)
-        ssiAgentApi.unsafelyUnwrapped.abandonConnection(connection: connection.unsafelyUnwrapped, force: true, notifyPeerBeforeAbandoning: false)
+        //Sleeper().sleep(value: 5000)
+     //   ssiAgentApi.unsafelyUnwrapped.abandonConnection(connection: connection.unsafelyUnwrapped, force: true, notifyPeerBeforeAbandoning: false)
 
-        Sleeper().sleep(value: 5000)
+      //  Sleeper().sleep(value: 5000)
 
-        ssiAgentApi.unsafelyUnwrapped.reconnect(connection: connection.unsafelyUnwrapped, keepConnectionAlive: true)
+    //    ssiAgentApi.unsafelyUnwrapped.reconnect(connection: connection.unsafelyUnwrapped, keepConnectionAlive: true)
 
         
         Logger.logMessageDebug(message: "Listener: ConnectionStarted", tag: "INIT", throwable: nil)
