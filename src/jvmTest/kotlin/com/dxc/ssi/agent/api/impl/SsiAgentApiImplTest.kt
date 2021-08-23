@@ -50,7 +50,7 @@ class SsiAgentApiImplTest {
     private lateinit var ssiAgentApi: SsiAgentApi
     var logger: Kermit = Kermit(LogcatLogger())
     @Test
-    //@Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
         logger.d { "Starting test" }
@@ -68,7 +68,7 @@ class SsiAgentApiImplTest {
                 walletName = walletName,
                 walletPassword = walletPassword
             )
-            print("Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}")
+            logger.d { "Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}"}
             //Store did somewhere in your application to use it afterwards
         }
 
@@ -94,7 +94,7 @@ class SsiAgentApiImplTest {
             .build()
 
         val invitationUrl =
-            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiQXpnSnhtZmtlcnhScTZ3TlpGc3FablZWOFI0QU5hWnZLTkdwb3VUUE5icU0iXSwiQGlkIjoiZmMwMmMyMWEtMmU2MS00MzgyLThkNTUtYTY1ODRkOTk4OTFkIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiSkJFTjRrQlZpV0pSRmV1M29ncFEyaTNTQnlFWDE5Mk5Mbnl3TlV4ejRIUk4iXSwiQGlkIjoiNDU2ZWMwNmEtYmJiMi00NmJmLThjYzctMGM1YmVkZmJlNTNiIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
 
@@ -102,7 +102,7 @@ class SsiAgentApiImplTest {
             override fun initializationCompleted() {
 
                 logger.d { "Connecting to issuer" }
-                ssiAgentApi.abandonAllConnections()
+               // ssiAgentApi.abandonAllConnections()
                 val connection = ssiAgentApi.connect(invitationUrl, keepConnectionAlive = true)
 
                 logger.d { "Connected to issuer" }
