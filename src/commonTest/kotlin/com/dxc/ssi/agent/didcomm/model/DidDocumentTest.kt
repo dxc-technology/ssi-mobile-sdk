@@ -4,6 +4,9 @@ import com.dxc.ssi.agent.didcomm.model.didexchange.Authentication
 import com.dxc.ssi.agent.didcomm.model.didexchange.DidDocument
 import com.dxc.ssi.agent.didcomm.model.didexchange.PublicKey
 import com.dxc.ssi.agent.didcomm.model.common.Service
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -11,7 +14,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class DidDocumentTest {
-
+    var logger: Kermit = Kermit(LogcatLogger())
     @Test
     fun testDidDocumentSerialization() {
 
@@ -61,7 +64,7 @@ class DidDocumentTest {
         )
 
         val ourDidDocument = Json.encodeToString(didDocument)
-        println(ourDidDocument)
+        logger.d { ourDidDocument }
 
         assertEquals(exampleDidDocument, ourDidDocument, "DID Document does not match expected one after serialization")
 

@@ -37,9 +37,13 @@ import com.dxc.utils.Base64
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 
 
 class IndyProver(val walletHolder: WalletHolder) : Prover {
+    var logger: Kermit = Kermit(LogcatLogger())
     private var masterSecretId: String?
         get() = isoMasterSecret.access { it.obj }!!
         set(value) {
@@ -66,20 +70,19 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
             credentialDefinition
         )
 
-        println(
+        logger.d {
             "Before executing Anoncreds.proverCreateCredentialReq " +
                     "proverDid = $proverDid," +
                     "credentialOfferJson = $credentialOfferJson," +
                     "credDefJson = $credDefJson," +
-                    "masterSecretId = $masterSecretId"
-        )
+                    "masterSecretId = $masterSecretId" }
 
         val credReq = Anoncreds.proverCreateCredentialReq(
             walletHolder.getWallet() as Wallet, proverDid, credentialOfferJson, credDefJson, masterSecretId
         )
 
-        println("credReq.credentialRequestJson = ${credReq.getCredentialRequestJson()}")
-        println("credReq.credentialRequestMetadataJson = ${credReq.getCredentialRequestMetadataJson()}")
+        logger.d { "credReq.credentialRequestJson = ${credReq.getCredentialRequestJson()}" }
+        logger.d { "credReq.credentialRequestMetadataJson = ${credReq.getCredentialRequestMetadataJson()}" }
 
         val credentialRequest =
             IndySerializationUtils.jsonProcessor.decodeFromString<IndyCredentialRequest>(credReq.getCredentialRequestJson())
@@ -95,18 +98,18 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         try {
             Anoncreds.proverCreateMasterSecret(walletHolder.getWallet() as Wallet, id)
         } catch (e: DuplicateMasterSecretNameException) {
-            println("MasterSecret already exists, so we will use it")
+            logger.d { "MasterSecret already exists, so we will use it" }
         }
     }
 
     override fun createCredentialDefinitionIdFromOffer(credentialOffer: CredentialOffer): CredentialDefinitionId {
 
-        println("createCredentialDefinitionIdFromOffer: cred offer $credentialOffer")
+        logger.d { "createCredentialDefinitionIdFromOffer: cred offer $credentialOffer" }
 
         val indyCredentialOffer = credentialOffer as IndyCredentialOffer
 
 
-        println("indy cred offer ${indyCredentialOffer}")
+        logger.d {  "indy cred offer ${indyCredentialOffer}" }
 
         val credentialDefinitionIdRaw = indyCredentialOffer.credentialDefinitionIdRaw
 
@@ -170,7 +173,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         //TODO: implement batches instead of hardcoded 200 creds
         val credentialsJson = credentialsSearch.fetchNextCredentials(200)
 
-        println("Retrieved  credentialsJson: $credentialsJson")
+        logger.d { "Retrieved  credentialsJson: $credentialsJson" }
 
         val credentialInfos =
             IndySerializationUtils.jsonProcessor.decodeFromString<List<IndyCredInfo>>(credentialsJson)
@@ -191,7 +194,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         //TODO: check if this type cast is needed here
         val credentialRequestJson =
             IndySerializationUtils.jsonProcessor.encodeToString(credentialRequestInfo.credentialRequest as IndyCredentialRequest)
-        println("extractCredentialRequestDataFromCredentialInfo: credentialRequestJson = $credentialRequestJson")
+        logger.d { "extractCredentialRequestDataFromCredentialInfo: credentialRequestJson = $credentialRequestJson" }
 
 
         return RawData(base64 = Base64.plainStringToBase64String(credentialRequestJson))
@@ -226,10 +229,10 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
                     revocationRegistryDefinition
                 )
 
-        println("receiveCredential: credentialRequestMetadataJson -> $credentialRequestMetadataJson")
-        println("receiveCredential: credentialJson -> $credentialJson")
-        println("receiveCredential: credDefJson -> $credDefJson")
-        println("receiveCredential: revRegDefJson -> $revRegDefJson")
+        logger.d { "receiveCredential: credentialRequestMetadataJson -> $credentialRequestMetadataJson" }
+        logger.d { "receiveCredential: credentialJson -> $credentialJson" }
+        logger.d { "receiveCredential: credDefJson -> $credDefJson" }
+        logger.d { "receiveCredential: revRegDefJson -> $revRegDefJson" }
 
         return Anoncreds.proverStoreCredential(
             walletHolder.getWallet() as Wallet,
@@ -288,7 +291,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         val jsonCredentialOffer = Base64.base64StringToPlainString(data.base64)
 
 
-        println("jsonCredentialOffer = $jsonCredentialOffer")
+        logger.d { "jsonCredentialOffer = $jsonCredentialOffer" }
 
         val indyCredentialOffer =
             IndySerializationUtils.jsonProcessor.decodeFromString<IndyCredentialOffer>(
@@ -311,7 +314,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
     override fun buildPresentationRequestObjectFromRawData(data: RawData): PresentationRequest {
         val indyPresentationRequestJson = Base64.base64StringToPlainString(data.base64)
 
-        println("Received JSON PresentationRequest: $indyPresentationRequestJson")
+        logger.d { "Received JSON PresentationRequest: $indyPresentationRequestJson" }
 
         val indyPresentationReuqest =
             IndySerializationUtils.jsonProcessor.decodeFromString<IndyPresentationRequest>(indyPresentationRequestJson)
@@ -330,7 +333,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
         val proofRequestJson = IndySerializationUtils.jsonProcessor.encodeToString(presentationRequest)
 
-        println("In createPresentation function: proofRequestJson = $proofRequestJson")
+        logger.d { "In createPresentation function: proofRequestJson = $proofRequestJson" }
 
         //TODO: deal with extra query. Understand what it is and how to use it. See cordentity
         val extraQueryJson = null
@@ -348,7 +351,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
             val credentialJson = searchObj.fetchNextCredentials(key, 1)
 
-            println("Retrieved for key = $key  -> credentialJson: $credentialJson")
+            logger.d { "Retrieved for key = $key  -> credentialJson: $credentialJson" }
 
             val credentialForTheRequest =
                 IndySerializationUtils.jsonProcessor.decodeFromString<List<IndyCredentialForTheRequest>>(credentialJson)
@@ -401,7 +404,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         val requestedPredicates = indyPresentationRequest.requestedPredicates.keys.associate { key ->
             val credentialJson = searchObj.fetchNextCredentials(key, 1)
 
-            println("Retrieved for key = $key  -> credentialJson: $credentialJson")
+            logger.d { "Retrieved for key = $key  -> credentialJson: $credentialJson" }
 
             val credentialForTheRequest =
                 IndySerializationUtils.jsonProcessor.decodeFromString<List<IndyCredentialForTheRequest>>(credentialJson)
@@ -471,12 +474,12 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         val usedRevStatesJson = IndySerializationUtils.jsonProcessor.encodeToString(usedRevocationStates)
 
 
-        println("proofRequestJson -> $proofRequestJson")
-        println("requestedCredentialsJson -> $requestedCredentialsJson")
-        println("masterSecretId -> $masterSecretId")
-        println("usedSchemasJson -> $usedSchemasJson")
-        println("usedCredentialDefsJson -> $usedCredentialDefsJson")
-        println("usedRevStatesJson -> $usedRevStatesJson")
+        logger.d { "proofRequestJson -> $proofRequestJson" }
+        logger.d { "requestedCredentialsJson -> $requestedCredentialsJson" }
+        logger.d { "masterSecretId -> $masterSecretId" }
+        logger.d { "usedSchemasJson -> $usedSchemasJson" }
+        logger.d { "usedCredentialDefsJson -> $usedCredentialDefsJson" }
+        logger.d { "usedRevStatesJson -> $usedRevStatesJson" }
 
         val proverProofJson = Anoncreds.proverCreateProof(
             walletHolder.getWallet() as Wallet,
@@ -488,7 +491,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
             usedRevStatesJson
         )
 
-        println("Indy proof created: $proverProofJson")
+        logger.d { "Indy proof created: $proverProofJson" }
 
         val presentation = IndySerializationUtils.jsonProcessor.decodeFromString<IndyPresentation>(proverProofJson)
 
@@ -519,7 +522,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         //TODO: check if this type cast is needed here
         val presentationJson =
             IndySerializationUtils.jsonProcessor.encodeToString(presentation as IndyPresentation)
-        println("extractPresentationDataFromPresentation: presentationJson = $presentationJson")
+        logger.d { "extractPresentationDataFromPresentation: presentationJson = $presentationJson" }
 
 
         return RawData(base64 = Base64.plainStringToBase64String(presentationJson))

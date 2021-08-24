@@ -2,11 +2,14 @@ package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
+import com.dxc.ssi.agent.api.callbacks.didexchange.DidExchangeError
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.library.LibraryError
 import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
 import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
+import com.dxc.ssi.agent.didcomm.model.ack.Ack
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
@@ -15,12 +18,15 @@ import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.ledger.indy.GenesisMode
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
-import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.OfferResponseAction
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.utils.ToBeReworked
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
@@ -28,8 +34,8 @@ import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlin.test.Test
 import kotlin.test.Ignore
+import kotlin.test.Test
 
 //TODO: move this test to common level
 class SsiAgentApiImplTest {
@@ -37,7 +43,7 @@ class SsiAgentApiImplTest {
     private val walletName = "newWalletName2"
     private val walletPassword = "newWalletPassword"
     private val did = "4PCVFCeZbKXyvgjCedbXDx"
-
+    var logger: Kermit = Kermit(LogcatLogger())
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     @Ignore
@@ -88,19 +94,26 @@ class SsiAgentApiImplTest {
 
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
-                println("Connecting to issuer")
+                logger.d { "Connecting to issuer" }
                 ssiAgentApi.connect(issuerInvitationUrl)
 
                 //TODO: ensure that connection can be established without delay between two connections
                 //Sleeper().sleep(4000)
 
-                println("Connecting to verifier")
+                logger.d { "Connecting to verifier" }
                 ssiAgentApi.connect(verifierInvitationUrl)
             }
 
-            override fun initializationFailed() {
+            override fun initializationFailed(
+                error: LibraryError,
+                message: String?,
+                details: String?,
+                stackTrace: String?
+            ) {
                 TODO("Not yet implemented")
             }
+
+
         })
 
 
@@ -119,8 +132,8 @@ class SsiAgentApiImplTest {
             return PresentationRequestResponseAction.ACCEPT
         }
 
-        override fun onDone(connection: PeerConnection): CallbackResult {
-            return CallbackResult(true)
+        override fun onDone(connection: PeerConnection) {
+
         }
 
         override fun onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
@@ -130,6 +143,7 @@ class SsiAgentApiImplTest {
     }
 
     class CredReceiverControllerImpl : CredReceiverController {
+        var logger: Kermit = Kermit(LogcatLogger())
         override fun onOfferReceived(
             connection: PeerConnection,
             credentialOfferContainer: CredentialOfferContainer
@@ -140,8 +154,8 @@ class SsiAgentApiImplTest {
         override fun onRequestSent(
             connection: PeerConnection,
             credentialRequestContainer: CredentialRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ){
+
         }
 
         override fun onCredentialReceived(
@@ -151,18 +165,23 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
-            return CallbackResult(true)
+        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
         }
 
         override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
             TODO("Not yet implemented")
         }
 
+        override fun onAckSent(connection: PeerConnection, ack: Ack) {
+            logger.d {"Ack sent for credential" }
+        }
+
 
     }
 
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
+        var logger: Kermit = Kermit(LogcatLogger())
+
         override fun onInvitationReceived(
             connection: PeerConnection,
             invitation: Invitation
@@ -170,24 +189,32 @@ class SsiAgentApiImplTest {
             return CallbackResult(canProceedFurther = true)
         }
 
-        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
-            println("Request sent hook called : $connection, $request")
-            return CallbackResult(true)
+        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
+            logger.d { "Request sent hook called : $connection, $request" }
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
-            println("Response received hook called : $connection, $response")
+            logger.d { "Response received hook called : $connection, $response"}
             return CallbackResult(true)
         }
 
-        override fun onCompleted(connection: PeerConnection): CallbackResult {
-            println("Connection completed : $connection")
-            return CallbackResult(true)
+        override fun onCompleted(connection: PeerConnection) {
+            logger.d { "Connection completed : $connection" }
+
         }
 
-        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
-            println("Connection abandoned : $connection")
-            return CallbackResult(true)
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
+            logger.d { "Connection abandoned : $connection" }
+        }
+
+        override fun onFailure(
+            connection: PeerConnection?,
+            error: DidExchangeError,
+            message: String?,
+            details: String?,
+            stackTrace: String?
+        ) {
+            TODO("Not yet implemented")
         }
 
     }

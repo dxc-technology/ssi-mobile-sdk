@@ -1,11 +1,19 @@
 package com.dxc.ssi.agent.didcomm.actions.issue.impl
 
+import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.issue.CredentialIssuenceAction
+import com.dxc.ssi.agent.didcomm.commoon.MessageSender
+import com.dxc.ssi.agent.didcomm.constants.toProblemReportDescription
+import com.dxc.ssi.agent.didcomm.model.ack.Ack
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
+import com.dxc.ssi.agent.model.messages.Message
+import com.dxc.utils.Result
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class ReceiveCredentialAction(
@@ -16,6 +24,9 @@ class ReceiveCredentialAction(
         val walletConnector = actionParams.walletConnector
         val credReceiverController = actionParams.callbacks.credReceiverController!!
         val connection = actionParams.context?.connection!!
+        val transport = actionParams.transport
+        val services = actionParams.services
+        val callbacks = actionParams.callbacks
 
         val credentialContainerMessage =
             Json {
@@ -49,11 +60,33 @@ class ReceiveCredentialAction(
                 revocationRegistryDefinition = null
             )
             // 4. Build Credential Ack
-            //TODO: understand how to build the ack and build it (looks like .NET agent does not expect ACK though)
+            val credentialAck = Ack(id = uuid4().toString(), thread = credentialContainerMessage.thread)
             // 5.  Send credential ack
 
+            val result =  MessageSender.packAndSendMessage(
+                Message(Json.encodeToString(credentialAck)),
+                connection,
+                walletConnector,
+                transport,
+                services,
+                onMessageSent = {
+                    services.connectionsTrackerService!!.trustPingSentOverConnectionEvent(connection)
+                    callbacks.credReceiverController?.onAckSent(connection, credentialAck)
+                    Result.Success(ActionResult())
+
+                },
+                onMessageSendingFailure = {
+                    val problemReport = ProblemReport(
+                        id = uuid4().toString(),
+                        description = com.dxc.ssi.agent.didcomm.constants.DidCommProblemCodes.COULD_NOT_DELIVER_MESSAGE.toProblemReportDescription()
+                    )
+                    Result.Success(ActionResult())
+                }
+            )
+
+            //Currently we proceed to finish the creential flow on agent side even if Ack was not delivered
             // 6. Remove credential exchange record
-            walletConnector.prover!!.removeCredentialExchangeRecordByThread(credentialContainerMessage.thread)
+            walletConnector.prover.removeCredentialExchangeRecordByThread(credentialContainerMessage.thread)
 
             // 6. Execute callback
             credReceiverController.onDone(

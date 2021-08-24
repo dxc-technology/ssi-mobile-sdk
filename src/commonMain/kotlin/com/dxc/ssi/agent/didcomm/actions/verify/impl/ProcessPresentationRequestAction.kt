@@ -14,6 +14,9 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationContainer
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationState
 import com.dxc.ssi.agent.exceptions.common.NoCredentialToSatisfyPresentationRequestException
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.PresentationExchangeRecord
 import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.model.messages.Message
@@ -25,10 +28,10 @@ class ProcessPresentationRequestAction(
     private val presentationRequestContainer: PresentationRequestContainer,
     private val presentationRequestResponseAction: PresentationRequestResponseAction? = null
 ) : CredentialVerificationAction {
+    private val logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
 
-        println("Entered ProcessPresentationRequestAction")
-
+        logger.d { "Entered ProcessPresentationRequestAction" }
         val messageContext = actionParams.context
         val credPresenterController = actionParams.callbacks.credPresenterController!!
         val walletConnector = actionParams.walletConnector
@@ -44,8 +47,8 @@ class ProcessPresentationRequestAction(
             walletConnector.walletHolder.getConnectionRecordById(existingPresentationExchangeRecord.connectionId)!!
 
         val presentationRequest =
-            walletConnector.prover!!.buildPresentationRequestObjectFromRawData(
-                //TODO: deal with several attachemnts
+            walletConnector.prover.buildPresentationRequestObjectFromRawData(
+                //TODO: deal with several attachments
                 presentationRequestContainer.presentationRequestAttach[0].data
             )
 
@@ -60,17 +63,16 @@ class ProcessPresentationRequestAction(
             PresentationRequestResponseAction.ACCEPT -> {
                 try {
                     val presentationData =
-                        walletConnector.prover!!.createPresentation(presentationRequest, ledgerConnector)
+                        walletConnector.prover.createPresentation(presentationRequest, ledgerConnector)
 
                     val presentation = PresentationContainer(
-                        //TODO: set proper id
                         id = uuid4().toString(),
                         thread = Thread(thid = presentationRequestContainer.id),
                         presentationAttach = listOf(
                             Attach(
                                 id = "libindy-presentation-0",
                                 mimeType = "application/json",
-                                data = walletConnector.prover!!.extractPresentationDataFromPresentation(presentationData)
+                                data = walletConnector.prover.extractPresentationDataFromPresentation(presentationData)
 
                             )
                         ),
@@ -151,6 +153,16 @@ class ProcessPresentationRequestAction(
             PresentationRequestResponseAction.REJECT -> {
                 //TODO: Consider an option to send Send PresentationProposal here instead of ProblemReport, depending on user input
 
+                walletConnector.prover.storePresentationExchangeRecord(
+                    PresentationExchangeRecord(
+                        state = CredentialVerificationState.REQUEST_REJECTED,
+                        connectionId = connection.id,
+                        presentationRequestContainer = presentationRequestContainer,
+                        thread = Thread(thid = presentationRequestContainer.id),
+                        isParked = false
+                    )
+                )
+
                 val problemReport = ProblemReport(
                     id = uuid4().toString(),
                     description = DidCommProblemCodes.USER_REJECTED_PRESENTATION_REQUEST.toProblemReportDescription(),
@@ -165,6 +177,8 @@ class ProcessPresentationRequestAction(
                     transport,
                     services
                 )
+
+
             }
             PresentationRequestResponseAction.PARK -> {
                 walletConnector.prover.storePresentationExchangeRecord(

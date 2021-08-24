@@ -71,5 +71,9 @@ actual class Did {
             return Json.decodeFromString(callbackResultJson.stringResult)
 
         }
+
+        actual suspend fun getListMyDidsWithMeta(wallet: Wallet): Set<DidWithMetadataResult> {
+            TODO("Not yet implemented")
+        }
     }
 }

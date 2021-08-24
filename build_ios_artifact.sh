@@ -1,6 +1,6 @@
 ./gradlew clean
-./gradlew :"BuildDevice" -PXCODE_CONFIGURATION=Release
-./gradlew :"BuildSimulator" -PXCODE_CONFIGURATION=Release
+./gradlew :"BuildDevice"
+./gradlew :"BuildSimulator"
 
 lipo build/xcode-framework-arm/ssi_agent.framework/ssi_agent -extract arm64 -output build/xcode-framework-arm/ssi_agent.framework/ssi_agent
 lipo -info build/xcode-framework-arm/ssi_agent.framework/ssi_agent

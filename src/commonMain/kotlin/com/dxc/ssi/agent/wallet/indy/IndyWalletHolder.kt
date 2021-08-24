@@ -2,11 +2,13 @@ package com.dxc.ssi.agent.wallet.indy
 
 import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
 import com.dxc.ssi.agent.model.*
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.utils.ObjectHolder
-import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.helpers.WalletCustomRecordsRepository
+import com.dxc.ssi.agent.wallet.indy.helpers.WalletHelper
 import com.dxc.ssi.agent.wallet.indy.libindy.Crypto
 import com.dxc.ssi.agent.wallet.indy.libindy.Did
 import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
@@ -21,6 +23,8 @@ open class IndyWalletHolder(
     private val walletPassword: String,
     private val didConfig: DidConfig
 ) : WalletHolder {
+    var logger: Kermit = Kermit(LogcatLogger())
+
     //TODO: think how to avoid optionals here
     private var isoDid = IsolateState { ObjectHolder<String?>() }
     private var isoVerkey = IsolateState { ObjectHolder<String?>() }
@@ -35,7 +39,12 @@ open class IndyWalletHolder(
     }
 
     override fun getIdentityDetails(): IdentityDetails {
-        return IdentityDetails(isoDid.access { it.obj }!!, isoVerkey.access { it.obj }!!, null, null)
+        return IdentityDetails(
+            isoDid.access { it.obj }!!,
+            isoVerkey.access { it.obj }!!,
+            null,
+            null
+        )
     }
 
     override fun getIdentityDetails(did: String): IdentityDetails {
@@ -52,12 +61,16 @@ open class IndyWalletHolder(
     }
 
     override suspend fun getConnectionRecordById(connectionId: String): PeerConnection? {
-
-        val wallet = isoWallet.access { it.obj }!!
-        val peerConnectionRecord: PeerConnectionRecord? =
-            WalletCustomRecordsRepository.getWalletRecordById(wallet, connectionId)
-
-        return peerConnectionRecord?.peerConnection
+        var result: PeerConnection? = null
+        try {
+            val wallet = isoWallet.access { it.obj }!!
+            val peerConnectionRecord: PeerConnectionRecord? =
+                WalletCustomRecordsRepository.getWalletRecordById(wallet, connectionId)
+            result = peerConnectionRecord?.peerConnection
+        } catch (t: Throwable) {
+            logger.e("Error from library", t) { t.message.toString() }
+        }
+        return result
     }
 
     override suspend fun findConnectionByVerKey(verKey: String): PeerConnection? {
@@ -65,7 +78,10 @@ open class IndyWalletHolder(
         val query = "{\"${WalletRecordTag.ConnectionVerKey.name}\": \"${verKey}\"}"
         val wallet = isoWallet.access { it.obj }!!
 
-        return WalletCustomRecordsRepository.getWalletRecordsByQuery<PeerConnectionRecord>(wallet, query)
+        return WalletCustomRecordsRepository.getWalletRecordsByQuery<PeerConnectionRecord>(
+            wallet,
+            query
+        )
             .map { it.peerConnection }.firstOrNull()
     }
 
@@ -79,7 +95,10 @@ open class IndyWalletHolder(
 
         val wallet = isoWallet.access { it.obj }!!
 
-        return WalletCustomRecordsRepository.getWalletRecordsByQuery<PeerConnectionRecord>(wallet, query)
+        return WalletCustomRecordsRepository.getWalletRecordsByQuery<PeerConnectionRecord>(
+            wallet,
+            query
+        )
             .map { it.peerConnection }.toSet()
 
     }
@@ -96,19 +115,26 @@ open class IndyWalletHolder(
     }
 
     //TODO: remove all unnecessary code and beautify this function
-    override suspend fun packMessage(message: Message, recipientKeys: List<String>, useAnonCrypt: Boolean): String {
+    override suspend fun packMessage(
+        message: Message,
+        recipientKeys: List<String>,
+        useAnonCrypt: Boolean
+    ): String {
+
         val byteArrayMessage = message.payload.toByteArray()
-        val recipientVk = recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
+        val recipientVk =
+            recipientKeys.joinToString(separator = "\",\"", prefix = "[\"", postfix = "\"]")
         //val recipientVk = recipientKeys.joinToString(separator = ",",prefix = "", postfix = "")
-        println("recipientKeys = $recipientVk")
+        logger.d { "recipientKeys = $recipientVk" }
 
         val senderVk = if (useAnonCrypt) null else isoVerkey.access { it.obj }
         val wallet = isoWallet.access { it.obj }
-        val byteArrayPackedMessage = Crypto.packMessage(wallet!!, recipientVk, senderVk, byteArrayMessage)
+        val byteArrayPackedMessage =
+            Crypto.packMessage(wallet!!, recipientVk, senderVk, byteArrayMessage)
 
         val decodedString = String(byteArrayPackedMessage)
 
-        println("Decoded packed message = $decodedString")
+        logger.d { "Decoded packed message = $decodedString" }
 
         return decodedString
     }
@@ -117,16 +143,11 @@ open class IndyWalletHolder(
     override suspend fun unPackMessage(packedMessage: Message): Message {
 
         val byteArrayMessage = packedMessage.payload.toByteArray()
-
         val wallet = isoWallet.access { it.obj }
         val byteArrayUnpackedMessage = Crypto.unpackMessage(wallet!!, byteArrayMessage)
-
         val decodedString = String(byteArrayUnpackedMessage)
-
-        println("Decoded packed message = $decodedString")
-
+        logger.d { "Decoded packed message = $decodedString" }
         return Message(decodedString)
-
     }
 
     override suspend fun openWalletOrFail() {

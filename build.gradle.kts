@@ -16,8 +16,9 @@ plugins {
     /* TODO: Deal with : The 'kotlin-android-extensions' Gradle plugin is deprecated. Please use this migration guide (https://goo.gle/kotlin-android-extensions-deprecation) to start working with View Binding (https://developer.android.com/topic/libraries/view-binding) and the 'kotlin-parcelize' plugin.*/
     id("kotlin-android-extensions")
     kotlin("plugin.serialization") version kotlinVersion
-    kotlin("native.cocoapods") version "1.4.31"
+    kotlin("native.cocoapods") version "1.5.21"
     id("maven-publish")
+
 }
 
 
@@ -29,13 +30,15 @@ publishing {
         mavenLocal()
     }
 }
+
 repositories {
     google()
-    jcenter()
     mavenCentral()
+    jcenter()
     maven(url = "https://repo.sovrin.org/repository/maven-releases")
     maven { setUrl("https://dl.bintray.com/kotlin/kotlinx.html/") }
 }
+
 
 kotlin {
     jvm {
@@ -76,24 +79,27 @@ kotlin {
                 }
             }
             binaries.all {
-                  linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
+                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
             }
         }
     }
 
     cocoapods {
-        pod("PocketSocket/Client") {
+        pod("PocketSocket") {
             source = git("https://github.com/zwopple/PocketSocket") {
                 tag = "1.0.1"
             }
         }
+
         summary = "Kotlin sample project with CocoaPods dependencies"
         homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
         ios.deploymentTarget = "12.2"
         osx.deploymentTarget = "10.8"
         tvos.deploymentTarget = "9.0"
+
         frameworkName = "ssi_agent"
         podfile = project.file("./samples/swiftIosApp/Podfile")
+
     }
 
     val hostOs = System.getProperty("os.name")
@@ -111,16 +117,17 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
                 implementation("io.ktor:ktor-utils:$ktorVersion")
                 //For now we use ktor only to have common URL class. Also I assume we might extend its usage
-                implementation ("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
-                implementation ("co.touchlab:stately-iso-collections:1.1.4-a1")
-                implementation ("co.touchlab:stately-concurrency:1.1.4")
+                implementation("co.touchlab:stately-iso-collections:1.1.4-a1")
+                implementation("co.touchlab:stately-concurrency:1.1.4")
                 //TODO: check if two stately dependencies below are needed, considering that they should be included in the dependency above
                 implementation("co.touchlab:stately-isolate:1.1.4-a1")
                 implementation("co.touchlab:stately-common:1.1.4")
                 implementation("com.benasher44:uuid:$uuidVersion")
                 //TODO: check why jdk dependency is added in common module
                 implementation(kotlin("stdlib-jdk8"))
+                implementation(kotlin("stdlib-common"))
             }
         }
         val commonTest by getting {
@@ -202,6 +209,9 @@ kotlin {
 android {
     compileSdkVersion(29)
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
     defaultConfig {
         minSdkVersion(24)
         //TODO: understand why websockets stop working when changing targetSDKVersion above 27
@@ -210,7 +220,7 @@ android {
 
         //TODO: check which options below are really needed as they were added during development when doing some try and error
         ndk {
-            ndkVersion  = "21.4.7075529"
+            ndkVersion = "21.4.7075529"
             moduleName = "indy"
             abiFilters("x86", "arm64-v8a", "armeabi-v7a")
         }
@@ -242,10 +252,14 @@ dependencies {
     implementation("junit:junit:$junitVersion")
 }
 
+tasks.register<Exec>("BuildCommon") {  // Workaround for issue with KMP, build with this command when facing an issue with jvmTest
+    commandLine("./gradlew -x jvmTest", "build")
+}
+
 tasks.register<Exec>("PreparePods") {
     workingDir("./libindy-pod")
-    commandLine("pod","setup")
-    commandLine("pod","install")
+    commandLine("pod", "setup")
+    commandLine("pod", "install")
 }
 
 tasks.register<Copy>("CopyLibIndy") {
@@ -254,12 +268,12 @@ tasks.register<Copy>("CopyLibIndy") {
 }
 
 tasks.register<Exec>("BuildSimulator") {
-    commandLine("./gradlew", "build")
+    commandLine("./gradlew", "packForXcode")
 }
 
 tasks.register<Exec>("BuildDevice") {
     environment(mapOf("SDK_NAME" to "iphoneos"))
-    commandLine("./gradlew", "build") //REAL DEVICE
+    commandLine("./gradlew", "packForXcode") //REAL DEVICE
 }
 
 tasks.register<Copy>("CopyKlibToPods") {
@@ -289,14 +303,16 @@ val packForXcode by tasks.creating(Sync::class) {
     val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
     val targetName = "ios"
     if (sdkName.startsWith("iphoneos")) {
-        val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
+        val framework =
+            kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
         inputs.property("mode", mode)
         dependsOn(framework.linkTask)
         val targetDir = File(buildDir, "xcode-framework-arm")
         from({ framework.outputDirectory })
         into(targetDir)
     } else {
-        val framework = kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
+        val framework =
+            kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
         inputs.property("mode", mode)
         dependsOn(framework.linkTask)
         val targetDir = File(buildDir, "xcode-framework-X64")
@@ -304,5 +320,14 @@ val packForXcode by tasks.creating(Sync::class) {
         into(targetDir)
     }
 }
-tasks.getByName("build").dependsOn(packForXcode)
 
+tasks.named<org.jetbrains.kotlin.gradle.tasks.DefFileTask>("generateDefPocketSocket").configure {
+    doLast {
+        outputFile.writeText(
+            """
+            language = Objective-C
+            headers = "$projectDir/socketlib/PocketSocketHeaders/PSWebSocket.h"
+            """
+        )
+    }
+}

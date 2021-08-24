@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.model
 
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import io.ktor.http.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -8,7 +11,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ConnectionTest {
-
+    var logger: Kermit = Kermit(LogcatLogger())
     @Test
     fun testSerialization() {
 
@@ -25,7 +28,7 @@ class ConnectionTest {
 
         val jsonString = Json.encodeToString(connection)
 
-        println(jsonString)
+        logger.d { jsonString }
 
         val connection2 = Json { ignoreUnknownKeys = true }.decodeFromString<PeerConnection>(jsonString)
 

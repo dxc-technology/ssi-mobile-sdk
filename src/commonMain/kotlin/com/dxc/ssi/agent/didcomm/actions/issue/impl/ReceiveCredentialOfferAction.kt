@@ -9,14 +9,17 @@ import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 class ReceiveCredentialOfferAction(
     private val actionParams: ActionParams
 ) : CredentialIssuenceAction {
+    var logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
         try {
 
-            println("Entered ReceiveCredentialOfferAction")
+            logger.d { "Entered ReceiveCredentialOfferAction" }
 
             val walletConnector = actionParams.walletConnector
             val ledgerConnector = actionParams.ledgerConnector
@@ -56,10 +59,10 @@ class ReceiveCredentialOfferAction(
             )
 
 
-            println("Exited ReceiveCredentialOfferAction")
+            logger.d { "Exited ReceiveCredentialOfferAction" }
             return ProcessCredentialOfferAction(actionParams, credentialOfferContainerMessage).perform()
         } catch (t: Throwable) {
-            println("Got exception ${t.stackTraceToString()}")
+            logger.d { "Got exception ${t.stackTraceToString()}" }
             throw t
         }
 

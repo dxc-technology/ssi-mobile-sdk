@@ -25,6 +25,14 @@ actual class Did {
             }
         }
 
+        actual suspend fun getListMyDidsWithMeta(wallet: Wallet): Set<DidWithMetadataResult> {
+            val converter = IndyJvmToCommonExceptionConverter<Set<DidWithMetadataResult>>()
+            return converter.convertException {
+                val result = Did.getListMyDidsWithMeta(wallet.wallet).get()
+                Json.decodeFromString(result)
+            }
+        }
+
     }
 
 }
