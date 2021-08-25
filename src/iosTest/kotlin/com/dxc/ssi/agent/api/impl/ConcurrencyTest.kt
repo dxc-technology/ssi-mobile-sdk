@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.api.impl
 
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.utils.Sleeper
 import kotlinx.coroutines.*
@@ -9,24 +12,24 @@ import kotlin.test.Ignore
 
 
 class ConcurrencyTest {
-
+    var logger: Kermit = Kermit(LogcatLogger())
     private var job = Job()
     private val agentScope = CoroutineScope(Dispatchers.Default + job)
 
     @Test
     // @Ignore
     fun test() {
-        println("starting test")
+        logger.d { "starting test" }
         runBlocking {
-            println("starting runBlocking")
+            logger.d { "starting runBlocking" }
             agentScope.async {
-                println("starting async")
+                logger.d { "starting async" }
 
-                println("end async")
+                logger.d { "end async" }
             }.await()
-            println("end runBlocking")
+            logger.d { "end runBlocking" }
         }
-        println("end test")
+        logger.d { "end test" }
     }
 
     @Test
@@ -35,55 +38,55 @@ class ConcurrencyTest {
 
 
 
-        println("starting test")
+        logger.d { "starting test" }
 
         agentScope.launch {
-            println("start sleeping in first sleeper")
+            logger.d { "start sleeping in first sleeper" }
             while (true) {
                 sleep(10)
-                println("call delay in first sleeper")
+                logger.d { "call delay in first sleeper" }
                 delay(10)
             }
-            println("end sleeping in first sleeper")
+            logger.d { "end sleeping in first sleeper" }
         }
 
-        println("after first launch")
+        logger.d { "after first launch" }
 
         agentScope.launch {
-            println("start sleeping in second sleeper")
+            logger.d { "start sleeping in second sleeper" }
             while (true) {
                 sleep(10)
-                println("call delay in second sleeper")
+                logger.d { "call delay in second sleeper" }
                 delay(10)
             }
-            println("end sleeping in second sleeper")
+            logger.d { "end sleeping in second sleeper" }
         }
 
         CoroutineHelper.waitForCompletion(agentScope.async {
-            println("starting async")
+            logger.d { "starting async" }
 
-            println("end async")
+            logger.d { "end async" }
         })
 
-        println("end test")
+        logger.d { "end test" }
     }
 
 
     @Test
     @Ignore
     fun testCustomCoroutineScope() {
-        println("Test started")
+        logger.d { "Test started" }
 
 
         val async = agentScope.async {
-            println("executing agentScope.async")
+            logger.d { "executing agentScope.async" }
         }
 
-        println("Waiting for async result")
+        logger.d { "Waiting for async result" }
         runBlocking {
             async.await()
         }
-        println("Got async result")
+        logger.d { "Got async result" }
 
         sleep(1000)
     }
@@ -91,18 +94,18 @@ class ConcurrencyTest {
     @Test
     @Ignore
     fun testGlobalScope() {
-        println("Test started")
+        logger.d { "Test started" }
 
 
         val async = GlobalScope.async {
-            println("executing agentScope.async")
+            logger.d { "executing agentScope.async" }
         }
 
-        println("Waiting for async result")
+        logger.d { "Waiting for async result" }
         runBlocking {
             async.await()
         }
-        println("Got async result")
+        logger.d { "Got async result" }
 
         sleep(1000)
     }
@@ -112,15 +115,15 @@ class ConcurrencyTest {
 
         //TODO: check how to close this context afterwards to avoid leaking native threads
         withContext(newSingleThreadContext("listen for messages thread")) {
-            println("IN listenForMessages function")
+            logger.d { "IN listenForMessages function" }
             //TODO: change to smth like while CONNECTED
             //    withContext(newSingleThreadContext("Thread 2")) {
             async {
                 Sleeper().sleep(10000)
-                println("stop listening for messages")
+                logger.d { "stop listening for messages" }
             }
 
-            println("after async")
+            logger.d { "after async" }
             //     }
 
 
@@ -131,15 +134,15 @@ class ConcurrencyTest {
 
         //TODO: check how to close this context afterwards to avoid leaking native threads
         withContext(newSingleThreadContext("listen for failures thread")) {
-            println("IN listenForFailures function")
+            logger.d { "IN listenForFailures function" }
             //TODO: change to smth like while CONNECTED
             //    withContext(newSingleThreadContext("Thread 2")) {
             async {
                 Sleeper().sleep(10000)
-                println("stop listening for failures")
+                logger.d { "stop listening for failures" }
             }
 
-            println("after async failures")
+            logger.d { "after async failures" }
             //     }
 
 

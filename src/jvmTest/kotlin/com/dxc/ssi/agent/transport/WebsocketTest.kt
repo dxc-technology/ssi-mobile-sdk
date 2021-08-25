@@ -1,5 +1,8 @@
 package com.dxc.ssi.agent.transport
 
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.utils.Sleeper
 import okhttp3.*
 import org.junit.Test
@@ -10,30 +13,31 @@ class WebsocketTest {
 
     @Test
     fun testWs() {
+        var logger: Kermit = Kermit(LogcatLogger())
         val socketRequest = Request.Builder().url(socketEndpoint).build()
         val webClient = OkHttpClient().newBuilder().build()
         var webSocket : WebSocket? = webClient.newWebSocket(
             socketRequest,
             object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
-                    println("Opened websocket")
+                    logger.d { "Opened websocket" }
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    println("Failure websocket")
+                    logger.d { "Failure websocket" }
                 }
 
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
-                    println("OnMessage")
+                    logger.d { "OnMessage" }
                 }
 
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                    println("Closing websocket")
+                    logger.d { "Closing websocket" }
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                    println("Closed websocket")
+                    logger.d { "Closed websocket" }
                 }
 
             }

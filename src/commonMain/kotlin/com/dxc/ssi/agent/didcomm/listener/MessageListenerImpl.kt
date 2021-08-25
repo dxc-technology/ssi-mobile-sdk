@@ -7,6 +7,9 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.router.MessageRouter
 import com.dxc.ssi.agent.didcomm.router.MessageRouterImpl
 import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
 import com.dxc.ssi.agent.model.messages.Context
@@ -24,6 +27,7 @@ class MessageListenerImpl(
 ) :
     MessageListener {
 
+    private val logger: Kermit = Kermit(LogcatLogger())
     private var isShutdown: Boolean = false
     override val messageRouter: MessageRouter =
         MessageRouterImpl(walletConnector, ledgerConnector, services, transport, callbacks)
@@ -34,21 +38,26 @@ class MessageListenerImpl(
 
     override suspend fun listen() {
 
-        println("Started listener")
-
+        logger.d { "Started listener" }
         while (!isShutdown) {
+            try {
 
-            println("Message Listener: Checking for new messages")
+                logger.d { "Message Listener: Checking for new messages" }
 
-            val receivedMessage = transport.receiveNextMessage()
+                val receivedMessage = transport.receiveNextMessage()
 
-            println("Message Listener: Received message")
+                logger.d { "Message Listener: Received message" }
 
-            val messageContext = unpackAndBuildMesageContext(receivedMessage)
+                val messageContext = unpackAndBuildMesageContext(receivedMessage)
 
-
-            messageRouter.routeAndProcessMessage(messageContext)
-            println("Message Listener: : procesed message")
+                messageRouter.routeAndProcessMessage(messageContext)
+                logger.d { "Message Listener: : procesed message" }
+            } catch (t: Throwable) {
+                logger.e(
+                    "Error in listen inside library",
+                    t
+                ) { t.message.toString() }
+            }
         }
 
     }
@@ -58,12 +67,12 @@ class MessageListenerImpl(
 
         val unpackedMessage = walletConnector.walletHolder.unPackMessage(Message(receivedMessage.payload))
         val receivedUnpackedMessage = Json.decodeFromString<ReceivedUnpackedMessage>(unpackedMessage.payload)
-        println("Received Unpacked message: $receivedUnpackedMessage")
 
-        println(
-            "sender verkey = ${receivedUnpackedMessage.senderVerKey}" +
-                    "receiver_verkey = ${receivedUnpackedMessage.recipientVerKey}"
-        )
+        logger.d { "Received Unpacked message: $receivedUnpackedMessage" }
+
+        logger.d {  "sender verkey = ${receivedUnpackedMessage.senderVerKey}" +
+                "receiver_verkey = ${receivedUnpackedMessage.recipientVerKey}" }
+
         val connection = getConnectionByVerkey(receivedUnpackedMessage.senderVerKey)
 
         return Context(connection, receivedUnpackedMessage)

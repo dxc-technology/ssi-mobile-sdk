@@ -2,6 +2,7 @@ package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.api.Callbacks
 import com.dxc.ssi.agent.api.SsiAgentApi
+import com.dxc.ssi.agent.api.callbacks.library.LibraryError
 import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
@@ -14,6 +15,9 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestConta
 import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
 import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
@@ -29,6 +33,7 @@ class SsiAgentApiImpl(
     private val callbacks: Callbacks
 ) : SsiAgentApi {
 
+    private var logger: Kermit = Kermit(LogcatLogger())
     private var job = Job()
     private val agentScope = CoroutineScope(Dispatchers.Default + job)
 
@@ -68,23 +73,45 @@ class SsiAgentApiImpl(
         if (!EnvironmentUtils.environmentInitizlized)
             throw RuntimeException("Please initialize environment before initializing SsiAgentApiImpl")
 
-
-        println("Before running agentScope.async")
+        logger.d { "Before running agentScope.async" }
         agentScope.launch {
             try {
-                println("Before initializing ledgerConnector")
+                logger.d { "Before initializing ledgerConnector" }
                 ledgerConnector.init()
+            } catch (t: Throwable) {
+                agentScope.launch {
+                    libraryStateListener.initializationFailed(
+                        error = LibraryError.LEDGER_CONNECTION_EXCEPTION,
+                        stackTrace = t.stackTraceToString()
+                    )
+                }
+                return@launch
+
+            }
+            try {
                 //TODO: combine it into single function
                 walletConnector.walletHolder.openWalletOrFail()
                 walletConnector.walletHolder.initializeDid()
                 ledgerConnector.did = walletConnector.walletHolder.getIdentityDetails().did
-                println("Set ledgerConnectorDid")
+                logger.d { "Set ledgerConnectorDid" }
 
                 if (walletConnector.prover != null) {
                     walletConnector.prover.createMasterSecret(Configuration.masterSecretId)
                 }
+            } catch (t: Throwable) {
 
-                println("init: initialized ledger and wallet")
+                agentScope.launch {
+                    libraryStateListener.initializationFailed(
+                        error = LibraryError.WALLET_INITIALIZATION_EXCEPTION,
+                        stackTrace = t.stackTraceToString()
+                    )
+                }
+                return@launch
+
+            }
+            try {
+
+                logger.d { "init: initialized ledger and wallet" }
 
                 agentScope.launch {
                     withContext(mainListenerSingleThreadDispatcher.context) {
@@ -92,31 +119,36 @@ class SsiAgentApiImpl(
                     }
                 }
 
-                println("init: initialized message listener")
+                logger.d { "init: initialized message listener" }
 
                 agentScope.launch {
                     withContext(trustPingListenerSingleThreadDispatcher.context) {
                         services.connectionsTrackerService!!.start()
                     }
                 }
+                logger.d { "init: initialized trust ping tracker service" }
 
-                println("init: initialized trust ping tracker service")
+                agentScope.launch { libraryStateListener.initializationCompleted() }
 
-                libraryStateListener.initializationCompleted()
             } catch (t: Throwable) {
-                t.printStackTrace()
-                libraryStateListener.initializationFailed()
+                agentScope.launch {
+                    libraryStateListener.initializationFailed(
+                        error = LibraryError.LISTENER_SETUP_EXCEPTION,
+                        stackTrace = t.stackTraceToString()
+                    )
+                }
+
             }
 
         }
 
     }
 
-    override fun connect(url: String, keepConnectionAlive: Boolean): PeerConnection {
-        println("Entered connect function")
+    override fun connect(url: String, keepConnectionAlive: Boolean): PeerConnection? {
+        logger.d { "Entered connect function" }
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
-                println("Entered async connection initiation")
+                logger.d { "Entered async connection initiation" }
                 //TODO: fix NPE
                 messageListener.messageRouter.processors.didExchangeProcessor!!.initiateConnectionByInvitation(
                     url,
@@ -126,34 +158,57 @@ class SsiAgentApiImpl(
     }
 
     override fun reconnect(connection: PeerConnection, keepConnectionAlive: Boolean) {
+        try {
+            CoroutineHelper.waitForCompletion(
+                agentScope.async {
+                    logger.d { "Entered async keepAlive connection status change" }
+                    //TODO: think about avoiding NPE
+                    services.connectionsTrackerService!!.reconnect(connection, keepConnectionAlive)
 
-
-        CoroutineHelper.waitForCompletion(
-            agentScope.async {
-                println("Entered async keepAlive connection status change")
-                //TODO: think about avoiding NPE
-                services.connectionsTrackerService!!.reconnect(connection, keepConnectionAlive)
-
-            })
+                })
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in reconnect inside library with $connection",
+                t
+            ) { t.message.toString() }
+        }
     }
 
     override fun keepConnectionAlive(connection: PeerConnection, keepConnectionAlive: Boolean) {
-        CoroutineHelper.waitForCompletion(
-            agentScope.async {
-                println("Entered async keepAlive connection status change")
-                //TODO: think about avoiding NPE
-                services.connectionsTrackerService!!.keepConnectionAlive(connection, keepConnectionAlive)
+        try {
+            CoroutineHelper.waitForCompletion(
+                agentScope.async {
+                    logger.d { "Entered async keepAlive connection status change" }
+                    //TODO: think about avoiding NPE
+                    services.connectionsTrackerService!!.keepConnectionAlive(
+                        connection,
+                        keepConnectionAlive
+                    )
 
-            })
+                })
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in keepConnectionAlive inside library",
+                t
+            ) { t.message.toString() }
+        }
     }
 
     override fun disconnect(connection: PeerConnection) {
-        CoroutineHelper.waitForCompletion(
-            agentScope.async {
-                println("Entered async disconnect")
-                transport.disconnect(connection)
+        try {
+            CoroutineHelper.waitForCompletion(
+                agentScope.async {
+                    logger.d { "Entered async disconnect" }
+                    services.connectionsTrackerService!!.keepConnectionAlive(connection, false)
+                    transport.disconnect(connection)
 
-            })
+                })
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in disconnect inside library with $connection",
+                t
+            ) { t.message.toString() }
+        }
     }
 
     //TODO: current function is synchronous with hardcoded timeout, generalize it
@@ -161,8 +216,11 @@ class SsiAgentApiImpl(
         return CoroutineHelper.waitForCompletion(
             agentScope.async {
                 //TODO: fix NPE
-                messageListener.messageRouter.processors.trustPingProcessor!!.sendTrustPingOverConnection(connection)
+                messageListener.messageRouter.processors.trustPingProcessor!!.sendTrustPingOverConnection(
+                    connection
+                )
             })
+
     }
 
     override fun issueCredentialOverConnection(connection: PeerConnection) {
@@ -181,12 +239,16 @@ class SsiAgentApiImpl(
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun shutdown(force: Boolean) {
         //TODO: make some intelligence and control cancellation behaviour. Make cancellation graceful and controllable. Understand what force parameter would mean
-        job.cancel()
-        mainListenerSingleThreadDispatcher.closeContext()
-        trustPingListenerSingleThreadDispatcher.closeContext()
-        services.connectionsTrackerService!!.shutdown()
-        transport.shutdown()
-        println("Stopped the agent")
+        try {
+            job.cancel()
+            mainListenerSingleThreadDispatcher.closeContext()
+            trustPingListenerSingleThreadDispatcher.closeContext()
+            services.connectionsTrackerService!!.shutdown()
+            transport.shutdown()
+            logger.d { "Stopped the agent" }
+        } catch (t: Throwable) {
+            logger.e("Error in shutdown inside library", t) { t.message.toString() }
+        }
     }
 
     override fun getConnection(connectionId: String): PeerConnection? {
@@ -201,21 +263,40 @@ class SsiAgentApiImpl(
             agentScope.async {
                 walletConnector.walletHolder.getConnections(connectionState)
             })
+
     }
 
-    override fun abandonConnection(connection: PeerConnection, force: Boolean, notifyPeerBeforeAbandoning: Boolean) {
-        CoroutineHelper.waitForCompletion(
-            agentScope.async {
-                //TODO: fix NPE
-                messageListener.messageRouter.processors.abandonConnectionProcessor!!.abandonConnection(
-                    connection,
-                    notifyPeerBeforeAbandoning
-                )
-            })
+    override fun abandonConnection(
+        connection: PeerConnection,
+        force: Boolean,
+        notifyPeerBeforeAbandoning: Boolean
+    ) {
+        try {
+            CoroutineHelper.waitForCompletion(
+                agentScope.async {
+                    //TODO: fix NPE
+                    messageListener.messageRouter.processors.abandonConnectionProcessor!!.abandonConnection(
+                        connection,
+                        notifyPeerBeforeAbandoning
+                    )
+                })
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in abandonConnection inside library with $connection",
+                t
+            ) { t.message.toString() }
+        }
     }
 
     override fun abandonAllConnections(force: Boolean, notifyPeerBeforeAbandoning: Boolean) {
-        getConnections().forEach { abandonConnection(it, force, notifyPeerBeforeAbandoning) }
+        try {
+            getConnections().forEach { abandonConnection(it, force, notifyPeerBeforeAbandoning) }
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in abandonAllConnections inside library",
+                t
+            ) { t.message.toString() }
+        }
     }
 
     override fun removeAbandonedConnectionsFromWallet() {
@@ -251,6 +332,7 @@ class SsiAgentApiImpl(
             agentScope.async {
                 walletConnector.prover!!.getParkedPresentationRequests()
             })
+
     }
 
     override fun processParkedPresentationRequest(

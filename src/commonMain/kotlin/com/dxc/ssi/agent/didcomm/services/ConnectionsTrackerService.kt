@@ -3,8 +3,12 @@ package com.dxc.ssi.agent.didcomm.services
 import co.touchlab.stately.collections.IsoMutableMap
 import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.api.Callbacks
+import com.dxc.ssi.agent.api.callbacks.connection.ReconnectionError
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.processor.Processors
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.ConnectionTransportState
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
@@ -18,6 +22,7 @@ class ConnectionsTrackerService(
     val callbacks: Callbacks,
     val processors: Processors
 ) {
+    private val logger: Kermit = Kermit(LogcatLogger())
 
     private var job = Job()
     private val serviceScope = CoroutineScope(Dispatchers.Default + job)
@@ -35,46 +40,69 @@ class ConnectionsTrackerService(
     private val sentPingsMap = IsoMutableMap<String/*ConnectionId*/, Long /*Timestamp when ping was sent*/>()
 
     suspend fun start() {
-        println("Started listener")
-        serviceScope.launch {
-            trackTrustPingStatuses()
-        }
+        try {
+            logger.d { "Started listener" }
 
-        serviceScope.launch {
-            generateKeepAliveTrustPings()
+            serviceScope.launch {
+                trackTrustPingStatuses()
+            }
+
+            serviceScope.launch {
+                generateKeepAliveTrustPings()
+            }
+        } catch (t: Throwable) {
+            logger.e(
+                "Error in start inside library",
+                t
+            ) { t.message.toString() }
         }
     }
 
     private suspend fun generateKeepAliveTrustPings() {
         while (!isShutdown) {
-            println("Trust Ping Generator woken up")
+            try {
+                logger.d { "Trust Ping Generator woken up" }
 
-            //TODO: also introduce somewhere removal of outdated IN Progress connection records
-            walletConnector.walletHolder.getConnections(PeerConnectionState.COMPLETED).filter { it.keepTransportAlive }
-                .forEach {
-                    serviceScope.launch {
-                        println("generating trust ping for connection $it")
-                        processors.trustPingProcessor!!.sendTrustPingOverConnection(it)
+                //TODO: also introduce somewhere removal of outdated IN Progress connection records
+                walletConnector.walletHolder.getConnections(PeerConnectionState.COMPLETED)
+                    .filter { it.keepTransportAlive }
+                    .forEach {
+                        serviceScope.launch {
+                            logger.d { "generating trust ping for connection $it" }
+                            processors.trustPingProcessor!!.sendTrustPingOverConnection(it)
+                        }
                     }
-                }
-            delay(sendTrustPingIntervalMs)
-            println("Sent trust pings for connections")
+                delay(sendTrustPingIntervalMs)
+                logger.d { "Sent trust pings for connections" }
+            } catch (t: Throwable) {
+                logger.e(
+                    "Error in generateKeepAliveTrustPings inside library",
+                    t
+                ) { t.message.toString() }
+            }
         }
-
     }
 
 
     private suspend fun trackTrustPingStatuses() {
         while (!isShutdown) {
-            println("Checking trust pings states")
-            getNotResponsiveConnections().forEach {
-                sentPingsMap.remove(it.id)
-                callbacks.trustPingController?.onTrustPingResponseDidNotReceived(it)
+            try {
+                logger.d { "Checking trust pings states" }
 
+                getNotResponsiveConnections().forEach {
+                    sentPingsMap.remove(it.id)
+                    callbacks.trustPingController?.onTrustPingResponseDidNotReceived(it)
+
+                }
+
+                delay(maxTimeoutForTrustPingResponseMs)
+                logger.d { "Done checking trust pings states" }
+            } catch (t: Throwable) {
+                logger.e(
+                    "Error in trackTrustPingStatuses inside library",
+                    t
+                ) { t.message.toString() }
             }
-
-            delay(maxTimeoutForTrustPingResponseMs)
-            println("Done checking trust pings states")
         }
 
     }
@@ -89,12 +117,12 @@ class ConnectionsTrackerService(
     }
 
     fun trustPingSentOverConnectionEvent(connection: PeerConnection) {
-        println("TrustPing sent for connectionId = ${connection.id}")
+        logger.d { "TrustPing sent for connectionId = ${connection.id}" }
         sentPingsMap[connection.id] = System.currentTimeMillis()
     }
 
     fun trustPingResponseReceivedEvent(connection: PeerConnection) {
-        println("TrustPing received for connectionId = ${connection.id}")
+        logger.d { "TrustPing received for connectionId = ${connection.id}" }
         sentPingsMap.remove(connection.id)
     }
 
@@ -116,10 +144,31 @@ class ConnectionsTrackerService(
     fun reconnect(connection: PeerConnection, keepConnectionAlive: Boolean) {
 
         serviceScope.launch {
-            println("generating trust ping for connection $connection")
-            processors.trustPingProcessor!!.sendTrustPingOverConnection(connection)
-            val actualConnection = walletConnector.walletHolder.getConnectionRecordById(connection.id)!!
-            callbacks.statefulConnectionController?.onReconnected(actualConnection)
+
+            walletConnector.walletHolder.getConnectionRecordById(connection.id)?.let { existingConnection ->
+
+                if (existingConnection.state == PeerConnectionState.ABANDONED) {
+                    callbacks.statefulConnectionController?.onReconnectFailed(
+                        ReconnectionError.ATTEMPT_TO_RECONNECT_ABANDONED_CONNECTION,
+                        "It is not allowed to reconnect on abandoned connections"
+                    )
+
+                } else {
+                    try {
+                        logger.d { "generating trust ping for connection $connection" }
+                        processors.trustPingProcessor!!.sendTrustPingOverConnection(connection)
+                        val actualConnection = walletConnector.walletHolder.getConnectionRecordById(connection.id)!!
+                        callbacks.statefulConnectionController?.onReconnected(actualConnection)
+                    } catch (t: Throwable) {
+                        callbacks.statefulConnectionController?.onReconnectFailed(
+                            ReconnectionError.UNKNOWN_ERROR,
+                            t.toString()
+                        )
+                    }
+                }
+
+            }
+
         }
 
     }

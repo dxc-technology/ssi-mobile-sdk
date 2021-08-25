@@ -13,9 +13,12 @@ import com.dxc.utils.Base64
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 object WalletCustomRecordsRepository {
 
+    var logger: Kermit = Kermit(LogcatLogger())
     suspend inline fun <reified T : WalletStorable> upsertWalletRecord(wallet: Wallet, walletStorable: T) {
 
         val existingWalletRecord: T? = getWalletRecordById(wallet, walletStorable.id)
@@ -90,7 +93,7 @@ object WalletCustomRecordsRepository {
 
         return retrievedWalletRecords.records!!
             .map {
-                println(it.value)
+                logger.d { it.value }
                 Base64.base64StringToPlainString(it.value)
             }.map<String, T> { IndySerializationUtils.jsonProcessor.decodeFromString(it) }
             .toSet()
@@ -103,7 +106,7 @@ object WalletCustomRecordsRepository {
         walletRecordType: WalletRecordType,
         query: String
     ): RetrievedWalletRecords {
-        println("Searching connections using query: $query")
+        logger.d { "Searching connections using query: $query" }
 
         val options = "{\"retrieveType\" : true, \"retrieveTotalCount\" : true}"
 
@@ -114,7 +117,7 @@ object WalletCustomRecordsRepository {
         val foundRecordsJson = search.searchFetchNextRecords(wallet, 200)
         search.closeSearch()
 
-        println("Fetched connections json = $foundRecordsJson")
+        logger.d { "Fetched connections json = $foundRecordsJson" }
 
         return Json.decodeFromString(foundRecordsJson)
 

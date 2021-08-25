@@ -88,7 +88,7 @@ reuse it on application restart.
 
     if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
         val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
-        println("Generated didResult: $didResult")
+        logger.d { "Generated didResult: $didResult" }
     //Store did somewhere in your application to use it afterwards
     }
 ```
@@ -106,15 +106,21 @@ val walletHolder = IndyWalletHolder(
 val indyWalletConnector = IndyWalletConnector.build(walletHolder)
 ```
 
-Here we define that lib should build genesys.txn file based on ip address of public ledger. Alternatively it is possible
-to use IndyLedgerConnectorConfiguration.GenesisMode.FILE and specify existing genesis file.
+In order for SSI library to function it needs to know the ledger to use. In the example below we instruct the library to use SOVRIN_BUILDERNET genesys.
+
 
 ```kotlin
-val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-    genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
-    ipAddress = "192.168.0.117"
-)
+val indyLedgerConnector = IndyLedgerConnectorBuilder()
+    .withGenesisMode(GenesisMode.SOVRIN_BUILDERNET)
+    .build()
 ```
+Following Genesys modes are supported:
+
+- IP - for local dev  indy network,there is predefined genesys template, in which provided IP address is embedded. Needed for dev purposes, when we deploy dev network to arbitrary host
+- FILE - location of a file with genesys file
+- SOVRIN_BUILDERNET - Sovrin Buildernet (https://sovrin.org/overview/)
+- SOVRIN_STAGENET - Sovrin Stage Net (https://sovrin.org/overview/)
+- SOVRIN_MAINNET - Sovrn Mainnet (https://sovrin.org/overview/)
 
 Next we build the library providing all pluggable parts. Business logic is encapusalted in controllers called at
 different stages of connection and credential lifecycle. Only those controller which we need for our specific business
@@ -124,17 +130,35 @@ case should be defined. For example for case of holder mobile library we need to
 - CredPresenterController
 - CredReceiverController
 
-ANd we do not need to define controllers for issuence credentials or accepting connection.
 
 ```kotlin
-    val ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
+ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
     .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
     .withCredReceiverController(CredReceiverControllerImpl())
     .withCredPresenterController(CredPresenterControllerImpl())
-    .withLedgerConnector(IndyLedgerConnector(indyLedgerConnectorConfiguration))
+    .withLedgerConnector(indyLedgerConnector)
     .build()
+```
 
-ssiAgentApi.init()
+When library is built it is necessary to initialize it using **init** method. Object of LibraryStateListener is passed as a parameter in order to get callbacks on when initialization completed or failed.
+
+```kotlin
+ssiAgentApi.init(object : LibraryStateListener {
+    override fun initializationCompleted() {
+        val connection = ssiAgentApi.connect(issuerInvitationUrl, keepConnectionAlive = true)
+        
+    }
+
+    override fun initializationFailed(
+        error: LibraryError,
+        message: String?,
+        details: String?,
+        stackTrace: String?
+    ) {
+    
+    }
+
+})
 ```
 
 After that we can use connect function to establish connection.
@@ -144,6 +168,8 @@ ssiAgentApi.connect()
 ```
 
 You can intervene into connecting process by placing your custom logic into ConnectionInitiatorController methods.
+
+See SsiAgentApi interface to get understanding of all features of the library.
 
 # Android usage
 
@@ -158,7 +184,7 @@ repository.
    ```
    gradlew :publishAndroidPublicationToMavenLocal
    ```
-2. Ensureit appeared there under folder "~/.m2/repository/com/dxc/kotlin-multiplatform-agent-android/1.0-SNAPSHOT"
+2. Ensure it appeared there under folder "~/.m2/repository/com/dxc/kotlin-multiplatform-agent-android/1.0-SNAPSHOT"
 
 ## Add dependencies to gradle
 
@@ -253,7 +279,7 @@ if (!walletManager.isWalletExistsAndOpenable(walletName, walletPassword))
 
 if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
     val didResult = walletManager.createDid(walletName = walletName, walletPassword = walletPassword)
-    println("Generated didResult: $didResult")
+    logger.d { "Generated didResult: $didResult")
     //Store did somewhere in your application to use it afterwards
 }
 
@@ -277,7 +303,22 @@ ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
     .withLedgerConnector(IndyLedgerConnector(indyLedgerConnectorConfiguration))
     .build()
 
-ssiAgentApi.init()
+    ssiAgentApi.init(object : LibraryStateListener {
+        override fun initializationCompleted() {
+            val connection = ssiAgentApi.connect(issuerInvitationUrl, keepConnectionAlive = true)
+
+        }
+
+        override fun initializationFailed(
+            error: LibraryError,
+            message: String?,
+            details: String?,
+            stackTrace: String?
+        ) {
+
+        }
+
+    })
 
 ```
 
@@ -366,9 +407,10 @@ source 'https://github.com/hyperledger/indy-sdk.git'
 
 Add pods to your Podfile:
 ```script
-pod 'ssi_agent', '0.0.1', :source => "https://github.com/kkamyczek/ssi-mobile-sdk.git"
 pod 'libsodium', '~> 1.0.12'
-pod 'libzmq-pw', "4.2.2
+    pod 'libzmq-pw', "4.2.2"
+    pod 'PocketSocket', '1.0.1'
+    pod 'ssi_agent', "0.0.9", :source => "https://github.com/Lumedic/ssi-mobile-sdk.git"
 ```
 
 Run as described:
@@ -412,154 +454,315 @@ pod install --verbose
 7. Example of swift code to establish connection
 
 ```swift
+
+//
+//  AppDelegate.swift
+//  swiftApp
+//
+//  Created by Krzysztof on 25/04/2021.
+//
+
 import UIKit
 import ssi_agent
 
 
+class Logger{
+    static var logger: LogcatLogger = LogcatLogger()
+    static func logMessageDebug(message: String, tag: String, throwable: KotlinThrowable?){
+        DispatchQueue.main.async {
+            logger.log(severity: Severity.debug, message: message, tag: tag, throwable: throwable)
+        }
+    }
+}
+
+var ssiAgentApi: SsiAgentApi? = nil
+
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    let myWalletName = "newWalletName4"
-    let myWalletPassword = "newWalletPassword"
-    let myDid = "4PCVFCeZbKXyvgjCedbXDx"
+    var window : UIWindow?
+    
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
+    
         let cic = ConnectionInitiatorControllerImpl()
         let crc = CredentialReceiverControllerImpl()
         let cpc = CredPresenterControllerImpl()
-        
-        
-        EnvironmentUtils().doInitEnvironment(environment: EnvironmentImpl())
+        let lsl = LibraryStateListenerImpl()
 
-        let walletManager = IndyWalletManager.Companion()
-        
 
-        if (!walletManager.isWalletExistsAndOpenable(walletName: myWalletName, walletPassword: myWalletPassword)) {
-            print("Recreating wallet")
-            walletManager.createWallet(walletName: myWalletName, walletPassword: myWalletPassword, walletCreationStrategy: WalletCreationStrategy.truncateandcreate)}
-
+            let myWalletName = "newWalletName6"
+            let myWalletPassword = "newWalletPassword"
+            let myDid = "4PCVFCeZbKXyvgjCedbXDx"
         
-        if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
-            print("Recreating did")
-            let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
-                didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
-                walletName : myWalletName, walletPassword:myWalletPassword)
+        //ToBeReworked.init().enableIndyLog()
+
+        print("Starting AppDelegate")
+
+        DispatchQueue.global().async {
+          
+        
+            let group = DispatchGroup()
             
-            print("Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())")
-            //Store did somewhere in your application to use it afterwards
-        }
+            group.enter()
+            
+            DispatchQueue.main.async {
+                print("Before initializing env")
+                EnvironmentUtils().doInitEnvironment(environment:EnvironmentImpl())
+                group.leave()
+            }
+           
+       
+            group.notify(queue: .main) {
+                
+                print("Strting wallet init")
+                
+                let walletManager = IndyWalletManager.Companion()
 
-        let walletHolder = IndyWalletHolder(
-            walletName : myWalletName,
-            walletPassword :myWalletPassword,
-            didConfig : DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil)
-        )
+                Logger.logMessageDebug(message: "Before creating wallet", tag: "INIT", throwable: nil)
+              
+                let indyHomeEnv = getEnvironmentVar( "INDY_HOME")
+                
+                Logger.logMessageDebug(message: "Env INDY_HOME= \(indyHomeEnv)", tag: "INIT", throwable: nil)
+                if (!walletManager.isWalletExistsAndOpenable(walletName: myWalletName, walletPassword: myWalletPassword)) {
+                    Logger.logMessageDebug(message: "Recreating wallet", tag: "INIT", throwable: nil)
+                    walletManager.createWallet(walletName: myWalletName, walletPassword: myWalletPassword, walletCreationStrategy: WalletCreationStrategy.truncateandcreate)}
+                
+                Logger.logMessageDebug(message: "Before creating did", tag: "INIT", throwable: nil)
+                if (!walletManager.isDidExistsInWallet(did: myDid, walletName: myWalletName, walletPassword: myWalletPassword)) {
+                    Logger.logMessageDebug(message: "Recreating did", tag: "INIT", throwable: nil)
 
-        let indyWalletConnector = IndyWalletConnector().build(walletHolder: walletHolder)
-        
-        
-        let indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-            genesisFilePath: "./docker_pool_transactions_genesis.txt",
-            ipAddress: "192.168.0.117",
-            genesisMode: IndyLedgerConnectorConfiguration.GenesisMode.ip,
-            generatedGenesysFileName: "genesis.txn",
-            retryTimes: 5,
-            retryDelayMs: 5000)
-        
-        let ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
-                .withConnectionInitiatorController(connectionInitiatorController: cic)
-                .withCredReceiverController(credReceiverController: crc)
-                .withCredPresenterController(credPresenterController: cpc)
-                .withLedgerConnector(ledgerConnector: IndyLedgerConnector(indyLedgerConnectorConfiguration: indyLedgerConnectorConfiguration))
+                    let didResult: CreateAndStoreMyDidResult = walletManager.createDid(
+                        didConfig: DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil),
+                        walletName : myWalletName, walletPassword:myWalletPassword)
+
+
+                    Logger.logMessageDebug(message: "Got generated didResult: did = \(didResult.getDid()) , verkey = \(didResult.getVerkey())", tag: "INIT", throwable: nil)
+
+
+                    //Store did somewhere in your application to use it afterwards
+                }
+                
+                Logger.logMessageDebug(message: "Before creating wallet holder", tag: "INIT", throwable: nil)
+
+
+                
+                let walletHolder = IndyWalletHolder(
+                    walletName : myWalletName,
+                    walletPassword :myWalletPassword,
+                    didConfig : DidConfig.init(did: myDid, seed: nil, cryptoType: nil, cid: nil)
+                )
+                Logger.logMessageDebug(message: "Before creating wallet connector", tag: "INIT", throwable: nil)
+                
+                let indyWalletConnector = IndyWalletConnector().build(walletHolder: walletHolder)
+
+
+
+            let indyLedgerConnector = IndyLedgerConnectorBuilder()
+                .withGenesisMode(genesisMode: GenesisMode.sovrinBuildernet)
                 .build()
-        
-               ssiAgentApi.doInit()
-      
-       ssiAgentApi.connect(url: "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiNDk3WG5jdjNUckI5Wk5MSHlyYWNQTUxNMm54ZGZHV2R2RXNtb2pXWDNBYVQiXSwicmVjaXBpZW50S2V5cyI6WyJIYUY3bW5BZkYyZXFIcFdndDNDMlljMzNoM25ZV2c0dlBnOXhteWpTVW1KeSJdLCJAaWQiOiI5MmE3OTEwZC0zYWUyLTQzZTgtYmE3YS0xMGI1MGVmYWEwMWIiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0=")
+                
+                Logger.logMessageDebug(message: "Before creating ssiAgentApi", tag: "INIT", throwable: nil)
 
-        sleep(180)
-        ssiAgentApi.shutdown(force: true)
+                
+                ssiAgentApi = SsiAgentBuilderImpl(walletConnector: indyWalletConnector)
+                        .withConnectionInitiatorController(connectionInitiatorController: cic)
+                        .withCredReceiverController(credReceiverController: crc)
+                        .withCredPresenterController(credPresenterController: cpc)
+                        .withLedgerConnector(ledgerConnector: indyLedgerConnector)
+                        .build()
+           
+            
+                Logger.logMessageDebug(message: "Before initialization", tag: "INIT", throwable: nil)
+
+                ssiAgentApi.unsafelyUnwrapped.doInit(libraryStateListener:lsl)
+                
+                Logger.logMessageDebug(message: "After initialize fun called", tag: "INIT", throwable: nil)
+
+            }
+            
+           
+        }
         
+       // sleep(10000)
+ 
         return true
+      
     }
 
-    // MARK: UISceneSession Lifecycle
+     
+}
 
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-    }
-
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
-    }
-
-
+func getEnvironmentVar(_ name: String) -> String? {
+    guard let rawValue = getenv(name) else { return nil }
+    return String(utf8String: rawValue)
 }
 
 class ConnectionInitiatorControllerImpl: ConnectionInitiatorController
 {
-    func onCompleted(connection: PeerConnection) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onFailure(connection: PeerConnection?, error: DidExchangeError, message: String?, details: String?, stackTrace: String?) {
+
+        print("Connection failure", error)
+    }
+
+    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
+        Logger.logMessageDebug(message: "onAbandoned", tag: "INIT", throwable: nil)
+    }
+
+    func onCompleted(connection: PeerConnection) {
+        Logger.logMessageDebug(message: "onCompleted", tag: "INIT", throwable: nil)
     }
     
-    func onInvitationReceived(connection: PeerConnection, endpoint: String, invitation: Invitation) -> CallbackResult {
+    func onInvitationReceived(connection: PeerConnection, invitation: Invitation) -> CallbackResult {
+        Logger.logMessageDebug(message: "onInvitationReceived", tag: "INIT", throwable: nil)
         return CallbackResult(canProceedFurther: true)
     }
     
    
-    
-    func onRequestSent(connection: PeerConnection, request: ConnectionRequest) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
+        Logger.logMessageDebug(message: "onRequestSent", tag: "INIT", throwable: nil)
     }
     
     func onResponseReceived(connection: PeerConnection, response: ConnectionResponse) -> CallbackResult {
+        Logger.logMessageDebug(message: "onResponseReceived", tag: "INIT", throwable: nil)
         return CallbackResult(canProceedFurther: true)
-    }
-    
-    func onAbandoned(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
-        
     }
     
 }
 
 
+class LibraryStateListenerImpl : LibraryStateListener {
+    func initializationFailed(error: LibraryError, message: String?, details: String?, stackTrace: String?) {
+        print("Listener: Initialization failed", error)
+    }
+
+    func initializationCompleted()  {
+        
+        print("Library initialized")
+        Logger.logMessageDebug(message: "Listener: Initialization completed", tag: "INIT", throwable: nil)
+        
+        let connection = ssiAgentApi.unsafelyUnwrapped.connect(url: "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiRkdTOXZYTm1lMWQydVozV1BDcDdFZXJzd1A1MUI5M1k0RllvdGJaSmZKcXoiXSwiQGlkIjoiYWY2MTE4ZWMtNDk1Yi00ZjU1LWFmNGUtYzA3OTk0ZDA4MDMxIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9", keepConnectionAlive: true)
+
+        //Sleeper().sleep(value: 5000)
+     //   ssiAgentApi.unsafelyUnwrapped.abandonConnection(connection: connection.unsafelyUnwrapped, force: true, notifyPeerBeforeAbandoning: false)
+
+      //  Sleeper().sleep(value: 5000)
+
+    //    ssiAgentApi.unsafelyUnwrapped.reconnect(connection: connection.unsafelyUnwrapped, keepConnectionAlive: true)
+
+        
+        Logger.logMessageDebug(message: "Listener: ConnectionStarted", tag: "INIT", throwable: nil)
+
+
+    }
+    
+
+}
+
 class CredentialReceiverControllerImpl: CredReceiverController {
+    func onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onDone", tag: "INIT", throwable: nil)
+
+    }
+
+    func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onRequestSent", tag: "INIT", throwable: nil)
+    }
+
+    func onProblemReport(connection: PeerConnection, problemReport: ProblemReport) -> CallbackResult {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onProblemReport", tag: "INIT", throwable: nil)
+        return CallbackResult(canProceedFurther: true)
+    }
+    
     func onCredentialReceived(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onCredentialReceived", tag: "INIT", throwable: nil)
         return CallbackResult(canProceedFurther: true)
     }
     
     func onDone(connection: PeerConnection, credentialContainer: CredentialContainer) -> CallbackResult {
+        
+       /*
+        DispatchQueue.global().async {
+            Sleeper().sleep(value: 5000)
+            
+            print("Getting credentials from wallet")
+            let credInfos = ssiAgentApi.unsafelyUnwrapped.getCredentialInfos().map {$0 as! IndyCredInfo}
+            
+            print("Got")
+            
+            print(credInfos)
+            
+            credInfos.forEach { credInfo in
+                print("retrieving first cred")
+                let cred = ssiAgentApi.unsafelyUnwrapped.getCredentialInfo(localWalletCredId: credInfo.referent)
+                
+                print(cred)
+            }
+            
+        
+        }
+        */
         return CallbackResult(canProceedFurther: true)
     }
     
-    func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onOfferReceived(connection: PeerConnection, credentialOfferContainer: CredentialOfferContainer) -> OfferResponseAction {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onOfferReceived", tag: "INIT", throwable: nil)
+        return OfferResponseAction.accept
     }
     
-    func onRequestSent(connection: PeerConnection, credentialRequestContainer: CredentialRequestContainer) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+
+    func onAckSent(connection: PeerConnection, ack: Ack) {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onAckSent", tag: "INIT", throwable: nil)
     }
     
 }
 
 
 class CredPresenterControllerImpl: CredPresenterController {
-    func onDone(connection: PeerConnection) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onProblemReportGenerated", tag: "INIT", throwable: nil)
+    }
+
+    func onDone(connection: PeerConnection)  {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onDone", tag: "INIT", throwable: nil)
     }
     
-    func onRequestReceived(connection: PeerConnection, presentationRequest: PresentationRequestContainer) -> CallbackResult {
-        return CallbackResult(canProceedFurther: true)
+    func onRequestReceived(connection: PeerConnection,
+                           presentationRequestContainer: PresentationRequestContainer) -> PresentationRequestResponseAction {
+        Logger.logMessageDebug(message: "CredentialReceiverControllerImpl:onRequestReceived", tag: "INIT", throwable: nil)
+        DispatchQueue.global().async {
+            Sleeper().sleep(value: 10000)
+            
+            Logger.logMessageDebug(message: "Getting parked proof requests from wallet", tag: "INIT", throwable: nil)
+
+
+
+            let credInfos = ssiAgentApi.unsafelyUnwrapped.getCredentialInfos().map {$0 as! IndyCredInfo}
+            let parketPresentationRequestContainers = ssiAgentApi.unsafelyUnwrapped.getParkedPresentationRequests()
+            
+            Logger.logMessageDebug(message: "Got \(parketPresentationRequestContainers)", tag: "INIT", throwable: nil)
+
+            
+            parketPresentationRequestContainers.forEach { presentationRequestContainer in
+                ssiAgentApi.unsafelyUnwrapped.processParkedPresentationRequest(presentationRequestContainer: presentationRequestContainer, presentationRequestResponseAction: PresentationRequestResponseAction.accept)
+            }
+           
+            credInfos.forEach { credInfo in
+
+                Logger.logMessageDebug(message: "retrieving first cred", tag: "INIT", throwable: nil)
+                let cred = ssiAgentApi.unsafelyUnwrapped.getCredentialInfo(localWalletCredId: credInfo.referent)
+                
+                Logger.logMessageDebug(message: "\(cred)", tag: "INIT", throwable: nil)
+            }
+            
+        
+        }
+        
+        return PresentationRequestResponseAction.park
     }
     
     
 }
+
 ```
 
 ## Some documentation references

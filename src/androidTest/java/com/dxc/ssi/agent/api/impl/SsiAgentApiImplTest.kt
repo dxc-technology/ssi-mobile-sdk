@@ -7,11 +7,14 @@ import androidx.test.rule.GrantPermissionRule
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
+import com.dxc.ssi.agent.api.callbacks.didexchange.DidExchangeError
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.library.LibraryError
 import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
 import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
+import com.dxc.ssi.agent.didcomm.model.ack.Ack
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
@@ -36,14 +39,18 @@ import kotlinx.coroutines.launch
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 
 //TODO: if we can use some common kotlin tests to have common tests for all platforms
 class SsiAgentApiImplTest {
 
-    private val walletName = "newWalletName2"
+    private val walletName = "newWalletName60"
     private val walletPassword = "newWalletPassword"
     private val did = "Goci8gnhuC9vvxTWg1aFSx"
     lateinit var ssiAgentApi: SsiAgentApi
+    var logger: Kermit = Kermit(LogcatLogger())
 
     @Rule
     @JvmField
@@ -70,7 +77,7 @@ class SsiAgentApiImplTest {
 
         val instrumentation = InstrumentationRegistry.getInstrumentation()
 
-        println("Starting test")
+        logger.d { "Starting test" }
 
         EnvironmentUtils.initEnvironment(EnvironmentImpl(instrumentation.context))
 
@@ -85,7 +92,7 @@ class SsiAgentApiImplTest {
                 walletName = walletName,
                 walletPassword = walletPassword
             )
-            print("Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}")
+            logger.d { "Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}" }
             //Store did somewhere in your application to use it afterwards
         }
 
@@ -109,25 +116,30 @@ class SsiAgentApiImplTest {
             .build()
 
 
-        val issuerInvitationUrl =
-            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiMlBVdXY3dnpEQk16b2szQUFQRThHN2dlVk5KbUVlWTdTRGlOaUhRQTFhaDgiXSwiQGlkIjoiZDBhNjcyY2YtNDczOC00NDdlLWI3MWQtYjU4NTZmYTEzMTk1IiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+        val issuerInvitationUrl = "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiRGNrNnRkanJSdENKWThGY1V4REt6clhiM0N4TWlpZUxiY3RKRzFYVEozbm8iXSwiQGlkIjoiNTgyYjUwNDItYmNhMS00Y2M0LTlkM2UtYWViYWJhNjlhZTNjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
 
-                ssiAgentApi.abandonAllConnections(force = true, notifyPeerBeforeAbandoning = false)
+//                ssiAgentApi.abandonAllConnections(force = true, notifyPeerBeforeAbandoning = false)
 
 
-                println("Connecting to issuer")
+                logger.d { "Connecting to issuer" }
                 val connection = ssiAgentApi.connect(issuerInvitationUrl, keepConnectionAlive = true)
-                println("Connected to issuer")
+                logger.d { "Connected to issuer" }
 
             }
 
-            override fun initializationFailed() {
+            override fun initializationFailed(
+                error: LibraryError,
+                message: String?,
+                details: String?,
+                stackTrace: String?
+            ) {
                 TODO("Not yet implemented")
             }
+
         })
 
         Sleeper().sleep(800000)
@@ -143,10 +155,10 @@ class SsiAgentApiImplTest {
             GlobalScope.launch {
                 delay(10_000)
 
-                println("Woken up...")
+                logger.d { "Woken up..." }
 
                 ssiAgentApi.getParkedPresentationRequests().forEach { presentationRequestContainer ->
-                    println("Accepting parked presentation request $presentationRequestContainer")
+                    logger.d { "Accepting parked presentation request $presentationRequestContainer" }
                     ssiAgentApi.processParkedPresentationRequest(
                         presentationRequestContainer,
                         PresentationRequestResponseAction.ACCEPT
@@ -157,8 +169,8 @@ class SsiAgentApiImplTest {
             return PresentationRequestResponseAction.PARK
         }
 
-        override fun onDone(connection: PeerConnection): CallbackResult {
-            return CallbackResult(true)
+        override fun onDone(connection: PeerConnection) {
+
         }
 
         override fun onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
@@ -168,12 +180,14 @@ class SsiAgentApiImplTest {
     }
 
     inner class CredReceiverControllerImpl : CredReceiverController {
+        var logger: Kermit = Kermit(LogcatLogger())
+
         override fun onOfferReceived(
             connection: PeerConnection,
             credentialOfferContainer: CredentialOfferContainer
         ): OfferResponseAction {
 
-            println("Received credential offer")
+            logger.d { "Received credential offer" }
 
             GlobalScope.launch {
                 delay(20_000)
@@ -190,8 +204,8 @@ class SsiAgentApiImplTest {
         override fun onRequestSent(
             connection: PeerConnection,
             credentialRequestContainer: CredentialRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ){
+
         }
 
         override fun onCredentialReceived(
@@ -201,18 +215,23 @@ class SsiAgentApiImplTest {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer): CallbackResult {
-            return CallbackResult(true)
+        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
+
         }
 
         override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
             TODO("Not yet implemented")
         }
 
+        override fun onAckSent(connection: PeerConnection, ack: Ack) {
+            logger.d { "Ack sent for credential" }
+        }
+
 
     }
 
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
+        var logger: Kermit = Kermit(LogcatLogger())
         override fun onInvitationReceived(
             connection: PeerConnection,
             invitation: Invitation
@@ -220,26 +239,32 @@ class SsiAgentApiImplTest {
             return CallbackResult(canProceedFurther = true)
         }
 
-        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest): CallbackResult {
-            println("Request sent hook called : $connection, $request")
-            return CallbackResult(true)
+        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
+            logger.d { "Request sent hook called : $connection, $request" }
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
-            println("Response received hook called : $connection, $response")
+            logger.d {"Response received hook called : $connection, $response" }
             return CallbackResult(true)
         }
 
-        override fun onCompleted(connection: PeerConnection): CallbackResult {
-            println("Connection completed : $connection")
-            return CallbackResult(true)
+        override fun onCompleted(connection: PeerConnection) {
+            logger.d { "Connection completed : $connection" }
         }
 
-        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?): CallbackResult {
-            println("Connection completed : $connection")
-            return CallbackResult(true)
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
+            logger.d { "Connection completed : $connection" }
         }
 
+        override fun onFailure(
+            connection: PeerConnection?,
+            error: DidExchangeError,
+            message: String?,
+            details: String?,
+            stackTrace: String?
+        ) {
+            TODO("Not yet implemented")
+        }
 
     }
 }

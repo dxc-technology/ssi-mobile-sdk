@@ -6,6 +6,9 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
 import com.dxc.ssi.agent.model.messages.Context
 import kotlinx.serialization.decodeFromString
@@ -20,10 +23,11 @@ abstract class AbstractMessageProcessor(
     val processors: Processors,
     val services: Services,
 ) : MessageProcessor {
-
+    var logger: Kermit = Kermit(LogcatLogger())
 
     override suspend fun processMessage(context: Context) {
-        println("Started processing message $context")
+
+        logger.d { "Started processing message $context" }
 
         val actionParams = ActionParams(
             walletConnector = walletConnector,
@@ -40,7 +44,7 @@ abstract class AbstractMessageProcessor(
             .invoke(actionParams)
             .perform()
 
-        println("action completed with result : $actionResult")
+        logger.d { "action completed with result : $actionResult" }
 
     }
 
@@ -51,7 +55,7 @@ abstract class AbstractMessageProcessor(
         val typeAttribute =
             Json { ignoreUnknownKeys = true }.decodeFromString<BasicMessageWithTypeOnly>(message).type
         val messageType = enumValues<T>().single { Regex((it as MessageType).getTypeString()).matches(typeAttribute) }
-        println("Determined message type: $messageType")
+        logger.d { "Determined message type: $messageType" }
         return messageType
     }
 

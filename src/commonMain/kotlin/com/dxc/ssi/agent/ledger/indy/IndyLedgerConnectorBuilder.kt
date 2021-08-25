@@ -23,7 +23,7 @@ class IndyLedgerConnectorBuilder {
         }
 
         if(genesisMode == null) {
-            genesisMode = GenesisMode.SOVRIN_BUILDERNET
+            genesisMode = GenesisMode.FILE
         }
 
         if(generatedGenesysFileName == null) {
@@ -51,11 +51,13 @@ class IndyLedgerConnectorBuilder {
     }
 
     fun withGenesisFilePath(genesisFilePath: String) : IndyLedgerConnectorBuilder {
+        this.genesisMode = GenesisMode.FILE
         this.genesisFilePath = genesisFilePath
         return this
     }
     fun withIpAddress(ipAddress: String) : IndyLedgerConnectorBuilder {
         this.ipAddress = ipAddress
+        this.genesisMode = GenesisMode.IP
         return this
     }
     fun withGenesisMode(genesisMode: GenesisMode) : IndyLedgerConnectorBuilder {

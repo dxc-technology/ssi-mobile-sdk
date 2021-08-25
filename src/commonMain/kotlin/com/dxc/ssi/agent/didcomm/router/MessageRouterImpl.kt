@@ -11,6 +11,9 @@ import com.dxc.ssi.agent.didcomm.processor.issue.CredIssuerProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessorImpl
 import com.dxc.ssi.agent.didcomm.processor.verify.CredVerifierProcessorImpl
 import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.messages.BasicMessageWithTypeOnly
 import com.dxc.ssi.agent.model.messages.Context
 import kotlinx.serialization.decodeFromString
@@ -25,6 +28,7 @@ class MessageRouterImpl(
 ) :
     MessageRouter {
 
+    private val logger: Kermit = Kermit(LogcatLogger())
     override val processors = Processors()
 
     init {
@@ -108,7 +112,8 @@ class MessageRouterImpl(
             else -> throw IllegalArgumentException("Unknown message type: $typeAttribute")
         }
 
-        println("Determined route: $route")
+        logger.d { "Determined route: $route" }
+
         return route
 
     }

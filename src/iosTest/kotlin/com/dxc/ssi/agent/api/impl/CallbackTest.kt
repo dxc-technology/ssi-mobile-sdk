@@ -3,6 +3,9 @@ package com.dxc.ssi.agent.api.impl
 
 import com.dxc.ssi.agent.callback.callbackHandler
 import com.dxc.ssi.agent.callback.impl.SimpleCallback
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.wallet.indy.model.WalletConfig
 import com.dxc.ssi.agent.wallet.indy.model.WalletPassword
 import com.indylib.indy_create_wallet
@@ -13,7 +16,7 @@ import kotlin.test.Test
 import kotlin.test.Ignore
 
 class CallbackTest {
-
+    var logger: Kermit = Kermit(LogcatLogger())
     @Test
     @OptIn(ExperimentalStdlibApi::class)
     @Ignore
@@ -36,6 +39,6 @@ class CallbackTest {
             callbackHandler.waitForCallbackResult(commandHandle)
         }
 
-        println("Test finished")
+        logger.d { "Test finished" }
     }
 }
