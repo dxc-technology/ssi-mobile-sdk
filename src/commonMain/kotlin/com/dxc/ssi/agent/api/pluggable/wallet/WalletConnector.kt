@@ -5,5 +5,4 @@ data class WalletConnector(
     val prover: Prover?,
     val verifier: Verifier?,
     val trustee: Trustee?,
-    val walletHolder: WalletHolder
-)
+    val walletHolder: WalletHolder)

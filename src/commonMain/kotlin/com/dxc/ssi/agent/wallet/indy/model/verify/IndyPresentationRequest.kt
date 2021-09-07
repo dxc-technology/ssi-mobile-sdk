@@ -10,30 +10,24 @@ import kotlinx.serialization.Serializable
 "version": "2.0",
 "nonce": "886317418316603832867162",
 "requested_attributes": {
-"first-name-requirement": {
-"name": "name",
-"restrictions": [
-{
-"schema_name": "vaccination-schema"
-}
-]
-},
-"age-requirement": {
-"name": "age",
-"restrictions": [
-{
-"schema_name": "vaccination-schema"
-}
-]
-},
-"vaccination-requirement": {
-"name": "vaccination",
-"restrictions": [
-{
-"schema_name": "vaccination-schema"
-}
-]
-}
+    "first-name-requirement": {
+        "name": "name",
+        "restrictions": [
+            {"schema_name": "vaccination-schema"}
+        ]
+    },
+    "age-requirement": {
+        "name": "age",
+        "restrictions": [
+            { "schema_name": "vaccination-schema"}
+        ]
+    },
+    "vaccination-requirement": {
+        "name": "vaccination",
+        "restrictions": [
+            {"schema_name": "vaccination-schema"}
+        ]
+    }
 },
 "requested_predicates": {}
 }

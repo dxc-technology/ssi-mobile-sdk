@@ -4,29 +4,42 @@ import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.model.trustping.TrustPingResponse
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 
-class ReceiveTrustPingResponseAction(private val actionParams: ActionParams): Action {
+class ReceiveTrustPingResponseAction(private val actionParams: ActionParams) : Action {
+    private val logger: Kermit = Kermit(LogcatLogger())
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     override suspend fun perform(): ActionResult {
-        println("Entered perform fun")
-        val messageContext = actionParams.messageContext
-        println("Got messageContext")
-        val connection = messageContext.connection!!
-        println("Got connection")
-        val trustPingTrackerService = actionParams.trustPingTrackerService!!
-        println("Got trustPingService")
+        logger.d { "Entered perform fun" }
+        val messageContext = actionParams.context
+        logger.d { "Got messageContext" }
 
-        val trustPingResponseMessage =
-            Json {
-                ignoreUnknownKeys = true
-            }.decodeFromString<TrustPingResponse>(messageContext.receivedUnpackedMessage.message)
 
-        println("Decoded trustPingResponseMessage")
+        messageContext!!.connection?.let { connection ->
+            logger.d { "Got connection" }
+            val connectionsTrackerService = actionParams.services.connectionsTrackerService!!
+            logger.d { "Got trustPingService" }
 
-        trustPingTrackerService.trustPingResponseReceivedEvent(connection)
-        println("Marked ping message as received")
+            val trustPingResponseMessage =
+                json.decodeFromString<TrustPingResponse>(messageContext.receivedUnpackedMessage!!.message)
+
+            logger.d { "Decoded trustPingResponseMessage" }
+
+            connectionsTrackerService.trustPingResponseReceivedEvent(connection)
+            actionParams.callbacks.trustPingController?.onTrustPingResponseReceived(connection)
+            logger.d { "Marked ping message as received" }
+
+        }
+
+
         return ActionResult()
     }
 }

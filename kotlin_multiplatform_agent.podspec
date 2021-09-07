@@ -12,9 +12,11 @@ Pod::Spec.new do |spec|
     spec.libraries                = "c++"
     spec.module_name              = "#{spec.name}_umbrella"
 
-    spec.ios.deployment_target = '10.2'
+    spec.ios.deployment_target = '12.2'
+    spec.osx.deployment_target = '10.8'
+    spec.tvos.deployment_target = '9.0'
 
-                
+    spec.dependency 'PocketSocket'
 
     spec.pod_target_xcconfig = {
         'KOTLIN_TARGET[sdk=iphonesimulator*]' => 'ios_x64',

@@ -1,14 +1,20 @@
 package com.dxc.ssi.agent.api.pluggable.wallet
 
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
-import com.dxc.ssi.agent.didcomm.model.common.Data
+import com.dxc.ssi.agent.didcomm.model.common.RawData
 import com.dxc.ssi.agent.didcomm.model.common.Thread
+import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
+import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
+import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
+import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
+import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationState
 import com.dxc.ssi.agent.model.CredentialExchangeRecord
+import com.dxc.ssi.agent.model.PresentationExchangeRecord
 import com.dxc.ssi.agent.wallet.indy.model.revoke.RevocationState
 import com.dxc.ssi.agent.wallet.indy.model.verify.RevocationRegistryEntry
 
@@ -124,17 +130,25 @@ interface Prover {
      * @param id [String]
      */
     suspend fun createMasterSecret(id: String)
-    fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): Data
-    fun buildCredentialObjectFromRawData(data: Data): Credential
-    fun buildCredentialOfferObjectFromRawData(data: Data): CredentialOffer
+    fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): RawData
+    fun buildCredentialObjectFromRawData(data: RawData): Credential
+    fun buildCredentialOfferObjectFromRawData(data: RawData): CredentialOffer
     suspend fun removeCredentialExchangeRecordByThread(thread: Thread)
-    fun buildPresentationRequestObjectFromRawData(data: Data): PresentationRequest
+    fun buildPresentationRequestObjectFromRawData(data: RawData): PresentationRequest
     suspend fun createPresentation(
         presentationRequest: PresentationRequest,
         ledgerConnector: LedgerConnector,
     ): Presentation
 
-    fun extractPresentationDataFromPresentation(presentation: Presentation): Data
+    fun extractPresentationDataFromPresentation(presentation: Presentation): RawData
+    suspend fun getParkedCredentialOffers(): Set<CredentialOfferContainer>
+    suspend fun findCredentialExchangeRecordsWithState(credentialIssuenceState: CredentialIssuenceState): Set<CredentialExchangeRecord>
+    suspend fun findPresentationExchangeRecordsWithState(credentialVerificationState: CredentialVerificationState): Set<PresentationExchangeRecord>
+    suspend fun getCredentialInfos(): Set<CredentialInfo>
+    suspend fun getCredentialInfo(localWalletCredId: String): CredentialInfo
+    suspend fun getParkedPresentationRequests(): Set<PresentationRequestContainer>
+    suspend fun getPresentationExchangeRecordByThread(thread: Thread): PresentationExchangeRecord?
+    suspend fun storePresentationExchangeRecord(presentationExchangeRecord: PresentationExchangeRecord)
 
 
 }

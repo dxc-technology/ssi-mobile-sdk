@@ -1,5 +1,7 @@
 package com.dxc.ssi.agent.didcomm.model.didexchange
 
+import com.dxc.ssi.agent.utils.UrlSerializer
+import io.ktor.http.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -23,10 +25,13 @@ import kotlinx.serialization.Serializable
 //TODO: think about some model types instead of just strings
 @Serializable
 data class Invitation(
+    //TODO: set default type here and validate it
     @SerialName("@type") val type: String,
-    @SerialName("@id") val id :String,
+    @SerialName("@id") val id: String,
     val label: String,
-    val recipientKeys :List<String>,
-    val routingKeys :List<String>,
-    val imageUrl : String?
+    @Serializable(with = UrlSerializer::class)
+    val serviceEndpoint: Url,
+    val recipientKeys: List<String>,
+    val routingKeys: List<String>,
+    val imageUrl: String?
 )

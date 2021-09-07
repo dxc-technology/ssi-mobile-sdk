@@ -5,21 +5,28 @@ import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.wallet.Prover
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletHolder
 import com.dxc.ssi.agent.config.Configuration
-import com.dxc.ssi.agent.didcomm.model.common.Data
+import com.dxc.ssi.agent.didcomm.model.common.RawData
 import com.dxc.ssi.agent.didcomm.model.common.Thread
+import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.data.*
 import com.dxc.ssi.agent.didcomm.model.revokation.data.RevocationRegistryDefinition
+import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
+import com.dxc.ssi.agent.didcomm.model.verify.data.CredentialInfo
 import com.dxc.ssi.agent.didcomm.model.verify.data.Presentation
 import com.dxc.ssi.agent.didcomm.model.verify.data.PresentationRequest
-import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
-import com.dxc.ssi.agent.model.CredentialExchangeRecord
-import com.dxc.ssi.agent.utils.JsonUtils
-import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
+import com.dxc.ssi.agent.didcomm.states.State
+import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
+import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationState
+import com.dxc.ssi.agent.exceptions.common.NoCredentialToSatisfyPresentationRequestException
+import com.dxc.ssi.agent.exceptions.indy.DuplicateMasterSecretNameException
 import com.dxc.ssi.agent.ledger.indy.helpers.TailsHelper
-import com.dxc.ssi.agent.wallet.indy.libindy.Anoncreds
-import com.dxc.ssi.agent.wallet.indy.libindy.CredentialsSearchForProofReq
-import com.dxc.ssi.agent.wallet.indy.libindy.Wallet
-import com.dxc.ssi.agent.wallet.indy.libindy.WalletRecord
+import com.dxc.ssi.agent.model.CredentialExchangeRecord
+import com.dxc.ssi.agent.model.ExchangeRecord
+import com.dxc.ssi.agent.model.PresentationExchangeRecord
+import com.dxc.ssi.agent.utils.ObjectHolder
+import com.dxc.ssi.agent.utils.indy.IndySerializationUtils
+import com.dxc.ssi.agent.wallet.indy.helpers.WalletCustomRecordsRepository
+import com.dxc.ssi.agent.wallet.indy.libindy.*
 import com.dxc.ssi.agent.wallet.indy.model.WalletRecordType
 import com.dxc.ssi.agent.wallet.indy.model.issue.*
 import com.dxc.ssi.agent.wallet.indy.model.issue.temp.RevocationRegistryDefinitionId
@@ -30,9 +37,13 @@ import com.dxc.utils.Base64
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 
 
 class IndyProver(val walletHolder: WalletHolder) : Prover {
+    var logger: Kermit = Kermit(LogcatLogger())
     private var masterSecretId: String?
         get() = isoMasterSecret.access { it.obj }!!
         set(value) {
@@ -59,20 +70,19 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
             credentialDefinition
         )
 
-        println(
+        logger.d {
             "Before executing Anoncreds.proverCreateCredentialReq " +
                     "proverDid = $proverDid," +
                     "credentialOfferJson = $credentialOfferJson," +
                     "credDefJson = $credDefJson," +
-                    "masterSecretId = $masterSecretId"
-        )
+                    "masterSecretId = $masterSecretId" }
 
         val credReq = Anoncreds.proverCreateCredentialReq(
             walletHolder.getWallet() as Wallet, proverDid, credentialOfferJson, credDefJson, masterSecretId
         )
 
-        println("credReq.credentialRequestJson = ${credReq.getCredentialRequestJson()}")
-        println("credReq.credentialRequestMetadataJson = ${credReq.getCredentialRequestMetadataJson()}")
+        logger.d { "credReq.credentialRequestJson = ${credReq.getCredentialRequestJson()}" }
+        logger.d { "credReq.credentialRequestMetadataJson = ${credReq.getCredentialRequestMetadataJson()}" }
 
         val credentialRequest =
             IndySerializationUtils.jsonProcessor.decodeFromString<IndyCredentialRequest>(credReq.getCredentialRequestJson())
@@ -87,22 +97,19 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         masterSecretId = id
         try {
             Anoncreds.proverCreateMasterSecret(walletHolder.getWallet() as Wallet, id)
-        } catch (e: Exception) {
-            if (!e.message!!.contains("DuplicateMasterSecretNameException")) throw e
-
-            //TODO: think what should be the behaviour
-            println("MasterSecret already exists, who cares, continuing")
+        } catch (e: DuplicateMasterSecretNameException) {
+            logger.d { "MasterSecret already exists, so we will use it" }
         }
     }
 
     override fun createCredentialDefinitionIdFromOffer(credentialOffer: CredentialOffer): CredentialDefinitionId {
 
-        println("createCredentialDefinitionIdFromOffer: cred offer ${credentialOffer}")
+        logger.d { "createCredentialDefinitionIdFromOffer: cred offer $credentialOffer" }
 
         val indyCredentialOffer = credentialOffer as IndyCredentialOffer
 
 
-        println("indy cred offer ${indyCredentialOffer}")
+        logger.d {  "indy cred offer ${indyCredentialOffer}" }
 
         val credentialDefinitionIdRaw = indyCredentialOffer.credentialDefinitionIdRaw
 
@@ -116,91 +123,81 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
     }
 
     override suspend fun storeCredentialExchangeRecord(credentialExchangeRecord: CredentialExchangeRecord) {
-        //TODO: check if we need to check wallet health status before using it
-
-        //TODO:Understand what id to use for uniquely identifying proper record
-        val existingCredentialExchangeRecord = getCredentialExchangeRecordByThread(credentialExchangeRecord.thread)
+        storeExchangeRecord(credentialExchangeRecord)
+    }
 
 
-        val value = IndySerializationUtils.jsonProcessor.encodeToString(credentialExchangeRecord)
+    override suspend fun storePresentationExchangeRecord(presentationExchangeRecord: PresentationExchangeRecord) {
+        storeExchangeRecord(presentationExchangeRecord)
+    }
 
-        println("Serialized credentialExchange record = $value")
-
-        if (existingCredentialExchangeRecord == null) {
-
-            //TODO: think what tags do we need here
-            val tagsJson = null
-
-            WalletRecord.add(
-                walletHolder.getWallet() as Wallet,
-                WalletRecordType.CredentialExchangeRecord.name,
-                credentialExchangeRecord.thread.thid,
-                value,
-                tagsJson
-            )
-
-        } else {
-
-            //TODO: see if we also need to update tags
-
-            WalletRecord.updateValue(
-                walletHolder.getWallet() as Wallet,
-                WalletRecordType.CredentialExchangeRecord.name,
-                credentialExchangeRecord.thread.thid,
-                value
-            )
-
-
-        }
+    private suspend inline fun <reified T : ExchangeRecord> storeExchangeRecord(exchangeRecord: T) {
+        WalletCustomRecordsRepository.upsertWalletRecord(walletHolder.getWallet() as Wallet, exchangeRecord)
     }
 
     override suspend fun getCredentialExchangeRecordByThread(thread: Thread): CredentialExchangeRecord? {
+        return getExchangeRecordByThreadId(thread)
+    }
 
-        //TODO: use some serializable data structure
-        val options = "{\"retrieveType\" : true}"
-        /*
-        *  retrieveType: (optional, false by default) Retrieve record type,
-        * retrieveValue: (optional, true by default) Retrieve record value,
-        * retrieveTags: (optional, true by default) Retrieve record tags }
-        *
-        * */
+    override suspend fun getPresentationExchangeRecordByThread(thread: Thread): PresentationExchangeRecord? {
+        return getExchangeRecordByThreadId(thread)
+    }
 
+    //TODO: consider removing this functions
+    private suspend inline fun <reified T : ExchangeRecord> getExchangeRecordByThreadId(thread: Thread): T? {
+        return WalletCustomRecordsRepository.getWalletRecordById(walletHolder.getWallet() as Wallet, thread.thid)
+    }
 
-        //TODO: find out better solution of looking up for connection
-        return try {
-            val retrievedValue =
-                WalletRecord.get(
-                    walletHolder.getWallet() as Wallet,
-                    WalletRecordType.CredentialExchangeRecord.name,
-                    thread.thid,
-                    options
-                )
-            IndySerializationUtils.jsonProcessor.decodeFromString<CredentialExchangeRecord>(
-                JsonUtils.extractValue(
-                    retrievedValue
-                )
-            )
-        } catch (w: WalletItemNotFoundException) {
-            null //this will be the case for ios
-        } catch (e: Exception) { //TODO: unify this check with the explicit exception as above. For this we will need to implement exceptions on common level for JVM and android impementations
-//this will be the case for Android and JVM. To be unified
-            if (e.message!!.contains("WalletItemNotFoundException"))
-                null
-            else
-                throw e
-        }
+    override suspend fun findCredentialExchangeRecordsWithState(credentialIssuenceState: CredentialIssuenceState): Set<CredentialExchangeRecord> {
+        return findExchangeRecordsWithState(credentialIssuenceState)
+    }
+
+    override suspend fun findPresentationExchangeRecordsWithState(credentialVerificationState: CredentialVerificationState): Set<PresentationExchangeRecord> {
+        return findExchangeRecordsWithState(credentialVerificationState)
+    }
+
+    private suspend inline fun <reified T : ExchangeRecord, S : State> findExchangeRecordsWithState(state: S): Set<T> {
+        val query =
+            "{\"${ExchangeRecord.getWalletRecordStateTag(T::class)}\": \"${state.name}\"}"
+        return WalletCustomRecordsRepository.getWalletRecordsByQuery(walletHolder.getWallet() as Wallet, query)
+    }
+
+    override suspend fun getCredentialInfos(): Set<CredentialInfo> {
+
+        val queryJson = "{}"
+
+        val credentialsSearch = CredentialsSearch()
+
+        credentialsSearch.open(walletHolder.getWallet() as Wallet, queryJson)
+
+        //TODO: implement batches instead of hardcoded 200 creds
+        val credentialsJson = credentialsSearch.fetchNextCredentials(200)
+
+        logger.d { "Retrieved  credentialsJson: $credentialsJson" }
+
+        val credentialInfos =
+            IndySerializationUtils.jsonProcessor.decodeFromString<List<IndyCredInfo>>(credentialsJson)
+
+        credentialsSearch.closeSearch()
+
+        return credentialInfos.toSet()
 
     }
 
-    override fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): Data {
+    override suspend fun getCredentialInfo(localWalletCredId: String): CredentialInfo {
+        val credentialInfoJson = Anoncreds.proverGetCredential(walletHolder.getWallet() as Wallet, localWalletCredId)
+        return IndySerializationUtils.jsonProcessor.decodeFromString<IndyCredInfo>(credentialInfoJson)
+    }
+
+    override fun extractCredentialRequestDataFromCredentialInfo(credentialRequestInfo: CredentialRequestInfo): RawData {
 
         //TODO: check if this type cast is needed here
         val credentialRequestJson =
             IndySerializationUtils.jsonProcessor.encodeToString(credentialRequestInfo.credentialRequest as IndyCredentialRequest)
-        println("extractCredentialRequestDataFromCredentialInfo: credentialRequestJson = $credentialRequestJson")
+        logger.d { "extractCredentialRequestDataFromCredentialInfo: credentialRequestJson = $credentialRequestJson" }
 
 
-        return Data(base64 = Base64.plainStringToBase64String(credentialRequestJson))
+        return RawData(base64 = Base64.plainStringToBase64String(credentialRequestJson))
 
     }
 
@@ -232,10 +229,10 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
                     revocationRegistryDefinition
                 )
 
-        println("receiveCredential: credentialRequestMetadataJson -> $credentialRequestMetadataJson")
-        println("receiveCredential: credentialJson -> $credentialJson")
-        println("receiveCredential: credDefJson -> $credDefJson")
-        println("receiveCredential: revRegDefJson -> $revRegDefJson")
+        logger.d { "receiveCredential: credentialRequestMetadataJson -> $credentialRequestMetadataJson" }
+        logger.d { "receiveCredential: credentialJson -> $credentialJson" }
+        logger.d { "receiveCredential: credDefJson -> $credDefJson" }
+        logger.d { "receiveCredential: revRegDefJson -> $revRegDefJson" }
 
         return Anoncreds.proverStoreCredential(
             walletHolder.getWallet() as Wallet,
@@ -278,7 +275,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         return revocationState
     }
 
-    override fun buildCredentialObjectFromRawData(data: Data): Credential {
+    override fun buildCredentialObjectFromRawData(data: RawData): Credential {
 
         val indyCredentialJson = Base64.base64StringToPlainString(data.base64)
 
@@ -289,12 +286,12 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun buildCredentialOfferObjectFromRawData(data: Data): CredentialOffer {
+    override fun buildCredentialOfferObjectFromRawData(data: RawData): CredentialOffer {
 
         val jsonCredentialOffer = Base64.base64StringToPlainString(data.base64)
 
 
-        println("jsonCredentialOffer = $jsonCredentialOffer")
+        logger.d { "jsonCredentialOffer = $jsonCredentialOffer" }
 
         val indyCredentialOffer =
             IndySerializationUtils.jsonProcessor.decodeFromString<IndyCredentialOffer>(
@@ -314,10 +311,10 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         )
     }
 
-    override fun buildPresentationRequestObjectFromRawData(data: Data): PresentationRequest {
+    override fun buildPresentationRequestObjectFromRawData(data: RawData): PresentationRequest {
         val indyPresentationRequestJson = Base64.base64StringToPlainString(data.base64)
 
-        println("Received JSON PresentationRequest: $indyPresentationRequestJson")
+        logger.d { "Received JSON PresentationRequest: $indyPresentationRequestJson" }
 
         val indyPresentationReuqest =
             IndySerializationUtils.jsonProcessor.decodeFromString<IndyPresentationRequest>(indyPresentationRequestJson)
@@ -336,7 +333,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
         val proofRequestJson = IndySerializationUtils.jsonProcessor.encodeToString(presentationRequest)
 
-        println("In createPresentation function: proofRequestJson = $proofRequestJson")
+        logger.d { "In createPresentation function: proofRequestJson = $proofRequestJson" }
 
         //TODO: deal with extra query. Understand what it is and how to use it. See cordentity
         val extraQueryJson = null
@@ -354,12 +351,12 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
             val credentialJson = searchObj.fetchNextCredentials(key, 1)
 
-            println("Retrieved for key = $key  -> credentialJson: $credentialJson")
+            logger.d { "Retrieved for key = $key  -> credentialJson: $credentialJson" }
 
             val credentialForTheRequest =
                 IndySerializationUtils.jsonProcessor.decodeFromString<List<IndyCredentialForTheRequest>>(credentialJson)
                     .firstOrNull()
-                    ?: throw RuntimeException("Unable to find attribute $key that satisfies proof request: ${indyPresentationRequest.requestedAttributes[key]}")
+                    ?: throw NoCredentialToSatisfyPresentationRequestException("Unable to find attribute $key that satisfies proof request: ${indyPresentationRequest.requestedAttributes[key]}")
 
             allSchemaIds.add(IndySchemaId.fromString(credentialForTheRequest.credInfo.schemaId))
             allCredentialDefinitionIds.add(IndyCredentialDefinitionId.fromString(credentialForTheRequest.credInfo.credDefId))
@@ -407,7 +404,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         val requestedPredicates = indyPresentationRequest.requestedPredicates.keys.associate { key ->
             val credentialJson = searchObj.fetchNextCredentials(key, 1)
 
-            println("Retrieved for key = $key  -> credentialJson: $credentialJson")
+            logger.d { "Retrieved for key = $key  -> credentialJson: $credentialJson" }
 
             val credentialForTheRequest =
                 IndySerializationUtils.jsonProcessor.decodeFromString<List<IndyCredentialForTheRequest>>(credentialJson)
@@ -477,12 +474,12 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
         val usedRevStatesJson = IndySerializationUtils.jsonProcessor.encodeToString(usedRevocationStates)
 
 
-        println("proofRequestJson -> $proofRequestJson")
-        println("requestedCredentialsJson -> $requestedCredentialsJson")
-        println("masterSecretId -> $masterSecretId")
-        println("usedSchemasJson -> $usedSchemasJson")
-        println("usedCredentialDefsJson -> $usedCredentialDefsJson")
-        println("usedRevStatesJson -> $usedRevStatesJson")
+        logger.d { "proofRequestJson -> $proofRequestJson" }
+        logger.d { "requestedCredentialsJson -> $requestedCredentialsJson" }
+        logger.d { "masterSecretId -> $masterSecretId" }
+        logger.d { "usedSchemasJson -> $usedSchemasJson" }
+        logger.d { "usedCredentialDefsJson -> $usedCredentialDefsJson" }
+        logger.d { "usedRevStatesJson -> $usedRevStatesJson" }
 
         val proverProofJson = Anoncreds.proverCreateProof(
             walletHolder.getWallet() as Wallet,
@@ -494,7 +491,7 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
             usedRevStatesJson
         )
 
-        println("Indy proof created: $proverProofJson")
+        logger.d { "Indy proof created: $proverProofJson" }
 
         val presentation = IndySerializationUtils.jsonProcessor.decodeFromString<IndyPresentation>(proverProofJson)
 
@@ -520,16 +517,30 @@ class IndyProver(val walletHolder: WalletHolder) : Prover {
 
     }
 
-    override fun extractPresentationDataFromPresentation(presentation: Presentation): Data {
+    override fun extractPresentationDataFromPresentation(presentation: Presentation): RawData {
 
         //TODO: check if this type cast is needed here
         val presentationJson =
             IndySerializationUtils.jsonProcessor.encodeToString(presentation as IndyPresentation)
-        println("extractPresentationDataFromPresentation: presentationJson = $presentationJson")
+        logger.d { "extractPresentationDataFromPresentation: presentationJson = $presentationJson" }
 
 
-        return Data(base64 = Base64.plainStringToBase64String(presentationJson))
+        return RawData(base64 = Base64.plainStringToBase64String(presentationJson))
 
+    }
+
+    override suspend fun getParkedCredentialOffers(): Set<CredentialOfferContainer> {
+        return findCredentialExchangeRecordsWithState(CredentialIssuenceState.OFFER_RECEIVED)
+            .filter { it.isParked }
+            .mapNotNull { it.credentialOfferContainer }
+            .toSet()
+    }
+
+    override suspend fun getParkedPresentationRequests(): Set<PresentationRequestContainer> {
+        return findPresentationExchangeRecordsWithState(CredentialVerificationState.REQUEST_RECEIVED)
+            .filter { it.isParked }
+            .mapNotNull { it.presentationRequestContainer }
+            .toSet()
     }
 
 

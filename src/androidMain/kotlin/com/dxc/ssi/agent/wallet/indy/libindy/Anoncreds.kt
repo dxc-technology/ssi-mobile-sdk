@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
+import com.dxc.ssi.agent.exceptions.indy.IndyJvmToCommonExceptionConverter
 import org.hyperledger.indy.sdk.anoncreds.Anoncreds
 
 actual class Anoncreds {
@@ -31,10 +32,13 @@ actual class Anoncreds {
             wallet: Wallet,
             masterSecretId: String
         ): String {
-            return Anoncreds.proverCreateMasterSecret(wallet.wallet, masterSecretId).get()
+            val converter = IndyJvmToCommonExceptionConverter<String>()
+            return converter.convertException {
+                Anoncreds.proverCreateMasterSecret(wallet.wallet, masterSecretId).get()
+            }
         }
 
-        actual  suspend fun proverStoreCredential(
+        actual suspend fun proverStoreCredential(
             wallet: Wallet,
             credId: String?,
             credReqMetadataJson: String,
@@ -50,6 +54,13 @@ actual class Anoncreds {
                 credDefJson,
                 revRegDefJson
             ).get()
+        }
+
+        actual suspend fun proverGetCredential(
+            wallet: Wallet,
+            credId: String
+        ): String {
+            return Anoncreds.proverGetCredential(wallet.wallet, credId).get()
         }
 
         actual suspend fun createRevocationState(

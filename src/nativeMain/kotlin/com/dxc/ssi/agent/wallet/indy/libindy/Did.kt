@@ -9,6 +9,17 @@ actual class Did {
             TODO("Not yet implemented")
         }
 
+        actual suspend fun getDidWithMeta(
+            wallet: Wallet,
+            did: String
+        ): DidWithMetadataResult {
+            TODO("Not yet implemented")
+        }
+
+        actual suspend fun getListMyDidsWithMeta(wallet: Wallet): Set<DidWithMetadataResult> {
+            TODO("Not yet implemented")
+        }
+
     }
 
 }

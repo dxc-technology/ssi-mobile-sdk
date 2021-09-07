@@ -4,6 +4,10 @@ import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
+import com.dxc.ssi.agent.model.PeerConnectionState
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -12,41 +16,47 @@ import kotlinx.serialization.json.Json
 class ReceiveConnectionResponseAction(
     private val actionParams: ActionParams
 ) : DidExchangeAction {
+    private val logger: Kermit = Kermit(LogcatLogger())
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     override suspend fun perform(): ActionResult {
 
         val connectionInitiatorController = actionParams.callbacks.connectionInitiatorController!!
-        val messageContext = actionParams.messageContext
+        val messageContext = actionParams.context
         val walletConnector = actionParams.walletConnector
-        val trustPingProcessor = actionParams.trustPingProcessor!!
+        val trustPingProcessor = actionParams.processors.trustPingProcessor!!
 
 
         val connectionResponse =
-            Json {
-                ignoreUnknownKeys = true
-            }.decodeFromString<ConnectionResponse>(messageContext.receivedUnpackedMessage.message)
+            json.decodeFromString<ConnectionResponse>(messageContext!!.receivedUnpackedMessage!!.message)
 
 
         val ourConnectionId = connectionResponse.thread.thid
         val ourConnection = walletConnector.walletHolder.getConnectionRecordById(ourConnectionId)
 
-        println("Existing connection record $ourConnection")
+        logger.d { "Existing connection record $ourConnection" }
 
         //TODO: move the decision below to some abstraction layer? StateMahine?
         when (ourConnection!!.state) {
             //TODO: Create some enum for possible states
-            "RequestSent" -> {
+            PeerConnectionState.REQUEST_SENT -> {
                 connectionInitiatorController.onResponseReceived(ourConnection, connectionResponse)
                 //TODO: think how to avoid NPE here
                 val updatedConnection = ourConnection.copy(
-                    state = "Complete",
-                    peerVerkey = messageContext.receivedUnpackedMessage.senderVerKey
+                    state = PeerConnectionState.COMPLETED,
+                    peerVerkey = messageContext.receivedUnpackedMessage!!.senderVerKey
                 )
                 walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
-                connectionInitiatorController.onCompleted(ourConnection)
-                trustPingProcessor.sendTrustPingOverConnection(ourConnection)
+                trustPingProcessor.sendTrustPingOverConnection(updatedConnection)
+                connectionInitiatorController.onCompleted(updatedConnection)
+                logger.d { "ReceiveConnectionResponseAction: after completed callback" }
+
                 return ActionResult(updatedConnection)
             }
 
+            PeerConnectionState.ABANDONED -> return ActionResult(ourConnection)
             else -> TODO("Not implemented") // process different possibilities here according to state diagram
 
         }

@@ -6,24 +6,29 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
+import com.dxc.ssi.agent.didcomm.actions.verify.impl.ProcessPresentationRequestAction
 import com.dxc.ssi.agent.didcomm.actions.verify.impl.ReceivePresentationRequestAction
+import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
 import com.dxc.ssi.agent.didcomm.processor.MessageType
-import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessor
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
+import com.dxc.ssi.agent.didcomm.processor.Processors
+import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationStateMachine
+import com.dxc.ssi.agent.kermit.Severity
+import com.dxc.ssi.agent.model.PresentationRequestResponseAction
+import com.dxc.ssi.agent.model.messages.Context
 
 class CredVerifierProcessorImpl(
     walletConnector: WalletConnector,
     ledgerConnector: LedgerConnector, transport: Transport, callbacks: Callbacks,
-    trustPingProcessor: TrustPingProcessor, trustPingTrackerService: TrustPingTrackerService
+    processors: Processors, services: Services
 ) : AbstractMessageProcessor(
     walletConnector,
     ledgerConnector,
     transport,
     callbacks,
-    trustPingProcessor,
-    trustPingTrackerService
+    processors,
+    services
 ), CredVerifierProcessor {
 
     private val stateMachine = CredentialVerificationStateMachine()
@@ -36,7 +41,7 @@ class CredVerifierProcessorImpl(
             { actionParams -> ReceivePresentationRequestAction(actionParams) }),
         PRESENTATION("^.*present-proof/1.0/presentation$", { actionParams -> kotlin.TODO("Not implemented") }),
         PRESENTATION_PROPOSAL("^.*present-proof/1.0/propose-presentation$",
-            { actionParams -> kotlin.TODO("Not implemented") }),
+            { actionParams -> TODO("Not implemented") }),
         PROBLEM_REPORT("to be done", { actionParams -> kotlin.TODO("Not implemented") }),
         PRESENTATION_ACK("to be done", { actionParams -> kotlin.TODO("Not implemented") });
 
@@ -46,6 +51,29 @@ class CredVerifierProcessorImpl(
 
     override fun getMessageType(message: String): MessageType {
         return getMessageTypeGeneric<CredVerifyMessageType>(message)
+    }
+
+    override suspend fun processParkedPresentationRequest(
+        presentationRequestContainer: PresentationRequestContainer,
+        presentationRequestResponseAction: PresentationRequestResponseAction
+    ) {
+        logger.d { "Preparing to process parked presentation request" }
+
+        val actionParams = ActionParams(
+            walletConnector = walletConnector,
+            ledgerConnector = ledgerConnector,
+            transport = transport,
+            callbacks = callbacks,
+            context = Context(),
+            processors = processors,
+            services = services
+        )
+
+        val actionResult = ProcessPresentationRequestAction(
+            actionParams,
+            presentationRequestContainer,
+            presentationRequestResponseAction
+        ).perform()
     }
 
 

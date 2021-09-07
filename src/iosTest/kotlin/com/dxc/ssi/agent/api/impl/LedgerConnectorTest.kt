@@ -1,5 +1,6 @@
 package com.dxc.ssi.agent.api.impl
 
+import com.dxc.ssi.agent.ledger.indy.GenesisMode
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.ledger.indy.helpers.PoolHelper
 import com.dxc.ssi.agent.utils.ToBeReworked
@@ -20,14 +21,15 @@ class LedgerConnectorTest {
         ToBeReworked.enableIndyLog()
 
         val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-            genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
+            genesisMode = GenesisMode.IP,
             ipAddress = "192.168.0.117"
         )
 
 
         GlobalScope.launch {
             withContext(Dispatchers.Default) {
-            PoolHelper.openOrCreateFromIp(
+            PoolHelper.openOrCreateCustomGenesis(
+                GenesisMode.IP,
                 indyLedgerConnectorConfiguration.ipAddress,
                 EnvironmentUtils.indyHomePath
             ) }

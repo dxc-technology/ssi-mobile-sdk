@@ -1,11 +1,16 @@
 package com.dxc.ssi.agent.wallet.indy.libindy
 
+import com.dxc.ssi.agent.exceptions.indy.IndyJvmToCommonExceptionConverter
+import com.dxc.ssi.agent.exceptions.indy.WalletItemNotFoundException
 import org.hyperledger.indy.sdk.non_secrets.WalletRecord
+import java.util.concurrent.ExecutionException
 
 actual class WalletRecord {
     actual companion object {
         actual suspend fun get(wallet: Wallet, type: String, id: String, optionsJson: String): String {
-            return WalletRecord.get(wallet.wallet, type, id, optionsJson).get()
+
+            val converter = IndyJvmToCommonExceptionConverter<String>()
+            return converter.convertException { WalletRecord.get(wallet.wallet, type, id, optionsJson).get() }
         }
 
         actual suspend fun add(wallet: Wallet, type: String, id: String, value: String, tagsJson: String?) {

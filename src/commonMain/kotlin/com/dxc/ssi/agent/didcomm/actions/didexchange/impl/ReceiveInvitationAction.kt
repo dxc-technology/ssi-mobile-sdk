@@ -2,15 +2,28 @@ package com.dxc.ssi.agent.didcomm.actions.didexchange.impl
 
 import com.benasher44.uuid.uuid4
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
+import com.dxc.ssi.agent.api.callbacks.didexchange.DidExchangeError
 import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.didexchange.DidExchangeAction
-import com.dxc.ssi.agent.didcomm.commoon.MessagePacker
+import com.dxc.ssi.agent.didcomm.commoon.MessageSender
+import com.dxc.ssi.agent.didcomm.constants.DidCommProblemCodes
+import com.dxc.ssi.agent.didcomm.constants.toProblemReportDescription
 import com.dxc.ssi.agent.didcomm.model.common.Service
 import com.dxc.ssi.agent.didcomm.model.didexchange.*
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
+import com.dxc.ssi.agent.didcomm.processor.Processors
+import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
+import com.dxc.ssi.agent.model.ConnectionTransportState
+import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PeerConnectionState
 import com.dxc.ssi.agent.model.messages.Message
+import com.dxc.utils.Base64
+import io.ktor.http.*
 import io.ktor.util.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -22,109 +35,108 @@ import kotlin.random.Random
 class ReceiveInvitationAction(
     val walletConnector: WalletConnector,
     val transport: Transport,
+    val processors: Processors,
+    val services: Services,
     val connectionInitiatorController: ConnectionInitiatorController,
-    private val invitationUrl: String
+    private val invitationUrl: String,
+    private val keepConnectionAlive: Boolean
 ) : DidExchangeAction {
+    private val logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
         // TODO: think to only form special message here and pass it to message processor
         // Create connection and store it in wallet // Create separate action for this?
         // Send Connection Request
         // Ensure transport is initialized?
+        var connection: PeerConnection? = null
+        try {
+            val invitationUrl = Url(invitationUrl)
+            val encodedInvitation = invitationUrl.parameters["c_i"]!!
+            val invitation = parseInvitationFromInvitationUrl(encodedInvitation)
 
-        val invitation = parseInvitationFromInvitationUrl(invitationUrl)
-        val endpoint = parseEndpointFromInvitationUrl(invitationUrl)
+            val connectionId = uuid4().toString()
 
-        println("Parsed invitation details: invitation = $invitation\nendpoint=$endpoint")
-
-        val connectionId = uuid4().toString()
-
-
-        val connection = Connection(
-            id = connectionId, state = "START",
-            invitation = invitationUrl,
-            isSelfInitiated = true,
-            peerRecipientKeys = invitation.recipientKeys,
-            endpoint = endpoint
-        )
-
-
-        //TODO: before storing record check if there were record with the same invitation and reuse it
-        //TODO: think about not storing connection object at all untill callback result is received
-        walletConnector.walletHolder.storeConnectionRecord(connection)
-        val callbackResult = connectionInitiatorController.onInvitationReceived(connection, endpoint, invitation)
-
-        if (callbackResult.canProceedFurther) {
-
-            //form request
-            val connectionRequest = buildConnectionRequest(invitation, connectionId)
-            val connectionRequestJson = Json.encodeToString(connectionRequest)
-
-            println("Connection request: $connectionRequestJson")
-
-            //send request
-            //TODO: introduce message packing/unpacking here
-
-            val messageToSend =
-                MessagePacker.packAndPrepareForwardMessage(Message(connectionRequestJson), connection, walletConnector)
+            connection = PeerConnection(
+                id = connectionId, state = PeerConnectionState.INVITATION_RECEIVED,
+                invitation = this.invitationUrl,
+                isSelfInitiated = true,
+                peerRecipientKeys = invitation.recipientKeys,
+                endpoint = invitation.serviceEndpoint,
+                keepTransportAlive = keepConnectionAlive,
+                transportState = ConnectionTransportState.INITIALIZATION
+            )
 
 
-            //TODO: ensure that transport function is synchronous here because we will save new status to wallet only after actual message was sent
-            transport.sendMessage(connection, messageToSend)
+            //TODO: before storing record check if there were record with the same invitation and reuse it
+            walletConnector.walletHolder.storeConnectionRecord(connection)
+            val callbackResult = connectionInitiatorController.onInvitationReceived(connection, invitation)
 
-            //TODO: set proper state here
-            val updatedConnection = connection.copy(state = "RequestSent")
-            walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
+            if (callbackResult.canProceedFurther) {
 
-            connectionInitiatorController.onRequestSent(updatedConnection, connectionRequest)
+                //form request
+                val connectionRequest = buildConnectionRequest(invitation, connectionId)
+                val connectionRequestJson = Json.encodeToString(connectionRequest)
 
-            //update status to request sent
-            return ActionResult(updatedConnection)
+                logger.d { "Connection request: $connectionRequestJson" }
 
-        } else {
-            //TODO: handle this situation here
-            //update status to abandoned
-            val updatedConnection = connection.copy(state = "Abandoned")
-            //TODO: see if we need to store it at all
-            walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
-            return ActionResult(updatedConnection)
+                MessageSender.packAndSendMessage(
+                    Message(connectionRequestJson), connection, walletConnector, transport, services,
+                    onMessageSendingFailure = {
+                        val problemReport = ProblemReport(
+                            id = uuid4().toString(),
+                            description = DidCommProblemCodes.COULD_NOT_DELIVER_MESSAGE.toProblemReportDescription()
+                        )
+                        processors.abandonConnectionProcessor!!.abandonConnection(connection, false, problemReport)
+                        null
+                    },
+                    onMessageSent = {
+                        val updatedConnection = connection.copy(state = PeerConnectionState.REQUEST_SENT)
+                        walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
+                        connectionInitiatorController.onRequestSent(updatedConnection, connectionRequest)
+                        null
+                    }
+                )
+
+                return ActionResult(walletConnector.walletHolder.getConnectionRecordById(connection.id))
+
+            } else {
+                //TODO: handle this situation here
+                //update status to abandoned
+                val updatedConnection = connection.copy(state = PeerConnectionState.ABANDONED)
+                //TODO: see if we need to store it at all
+                walletConnector.walletHolder.storeConnectionRecord(updatedConnection)
+                return ActionResult(updatedConnection)
+
+            }
+        } catch (e: URLParserException) {
+            connectionInitiatorController.onFailure(
+                connection = connection,
+                error = DidExchangeError.INVALID_INVITATION_URL,
+                details = invitationUrl
+            )
+        } catch (t: Throwable) {
+            connectionInitiatorController.onFailure(
+                connection = connection,
+                error = DidExchangeError.UNKNOWN_ERROR,
+                stackTrace = t.stackTraceToString()
+            )
 
         }
-
-        //
-        //val connection2 = walletConnector.walletHolder.getConnectionRecordById(connection.id)
-
+        return ActionResult()
 
     }
 
     @OptIn(InternalAPI::class)
-    private fun parseInvitationFromInvitationUrl(invitationUrl: String): Invitation {
-        // TODO: add validation here that invitation is proper URL
-        //TODO: modify it to support other parameters apart form c_i
-        val base64Invitation = Regex("^.*c_i=(.*$)").find(invitationUrl)!!.groups[1]!!.value
-
-        println("Parsed invitation json form URL $base64Invitation")
-
-        //TODO: find a replacement of ktor utils for decoding base64 to avoid InternalApi usage
-        val jsonInvitation = base64Invitation.decodeBase64String()
-
-        println("JSON invitation $jsonInvitation")
-
+    private fun parseInvitationFromInvitationUrl(encodedInvitation: String): Invitation {
+        val jsonInvitation = Base64.base64StringToPlainString(encodedInvitation)
+        logger.d { "JSON invitation $jsonInvitation" }
         return Json { ignoreUnknownKeys = true }.decodeFromString<Invitation>(jsonInvitation)
-
-    }
-
-    private fun parseEndpointFromInvitationUrl(invitation: String): String {
-        return Regex("(^.*)\\?c_i=.*$").find(invitationUrl)!!.groups[1]!!.value
     }
 
     private fun buildConnectionRequest(invitation: Invitation, connectionId: String): ConnectionRequest {
 
-
         return ConnectionRequest(
             //TODO: understand how to populate id properly
             id = connectionId,
-            //TODO: create enum or other holder for message type, replace hardocde and move it inside of the message, as the template will suit only this particular request
-            type = "https://didcomm.org/connections/1.0/request",
             //TODO: understand what label should be
             label = "Holder",
             connection = buildConnection(),
@@ -133,8 +145,8 @@ class ReceiveInvitationAction(
 
     }
 
-    private fun buildConnection(): com.dxc.ssi.agent.didcomm.model.didexchange.Connection {
-        val connection = com.dxc.ssi.agent.didcomm.model.didexchange.Connection(
+    private fun buildConnection(): Connection {
+        val connection = Connection(
             //TODO: understand what did should be set to
             did = walletConnector.walletHolder.getIdentityDetails().did,
             didDocument = buildDidDocument()

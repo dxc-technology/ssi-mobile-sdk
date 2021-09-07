@@ -45,9 +45,9 @@ actual open class IndyException(override val message:String, val sdkErrorCode: I
                 ErrorCode.CommonInvalidParam13,
                 ErrorCode.CommonInvalidParam14 -> InvalidParameterException(sdkErrorCode)
                 ErrorCode.WalletItemNotFound -> WalletItemNotFoundException()
+                ErrorCode.AnoncredsMasterSecretDuplicateNameError -> DuplicateMasterSecretNameException()
                 /*
                 TODO: implement those exceptions when we need them
-                ErrorCode.CommonInvalidState -> InvalidStateException()
                 ErrorCode.CommonInvalidStructure -> InvalidStructureException()
                 ErrorCode.CommonIOError -> IOException()
                 ErrorCode.WalletInvalidHandle -> InvalidWalletException()
@@ -55,6 +55,8 @@ actual open class IndyException(override val message:String, val sdkErrorCode: I
                 ErrorCode.WalletTypeAlreadyRegisteredError -> DuplicateWalletTypeException()
                 */
                 ErrorCode.WalletAlreadyExistsError -> WalletExistsException()
+                ErrorCode.PoolLedgerTimeout -> PoolLedgerTimeoutException()
+                ErrorCode.CommonInvalidState -> InvalidStateException()
                 /*
                 ErrorCode.WalletNotFoundError -> WalletNotFoundException()
                 ErrorCode.WalletInputError -> WalletInputException()
@@ -78,7 +80,7 @@ actual open class IndyException(override val message:String, val sdkErrorCode: I
                 ErrorCode.LedgerNotFound -> LedgerNotFoundException()
                 ErrorCode.AnoncredsRevocationRegistryFullError -> RevocationRegistryFullException()
                 ErrorCode.AnoncredsInvalidUserRevocId -> AnoncredsInvalidUserRevocId()
-                ErrorCode.AnoncredsMasterSecretDuplicateNameError -> DuplicateMasterSecretNameException()
+
                 ErrorCode.AnoncredsProofRejected -> ProofRejectedException()
                 ErrorCode.AnoncredsCredentialRevoked -> CredentialRevokedException()
                 ErrorCode.AnoncredsCredDefAlreadyExistsError -> CredDefAlreadyExistsException()

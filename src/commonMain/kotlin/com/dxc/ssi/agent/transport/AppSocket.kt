@@ -1,35 +1,81 @@
 package com.dxc.ssi.agent.transport
 
+import co.touchlab.stately.isolate.IsolateState
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
-import co.touchlab.stately.collections.IsoMutableList
+import com.dxc.ssi.agent.utils.CoroutineHelper
+import com.dxc.ssi.agent.utils.ObjectHolder
+import com.dxc.utils.System
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 
-//Common
-
-class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelop>) {
+class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
     private val ws = PlatformSocket(url)
     private val job: CompletableJob = Job()
+    private val logger: Kermit = Kermit(LogcatLogger())
 
-    private val socketListenerAdapter = SocketListenerAdapter()
-
-
-    // private val isolatedWs = IsolateState {}
-
-    var socketError: Throwable? = null
-        private set
-    var currentState: State = State.CLOSED
+    var socketError: Throwable?
+        get() = isoSocketError.access { it.obj }!!
         private set(value) {
-            field = value
-            stateListener?.invoke(value)
+            isoSocketError.access { it.obj = value }
         }
-    var stateListener: ((State) -> Unit)? = null
+
+    var currentState: State
+        get() = isoCurrentState.access { it.obj }!!
         set(value) {
-            field = value
-            value?.invoke(currentState)
+            isoCurrentState.access { it.obj = value }
+        }
+    private val isoCurrentState = IsolateState { ObjectHolder(State.CLOSED) }
+    private val isoSocketError = IsolateState { ObjectHolder<Throwable?>(null) }
+
+    private val socketListener: PlatformSocketListener = object : PlatformSocketListener {
+        override fun onOpen() {
+
+            currentState = State.CONNECTED
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                socketOpenedChannel.send(SocketOpenedMessage())
+            })
+            logger.d { "PlatformSocketListener: ${System.getCurrentThread()} - Opened socket" }
+
         }
 
+        override fun onFailure(t: Throwable) {
+            socketError = t
+            currentState = State.CLOSED
+            logger.d { "PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}" }
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                socketOpenedChannel.send(SocketFailureMessage())
+            })
 
-    //TODO: rework this function to be more robust and more suited for different platforms
+        }
+
+        override fun onMessage(msg: String) {
+            logger.d { "${System.getCurrentThread()} - Received message: $msg" }
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                incomingMessagesChannel.send(MessageEnvelop(msg))
+            })
+
+        }
+
+        override fun onClosing(code: Int, reason: String) {
+            currentState = State.CLOSING
+            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketClosingChannel.send(Unit) })
+            logger.d { "PlatformSocketListener: Closing socket: code = $code, reason = $reason" }
+        }
+
+        override fun onClosed(code: Int, reason: String) {
+            currentState = State.CLOSED
+
+            logger.d { "PlatformSocketListener: Closed socket: code = $code, reason = $reason" }
+            job.complete()
+        }
+    }
+
+    val socketOpenedChannel: Channel<AppSocketMessage> = Channel()
+    val socketClosingChannel: Channel<Unit> = Channel()
+
     suspend fun connect() {
         if (currentState != State.CLOSED) {
             throw IllegalStateException("The socket is available.")
@@ -38,109 +84,39 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
         currentState = State.CONNECTING
 
 
-        //TODO: refactor this to have cleaner code, introduce single listen fun combining the funs above
-        //TODO: introduce liseners for other types of events
-        listenForMessages()
-        listenForFailures()
+        ws.openSocket(socketListener)
 
-        ws.openSocket(socketListenerAdapter)
-        println("awaiting while websocket is opened")
+        logger.d { "Thread = ${System.getCurrentThread()} awaiting while websocket is opened" }
+        when (socketOpenedChannel.receive()) {
+            is SocketOpenedMessage -> {
+                logger.d { "After socketListener.onOpen" }
 
-        socketListenerAdapter.socketOpenedChannel.receive()
-        socketListener.onOpen()
-        println("After socketListener.onOpen")
+                if (currentState != State.CONNECTED)
+                    throw IllegalStateException("Could not be opened")
+            }
+            is SocketFailureMessage -> {
+                //TODO: make the exception more meaningful allowing to differentiate between different types of errors
+                throw IllegalStateException("Could not be opened")
+            }
 
-
-        if (currentState != State.CONNECTED)
-            throw throw IllegalStateException("Could not be opened")
+        }
 
     }
 
-    //TODO: ensure to disconnect properly otherwise we will have leaking threads
-    fun disconnect() {
+    suspend fun disconnect() {
         if (currentState != State.CLOSED) {
             currentState = State.CLOSING
             ws.closeSocket(1000, "The user has closed the connection.")
-            job.complete()
+            //TODO: if we try to do it it hangs currently
+            //socketClosingChannel.receive()
         }
     }
 
     fun send(msg: String) {
         if (currentState != State.CONNECTED) throw IllegalStateException("The connection is lost.")
-        println("Sending message to websocket")
+        logger.d { "Sending message to websocket" }
         ws.sendMessage(msg)
-        println("Sent message to websocket")
-    }
-
-    private suspend fun listenForMessages() {
-        println("IN listenForMessages function")
-
-        //TODO: check that is is working as expected. I presume that once job is completed on socket disconnect them this coroutine willbe cancelled
-        CoroutineScope(Dispatchers.Default + job).async {
-            val receivedMessage = socketListenerAdapter.socketReceivedMessageChannel.receive()
-            socketListener.onMessage(receivedMessage)
-
-            listenForMessages()
-        }
-
-    }
-
-    private suspend fun listenForClosure() {
-        println("IN listenForClosure function")
-
-        //TODO: check that is is working as expected. I presume that once job is completed on socket disconnect them this coroutine willbe cancelled
-        CoroutineScope(Dispatchers.Default + job).async {
-            val closureDetails = socketListenerAdapter.socketClosedChannel.receive()
-            socketListener.onClosed(closureDetails.code, closureDetails.reason)
-
-            listenForMessages()
-        }
-
-    }
-
-
-    private suspend fun listenForFailures() {
-        println("IN listenForFailures function")
-        CoroutineScope(Dispatchers.Default + job).async {
-            val receivedThrowable = socketListenerAdapter.socketFailureChannel.receive()
-            socketListener.onFailure(receivedThrowable)
-
-            listenForFailures()
-        }
-
-    }
-
-    private val socketListener: PlatformSocketListener = object : PlatformSocketListener {
-        override fun onOpen() {
-            println("Opened socket")
-
-
-            currentState = State.CONNECTED
-        }
-
-        override fun onFailure(t: Throwable) {
-            socketError = t
-            currentState = State.CLOSED
-            println("Socket failure: $t \n ${t.stackTraceToString()}")
-        }
-
-        override fun onMessage(msg: String) {
-            println("Received message: $msg")
-            incomingMessagesQueue.add(MessageEnvelop(msg))
-
-        }
-
-        override fun onClosing(code: Int, reason: String) {
-            currentState = State.CLOSING
-            println("Closing socket: code = $code, reason = $reason")
-        }
-
-        override fun onClosed(code: Int, reason: String) {
-            currentState = State.CLOSED
-
-            println("Closed socket: code = $code, reason = $reason")
-            job.complete()
-        }
+        logger.d { "Sent message to websocket" }
     }
 
     enum class State {
@@ -149,4 +125,9 @@ class AppSocket(url: String, incomingMessagesQueue: IsoMutableList<MessageEnvelo
         CLOSING,
         CLOSED
     }
+
+    interface AppSocketMessage
+
+    class SocketOpenedMessage : AppSocketMessage
+    class SocketFailureMessage : AppSocketMessage
 }

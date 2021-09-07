@@ -1,152 +1,269 @@
 package com.dxc.ssi.agent.api.impl
 
 import android.Manifest
+import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.callbacks.CallbackResult
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
+import com.dxc.ssi.agent.api.callbacks.didexchange.DidExchangeError
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.library.LibraryError
+import com.dxc.ssi.agent.api.callbacks.library.LibraryStateListener
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
-import com.dxc.ssi.agent.didcomm.model.common.ProblemReport
+import com.dxc.ssi.agent.api.pluggable.wallet.WalletManager
+import com.dxc.ssi.agent.api.pluggable.wallet.indy.IndyWalletConnector
+import com.dxc.ssi.agent.didcomm.model.ack.Ack
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionRequest
 import com.dxc.ssi.agent.didcomm.model.didexchange.ConnectionResponse
 import com.dxc.ssi.agent.didcomm.model.didexchange.Invitation
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialOfferContainer
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialRequestContainer
+import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
-import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
-import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.ledger.indy.GenesisMode
+import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorBuilder
+import com.dxc.ssi.agent.model.DidConfig
+import com.dxc.ssi.agent.model.OfferResponseAction
+import com.dxc.ssi.agent.model.PeerConnection
+import com.dxc.ssi.agent.model.PresentationRequestResponseAction
+import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
+import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
+import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
 
 //TODO: if we can use some common kotlin tests to have common tests for all platforms
 class SsiAgentApiImplTest {
 
+    private val walletName = "newWalletName60"
+    private val walletPassword = "newWalletPassword"
+    private val did = "Goci8gnhuC9vvxTWg1aFSx"
+    lateinit var ssiAgentApi: SsiAgentApi
+    var logger: Kermit = Kermit(LogcatLogger())
+
     @Rule
     @JvmField
-    val permissionRule = GrantPermissionRule.grant(
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.INTERNET,
-        Manifest.permission.ACCESS_NETWORK_STATE
-    )
+    val permissionRule = if (Build.VERSION.SDK_INT >= 30) {   //  Use Android API 30 Platform to run it
+        GrantPermissionRule.grant(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            //  Instead of running this: Manifest.permission.MANAGE_EXTERNAL_STORAGE use this command: adb shell appops set --uid com.dxc.ssi.agent.test MANAGE_EXTERNAL_STORAGE allow
+        )
+    } else {
+        GrantPermissionRule.grant(
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE
+        )
+    }
 
     @Test
-    @Ignore("Ignored because it is actually integration tets whoch should be moved out of unit tests in order to to run during build")
+    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
 
         val instrumentation = InstrumentationRegistry.getInstrumentation()
 
-        println("Starting test")
-        val indyLedgerConnectorConfiguration = IndyLedgerConnectorConfiguration(
-            genesisMode = IndyLedgerConnectorConfiguration.GenesisMode.IP,
-            ipAddress = "192.168.0.117")
+        logger.d { "Starting test" }
 
-        val ssiAgentApi = SsiAgentBuilderImpl()
-            .withEnvironment(EnvironmentImpl(instrumentation.context))
+        EnvironmentUtils.initEnvironment(EnvironmentImpl(instrumentation.context))
+
+        val walletManager: WalletManager = IndyWalletManager
+
+        if (!walletManager.isWalletExistsAndOpenable(walletName, walletPassword))
+            walletManager.createWallet(walletName, walletPassword)
+
+        if (!walletManager.isDidExistsInWallet(did, walletName, walletPassword)) {
+            val didResult = walletManager.createDid(
+                didConfig = DidConfig(did = did),
+                walletName = walletName,
+                walletPassword = walletPassword
+            )
+            logger.d { "Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}" }
+            //Store did somewhere in your application to use it afterwards
+        }
+
+        val walletHolder = IndyWalletHolder(
+            walletName = walletName,
+            walletPassword = walletPassword,
+            didConfig = DidConfig(did = did)
+        )
+
+        val indyLedgerConnector = IndyLedgerConnectorBuilder()
+            .withGenesisMode(GenesisMode.SOVRIN_BUILDERNET)
+            .build()
+
+        val indyWalletConnector = IndyWalletConnector.build(walletHolder)
+
+        ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
             .withConnectionInitiatorController(ConnectionInitiatorControllerImpl())
             .withCredReceiverController(CredReceiverControllerImpl())
             .withCredPresenterController(CredPresenterControllerImpl())
-            .withLedgerConnector(IndyLedgerConnector(indyLedgerConnectorConfiguration))
+            .withLedgerConnector(indyLedgerConnector)
             .build()
 
-        ssiAgentApi.init()
+
+        val issuerInvitationUrl = "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiRGNrNnRkanJSdENKWThGY1V4REt6clhiM0N4TWlpZUxiY3RKRzFYVEozbm8iXSwiQGlkIjoiNTgyYjUwNDItYmNhMS00Y2M0LTlkM2UtYWViYWJhNjlhZTNjIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
-        val issuerInvitationUrl =
-            "ws://192.168.0.117:7000/ws?c_i=eyJsYWJlbCI6Iklzc3VlciIsImltYWdlVXJsIjpudWxsLCJzZXJ2aWNlRW5kcG9pbnQiOiJ3czovLzE5Mi4xNjguMC4xMTc6NzAwMC93cyIsInJvdXRpbmdLZXlzIjpbIkoxRVZQUVg0VzkyRjN0ajhUQVkzSEJGV3Myem85M29uVTliMWZ6OExiSzRhIl0sInJlY2lwaWVudEtleXMiOlsiNDZGdFlaVGRxajIyelNXYlR1WXd3R3U1dkJSWFl5UXR6TEsyUXdiQ2thZUsiXSwiQGlkIjoiZmVlMWIyNzUtNjQ0Ni00YjRlLWEwZjEtZDEyNDI0NzY3ZDYzIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+        ssiAgentApi.init(object : LibraryStateListener {
+            override fun initializationCompleted() {
 
-        val verifierInvitationUrl =
-            "ws://192.168.0.117:9000/ws?c_i=eyJsYWJlbCI6IlZlcmlmaWVyIiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzOi8vMTkyLjE2OC4wLjExNzo5MDAwL3dzIiwicm91dGluZ0tleXMiOlsiRndORkdDOU1YdTNrOXhleFhQaDNOcHZaMkx3VVl2eDU2YnRzd0Z2MU0xc3MiXSwicmVjaXBpZW50S2V5cyI6WyJBc1BLNzZiMW1lWXVqWmI4aHhLdTV6RjlzamlIVE5Sa2tuakFSNnY3WmhFWSJdLCJAaWQiOiI0ZmQzYTBiZi1kZjNjLTQ1MTMtYTljMC05M2JkNmVjMmNlZDkiLCJAdHlwZSI6ImRpZDpzb3Y6QnpDYnNOWWhNcmpIaXFaRFRVQVNIZztzcGVjL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIn0="
+//                ssiAgentApi.abandonAllConnections(force = true, notifyPeerBeforeAbandoning = false)
 
-        println("Connecting to issuer")
-        ssiAgentApi.connect(issuerInvitationUrl)
 
-        //TODO: ensure that connection can be established without delay between two connections
-        //Sleeper().sleep(4000)
+                logger.d { "Connecting to issuer" }
+                val connection = ssiAgentApi.connect(issuerInvitationUrl, keepConnectionAlive = true)
+                logger.d { "Connected to issuer" }
 
-        println("Connecting to verifier")
-        ssiAgentApi.connect(verifierInvitationUrl)
+            }
 
-        Sleeper().sleep(500000)
+            override fun initializationFailed(
+                error: LibraryError,
+                message: String?,
+                details: String?,
+                stackTrace: String?
+            ) {
+                TODO("Not yet implemented")
+            }
+
+        })
+
+        Sleeper().sleep(800000)
 
     }
 
-    class CredPresenterControllerImpl : CredPresenterController {
+    inner class CredPresenterControllerImpl : CredPresenterController {
         override fun onRequestReceived(
-            connection: Connection,
+            connection: PeerConnection,
             presentationRequest: PresentationRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ): PresentationRequestResponseAction {
+
+            GlobalScope.launch {
+                delay(10_000)
+
+                logger.d { "Woken up..." }
+
+                ssiAgentApi.getParkedPresentationRequests().forEach { presentationRequestContainer ->
+                    logger.d { "Accepting parked presentation request $presentationRequestContainer" }
+                    ssiAgentApi.processParkedPresentationRequest(
+                        presentationRequestContainer,
+                        PresentationRequestResponseAction.ACCEPT
+                    )
+                }
+            }
+
+            return PresentationRequestResponseAction.PARK
         }
 
-        override fun onDone(connection: Connection): CallbackResult {
-            return CallbackResult(true)
+        override fun onDone(connection: PeerConnection) {
+
+        }
+
+        override fun onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
+
         }
 
     }
 
-    class CredReceiverControllerImpl : CredReceiverController {
+    inner class CredReceiverControllerImpl : CredReceiverController {
+        var logger: Kermit = Kermit(LogcatLogger())
+
         override fun onOfferReceived(
-            connection: Connection,
+            connection: PeerConnection,
             credentialOfferContainer: CredentialOfferContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ): OfferResponseAction {
+
+            logger.d { "Received credential offer" }
+
+            GlobalScope.launch {
+                delay(20_000)
+                ssiAgentApi.getParkedCredentialOffers()
+                    .forEach {
+                        ssiAgentApi.processParkedCredentialOffer(it, OfferResponseAction.ACCEPT)
+                    }
+
+            }
+
+            return OfferResponseAction.PARK
         }
 
         override fun onRequestSent(
-            connection: Connection,
+            connection: PeerConnection,
             credentialRequestContainer: CredentialRequestContainer
-        ): CallbackResult {
-            return CallbackResult(true)
+        ){
+
         }
 
         override fun onCredentialReceived(
-            connection: Connection,
+            connection: PeerConnection,
             credentialContainer: CredentialContainer
         ): CallbackResult {
             return CallbackResult(true)
         }
 
-        override fun onDone(connection: Connection, credentialContainer: CredentialContainer): CallbackResult {
-            return CallbackResult(true)
+        override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
+
+        }
+
+        override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
+            TODO("Not yet implemented")
+        }
+
+        override fun onAckSent(connection: PeerConnection, ack: Ack) {
+            logger.d { "Ack sent for credential" }
         }
 
 
     }
 
     class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
+        var logger: Kermit = Kermit(LogcatLogger())
         override fun onInvitationReceived(
-            connection: Connection,
-            endpoint: String,
+            connection: PeerConnection,
             invitation: Invitation
         ): CallbackResult {
             return CallbackResult(canProceedFurther = true)
         }
 
-        override fun onRequestSent(connection: Connection, request: ConnectionRequest): CallbackResult {
-            println("Request sent hook called : $connection, $request")
+        override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
+            logger.d { "Request sent hook called : $connection, $request" }
+        }
+
+        override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
+            logger.d {"Response received hook called : $connection, $response" }
             return CallbackResult(true)
         }
 
-        override fun onResponseReceived(connection: Connection, response: ConnectionResponse): CallbackResult {
-            println("Response received hook called : $connection, $response")
-            return CallbackResult(true)
+        override fun onCompleted(connection: PeerConnection) {
+            logger.d { "Connection completed : $connection" }
         }
 
-        override fun onCompleted(connection: Connection): CallbackResult {
-            println("Connection completed : $connection")
-            return CallbackResult(true)
+        override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
+            logger.d { "Connection completed : $connection" }
         }
 
-        override fun onAbandoned(connection: Connection, problemReport: ProblemReport): CallbackResult {
-            println("Connection abandoned : $connection")
-            return CallbackResult(true)
+        override fun onFailure(
+            connection: PeerConnection?,
+            error: DidExchangeError,
+            message: String?,
+            details: String?,
+            stackTrace: String?
+        ) {
+            TODO("Not yet implemented")
         }
 
     }

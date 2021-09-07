@@ -6,10 +6,13 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.router.MessageRouter
 import com.dxc.ssi.agent.didcomm.router.MessageRouterImpl
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
+import com.dxc.ssi.agent.kermit.Severity
+import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.Message
-import com.dxc.ssi.agent.model.messages.MessageContext
+import com.dxc.ssi.agent.model.messages.Context
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
 import com.dxc.ssi.agent.model.messages.ReceivedUnpackedMessage
 import kotlinx.serialization.decodeFromString
@@ -19,14 +22,15 @@ class MessageListenerImpl(
     private val transport: Transport,
     private val walletConnector: WalletConnector,
     private val ledgerConnector: LedgerConnector,
-    private val trustPingTrackerService: TrustPingTrackerService,
+    private val services: Services,
     callbacks: Callbacks
 ) :
     MessageListener {
 
+    private val logger: Kermit = Kermit(LogcatLogger())
     private var isShutdown: Boolean = false
     override val messageRouter: MessageRouter =
-        MessageRouterImpl(walletConnector, ledgerConnector, trustPingTrackerService, transport, callbacks)
+        MessageRouterImpl(walletConnector, ledgerConnector, services, transport, callbacks)
 
     override fun shutdown() {
         isShutdown = true
@@ -34,41 +38,48 @@ class MessageListenerImpl(
 
     override suspend fun listen() {
 
-        println("Started listener")
-
+        logger.d { "Started listener" }
         while (!isShutdown) {
+            try {
 
-            println("Checking for new messages")
+                logger.d { "Message Listener: Checking for new messages" }
 
-            val receivedMessage = transport.receiveNextMessage()
+                val receivedMessage = transport.receiveNextMessage()
 
-            val messageContext = unpackAndBuildMesageContext(receivedMessage)
+                logger.d { "Message Listener: Received message" }
 
+                val messageContext = unpackAndBuildMesageContext(receivedMessage)
 
-            messageRouter.routeAndProcessMessage(messageContext)
-            println("procesed message")
+                messageRouter.routeAndProcessMessage(messageContext)
+                logger.d { "Message Listener: : procesed message" }
+            } catch (t: Throwable) {
+                logger.e(
+                    "Error in listen inside library",
+                    t
+                ) { t.message.toString() }
+            }
         }
 
     }
 
 
-    suspend fun unpackAndBuildMesageContext(receivedMessage: MessageEnvelop): MessageContext {
+    suspend fun unpackAndBuildMesageContext(receivedMessage: MessageEnvelop): Context {
 
         val unpackedMessage = walletConnector.walletHolder.unPackMessage(Message(receivedMessage.payload))
         val receivedUnpackedMessage = Json.decodeFromString<ReceivedUnpackedMessage>(unpackedMessage.payload)
-        println("Received Unpacked message: $receivedUnpackedMessage")
 
-        println(
-            "sender verkey = ${receivedUnpackedMessage.senderVerKey}" +
-                    "receiver_verkey = ${receivedUnpackedMessage.recipientVerKey}"
-        )
+        logger.d { "Received Unpacked message: $receivedUnpackedMessage" }
+
+        logger.d {  "sender verkey = ${receivedUnpackedMessage.senderVerKey}" +
+                "receiver_verkey = ${receivedUnpackedMessage.recipientVerKey}" }
+
         val connection = getConnectionByVerkey(receivedUnpackedMessage.senderVerKey)
 
-        return MessageContext(connection, receivedUnpackedMessage)
+        return Context(connection, receivedUnpackedMessage)
 
     }
 
-    private suspend fun getConnectionByVerkey(senderVerKey: String): Connection? {
+    private suspend fun getConnectionByVerkey(senderVerKey: String): PeerConnection? {
         return walletConnector.walletHolder.findConnectionByVerKey(senderVerKey)
     }
 

@@ -1,31 +1,30 @@
 package com.dxc.ssi.agent.api.impl
 
+import co.touchlab.stately.freeze
 import com.dxc.ssi.agent.api.Callbacks
-import com.dxc.ssi.agent.api.Environment
 import com.dxc.ssi.agent.api.SsiAgentApi
 import com.dxc.ssi.agent.api.SsiAgentBuilder
+import com.dxc.ssi.agent.api.callbacks.connection.StatefulConnectionController
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionInitiatorController
 import com.dxc.ssi.agent.api.callbacks.didexchange.ConnectionResponderController
 import com.dxc.ssi.agent.api.callbacks.issue.CredIssuerController
 import com.dxc.ssi.agent.api.callbacks.issue.CredReceiverController
+import com.dxc.ssi.agent.api.callbacks.trustping.TrustPingController
 import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
 import com.dxc.ssi.agent.api.callbacks.verification.CredVerifierController
 import com.dxc.ssi.agent.api.pluggable.LedgerConnector
 import com.dxc.ssi.agent.api.pluggable.Transport
-import com.dxc.ssi.agent.api.pluggable.wallet.*
+import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
+import com.dxc.ssi.agent.kermit.Kermit
+import com.dxc.ssi.agent.kermit.LogcatLogger
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnector
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorConfiguration
 import com.dxc.ssi.agent.transport.WebSocketTransportImpl
-import com.dxc.ssi.agent.wallet.indy.*
 
-class SsiAgentBuilderImpl() : SsiAgentBuilder {
+class SsiAgentBuilderImpl(private val walletConnector: WalletConnector) : SsiAgentBuilder {
 
+    var logger: Kermit = Kermit(LogcatLogger())
     private var transport: Transport? = null
-    private var issuer: Issuer? = null
-    private var prover: Prover? = null
-    private var verifier: Verifier? = null
-    private var trustee: Trustee? = null
-    private var walletHolder: WalletHolder? = null
     private var ledgerConnector: LedgerConnector? = null
     private var connectionInitiatorController: ConnectionInitiatorController? = null
     private var connectionResponderController: ConnectionResponderController? = null
@@ -33,97 +32,46 @@ class SsiAgentBuilderImpl() : SsiAgentBuilder {
     private var credIssuerController: CredIssuerController? = null
     private var credPresenterController: CredPresenterController? = null
     private var credVerifierController: CredVerifierController? = null
-    private var environment: Environment? = null
+    private var statefulConnectionController: StatefulConnectionController? = null
+    private var trustPingController: TrustPingController? = null
 
     override fun build(): SsiAgentApi {
 
-        if (transport == null) {
-            transport = WebSocketTransportImpl()
+        var result: SsiAgentApiImpl? = null
+        try {
+            if (transport == null) {
+                transport = WebSocketTransportImpl()
+            }
+
+
+            if (ledgerConnector == null)
+                ledgerConnector = IndyLedgerConnector(IndyLedgerConnectorConfiguration())
+
+            //TODO: think about some sensible defaults for those callbacks
+            val callbacks = Callbacks(
+                connectionInitiatorController,
+                connectionResponderController,
+                credReceiverController,
+                credIssuerController,
+                credPresenterController,
+                credVerifierController,
+                statefulConnectionController,
+                trustPingController
+            )
+            result = SsiAgentApiImpl(
+                transport = transport!!,
+                walletConnector = walletConnector!!,
+                ledgerConnector = ledgerConnector!!,
+                callbacks = callbacks
+            )
+        } catch (t: Throwable) {
+            logger.e("Error from library", t) { t.message.toString() }
         }
-
-        if (ledgerConnector == null)
-            ledgerConnector = IndyLedgerConnector( IndyLedgerConnectorConfiguration())
-
-        //TODO: it seems that all wallet-related entities must be assigned at once. It can not be the case that issuer is indy and verifier is some non-indy...
-        //TODO: combine all of those classes into IndyWalletConnector implementation
-        if (walletHolder == null)
-            walletHolder = IndyWalletHolder()
-        if (issuer == null)
-            issuer = IndyIssuer(walletHolder!!)
-        if (verifier == null)
-            verifier = IndyVerifier(walletHolder!!)
-        if (trustee == null)
-            trustee = IndyTrustee(walletHolder!!)
-        if (prover == null)
-            prover = IndyProver(walletHolder!!)
-        if(environment == null) {
-            throw IllegalArgumentException("Please pass EnvironmentImpl using withEnvironment()")
-        }
-
-
-
-        val walletConnector = WalletConnector(
-            issuer = issuer,
-            prover = prover,
-            verifier = verifier,
-            trustee = trustee,
-            walletHolder = walletHolder!!
-        )
-
-        //TODO: think about some sensible defaults for those callbacks
-        val callbacks = Callbacks(
-            connectionInitiatorController,
-            connectionResponderController,
-            credReceiverController,
-            credIssuerController,
-            credPresenterController,
-            credVerifierController
-        )
-
-
-
-        return SsiAgentApiImpl(
-            transport = transport!!,
-            walletConnector = walletConnector,
-            ledgerConnector = ledgerConnector!!,
-            callbacks = callbacks,
-            environment = environment!!
-        )
-
-    }
-
-    override fun withEnvironment(environment: Environment): SsiAgentBuilder {
-        this.environment= environment
-        return this
+        return result!!.freeze()
     }
 
     override fun withTransport(transport: Transport): SsiAgentBuilder {
         this.transport = transport
-        return this
-    }
-
-    override fun withProver(prover: Prover): SsiAgentBuilder {
-        this.prover = prover
-        return this
-    }
-
-    override fun withIssuer(issuer: Issuer): SsiAgentBuilder {
-        this.issuer = issuer
-        return this
-    }
-
-    override fun withVerifier(verifier: Verifier): SsiAgentBuilder {
-        this.verifier = verifier
-        return this
-    }
-
-    override fun withTrustee(trustee: Trustee): SsiAgentBuilder {
-        this.trustee = trustee
-        return this
-    }
-
-    override fun withWalletHolder(walletHolder: WalletHolder): SsiAgentBuilder {
-        this.walletHolder = walletHolder
         return this
     }
 
@@ -159,6 +107,16 @@ class SsiAgentBuilderImpl() : SsiAgentBuilder {
 
     override fun withCredVerifierController(credVerifierController: CredVerifierController): SsiAgentBuilder {
         this.credVerifierController = credVerifierController
+        return this
+    }
+
+    override fun withStatefulConnectionController(statefulConnectionController: StatefulConnectionController): SsiAgentBuilder {
+        this.statefulConnectionController = statefulConnectionController
+        return this
+    }
+
+    override fun withTrustPingController(trustPingController: TrustPingController): SsiAgentBuilder {
+        this.trustPingController = trustPingController
         return this
     }
 

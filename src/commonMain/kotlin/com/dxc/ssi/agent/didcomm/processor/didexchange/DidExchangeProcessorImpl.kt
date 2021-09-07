@@ -10,28 +10,37 @@ import com.dxc.ssi.agent.didcomm.actions.didexchange.impl.ReceiveConnectionRespo
 import com.dxc.ssi.agent.didcomm.actions.didexchange.impl.ReceiveInvitationAction
 import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
 import com.dxc.ssi.agent.didcomm.processor.MessageType
-import com.dxc.ssi.agent.didcomm.processor.trustping.TrustPingProcessor
-import com.dxc.ssi.agent.didcomm.services.TrustPingTrackerService
-import com.dxc.ssi.agent.model.Connection
+import com.dxc.ssi.agent.didcomm.processor.Processors
+import com.dxc.ssi.agent.didcomm.services.Services
+import com.dxc.ssi.agent.model.PeerConnection
 
 //TODO: for now this class won;t be part of abstraction, once it is implemented see if it is posible to generalize it with MessageProcessor and AbstractMessageProcessor
 //TODO: rename DidExchange to Connection everywhere? Since Did exchange spec is not yet in active status
 class DidExchangeProcessorImpl(
     walletConnector: WalletConnector,
     ledgerConnector: LedgerConnector, transport: Transport, callbacks: Callbacks,
-    trustPingProcessor: TrustPingProcessor, trustPingTrackerService: TrustPingTrackerService
+    processors: Processors,
+    services: Services
 ) : AbstractMessageProcessor(
-    walletConnector, ledgerConnector, transport, callbacks, trustPingProcessor,
-    trustPingTrackerService
+    walletConnector, ledgerConnector, transport, callbacks, processors,
+    services
 ), DidExchangeProcessor {
 
 
-    override suspend fun initiateConnectionByInvitation(invitation: String): Connection {
+    override suspend fun initiateConnectionByInvitation(invitation: String, keepConnectionAlive: Boolean): PeerConnection? {
 
         //TODO: think how to avoid NPE here
         val receiveInvitationAction =
-            ReceiveInvitationAction(walletConnector, transport, callbacks.connectionInitiatorController!!, invitation)
-        return receiveInvitationAction.perform().connection!!
+            ReceiveInvitationAction(
+                walletConnector,
+                transport,
+                processors,
+                services,
+                callbacks.connectionInitiatorController!!,
+                invitation,
+                keepConnectionAlive
+            )
+        return receiveInvitationAction.perform().connection
     }
 
 
