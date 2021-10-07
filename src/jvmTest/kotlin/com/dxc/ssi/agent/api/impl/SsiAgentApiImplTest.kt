@@ -50,7 +50,7 @@ class SsiAgentApiImplTest {
     private lateinit var ssiAgentApi: SsiAgentApi
     var logger: Kermit = Kermit(LogcatLogger())
     @Test
-    @Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
+    //@Ignore("Ignored because it is actually integration tests which should be moved out of unit tests in order to to run during build")
     //TODO: Move integration tests to separate module
     fun basicTest() {
         logger.d { "Starting test" }
@@ -94,7 +94,14 @@ class SsiAgentApiImplTest {
             .build()
 
         val invitationUrl =
-            "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiSkJFTjRrQlZpV0pSRmV1M29ncFEyaTNTQnlFWDE5Mk5Mbnl3TlV4ejRIUk4iXSwiQGlkIjoiNDU2ZWMwNmEtYmJiMi00NmJmLThjYzctMGM1YmVkZmJlNTNiIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
+            "ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNWQ4NGRkY2ItNjY3OC00YTE5LWI3NGQtOGVkYjZiNWQ2ZTFjIiwgInJlY2lwaWVudEtleXMiOiBbIjY5Z0FwSzVxTXRnMmFUcmhIN1hDeHVGc0Z3cGhrbVZ6ZlNwUENqVmJCNjhjIl0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiYTJlYzQ2NmEtZWUyYS00OGQxLTk4ZGMtZTdmOWZkMDFmZDI2IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyI5SlFWdkZLSzRneE01SHdlazJveWJjVXF6ZlpCZGV2NWRqNDFUUVc3c3FxYyJdLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiMjExZjU1ZjYtMjQ2ZC00MWM5LWE4OWYtYzU1OTliNzEyZWQwIiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyI2U3N0OEczd281YkZEMXZVU2F6NFVOYUJ3d2JUM1BnS0tnV21lTUFiZ1c5UyJdLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiZGYyZTk3N2UtMWZiNS00ZmM3LWI0MzAtYzY1MDcxZjY1OWViIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyJGaGFrcUc4cEF3UjR3eW1YOExGd2JxaXpGUDlaODJ1bjYzcFN5dE05RDhpOSJdfQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNmRhOGQ2NzgtM2QwNi00ZWJjLWFlOTgtMTQ0MTg4MjBiMDU3IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJsYWJlbCI6ICJhbGljZS5hZ2VudCIsICJyZWNpcGllbnRLZXlzIjogWyJEUkxUb3I0aWpDNzRuNXlqTk5QS2hyQ0hXS0JDSkJXUm1ycm5wQ0NlRlRTeSJdfQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiZmM5ZGZhZWEtNDIwNy00ODU2LWExNTMtNzNjODNkYzdiYTA2IiwgInJlY2lwaWVudEtleXMiOiBbIjZ2UHVZdFpVV2l2Vzc0WERNYzhad1lRRGVDZ3l2YTk1U1pDQnVKTkdYSnpIIl0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNzRiNmQ5M2ItM2M4My00NjM4LTgyYzEtNGFmYjk1NWRhZDk0IiwgInJlY2lwaWVudEtleXMiOiBbIjhCV1VtN283R1V1Y2F3aVAxTlFkZUJXVTROMThjZW01aHlIZGZRa3Jxdmt1Il0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            //"wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiSkJFTjRrQlZpV0pSRmV1M29ncFEyaTNTQnlFWDE5Mk5Mbnl3TlV4ejRIUk4iXSwiQGlkIjoiNDU2ZWMwNmEtYmJiMi00NmJmLThjYzctMGM1YmVkZmJlNTNiIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
 
 
 

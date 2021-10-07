@@ -31,11 +31,11 @@ object MessagePacker {
         logger.d { "Packed message: ${messageEnvelop.payload}" }
 
         //TODO: understand how to handle case with multiple recepient keys. Should we form forward message for each of those keys?
-        val forwardMessage = BuildForwardMessage.buildForwardMessage(messageEnvelop, connection.peerRecipientKeys.first())
+        //val forwardMessage = BuildForwardMessage.buildForwardMessage(messageEnvelop, connection.peerRecipientKeys.first())
 
         val outerMessageEnvelop = MessageEnvelop(
             payload = walletConnector.walletHolder.packMessage(
-                Message(Json.encodeToString(forwardMessage)),
+                Message(Json.encodeToString(messageEnvelop.payload)),
                 connection.peerRecipientKeys,
                 useAnonCrypt = true
             )

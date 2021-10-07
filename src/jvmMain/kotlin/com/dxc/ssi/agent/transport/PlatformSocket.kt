@@ -2,6 +2,7 @@ package com.dxc.ssi.agent.transport
 
 
 import okhttp3.*
+import okio.ByteString.Companion.encodeUtf8
 
 internal actual class PlatformSocket actual constructor(url: String) {
     private val socketEndpoint = url
@@ -17,7 +18,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
                     platformSocketListener.onFailure(t)
 
                 override fun onMessage(webSocket: WebSocket, text: String) =
-                    platformSocketListener.onMessage(text)
+                    platformSocketListener.onMessage(text))
 
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) =
                     platformSocketListener.onClosing(code, reason)
@@ -37,6 +38,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
     }
 
     actual fun sendMessage(msg: String) {
-        webSocket?.send(msg)
+        val convertedMsg = msg.encodeUtf8()
+        webSocket?.send(convertedMsg)
     }
 }

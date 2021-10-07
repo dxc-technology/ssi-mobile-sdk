@@ -32,6 +32,6 @@ data class Invitation(
     @Serializable(with = UrlSerializer::class)
     val serviceEndpoint: Url,
     val recipientKeys: List<String>,
-    val routingKeys: List<String>,
-    val imageUrl: String?
+    //val routingKeys: List<String>,
+    //val imageUrl: String?
 )
