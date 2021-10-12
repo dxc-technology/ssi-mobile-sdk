@@ -34,6 +34,7 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
         override fun onOpen() {
 
             currentState = State.CONNECTED
+
             CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
                 socketOpenedChannel.send(SocketOpenedMessage())
             })

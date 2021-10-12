@@ -1,22 +1,20 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'kotlin_multiplatform_agent'
     spec.version                  = '1.0-SNAPSHOT'
-    spec.homepage                 = 'https://github.com/Kotlin/kotlin-with-cocoapods-sample'
+    spec.homepage                 = ''
     spec.source                   = { :git => "Not Published", :tag => "Cocoapods/#{spec.name}/#{spec.version}" }
     spec.authors                  = ''
     spec.license                  = ''
-    spec.summary                  = 'Kotlin sample project with CocoaPods dependencies'
+    spec.summary                  = ''
 
     spec.static_framework         = true
-    spec.vendored_frameworks      = "build/cocoapods/framework/ssi_agent.framework"
+    spec.vendored_frameworks      = "build/cocoapods/framework/kotlin_multiplatform_agent.framework"
     spec.libraries                = "c++"
     spec.module_name              = "#{spec.name}_umbrella"
 
-    spec.ios.deployment_target = '12.2'
-    spec.osx.deployment_target = '10.8'
-    spec.tvos.deployment_target = '9.0'
+                
 
-    spec.dependency 'PocketSocket'
+                
 
     spec.pod_target_xcconfig = {
         'KOTLIN_TARGET[sdk=iphonesimulator*]' => 'ios_x64',

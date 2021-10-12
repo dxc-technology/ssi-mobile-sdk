@@ -27,8 +27,8 @@ class WebSocketTransportImpl : Transport {
     @OptIn(InternalAPI::class)
     override suspend fun sendMessage(connection: PeerConnection, message: MessageEnvelop) {
         logger.d { "Before sending message to endpoint: ${connection.endpoint}" }
-        if (!(connection.endpoint.protocol == URLProtocol.WS || connection.endpoint.protocol == URLProtocol.WSS))
-            throw IllegalArgumentException("Only websockets are supported by WebSocketTransportImpl!")
+//        if (!(connection.endpoint.protocol == URLProtocol.WS || connection.endpoint.protocol == URLProtocol.WSS))
+//            throw IllegalArgumentException("Only websockets are supported by WebSocketTransportImpl!")
 
 
         var numberOfRetries = 0

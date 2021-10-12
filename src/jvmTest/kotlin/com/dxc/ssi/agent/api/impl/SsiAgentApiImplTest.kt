@@ -25,6 +25,7 @@ import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestConta
 import com.dxc.ssi.agent.kermit.Kermit
 import com.dxc.ssi.agent.kermit.LogcatLogger
 import com.dxc.ssi.agent.kermit.Severity
+import com.dxc.ssi.agent.ledger.indy.GenesisMode
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorBuilder
 import com.dxc.ssi.agent.model.DidConfig
 import com.dxc.ssi.agent.model.OfferResponseAction
@@ -34,16 +35,16 @@ import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.ssi.agent.wallet.indy.model.verify.IndyCredInfo
 import com.dxc.utils.EnvironmentUtils
-import com.dxc.utils.Sleeper
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.junit.Ignore
+import com.dxc.utils.Sleeper
+import okhttp3.*
 import org.junit.Test
-
 class SsiAgentApiImplTest {
 
-    private val walletName = "newWalletName55"
+    private val walletName = "newWalletName70"
     private val walletPassword = "newWalletPassword"
     private val did = "Aj4mwDVVEh46K17Cqh4dpU"
 
@@ -56,6 +57,7 @@ class SsiAgentApiImplTest {
         logger.d { "Starting test" }
 
         EnvironmentUtils.initEnvironment(EnvironmentImpl())
+
 
         val walletManager: WalletManager = IndyWalletManager
 
@@ -82,7 +84,8 @@ class SsiAgentApiImplTest {
 
 
         val indyLedgerConnector = IndyLedgerConnectorBuilder()
-            .withGenesisFilePath("/home/ivan/IdeaProjects/dxc/Lumedic/ssi-mobile-sdk/files/sovrin_buildernet_genesis.txt")
+            .withGenesisFilePath("/Users/kkamyczek/krzysztof/ssi-mobile-sdk/files/sovrin_buildernet_genesis.txt")
+            .withGenesisMode(GenesisMode.SOVRIN_BUILDERNET)
             .build()
 
         ssiAgentApi = SsiAgentBuilderImpl(indyWalletConnector)
@@ -94,25 +97,14 @@ class SsiAgentApiImplTest {
             .build()
 
         val invitationUrl =
-            "ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNWQ4NGRkY2ItNjY3OC00YTE5LWI3NGQtOGVkYjZiNWQ2ZTFjIiwgInJlY2lwaWVudEtleXMiOiBbIjY5Z0FwSzVxTXRnMmFUcmhIN1hDeHVGc0Z3cGhrbVZ6ZlNwUENqVmJCNjhjIl0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
-            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiYTJlYzQ2NmEtZWUyYS00OGQxLTk4ZGMtZTdmOWZkMDFmZDI2IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyI5SlFWdkZLSzRneE01SHdlazJveWJjVXF6ZlpCZGV2NWRqNDFUUVc3c3FxYyJdLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
-            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiMjExZjU1ZjYtMjQ2ZC00MWM5LWE4OWYtYzU1OTliNzEyZWQwIiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyI2U3N0OEczd281YkZEMXZVU2F6NFVOYUJ3d2JUM1BnS0tnV21lTUFiZ1c5UyJdLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
-            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiZGYyZTk3N2UtMWZiNS00ZmM3LWI0MzAtYzY1MDcxZjY1OWViIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyJGaGFrcUc4cEF3UjR3eW1YOExGd2JxaXpGUDlaODJ1bjYzcFN5dE05RDhpOSJdfQ=="
-            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNmRhOGQ2NzgtM2QwNi00ZWJjLWFlOTgtMTQ0MTg4MjBiMDU3IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJsYWJlbCI6ICJhbGljZS5hZ2VudCIsICJyZWNpcGllbnRLZXlzIjogWyJEUkxUb3I0aWpDNzRuNXlqTk5QS2hyQ0hXS0JDSkJXUm1ycm5wQ0NlRlRTeSJdfQ=="
-            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiZmM5ZGZhZWEtNDIwNy00ODU2LWExNTMtNzNjODNkYzdiYTA2IiwgInJlY2lwaWVudEtleXMiOiBbIjZ2UHVZdFpVV2l2Vzc0WERNYzhad1lRRGVDZ3l2YTk1U1pDQnVKTkdYSnpIIl0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
-            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNzRiNmQ5M2ItM2M4My00NjM4LTgyYzEtNGFmYjk1NWRhZDk0IiwgInJlY2lwaWVudEtleXMiOiBbIjhCV1VtN283R1V1Y2F3aVAxTlFkZUJXVTROMThjZW01aHlIZGZRa3Jxdmt1Il0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
-            //"wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiSkJFTjRrQlZpV0pSRmV1M29ncFEyaTNTQnlFWDE5Mk5Mbnl3TlV4ejRIUk4iXSwiQGlkIjoiNDU2ZWMwNmEtYmJiMi00NmJmLThjYzctMGM1YmVkZmJlNTNiIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"
-
-
-
+            "ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiYWE4NDgzNzItYzRkZi00NWEzLWJiOTgtOGQ2NTM1MzI1MWFjIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInJlY2lwaWVudEtleXMiOiBbIkF4ZU1BRVd5V0szektMRUhYeXJSTkRGRFBvZEV4Sk5jSHg0S2t1Q1Zrc2U3Il0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAifQ=="
+        
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
 
-                logger.d { "Connecting to issuer" }
-               // ssiAgentApi.abandonAllConnections()
-                val connection = ssiAgentApi.connect(invitationUrl, keepConnectionAlive = true)
-
-                logger.d { "Connected to issuer" }
+                logger.d ("Control"){ "Connecting to issuer" }
+                ssiAgentApi.connect(invitationUrl, keepConnectionAlive = false)
+                logger.d ("Control"){ "Connected to issuer" }
 
             }
 
@@ -122,29 +114,31 @@ class SsiAgentApiImplTest {
                 details: String?,
                 stackTrace: String?
             ) {
-                logger.d { "Received error from library: $error with details: $details" }
+                logger.d ("Control"){ "Received error from library: $error with details: $details" }
             }
 
         })
 
 
 
-        Sleeper().sleep(1_000_000)
+        Sleeper().sleep(1_000_000_000)
 
     }
 
     class StatefulConnectionControllerImpl : StatefulConnectionController {
         var logger: Kermit = Kermit(LogcatLogger())
         override fun onReconnected(connection: PeerConnection) {
-            TODO("Not yet implemented")
+            // TODO("Not yet implemented")
+            logger.d ("Control"){ "onReconnected" }
         }
 
         override fun onReconnectFailed(reconnectionError: ReconnectionError, reason: String?) {
-            logger.d { "Failed to reconnect: $reconnectionError " }
+            logger.d ("Control"){ "Failed to reconnect: $reconnectionError " }
         }
 
         override fun onDisconnected(connection: PeerConnection) {
-            TODO("Not yet implemented")
+            logger.d ("Control"){ "onDisconnected" }
+            //TODO("Not yet implemented")
         }
 
     }
@@ -154,17 +148,16 @@ class SsiAgentApiImplTest {
             connection: PeerConnection,
             presentationRequest: PresentationRequestContainer
         ): PresentationRequestResponseAction {
-
-
+            logger.d ("Control"){ "CredPresenterControllerImpl ACCEPT" }
             return PresentationRequestResponseAction.ACCEPT
         }
 
         override fun onDone(connection: PeerConnection) {
-
+            logger.d ("Control"){ "CredPresenterControllerImpl onDone" }
         }
 
         override fun onProblemReportGenerated(connection: PeerConnection, problemReport: ProblemReport) {
-
+            logger.d ("Control"){ "CredPresenterControllerImpl onProblemReportGenerated" }
         }
 
     }
@@ -175,6 +168,7 @@ class SsiAgentApiImplTest {
             credentialOfferContainer: CredentialOfferContainer
         ): OfferResponseAction {
 
+            logger.d ("Control"){ "OfferResponseAction.ACCEPT" }
             return OfferResponseAction.ACCEPT
         }
 
@@ -182,18 +176,19 @@ class SsiAgentApiImplTest {
             connection: PeerConnection,
             credentialRequestContainer: CredentialRequestContainer
         ) {
-
+            logger.d ("Control"){ "CredReceiverControllerImpl onRequestSent" }
         }
 
         override fun onCredentialReceived(
             connection: PeerConnection,
             credentialContainer: CredentialContainer
         ): CallbackResult {
+            logger.d ("Control"){ "CredReceiverControllerImpl onCredentialReceived" }
             return CallbackResult(true)
         }
 
         override fun onDone(connection: PeerConnection, credentialContainer: CredentialContainer) {
-
+            logger.d ("Control"){ "Ack sent for credential onDone" }
         }
 
         override fun onProblemReport(connection: PeerConnection, problemReport: ProblemReport): CallbackResult {
@@ -201,35 +196,34 @@ class SsiAgentApiImplTest {
         }
 
         override fun onAckSent(connection: PeerConnection, ack: Ack) {
-            logger.d { "Ack sent for credential" }
+            logger.d ("Control") { "Ack sent for credential" }
         }
-
-
     }
 
-    inner class ConnectionInitiatorControllerImpl() : ConnectionInitiatorController {
+    inner class ConnectionInitiatorControllerImpl : ConnectionInitiatorController {
         override fun onInvitationReceived(
             connection: PeerConnection,
             invitation: Invitation
         ): CallbackResult {
+            logger.d ("Control") { "ConnectionInitiatorControllerImpl onInvitationReceived" }
             return CallbackResult(canProceedFurther = true)
         }
 
         override fun onRequestSent(connection: PeerConnection, request: ConnectionRequest) {
-            logger.d { "Request sent hook called : $connection, $request" }
+            logger.d ("Control"){ "Request sent hook called : $connection, $request" }
         }
 
         override fun onResponseReceived(connection: PeerConnection, response: ConnectionResponse): CallbackResult {
-            logger.d { "Response received hook called : $connection, $response" }
+            logger.d ("Control"){ "Response received hook called : $connection, $response" }
             return CallbackResult(true)
         }
 
         override fun onCompleted(connection: PeerConnection) {
-
+            logger.d ("Control") { "onCompleted : $connection" }
         }
 
         override fun onAbandoned(connection: PeerConnection, problemReport: ProblemReport?) {
-
+            logger.d ("Control") { "onAbandoned : $connection" }
         }
 
         override fun onFailure(
@@ -239,8 +233,9 @@ class SsiAgentApiImplTest {
             details: String?,
             stackTrace: String?
         ) {
-            logger.d { "Failure occured for connection $connection, error-> $error, details -> $details" }
+            logger.d ("Control") { "Failure occured for connection $connection, error-> $error, details -> $details" }
         }
 
     }
 }
+
