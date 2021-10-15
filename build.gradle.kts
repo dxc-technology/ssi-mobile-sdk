@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-
 val serializationVersion: String = "1.0.1"
 val indyVersion: String = "1.16.0"
 val jacksonVersion: String = "2.9.7"
@@ -153,14 +151,19 @@ kotlin {
                 implementation("org.slf4j:slf4j-log4j12:1.8.0-alpha2")
                 implementation("log4j:log4j:1.2.17")
                 implementation("javax.websocket:javax.websocket-api:1.1")
+                implementation("com.googlecode.json-simple:json-simple:1.1")
 
+                implementation("org.eclipse.jetty:jetty-server:9.4.3.v20170317")
+                implementation("org.eclipse.jetty:jetty-servlet:9.4.3.v20170317")
+                implementation("org.eclipse.jetty.websocket:javax-websocket-server-impl:9.4.3.v20170317")
+                implementation("org.eclipse.jetty.websocket:websocket-server:9.4.3.v20170317")
+                implementation("org.eclipse.jetty.websocket:javax-websocket-client-impl:9.4.3.v20170317")
+                implementation("org.eclipse.jetty.websocket:websocket-client:9.4.3.v20170317")
                 //implementation( "com.sun.jna:jna:3.0.9")
-
                 /*
                 implementation("ch.qos.logback:logback-classic:1.2.3")
                 implementation("ch.qos.logback:logback-core:1.2.3")
                 */
-
             }
         }
         val jvmTest by getting {

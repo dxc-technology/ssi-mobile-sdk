@@ -24,7 +24,6 @@ import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.kermit.Kermit
 import com.dxc.ssi.agent.kermit.LogcatLogger
-import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.ledger.indy.GenesisMode
 import com.dxc.ssi.agent.ledger.indy.IndyLedgerConnectorBuilder
 import com.dxc.ssi.agent.model.DidConfig
@@ -33,15 +32,24 @@ import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
-import com.dxc.ssi.agent.wallet.indy.model.verify.IndyCredInfo
 import com.dxc.utils.EnvironmentUtils
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import org.junit.Ignore
 import com.dxc.utils.Sleeper
-import okhttp3.*
+import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.servlet.ServletContextHandler
+import org.eclipse.jetty.websocket.api.Session
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage
+import org.eclipse.jetty.websocket.api.annotations.WebSocket
+import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
+import org.eclipse.jetty.websocket.servlet.WebSocketCreator
 import org.junit.Test
+import java.net.InetAddress
+import java.net.InetSocketAddress
+
+
 class SsiAgentApiImplTest {
 
     private val walletName = "newWalletName70"
@@ -96,14 +104,14 @@ class SsiAgentApiImplTest {
             .withLedgerConnector(indyLedgerConnector)
             .build()
 
-        val invitationUrl =
-            "ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiYWE4NDgzNzItYzRkZi00NWEzLWJiOTgtOGQ2NTM1MzI1MWFjIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInJlY2lwaWVudEtleXMiOiBbIkF4ZU1BRVd5V0szektMRUhYeXJSTkRGRFBvZEV4Sk5jSHg0S2t1Q1Zrc2U3Il0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAifQ=="
-        
+        val invitationUrl=
+            "ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNzMwMWJiZjItNTJmZS00ZjQyLTkzMzMtNDRkMzNhM2Q1MDkxIiwgInJlY2lwaWVudEtleXMiOiBbIjNRVkpkbVY4ekR0cjh2UEVvQkdjNTRyYlZKVkZYa0hxa29GWlczYlliRUQ3Il0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
 
                 logger.d ("Control"){ "Connecting to issuer" }
-                ssiAgentApi.connect(invitationUrl, keepConnectionAlive = false)
+                ssiAgentApi.connect(invitationUrl, keepConnectionAlive = true)
                 logger.d ("Control"){ "Connected to issuer" }
 
             }
@@ -239,3 +247,41 @@ class SsiAgentApiImplTest {
     }
 }
 
+@WebSocket
+class JettyWebSocket {
+    @OnWebSocketConnect
+    fun onOpen(session: Session?) {
+        println("onOpen")
+    }
+
+    @OnWebSocketMessage
+    fun onMessage(message: String) {
+        println("onOpen")
+        println(message)
+    }
+
+    @OnWebSocketClose
+    fun onClose(closeCode: Int, closeReasonPhrase: String?) {
+        println("onClose")
+        println("$closeCode $closeReasonPhrase")
+    }
+}
+class RunWebSocketStandalone {
+    @Test
+    fun runWS(){
+        val isa = InetSocketAddress(InetAddress.getByName("192.168.0.104"), 8123)
+        val server = Server(isa)
+        val context = ServletContextHandler(ServletContextHandler.SESSIONS)
+        context.contextPath = "/"
+        server.handler = context
+        val wsFilter: WebSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(context)
+        wsFilter.addMapping("/ws", SocketCreator())
+        server.start()
+        server.join()
+    }
+}
+class SocketCreator : WebSocketCreator {
+    override fun createWebSocket(req: ServletUpgradeRequest, resp: ServletUpgradeResponse): Any {
+        return JettyWebSocket()
+    }
+}
