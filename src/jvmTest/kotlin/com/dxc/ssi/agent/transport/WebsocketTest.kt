@@ -9,7 +9,7 @@ import org.junit.Test
 
 class WebsocketTest {
 
-    val socketEndpoint = "ws://192.168.0.104:9000/ws"
+    val socketEndpoint = "ws://192.168.0.104:8123/ws"
 
     @Test
     fun testWs() {

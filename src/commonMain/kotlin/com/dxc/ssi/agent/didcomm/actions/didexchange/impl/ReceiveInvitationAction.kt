@@ -178,7 +178,7 @@ class ReceiveInvitationAction(
             priority = 0,
             recipientKeys = listOf(walletConnector.walletHolder.getIdentityDetails().verkey),
             //TODO: remove this randomness once agent is fixed
-            serviceEndpoint = "ws://test${Random.nextInt(1000, 100000)}:8123"
+            serviceEndpoint = "ws://192.168.0.104:8123/ws"
         )
 
         return listOf(service)

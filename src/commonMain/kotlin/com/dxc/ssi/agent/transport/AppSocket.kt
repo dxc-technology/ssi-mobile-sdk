@@ -35,9 +35,10 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
 
             currentState = State.CONNECTED
 
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+            GlobalScope.async {
+            //CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
                 socketOpenedChannel.send(SocketOpenedMessage())
-            })
+            }
             logger.d { "PlatformSocketListener: ${System.getCurrentThread()} - Opened socket" }
 
         }
@@ -46,23 +47,28 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
             socketError = t
             currentState = State.CLOSED
             logger.d { "PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}" }
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+            GlobalScope.async {
+            //CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
                 socketOpenedChannel.send(SocketFailureMessage())
-            })
+            }
 
         }
 
         override fun onMessage(msg: String) {
             logger.d { "${System.getCurrentThread()} - Received message: $msg" }
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+            GlobalScope.async {
+            //CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
                 incomingMessagesChannel.send(MessageEnvelop(msg))
-            })
+            }
 
         }
 
         override fun onClosing(code: Int, reason: String) {
             currentState = State.CLOSING
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketClosingChannel.send(Unit) })
+            GlobalScope.async {
+            //CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+                socketClosingChannel.send(Unit)
+            }
             logger.d { "PlatformSocketListener: Closing socket: code = $code, reason = $reason" }
         }
 

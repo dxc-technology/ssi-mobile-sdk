@@ -34,20 +34,8 @@ import com.dxc.ssi.agent.wallet.indy.IndyWalletHolder
 import com.dxc.ssi.agent.wallet.indy.IndyWalletManager
 import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
-import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.eclipse.jetty.websocket.api.Session
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage
-import org.eclipse.jetty.websocket.api.annotations.WebSocket
-import org.eclipse.jetty.websocket.server.WebSocketUpgradeFilter
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse
-import org.eclipse.jetty.websocket.servlet.WebSocketCreator
+
 import org.junit.Test
-import java.net.InetAddress
-import java.net.InetSocketAddress
 
 
 class SsiAgentApiImplTest {
@@ -105,7 +93,22 @@ class SsiAgentApiImplTest {
             .build()
 
         val invitationUrl=
-            "ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNzMwMWJiZjItNTJmZS00ZjQyLTkzMzMtNDRkMzNhM2Q1MDkxIiwgInJlY2lwaWVudEtleXMiOiBbIjNRVkpkbVY4ekR0cjh2UEVvQkdjNTRyYlZKVkZYa0hxa29GWlczYlliRUQ3Il0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            "ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiODQxNzYyM2MtZWUwZC00NWJmLTg0MGQtNzIwODJhMzVhMWY3IiwgInJlY2lwaWVudEtleXMiOiBbIkRhZ0V0ZHA0c3RyWVk0V1hHTlNmWFFoQ1V2alc2V014VTE5RTd3dlRwN3E1Il0sICJsYWJlbCI6ICJhbGljZS5hZ2VudCIsICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiN2FmY2RkYTUtMWQzOC00YjU4LTgyMWYtNWI1ZWFiMzU4ZDI2IiwgInJlY2lwaWVudEtleXMiOiBbIkJLd0NydWlxRXQxMndMaVBvWXlvNm5aNlc2MjdIeWV1VTFvUXRKYm1lTmlQIl0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiODAwMDc1OTYtYTBlYS00OTFkLWEzNTYtN2MyYzZmODViMTM2IiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyJFRThtOVliSm9meFBWZFphRFRlOFQ2b0JGTWJvdDFYeEJWUDltNWtkWldBNiJdfQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiODZmZTU1ZGUtOGVhNC00M2YzLTkzNjUtNDk2ZmRlNTI2MzRjIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInJlY2lwaWVudEtleXMiOiBbIjg1Sk44Y3Bmb2hrakx0RllocEd3VkFwRHoxdHZ2dlhzbXJwQktrR1dUdWNFIl0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiM2IxMGE5ZDAtODIxNi00MTQ4LTlkNmYtNTY5NDU4ZjM1ZDg1IiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyIzRm9EVTQ5UGhyTmh2VU1SZnFTdVg1dG1wNWt5dnV3OFJmQm1KUDIzbWZjUCJdfQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiODg4MDVhMjQtZDhkNC00YTg3LWFiZTgtZjUwYmRmMTIzZDgyIiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyJBTktwRzNrc1hNNjVXSFNIcHNmYkVNOE1TNjF2SHN4SDRON3JIYzgxR0tSbyJdLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNTZkMDRmYWItNWZmZi00N2YyLWFlOGQtZDNhYWRkMTMyYWFmIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyIzdFNDN3FtOFd2SzhFa3E3bktBRUR3VGgxRzJXaFBYbTl0cnBweFBCcWg3cSJdfQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiMzM4NWYwYmEtYjU3Ny00ZTQ5LWI2ZmMtZGJmNTNkNzMxNzRmIiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJsYWJlbCI6ICJhbGljZS5hZ2VudCIsICJyZWNpcGllbnRLZXlzIjogWyJKREtzM2YyUmhpS3J0Y2lMNWd2N2hFYVZlaHlGbm15cTVUd2Q3MndVdHN4Il19"
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiYTAwZTYyYWYtNWU2NC00MWVhLTg4ZDgtOTZlNjEwY2QyOGJjIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyJDU0NTdU5MNGVUTVJtckVSTlJxdFhoOUhiM2s1SGRUQVd0aFhzVnFFSmVxdSJdfQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiY2JmYzk3ZTAtYTJlOC00ZjBiLTlkYzktMzU4MDlmMGY0Y2JiIiwgInJlY2lwaWVudEtleXMiOiBbIkZqWHB1c0NmWFR2ZGdIQ1Ruc1haUVJNYTY1YXd0YzFHd2N1RnJOaThjWmtIIl0sICJsYWJlbCI6ICJhbGljZS5hZ2VudCIsICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiOTk1YTBjMzgtNjEwOC00MWJlLWE4ZGUtZDJjNzk5OWY2NzllIiwgInJlY2lwaWVudEtleXMiOiBbIkQ1S2hxcHZZSm1lV0EzQlpIVVJpU0NlVGhKWmtERXpxb2hBQWlWRDdITHhLIl0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiN2Q1ODQ2NGEtZTQ5MS00NDMxLTllZGYtODg4YzBhNDJiMGRlIiwgInJlY2lwaWVudEtleXMiOiBbIjRDR2QxcXhwVVhCcm5IdWhUb0NyajNCdkJodHhDRWpCRDJTc1VodFZ1WUNDIl0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiZjg5ZTBjMWUtZWI3Zi00NDczLTg4M2EtYTJlZDBjZWEwYzcwIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInJlY2lwaWVudEtleXMiOiBbIkMyN0hSN2VwR2p2cm1qcHNyYlZtSEQydlQ1ajNjWHJTeTh1Rkw2aTVhTkRmIl0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNGFmYmM5ZGItYzdhNi00ODBhLThmMTItZDdmMTdjNzc3MGZiIiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyJBNXJWQ0tlZFloYVk0VUxtUjRVSDduVHlFc3FtZzhyc1p6cjU2YldEck05RSJdLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiODQ4OTU0MTItZWZlMC00NTViLWJlMjItZmI2YTBmYmZiNzRmIiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyJFNGhKNXh3NEdKM3RNZlF2RHB2MjRtUU5xZmRSVkJpdGREN3lWSGtiQmlRSiJdLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNzMwMWJiZjItNTJmZS00ZjQyLTkzMzMtNDRkMzNhM2Q1MDkxIiwgInJlY2lwaWVudEtleXMiOiBbIjNRVkpkbVY4ekR0cjh2UEVvQkdjNTRyYlZKVkZYa0hxa29GWlczYlliRUQ3Il0sICJzZXJ2aWNlRW5kcG9pbnQiOiAid3M6Ly8xOTIuMTY4LjAuMTA0OjgwMzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQifQ=="
 
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
@@ -244,44 +247,5 @@ class SsiAgentApiImplTest {
             logger.d ("Control") { "Failure occured for connection $connection, error-> $error, details -> $details" }
         }
 
-    }
-}
-
-@WebSocket
-class JettyWebSocket {
-    @OnWebSocketConnect
-    fun onOpen(session: Session?) {
-        println("onOpen")
-    }
-
-    @OnWebSocketMessage
-    fun onMessage(message: String) {
-        println("onOpen")
-        println(message)
-    }
-
-    @OnWebSocketClose
-    fun onClose(closeCode: Int, closeReasonPhrase: String?) {
-        println("onClose")
-        println("$closeCode $closeReasonPhrase")
-    }
-}
-class RunWebSocketStandalone {
-    @Test
-    fun runWS(){
-        val isa = InetSocketAddress(InetAddress.getByName("192.168.0.104"), 8123)
-        val server = Server(isa)
-        val context = ServletContextHandler(ServletContextHandler.SESSIONS)
-        context.contextPath = "/"
-        server.handler = context
-        val wsFilter: WebSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(context)
-        wsFilter.addMapping("/ws", SocketCreator())
-        server.start()
-        server.join()
-    }
-}
-class SocketCreator : WebSocketCreator {
-    override fun createWebSocket(req: ServletUpgradeRequest, resp: ServletUpgradeResponse): Any {
-        return JettyWebSocket()
     }
 }
