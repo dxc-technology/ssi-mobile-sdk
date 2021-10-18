@@ -4,13 +4,12 @@ import co.touchlab.stately.isolate.IsolateState
 import com.dxc.ssi.agent.kermit.Kermit
 import com.dxc.ssi.agent.kermit.LogcatLogger
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
-import com.dxc.ssi.agent.utils.CoroutineHelper
 import com.dxc.ssi.agent.utils.ObjectHolder
 import com.dxc.utils.System
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 
-class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
+class AppSocketDuplex(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
     private val ws = PlatformSocket(url)
     private val job: CompletableJob = Job()
     private val logger: Kermit = Kermit(LogcatLogger())
@@ -31,12 +30,10 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
 
     private val socketListener: PlatformSocketListener = object : PlatformSocketListener {
         override fun onOpen() {
-
             currentState = State.CONNECTED
-
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+            CoroutineScope(Dispatchers.Default).async {
                 socketOpenedChannel.send(SocketOpenedMessage())
-            })
+            }
             logger.d { "PlatformSocketListener: ${System.getCurrentThread()} - Opened socket" }
 
         }
@@ -45,23 +42,25 @@ class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
             socketError = t
             currentState = State.CLOSED
             logger.d { "PlatformSocketListener: Socket failure: $t \n ${t.stackTraceToString()}" }
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+            CoroutineScope(Dispatchers.Default).async {
                 socketOpenedChannel.send(SocketFailureMessage())
-            })
+            }
 
         }
 
         override fun onMessage(msg: String) {
             logger.d { "${System.getCurrentThread()} - Received message: $msg" }
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async {
+            CoroutineScope(Dispatchers.Default).async {
                 incomingMessagesChannel.send(MessageEnvelop(msg))
-            })
+            }
 
         }
 
         override fun onClosing(code: Int, reason: String) {
             currentState = State.CLOSING
-            CoroutineHelper.waitForCompletion(CoroutineScope(Dispatchers.Default).async { socketClosingChannel.send(Unit) })
+            CoroutineScope(Dispatchers.Default).async {
+                socketClosingChannel.send(Unit)
+            }
             logger.d { "PlatformSocketListener: Closing socket: code = $code, reason = $reason" }
         }
 

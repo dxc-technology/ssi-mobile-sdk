@@ -21,7 +21,7 @@ class WebSocketTransportImpl : Transport {
     private val initialDelay = 1000L
 
     private val incomingMessagesChannel: Channel<MessageEnvelop> = Channel()
-    private val appSocketThreadSafeProvider = AppSocketThreadSafeProvider(incomingMessagesChannel)
+    private val appSocketThreadSafeProvider = AppSocketThreadSafeProviderDuplex(incomingMessagesChannel)
     var logger: Kermit = Kermit(LogcatLogger())
 
     @OptIn(InternalAPI::class)
