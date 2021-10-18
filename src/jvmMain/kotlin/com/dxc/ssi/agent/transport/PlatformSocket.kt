@@ -20,9 +20,6 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.charset.StandardCharsets
 
-
-private var pfl: PlatformSocketListener? = null
-
 internal actual class PlatformSocket actual constructor(url: String) {
     private val socketEndpoint = url
     private var webSocket: WebSocket? = null
@@ -48,7 +45,6 @@ internal actual class PlatformSocket actual constructor(url: String) {
                     platformSocketListener.onClosed(code, reason)
             }
         )
-        pfl = platformSocketListener
         runnable = Runnable {
             val isa = InetSocketAddress(InetAddress.getByName("192.168.0.104"), 8123)
             val server = Server(isa)
@@ -56,7 +52,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
             context.contextPath = "/"
             server.handler = context
             val wsFilter: WebSocketUpgradeFilter = WebSocketUpgradeFilter.configureContext(context)
-            wsFilter.addMapping("/ws", SocketCreator())
+            wsFilter.addMapping("/ws", SocketCreator(platformSocketListener))
             server.start()
             server.join()
         }
@@ -82,7 +78,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
 }
 
 @org.eclipse.jetty.websocket.api.annotations.WebSocket
-class JettyWebSocket {
+class JettyWebSocket(private val pfl: PlatformSocketListener?) {
     private var logger: Kermit = Kermit(LogcatLogger())
 
     @OnWebSocketConnect
@@ -112,8 +108,8 @@ class JettyWebSocket {
     }
 }
 
-class SocketCreator : WebSocketCreator {
+class SocketCreator(private val pfl: PlatformSocketListener?) : WebSocketCreator {
     override fun createWebSocket(req: ServletUpgradeRequest, resp: ServletUpgradeResponse): Any {
-        return JettyWebSocket()
+        return JettyWebSocket(pfl)
     }
 }
