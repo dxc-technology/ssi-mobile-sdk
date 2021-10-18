@@ -28,9 +28,9 @@ import io.ktor.util.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlin.random.Random
 
 
+const val localIp = "192.168.0.104"
 //TODO: Think about more generic actions constructor parameters and returns
 class ReceiveInvitationAction(
     val walletConnector: WalletConnector,
@@ -178,7 +178,7 @@ class ReceiveInvitationAction(
             priority = 0,
             recipientKeys = listOf(walletConnector.walletHolder.getIdentityDetails().verkey),
             //TODO: remove this randomness once agent is fixed
-            serviceEndpoint = "ws://192.168.0.104:8123/ws"
+            serviceEndpoint = "ws://$localIp:8123/ws"
         )
 
         return listOf(service)

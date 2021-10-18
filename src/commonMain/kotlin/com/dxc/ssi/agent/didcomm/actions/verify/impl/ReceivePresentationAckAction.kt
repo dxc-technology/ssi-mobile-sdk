@@ -1,12 +1,8 @@
 package com.dxc.ssi.agent.didcomm.actions.verify.impl
 
-import com.dxc.ssi.agent.api.callbacks.verification.CredPresenterController
-import com.dxc.ssi.agent.api.pluggable.LedgerConnector
-import com.dxc.ssi.agent.api.pluggable.Transport
-import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.actions.verify.CredentialVerificationAction
-import com.dxc.ssi.agent.model.PeerConnection
+
 /*
 class ReceivePresentationAckAction(
     private val walletConnector: WalletConnector,
@@ -22,3 +18,8 @@ class ReceivePresentationAckAction(
 
 }
 */
+class ReceivePresentationAckAction : CredentialVerificationAction {
+    override suspend fun perform(): ActionResult {
+        return(ActionResult())
+    }
+}

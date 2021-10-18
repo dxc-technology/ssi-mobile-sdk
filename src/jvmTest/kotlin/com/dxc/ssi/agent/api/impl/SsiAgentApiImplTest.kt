@@ -93,7 +93,7 @@ class SsiAgentApiImplTest {
             .build()
 
         val invitationUrl=
-            "ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiNzdkMDVjOTgtOGMyMC00ZGNiLTg2ODEtM2QwNDM5NDg1OWE0IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJsYWJlbCI6ICJhbGljZS5hZ2VudCIsICJyZWNpcGllbnRLZXlzIjogWyI3WWI4ajRScnlKZVdXS1BkWGUxS3hERkcxd3BHS0VITE5oM05uV255eW15QyJdfQ=="
+            "ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiMWUzODczZjAtY2NhNC00MzNkLTlhMjctMjJhM2QxM2Y0NGM1IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJsYWJlbCI6ICJhbGljZS5hZ2VudCIsICJyZWNpcGllbnRLZXlzIjogWyI3QnlONjJZWDlQTFZCTWhwbldDenp6ZnF2ZmRFMnZNSk5INVZWNzNnOGFwZCJdfQ=="
 
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {

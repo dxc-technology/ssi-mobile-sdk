@@ -1,6 +1,7 @@
 package com.dxc.ssi.agent.transport
 
 
+import com.dxc.ssi.agent.didcomm.actions.didexchange.impl.localIp
 import com.dxc.ssi.agent.kermit.Kermit
 import com.dxc.ssi.agent.kermit.LogcatLogger
 import okhttp3.*
@@ -46,7 +47,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
             }
         )
         runnable = Runnable {
-            val isa = InetSocketAddress(InetAddress.getByName("192.168.0.104"), 8123)
+            val isa = InetSocketAddress(InetAddress.getByName(localIp), 8123)
             val server = Server(isa)
             val context = ServletContextHandler(ServletContextHandler.SESSIONS)
             context.contextPath = "/"
