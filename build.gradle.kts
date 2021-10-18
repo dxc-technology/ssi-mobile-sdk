@@ -153,12 +153,10 @@ kotlin {
                 implementation("javax.websocket:javax.websocket-api:1.1")
                 implementation("com.googlecode.json-simple:json-simple:1.1")
 
-                implementation("org.eclipse.jetty:jetty-server:9.4.3.v20170317")
-                implementation("org.eclipse.jetty:jetty-servlet:9.4.3.v20170317")
                 implementation("org.eclipse.jetty.websocket:javax-websocket-server-impl:9.4.3.v20170317")
                 implementation("org.eclipse.jetty.websocket:websocket-server:9.4.3.v20170317")
-                implementation("org.eclipse.jetty.websocket:javax-websocket-client-impl:9.4.3.v20170317")
-                implementation("org.eclipse.jetty.websocket:websocket-client:9.4.3.v20170317")
+                //implementation("org.eclipse.jetty.websocket:javax-websocket-client-impl:9.4.3.v20170317")
+                //implementation("org.eclipse.jetty.websocket:websocket-client:9.4.3.v20170317")
                 //implementation( "com.sun.jna:jna:3.0.9")
                 /*
                 implementation("ch.qos.logback:logback-classic:1.2.3")
