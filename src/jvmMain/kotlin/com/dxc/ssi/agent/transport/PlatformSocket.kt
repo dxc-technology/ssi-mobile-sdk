@@ -99,7 +99,6 @@ class JettyWebSocket(private val pfl: PlatformSocketListener?) {
     fun onClose(closeCode: Int, closeReasonPhrase: String?) {
         logger.d("JettyWebSocket") { "onClose" }
         logger.d("JettyWebSocket") { "$closeCode" + "$closeReasonPhrase" }
-        pfl?.onClosed(closeCode, closeReasonPhrase!!)
     }
 
     @OnWebSocketError
