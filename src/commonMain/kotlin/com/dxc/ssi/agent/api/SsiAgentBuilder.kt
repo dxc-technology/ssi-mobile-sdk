@@ -13,7 +13,7 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.api.pluggable.wallet.*
 
 interface SsiAgentBuilder {
-    fun build(): SsiAgentApi
+    fun build(ip: String, port: Int): SsiAgentApi
     fun withTransport(transport: Transport): SsiAgentBuilder
     fun withLedgerConnector(ledgerConnector: LedgerConnector): SsiAgentBuilder
     fun withConnectionInitiatorController(connectionInitiatorController: ConnectionInitiatorController): SsiAgentBuilder

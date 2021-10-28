@@ -9,8 +9,8 @@ import com.dxc.utils.System
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 
-class AppSocketDuplex(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
-    private val ws = PlatformSocket(url)
+class AppSocketDuplex(url: String, incomingMessagesChannel: Channel<MessageEnvelop>, val ip: String, val port: Int) {
+    private val ws = PlatformSocket(url, ip, port)
     private val job: CompletableJob = Job()
     private val logger: Kermit = Kermit(LogcatLogger())
 

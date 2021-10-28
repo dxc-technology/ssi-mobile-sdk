@@ -1,7 +1,5 @@
 package com.dxc.ssi.agent.transport
 
-
-import com.dxc.ssi.agent.didcomm.actions.didexchange.impl.localIp
 import com.dxc.ssi.agent.kermit.Kermit
 import com.dxc.ssi.agent.kermit.LogcatLogger
 import okhttp3.*
@@ -21,10 +19,11 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.charset.StandardCharsets
 
-internal actual class PlatformSocket actual constructor(url: String) {
+internal actual class PlatformSocket actual constructor(url: String, private val ip: String, private val port: Int) {
     private val socketEndpoint = url
     private var webSocket: WebSocket? = null
     private var runnable: Runnable? = null
+
 
     actual fun openSocket(platformSocketListener: PlatformSocketListener) {
         val socketRequest = Request.Builder().url(socketEndpoint).build()
@@ -47,7 +46,7 @@ internal actual class PlatformSocket actual constructor(url: String) {
             }
         )
         runnable = Runnable {
-            val isa = InetSocketAddress(InetAddress.getByName(localIp), 8123)
+            val isa = InetSocketAddress(InetAddress.getByName(ip), port)
             val server = Server(isa)
             val context = ServletContextHandler(ServletContextHandler.SESSIONS)
             context.contextPath = "/"

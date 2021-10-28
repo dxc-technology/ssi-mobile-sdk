@@ -9,7 +9,11 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import com.dxc.utils.Result
 
-class AppSocketThreadSafeProviderDuplex(private val incomingMessagesChannel: Channel<MessageEnvelop>) {
+class AppSocketThreadSafeProviderDuplex(
+    private val incomingMessagesChannel: Channel<MessageEnvelop>,
+    val ip: String,
+    val port: Int
+) {
 
     private var job = Job()
     private val providerScope = CoroutineScope(Dispatchers.Default + job)
@@ -97,7 +101,7 @@ class AppSocketThreadSafeProviderDuplex(private val incomingMessagesChannel: Cha
 
 
     private suspend fun openConnection(endpoint: String): AppSocketDuplex {
-        val appSocket = AppSocketDuplex(endpoint, incomingMessagesChannel)
+        val appSocket = AppSocketDuplex(endpoint, incomingMessagesChannel, ip,port)
         appSocket.connect()
         return appSocket
     }

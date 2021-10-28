@@ -34,15 +34,17 @@ class SsiAgentBuilderImpl(private val walletConnector: WalletConnector) : SsiAge
     private var credVerifierController: CredVerifierController? = null
     private var statefulConnectionController: StatefulConnectionController? = null
     private var trustPingController: TrustPingController? = null
+    private lateinit var ip: String
+    private var port: Int = 0
 
-    override fun build(): SsiAgentApi {
-
+    override fun build(ip:String, port:Int): SsiAgentApi {
+        this.ip = ip
+        this.port = port
         var result: SsiAgentApiImpl? = null
         try {
             if (transport == null) {
-                transport = WebSocketTransportImpl()
+                transport = WebSocketTransportImpl(ip,port)
             }
-
 
             if (ledgerConnector == null)
                 ledgerConnector = IndyLedgerConnector(IndyLedgerConnectorConfiguration())
@@ -62,7 +64,10 @@ class SsiAgentBuilderImpl(private val walletConnector: WalletConnector) : SsiAge
                 transport = transport!!,
                 walletConnector = walletConnector!!,
                 ledgerConnector = ledgerConnector!!,
-                callbacks = callbacks
+                callbacks = callbacks,
+                ip = ip,
+                port = port,
+                
             )
         } catch (t: Throwable) {
             logger.e("Error from library", t) { t.message.toString() }

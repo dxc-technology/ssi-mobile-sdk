@@ -11,7 +11,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 
 class AppSocket(url: String, incomingMessagesChannel: Channel<MessageEnvelop>) {
-    private val ws = PlatformSocket(url)
+    private val ws = PlatformSocket(url, "",0)
     private val job: CompletableJob = Job()
     private val logger: Kermit = Kermit(LogcatLogger())
 

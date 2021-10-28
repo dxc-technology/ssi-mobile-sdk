@@ -27,7 +27,12 @@ class DidExchangeProcessorImpl(
 ), DidExchangeProcessor {
 
 
-    override suspend fun initiateConnectionByInvitation(invitation: String, keepConnectionAlive: Boolean): PeerConnection? {
+    override suspend fun initiateConnectionByInvitation(
+        invitation: String,
+        keepConnectionAlive: Boolean,
+        ip: String,
+        port: Int
+    ): PeerConnection? {
 
         //TODO: think how to avoid NPE here
         val receiveInvitationAction =
@@ -38,7 +43,9 @@ class DidExchangeProcessorImpl(
                 services,
                 callbacks.connectionInitiatorController!!,
                 invitation,
-                keepConnectionAlive
+                keepConnectionAlive,
+                ip = ip,
+                port = port
             )
         return receiveInvitationAction.perform().connection
     }

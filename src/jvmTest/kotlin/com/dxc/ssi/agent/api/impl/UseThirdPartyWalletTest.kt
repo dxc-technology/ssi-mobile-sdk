@@ -136,7 +136,7 @@ class UseThirdPartyWalletTest {
             .withCredPresenterController(CredPresenterControllerImpl())
             .withStatefulConnectionController(StatefulConnectionControllerImpl())
             .withLedgerConnector(indyLedgerConnector)
-            .build()
+            .build("",0)
 
         val invitationUrl =
             "wss://lce-agent-dev.lumedic.io/ws?c_i=eyJsYWJlbCI6IkNsb3VkIEFnZW50IiwiaW1hZ2VVcmwiOm51bGwsInNlcnZpY2VFbmRwb2ludCI6IndzczovL2xjZS1hZ2VudC1kZXYubHVtZWRpYy5pby93cyIsInJvdXRpbmdLZXlzIjpbIjVoUDdreEFDQnpGVXJQSmo0VkhzMTdpRGJ0TU1wclZRSlFTVm84dnZzdGdwIl0sInJlY2lwaWVudEtleXMiOlsiM0htYU5pbW9UeWlXaktFZnJQSlRDMjJWdnZta1pzYloyZjlVWXIxcGlaZkIiXSwiQGlkIjoiYjFlN2RmZGQtY2YxNC00MTE3LWIyY2QtZTZkMTY2NjI2YzkwIiwiQHR5cGUiOiJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiJ9"

@@ -36,11 +36,16 @@ import com.dxc.utils.EnvironmentUtils
 import com.dxc.utils.Sleeper
 
 import org.junit.Test
+import java.net.Inet4Address
 
 
 class SsiAgentApiImplTest {
 
-    private val walletName = "newWalletName70"
+    companion object {
+        val localIp: String = Inet4Address.getLocalHost().hostAddress
+        const val port = 8124
+    }
+    private val walletName = "newWalletName75"
     private val walletPassword = "newWalletPassword"
     private val did = "Aj4mwDVVEh46K17Cqh4dpU"
 
@@ -51,6 +56,8 @@ class SsiAgentApiImplTest {
     //TODO: Move integration tests to separate module
     fun basicTest() {
         logger.d { "Starting test" }
+
+        println(Inet4Address.getLocalHost().hostAddress)
 
         EnvironmentUtils.initEnvironment(EnvironmentImpl())
 
@@ -66,6 +73,7 @@ class SsiAgentApiImplTest {
                 walletName = walletName,
                 walletPassword = walletPassword
             )
+            println(didResult)
             logger.d { "Got generated didResult: did = ${didResult.did} , verkey = ${didResult.verkey}"}
             //Store did somewhere in your application to use it afterwards
         }
@@ -90,10 +98,15 @@ class SsiAgentApiImplTest {
             .withCredPresenterController(CredPresenterControllerImpl())
             .withStatefulConnectionController(StatefulConnectionControllerImpl())
             .withLedgerConnector(indyLedgerConnector)
-            .build()
+            .build(localIp,port)
 
-        val invitationUrl=
-            "ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiMWUzODczZjAtY2NhNC00MzNkLTlhMjctMjJhM2QxM2Y0NGM1IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJsYWJlbCI6ICJhbGljZS5hZ2VudCIsICJyZWNpcGllbnRLZXlzIjogWyI3QnlONjJZWDlQTFZCTWhwbldDenp6ZnF2ZmRFMnZNSk5INVZWNzNnOGFwZCJdfQ=="
+        val invitationUrl =
+            "ws://192.168.0.106:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICJiZTMxMTZlNy04Y2IwLTRlNTktYjA5NS02MDQ1ODBmOWNhMTQiLCAic2VydmljZUVuZHBvaW50IjogIndzOi8vMTkyLjE2OC4wLjEwNjo4MDMwIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInJlY2lwaWVudEtleXMiOiBbIjgxU0xvWDhUc2ZXRW9WenoxRFJjd2Q1WHAxSENwVmZCQlNrRjlVVzR0TkFxIl19"
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICJjYzc1OTgxMS0zYTRhLTRjOTMtYTAzZi05MDkzYTgxNTVjNzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQiLCAicmVjaXBpZW50S2V5cyI6IFsiN2FRNnhlemdQTkNXYTJiZWRKUHFXbXdGaFlqUk1VUldZM1BETkdOcXZRUUsiXSwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCJ9"
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiMDU3OGE5ZTUtMzEyZi00ZWVjLTliMWEtNTFkNTk3OGMxMDQzIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyJIYUp4cmk3ZVRMN280ekgxS2E3ckdXUnNrc1I2YnFoU0ZZaDNXdWZlbVJzZyJdfQ=="
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICIwNzY0MDVmZC1mMzlmLTQ1NzUtOWE1NC1hYWI5OTI5Y2UzODkiLCAic2VydmljZUVuZHBvaW50IjogIndzOi8vMTkyLjE2OC4wLjEwNDo4MDMwIiwgInJlY2lwaWVudEtleXMiOiBbIkI2YXlGa0doYTJTSnFmRkZrMUpvRnpkcXloN05RU3VvNzVSNDk0dU1WSDJKIl0sICJsYWJlbCI6ICJhbGljZS5hZ2VudCJ9"
+        //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICJlN2UwYjA0MC04ODgwLTQzMjMtOTlhOS0xMjEyMjA5OTUzM2MiLCAicmVjaXBpZW50S2V5cyI6IFsiOGtSWHdTZFJIcHp0MlB5Qm80ZWtrcmlSQXpCVkdtUW5GeDlxTHZ2cG9HUDMiXSwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJsYWJlbCI6ICJhbGljZS5hZ2VudCJ9"
+            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICIxOGE1Y2JiNC1jN2EyLTQyMzAtYjFlYS1jODQ0YTgxYjY3YWIiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQiLCAicmVjaXBpZW50S2V5cyI6IFsiOW1zTFRBaUxiR2VHN1ZTWGdueVhmZmFBZUFxMkxNaFhKRVFoUDhzZmMyR2kiXSwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCJ9"
 
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
@@ -231,4 +244,6 @@ class SsiAgentApiImplTest {
         }
 
     }
+
+
 }
