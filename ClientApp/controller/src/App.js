@@ -12,6 +12,7 @@ function App() {
     let [connectionId, setConnectionId] = useState("");
     let [record, setRecord] = useState("");
 
+
     let createInvite = () => {
         console.log("Create invite")
         const requestOptions = {
@@ -19,11 +20,11 @@ function App() {
             headers: {'accept': 'application/json', 'Content-Type': 'application/json'},
             body: "{}"
         };
-        fetch(`http://${ipAddress}/connections/create-invitation?auto_accept=true&multi_use=false`, requestOptions)
+        return fetch(`http://${ipAddress}/connections/create-invitation?auto_accept=true&multi_use=false`, requestOptions)
             .then(response => response.json())
             .then(data => {
                 console.log(data)
-                setInvite(data.invitation_url)
+                setInvite(`"${data.invitation_url}"`)
             });
     }
     let listDid = () => {
@@ -32,7 +33,7 @@ function App() {
             method: 'GET',
             headers: {'accept': 'application/json'},
         };
-        fetch(`http://${ipAddress}/wallet/did`, requestOptions)
+        return fetch(`http://${ipAddress}/wallet/did`, requestOptions)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -41,7 +42,6 @@ function App() {
 
                 setDid(did)
                 setVerkey(verkey)
-
                 console.log(did);
             });
     }
@@ -53,7 +53,7 @@ function App() {
             headers: {'accept': 'application/json', 'Content-Type': 'application/json'},
             body: JSON.stringify({'method': 'sov', 'options': {'key_type': 'ed25519'}})
         };
-        fetch(`http://${ipAddress}/wallet/did/create`, requestOptions)
+        return fetch(`http://${ipAddress}/wallet/did/create`, requestOptions)
             .then(response => response.json())
             .then(data => console.log(data));
     }
@@ -65,10 +65,11 @@ function App() {
             headers: {'accept': 'application/json'},
             body: "{}"
         };
-        fetch(`http://${ipAddress}/wallet/did/public?did=${did}`, requestOptions)
+        return fetch(`http://${ipAddress}/wallet/did/public?did=${did}`, requestOptions)
             .then(response => response.json())
-            .then(data => console.log(data));
-
+            .then(data => {
+                console.log(data)
+            });
     }
     let postSchema = () => {
         console.log("Post schema")
@@ -86,7 +87,7 @@ function App() {
                 "schema_version": "1.0"
             })
         };
-        fetch(`http://${ipAddress}/schemas`, requestOptions)
+        return fetch(`http://${ipAddress}/schemas`, requestOptions)
             .then(response => response.json())
             .then(data => {
                 console.log(data)
@@ -104,7 +105,7 @@ function App() {
                 "tag": "default"
             })
         };
-        fetch(`http://${ipAddress}/credential-definitions`, requestOptions)
+        return fetch(`http://${ipAddress}/credential-definitions`, requestOptions)
             .then(response => response.json())
             .then(data => {
                 console.log(data)
@@ -134,7 +135,7 @@ function App() {
                 }
             )
         };
-        fetch(`http://${ipAddress}/issue-credential/create-offer`, requestOptions)
+        return fetch(`http://${ipAddress}/issue-credential/create-offer`, requestOptions)
             .then(response => response.json())
             .then(data => console.log(data));
     }
@@ -144,7 +145,7 @@ function App() {
             method: 'GET',
             headers: {'accept': 'application/json'},
         };
-        fetch(`http://${ipAddress}/connections`, requestOptions)
+        return fetch(`http://${ipAddress}/connections`, requestOptions)
             .then(response => response.json())
             .then(data => {
                     setConnectionId(data.results[0].connection_id)
@@ -179,7 +180,7 @@ function App() {
                 "trace": true
             })
         };
-        fetch(`http://${ipAddress}/issue-credential/send-offer`, requestOptions)
+        return fetch(`http://${ipAddress}/issue-credential/send-offer`, requestOptions)
             .then(response => response.json())
             .then(data => console.log(data));
     }
@@ -215,9 +216,10 @@ function App() {
                 }
             )
         };
-        fetch(`http://${ipAddress}/present-proof/send-request`, requestOptions)
+        return fetch(`http://${ipAddress}/present-proof/send-request`, requestOptions)
             .then(response => response.json())
-            .then(data => console.log(data));
+            .then(data => console.log(data)
+            );
     }
 
     let sendReqFALSE = () => {
@@ -250,7 +252,7 @@ function App() {
                 "trace": false
             })
         }
-        fetch(`http://${ipAddress}/present-proof/send-request`, requestOptions)
+        return fetch(`http://${ipAddress}/present-proof/send-request`, requestOptions)
             .then(response => response.json())
             .then(data => console.log(data));
     }
@@ -262,7 +264,7 @@ function App() {
             method: 'GET',
             headers: {'accept': 'application/json'},
         };
-        fetch(`http://${ipAddress}/present-proof/records?connection_id=${connectionId}`, requestOptions)
+        return fetch(`http://${ipAddress}/present-proof/records?connection_id=${connectionId}`, requestOptions)
             .then(response => response.json())
             .then(data => {
                 console.log(data)
@@ -277,9 +279,38 @@ function App() {
             headers: {'accept': 'application/json', 'Content-Type': 'application/json'},
             body: "{}"
         };
-        fetch(`http://${ipAddress}/present-proof/records/${record}/verify-presentation`, requestOptions)
+        return fetch(`http://${ipAddress}/present-proof/records/${record}/verify-presentation`, requestOptions)
             .then(response => response.json())
             .then(data => console.log(data));
+    }
+
+
+    let allRun1 = async () => {
+        console.log("Run")
+        try {
+            await listDid()
+            await postDid()
+            await checkConnection()
+            await postSchema()
+            await postCredDef()
+        }
+        catch (e) {
+            console.log(e)
+        }
+    }
+
+    let allRun2 = async () => {
+        console.log("Run")
+        try {
+            await issueCredDef()
+            await sendOfferCredDef()
+            await sendReqTRUE()
+            await presentProof()
+            await verifyPresentation()
+        }
+        catch (e) {
+            console.log(e)
+        }
     }
 
     return (
@@ -327,7 +358,9 @@ function App() {
                 <p>
                     <a href="http://dev.greenlight.bcovrin.vonx.io/">British Columbia Sovrin</a>
                 </p>
-
+                <p>
+                    Automated steps below:
+                </p>
                 <p>
                     <button className="App-button" onClick={postDid}>Post DID</button>
                 </p>
@@ -358,6 +391,15 @@ function App() {
                 </p>
                 <p>
                     <button className="App-button" onClick={verifyPresentation}>Verify presentation</button>
+                </p>
+                <p>
+                    ------------------------------
+                </p>
+                <p>
+                    <button className="App-button" onClick={allRun1}>All run1</button>
+                </p>
+                <p>
+                    <button className="App-button" onClick={allRun2}>All run2</button>
                 </p>
             </div>
         </div>

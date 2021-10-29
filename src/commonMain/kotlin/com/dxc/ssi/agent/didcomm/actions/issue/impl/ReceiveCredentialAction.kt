@@ -63,16 +63,20 @@ class ReceiveCredentialAction(
             )
             // 4. Build Credential Ack
             val idRow = (credential as IndyCredential)
-            val credentialAck = Ack(id = uuid4().toString(), thread =
-            Thread(credentialContainerMessage.thread.thid), status = "OK",type = """did:sov:${
+
+            val newDidComm = "https://didcomm.org/issue-credential/1.0/ack"
+            val regularDidComm = """did:sov:${
                 idRow.schemaIdRaw.split(
                     ":"
                 )[0]
             };spec/issue-credential/1.0/ack"""
+            val credentialAck = Ack(
+                id = uuid4().toString(), thread =
+                Thread(credentialContainerMessage.thread.thid), status = "OK", type = newDidComm
             )
             // 5.  Send credential ack
 
-            val result =  MessageSender.packAndSendMessage(
+            val result = MessageSender.packAndSendMessage(
                 Message(Json.encodeToString(credentialAck)),
                 connection,
                 walletConnector,
