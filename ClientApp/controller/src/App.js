@@ -6,6 +6,7 @@ let ipAddress = "localhost:8031";
 function App() {
     let [invite, setInvite] = useState("");
     let [did, setDid] = useState("");
+    let [verkey, setVerkey] = useState("");
     let [schemaId, setSchemaId] = useState("")
     let [credDef, setCredDef] = useState("");
     let [connectionId, setConnectionId] = useState("");
@@ -35,8 +36,12 @@ function App() {
             .then(response => response.json())
             .then(data => {
                 console.log(data);
-                did = data.results[0].did
+                let did = data.results[0].did
+                let verkey = data.results[0].verkey
+
                 setDid(did)
+                setVerkey(verkey)
+
                 console.log(did);
             });
     }
@@ -293,6 +298,9 @@ function App() {
                     DID: {did}
                 </p>
                 <p>
+                    Verkey: {verkey}
+                </p>
+                <p>
                     SchemaId: {schemaId}
                 </p>
                 <p>
@@ -317,7 +325,7 @@ function App() {
                 </p>
 
                 <p>
-                    <button className="App-button">http://dev.greenlight.bcovrin.vonx.io/</button>
+                    <a href="http://dev.greenlight.bcovrin.vonx.io/">British Columbia Sovrin</a>
                 </p>
 
                 <p>
