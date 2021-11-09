@@ -11,6 +11,7 @@ function App() {
     let [credDef, setCredDef] = useState("");
     let [connectionId, setConnectionId] = useState("");
     let [record, setRecord] = useState("");
+    let [thread, setThread] = useState("");
 
 
     let createInvite = () => {
@@ -90,8 +91,8 @@ function App() {
         return fetch(`http://${ipAddress}/schemas`, requestOptions)
             .then(response => response.json())
             .then(data => {
-                console.log(data)
                 setSchemaId(data.schema_id)
+                console.log(data)
             });
 
     }
@@ -257,7 +258,6 @@ function App() {
             .then(data => console.log(data));
     }
 
-
     let presentProof = () => {
         console.log("Present Proof")
         const requestOptions = {
@@ -267,10 +267,61 @@ function App() {
         return fetch(`http://${ipAddress}/present-proof/records?connection_id=${connectionId}`, requestOptions)
             .then(response => response.json())
             .then(data => {
-                console.log(data)
                 setRecord(data.results[0].presentation_exchange_id)
+                setThread(data.results[0].thread_id)
+                console.log(data)
             });
     }
+
+
+    let sendPresentation = () => {
+        console.log("Send presentation")
+        const requestOptions = {
+            method: 'POST',
+            headers: {'accept': 'application/json', 'Content-Type': 'application/json'},
+            body: JSON.stringify(
+                {
+                    "requested_attributes": {
+                        "additionalProp1": {
+                            "cred_id": thread,
+                            "revealed": true
+                        },
+                        "additionalProp2": {
+                            "cred_id": thread,
+                            "revealed": true
+                        },
+                        "additionalProp3": {
+                            "cred_id": thread,
+                            "revealed": true
+                        }
+                    },
+                    "requested_predicates": {
+                        "additionalProp1": {
+                            "cred_id": thread,
+                            "timestamp": 1640995199
+                        },
+                        "additionalProp2": {
+                            "cred_id": thread,
+                            "timestamp": 1640995199
+                        },
+                        "additionalProp3": {
+                            "cred_id": thread,
+                            "timestamp": 1640995199
+                        }
+                    },
+                    "self_attested_attributes": {
+                        "additionalProp1": "self_attested_value",
+                        "additionalProp2": "self_attested_value",
+                        "additionalProp3": "self_attested_value"
+                    },
+                    "trace": false
+                })
+        }
+        return fetch(`http://${ipAddress}/present-proof/records/${record}/send-presentation`, requestOptions)
+            .then(response => response.json())
+            .then(data => console.log(data));
+    }
+
 
     let verifyPresentation = () => {
         console.log("Verify presentation")
@@ -286,33 +337,58 @@ function App() {
 
 
     let allRun1 = async () => {
-        console.log("Run")
+        console.log("postCredDef")
         try {
-            await listDid()
+            let res = await listDid()
+            console.log(res)
             await postDid()
             await checkConnection()
             await postSchema()
             await postCredDef()
-        }
-        catch (e) {
+        } catch (e) {
             console.log(e)
         }
     }
 
     let allRun2 = async () => {
-        console.log("Run")
+        console.log("sendReqTRUE")
         try {
             await issueCredDef()
             await sendOfferCredDef()
             await sendReqTRUE()
-            await presentProof()
-            await verifyPresentation()
-        }
-        catch (e) {
+        } catch (e) {
             console.log(e)
         }
     }
 
+    let allRun3 = async () => {
+        console.log("presentProof")
+        try {
+            await presentProof()
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+
+    let allRun4 = async () => {
+        console.log("sendPresentation")
+        try {
+            await sendPresentation()
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+
+    let allRun5 = async () => {
+        console.log("Run")
+        try {
+            await verifyPresentation()
+        } catch (e) {
+            console.log(e)
+        }
+    }
     return (
         <div>
             <div className="App">
@@ -356,7 +432,7 @@ function App() {
                 </p>
 
                 <p>
-                    <a href="http://dev.greenlight.bcovrin.vonx.io/">British Columbia Sovrin</a>
+                    <a href="http://dev.greenlight.bcovrin.vonx.io/" target="_blank">British Columbia Sovrin</a>
                 </p>
                 <p>
                     Automated steps below:
@@ -396,10 +472,19 @@ function App() {
                     ------------------------------
                 </p>
                 <p>
-                    <button className="App-button" onClick={allRun1}>All run1</button>
+                    <button className="App-button" onClick={allRun1}>All run1 - Start</button>
                 </p>
                 <p>
                     <button className="App-button" onClick={allRun2}>All run2</button>
+                </p>
+                <p>
+                    <button className="App-button" onClick={allRun3}>All run3 - Present proof </button>
+                </p>
+                <p>
+                    <button className="App-button" onClick={allRun4}>All run4 - Send Presentation</button>
+                </p>
+                <p>
+                    <button className="App-button" onClick={allRun5}>All run5 - Verify Presentation</button>
                 </p>
             </div>
         </div>

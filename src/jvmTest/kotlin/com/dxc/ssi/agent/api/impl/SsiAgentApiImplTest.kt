@@ -45,7 +45,7 @@ class SsiAgentApiImplTest {
         val localIp: String = Inet4Address.getLocalHost().hostAddress
         const val port = 8124
     }
-    private val walletName = "newWalletName75"
+    private val walletName = "newWalletName78"
     private val walletPassword = "newWalletPassword"
     private val did = "Aj4mwDVVEh46K17Cqh4dpU"
 
@@ -101,12 +101,9 @@ class SsiAgentApiImplTest {
             .build(localIp,port)
 
         val invitationUrl =
-            "ws://192.168.0.106:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICJiZTMxMTZlNy04Y2IwLTRlNTktYjA5NS02MDQ1ODBmOWNhMTQiLCAic2VydmljZUVuZHBvaW50IjogIndzOi8vMTkyLjE2OC4wLjEwNjo4MDMwIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInJlY2lwaWVudEtleXMiOiBbIjgxU0xvWDhUc2ZXRW9WenoxRFJjd2Q1WHAxSENwVmZCQlNrRjlVVzR0TkFxIl19"
-            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICJjYzc1OTgxMS0zYTRhLTRjOTMtYTAzZi05MDkzYTgxNTVjNzAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQiLCAicmVjaXBpZW50S2V5cyI6IFsiN2FRNnhlemdQTkNXYTJiZWRKUHFXbXdGaFlqUk1VUldZM1BETkdOcXZRUUsiXSwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCJ9"
-            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJkaWQ6c292OkJ6Q2JzTlloTXJqSGlxWkRUVUFTSGc7c3BlYy9jb25uZWN0aW9ucy8xLjAvaW52aXRhdGlvbiIsICJAaWQiOiAiMDU3OGE5ZTUtMzEyZi00ZWVjLTliMWEtNTFkNTk3OGMxMDQzIiwgImxhYmVsIjogImFsaWNlLmFnZW50IiwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJyZWNpcGllbnRLZXlzIjogWyJIYUp4cmk3ZVRMN280ekgxS2E3ckdXUnNrc1I2YnFoU0ZZaDNXdWZlbVJzZyJdfQ=="
-            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICIwNzY0MDVmZC1mMzlmLTQ1NzUtOWE1NC1hYWI5OTI5Y2UzODkiLCAic2VydmljZUVuZHBvaW50IjogIndzOi8vMTkyLjE2OC4wLjEwNDo4MDMwIiwgInJlY2lwaWVudEtleXMiOiBbIkI2YXlGa0doYTJTSnFmRkZrMUpvRnpkcXloN05RU3VvNzVSNDk0dU1WSDJKIl0sICJsYWJlbCI6ICJhbGljZS5hZ2VudCJ9"
-        //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICJlN2UwYjA0MC04ODgwLTQzMjMtOTlhOS0xMjEyMjA5OTUzM2MiLCAicmVjaXBpZW50S2V5cyI6IFsiOGtSWHdTZFJIcHp0MlB5Qm80ZWtrcmlSQXpCVkdtUW5GeDlxTHZ2cG9HUDMiXSwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCIsICJsYWJlbCI6ICJhbGljZS5hZ2VudCJ9"
-            //"ws://192.168.0.104:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICIxOGE1Y2JiNC1jN2EyLTQyMzAtYjFlYS1jODQ0YTgxYjY3YWIiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQiLCAicmVjaXBpZW50S2V5cyI6IFsiOW1zTFRBaUxiR2VHN1ZTWGdueVhmZmFBZUFxMkxNaFhKRVFoUDhzZmMyR2kiXSwgInNlcnZpY2VFbmRwb2ludCI6ICJ3czovLzE5Mi4xNjguMC4xMDQ6ODAzMCJ9"
+            "ws://192.168.0.103:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICI1ZGYyMmQwZS05ZmU3LTRiZDAtYTgwMy0xMTgxODljOGQzNjYiLCAic2VydmljZUVuZHBvaW50IjogIndzOi8vMTkyLjE2OC4wLjEwMzo4MDMwIiwgInJlY2lwaWVudEtleXMiOiBbIlQ0dG8zQVhqWGhaczRpYUI4QW1tdjRQdFd6QWVSY3JnS1V2b0pVa0JhOFciXSwgImxhYmVsIjogImFsaWNlLmFnZW50In0="
+            //"ws://192.168.0.103:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICI4ZGZiNzE2Yi01NTNiLTQxNjUtOTE2Ny1jZjc5YzUxZjUxYjAiLCAibGFiZWwiOiAiYWxpY2UuYWdlbnQiLCAic2VydmljZUVuZHBvaW50IjogIndzOi8vMTkyLjE2OC4wLjEwMzo4MDMwIiwgInJlY2lwaWVudEtleXMiOiBbIkZGVlU0WTdWYUZydmJuOTVkZVlyaE12cHlLQ2lKeUxhb0VuRjNSYmNSc0hhIl19"
+            //"ws://192.168.0.103:8030?c_i=eyJAdHlwZSI6ICJodHRwczovL2RpZGNvbW0ub3JnL2Nvbm5lY3Rpb25zLzEuMC9pbnZpdGF0aW9uIiwgIkBpZCI6ICIxNjNjZTk0Mi1mMTRlLTRlMzItODk5Mi1jMzVhNmQ0ZjI0YjIiLCAic2VydmljZUVuZHBvaW50IjogIndzOi8vMTkyLjE2OC4wLjEwMzo4MDMwIiwgInJlY2lwaWVudEtleXMiOiBbIkdTRGdpRFk2UVJEWUhHYW1qUjJNTW5QTEhTYTFBVlNxcTRYeWJDWk4xSzlMIl0sICJsYWJlbCI6ICJhbGljZS5hZ2VudCJ9"
 
         ssiAgentApi.init(object : LibraryStateListener {
             override fun initializationCompleted() {
