@@ -37,7 +37,7 @@ class SendTrustPingAction(
         val trustPingRequest =
             TrustPingRequest(
                 id = requestId,
-                responseRequested = true
+                responseRequested = false
             )
 
 

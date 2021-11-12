@@ -9,7 +9,7 @@ import org.junit.Test
 
 class WebsocketTest {
 
-    val socketEndpoint = "ws://192.168.0.117:9000/ws"
+    val socketEndpoint = "ws://192.168.0.104:8123/ws"
 
     @Test
     fun testWs() {
@@ -24,7 +24,7 @@ class WebsocketTest {
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    logger.d { "Failure websocket" }
+                    logger.d { "Failure websocket"+ t.message }
                 }
 
 

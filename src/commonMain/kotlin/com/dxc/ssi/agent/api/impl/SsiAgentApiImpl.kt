@@ -17,7 +17,6 @@ import com.dxc.ssi.agent.didcomm.services.ConnectionsTrackerService
 import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.kermit.Kermit
 import com.dxc.ssi.agent.kermit.LogcatLogger
-import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.OfferResponseAction
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.PeerConnectionState
@@ -30,7 +29,9 @@ class SsiAgentApiImpl(
     private val transport: Transport,
     private val walletConnector: WalletConnector,
     private val ledgerConnector: LedgerConnector,
-    private val callbacks: Callbacks
+    private val callbacks: Callbacks,
+    private val ip: String,
+    private val port: Int
 ) : SsiAgentApi {
 
     private var logger: Kermit = Kermit(LogcatLogger())
@@ -152,7 +153,9 @@ class SsiAgentApiImpl(
                 //TODO: fix NPE
                 messageListener.messageRouter.processors.didExchangeProcessor!!.initiateConnectionByInvitation(
                     url,
-                    keepConnectionAlive
+                    keepConnectionAlive,
+                    ip = ip,
+                    port = port
                 )
             })
     }

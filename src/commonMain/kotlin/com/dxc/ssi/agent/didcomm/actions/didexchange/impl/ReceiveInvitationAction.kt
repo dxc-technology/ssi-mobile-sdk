@@ -28,7 +28,8 @@ import io.ktor.util.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlin.random.Random
+
+
 
 
 //TODO: Think about more generic actions constructor parameters and returns
@@ -39,7 +40,9 @@ class ReceiveInvitationAction(
     val services: Services,
     val connectionInitiatorController: ConnectionInitiatorController,
     private val invitationUrl: String,
-    private val keepConnectionAlive: Boolean
+    private val keepConnectionAlive: Boolean,
+    private val ip: String,
+    private val port: Int
 ) : DidExchangeAction {
     private val logger: Kermit = Kermit(LogcatLogger())
     override suspend fun perform(): ActionResult {
@@ -48,6 +51,7 @@ class ReceiveInvitationAction(
         // Send Connection Request
         // Ensure transport is initialized?
         var connection: PeerConnection? = null
+
         try {
             val invitationUrl = Url(invitationUrl)
             val encodedInvitation = invitationUrl.parameters["c_i"]!!
@@ -178,7 +182,7 @@ class ReceiveInvitationAction(
             priority = 0,
             recipientKeys = listOf(walletConnector.walletHolder.getIdentityDetails().verkey),
             //TODO: remove this randomness once agent is fixed
-            serviceEndpoint = "ws://test${Random.nextInt(1000, 100000)}:8123"
+            serviceEndpoint = "ws://$ip:$port/ws"
         )
 
         return listOf(service)

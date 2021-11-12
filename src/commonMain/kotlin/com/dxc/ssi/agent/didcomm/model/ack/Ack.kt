@@ -21,7 +21,8 @@ import kotlinx.serialization.Serializable
 * */
 @Serializable
 data class Ack(
-    @Required @SerialName("@type") val type: String = "https://didcomm.org/notification/1.0/ack",
+    @Required @SerialName("@type") val type:String,
     @SerialName("@id") val id: String,
+    @SerialName("status") val status:String,
     @SerialName("~thread") val thread: Thread? = null
 )

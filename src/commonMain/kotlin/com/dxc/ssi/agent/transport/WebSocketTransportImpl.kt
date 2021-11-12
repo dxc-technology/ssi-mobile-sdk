@@ -4,31 +4,29 @@ import com.dxc.ssi.agent.api.pluggable.Transport
 import com.dxc.ssi.agent.exceptions.transport.MessageCouldNotBeDeliveredException
 import com.dxc.ssi.agent.model.PeerConnection
 import com.dxc.ssi.agent.model.messages.MessageEnvelop
-import io.ktor.http.*
 import io.ktor.util.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import com.dxc.ssi.agent.kermit.Kermit
 import com.dxc.ssi.agent.kermit.LogcatLogger
-import com.dxc.ssi.agent.kermit.Severity
 
 //TODO: handle closing websocket correctly
 //TODO: cleanup websockets cache with time to avoid memory leak
-class WebSocketTransportImpl : Transport {
+class WebSocketTransportImpl(val ip: String, val port: Int) : Transport {
 
     //TODO: think about making it configurable
     private val maxNumberOfRetries = 5
     private val initialDelay = 1000L
 
     private val incomingMessagesChannel: Channel<MessageEnvelop> = Channel()
-    private val appSocketThreadSafeProvider = AppSocketThreadSafeProvider(incomingMessagesChannel)
+    private val appSocketThreadSafeProvider = AppSocketThreadSafeProviderDuplex(incomingMessagesChannel, ip, port)
     var logger: Kermit = Kermit(LogcatLogger())
 
     @OptIn(InternalAPI::class)
     override suspend fun sendMessage(connection: PeerConnection, message: MessageEnvelop) {
         logger.d { "Before sending message to endpoint: ${connection.endpoint}" }
-        if (!(connection.endpoint.protocol == URLProtocol.WS || connection.endpoint.protocol == URLProtocol.WSS))
-            throw IllegalArgumentException("Only websockets are supported by WebSocketTransportImpl!")
+//        if (!(connection.endpoint.protocol == URLProtocol.WS || connection.endpoint.protocol == URLProtocol.WSS))
+//            throw IllegalArgumentException("Only websockets are supported by WebSocketTransportImpl!")
 
 
         var numberOfRetries = 0

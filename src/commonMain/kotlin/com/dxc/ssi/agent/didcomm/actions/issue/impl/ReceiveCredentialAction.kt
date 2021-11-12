@@ -7,10 +7,12 @@ import com.dxc.ssi.agent.didcomm.actions.issue.CredentialIssuenceAction
 import com.dxc.ssi.agent.didcomm.commoon.MessageSender
 import com.dxc.ssi.agent.didcomm.constants.toProblemReportDescription
 import com.dxc.ssi.agent.didcomm.model.ack.Ack
+import com.dxc.ssi.agent.didcomm.model.common.Thread
 import com.dxc.ssi.agent.didcomm.model.issue.container.CredentialContainer
 import com.dxc.ssi.agent.didcomm.model.problem.ProblemReport
 import com.dxc.ssi.agent.didcomm.states.issue.CredentialIssuenceState
 import com.dxc.ssi.agent.model.messages.Message
+import com.dxc.ssi.agent.wallet.indy.model.issue.IndyCredential
 import com.dxc.utils.Result
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -60,10 +62,21 @@ class ReceiveCredentialAction(
                 revocationRegistryDefinition = null
             )
             // 4. Build Credential Ack
-            val credentialAck = Ack(id = uuid4().toString(), thread = credentialContainerMessage.thread)
+            val idRow = (credential as IndyCredential)
+
+            val newDidComm = "https://didcomm.org/issue-credential/1.0/ack"
+            val regularDidComm = """did:sov:${
+                idRow.schemaIdRaw.split(
+                    ":"
+                )[0]
+            };spec/issue-credential/1.0/ack"""
+            val credentialAck = Ack(
+                id = uuid4().toString(), thread =
+                Thread(credentialContainerMessage.thread.thid), status = "OK", type = newDidComm
+            )
             // 5.  Send credential ack
 
-            val result =  MessageSender.packAndSendMessage(
+            val result = MessageSender.packAndSendMessage(
                 Message(Json.encodeToString(credentialAck)),
                 connection,
                 walletConnector,

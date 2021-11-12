@@ -18,7 +18,7 @@ import kotlin.native.concurrent.isFrozen
 
 data class WebSocketWrapper(var websocket: PSWebSocket? = null)
 
-internal actual class PlatformSocket actual constructor(url: String) : NSObject(), PSWebSocketDelegateProtocol {
+internal actual class PlatformSocket actual constructor(url: String, ip: String, port: Int) : NSObject(), PSWebSocketDelegateProtocol {
     private val socketEndpoint = NSURL.URLWithString(url)!!
     private val isolatedWebSocket = IsolateState { WebSocketWrapper() }
     private var psl: PlatformSocketListener? = null

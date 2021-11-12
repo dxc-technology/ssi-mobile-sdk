@@ -31,6 +31,6 @@ import kotlinx.serialization.Serializable
 data class CredentialPreview(
     //TODO: provide fault and validate it
     @SerialName("@type") val type: String,
-    @SerialName("@id") val id: String?,
+    //@SerialName("@id") val id: String?,
     val attributes: List<Attribute>
 )

@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-
 val serializationVersion: String = "1.0.1"
 val indyVersion: String = "1.16.0"
 val jacksonVersion: String = "2.9.7"
@@ -54,53 +52,53 @@ kotlin {
         publishLibraryVariantsGroupedByFlavor = true // This line
     }
 
-    if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true) {
-        iosArm64("ios") {
-            println("iosArm64")
-            compilations.getByName("main") {
-                val indylib by cinterops.creating {
-                    defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
-                    extraOpts("-libraryPath", "$projectDir/indylib")
-                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
-                }
-            }
-            binaries.all {
-                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
-            }
-        }
-    } else {
-        iosX64("ios") {
-            println("iosX64")
-            compilations.getByName("main") {
-                val indylib by cinterops.creating {
-                    defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
-                    extraOpts("-libraryPath", "$projectDir/indylib")
-                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
-                }
-            }
-            binaries.all {
-                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
-            }
-        }
-    }
+//    if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true) {
+//        iosArm64("ios") {
+//            println("iosArm64")
+//            compilations.getByName("main") {
+//                val indylib by cinterops.creating {
+//                    defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+//                    extraOpts("-libraryPath", "$projectDir/indylib")
+//                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+//                }
+//            }
+//            binaries.all {
+//                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
+//            }
+//        }
+//    } else {
+//        iosX64("ios") {
+//            println("iosX64")
+//            compilations.getByName("main") {
+//                val indylib by cinterops.creating {
+//                    defFile(project.file("../ssi-mobile-sdk/indylib/indylib.def"))
+//                    extraOpts("-libraryPath", "$projectDir/indylib")
+//                    extraOpts("-compiler-options", "-std=c99 -I$projectDir/indylib")
+//                }
+//            }
+//            binaries.all {
+//                linkerOpts("-L$projectDir/socketlib", "-lPocketSocket")
+//            }
+//        }
+//    }
 
-    cocoapods {
-        pod("PocketSocket") {
-            source = git("https://github.com/zwopple/PocketSocket") {
-                tag = "1.0.1"
-            }
-        }
-
-        summary = "Kotlin sample project with CocoaPods dependencies"
-        homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
-        ios.deploymentTarget = "12.2"
-        osx.deploymentTarget = "10.8"
-        tvos.deploymentTarget = "9.0"
-
-        frameworkName = "ssi_agent"
-        podfile = project.file("./samples/swiftIosApp/Podfile")
-
-    }
+//    cocoapods {
+//        pod("PocketSocket") {
+//            source = git("https://github.com/zwopple/PocketSocket") {
+//                tag = "1.0.1"
+//            }
+//        }
+//
+//        summary = "Kotlin sample project with CocoaPods dependencies"
+//        homepage = "https://github.com/Kotlin/kotlin-with-cocoapods-sample"
+//        ios.deploymentTarget = "12.2"
+//        osx.deploymentTarget = "10.8"
+//        tvos.deploymentTarget = "9.0"
+//
+//        frameworkName = "ssi_agent"
+//        podfile = project.file("./samples/swiftIosApp/Podfile")
+//
+//    }
 
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
@@ -152,14 +150,18 @@ kotlin {
                 implementation("org.slf4j:slf4j-api:1.7.30")
                 implementation("org.slf4j:slf4j-log4j12:1.8.0-alpha2")
                 implementation("log4j:log4j:1.2.17")
+                implementation("javax.websocket:javax.websocket-api:1.1")
+                implementation("com.googlecode.json-simple:json-simple:1.1")
 
+                implementation("org.eclipse.jetty.websocket:javax-websocket-server-impl:9.4.3.v20170317")
+                implementation("org.eclipse.jetty.websocket:websocket-server:9.4.3.v20170317")
+                //implementation("org.eclipse.jetty.websocket:javax-websocket-client-impl:9.4.3.v20170317")
+                //implementation("org.eclipse.jetty.websocket:websocket-client:9.4.3.v20170317")
                 //implementation( "com.sun.jna:jna:3.0.9")
-
                 /*
                 implementation("ch.qos.logback:logback-classic:1.2.3")
                 implementation("ch.qos.logback:logback-core:1.2.3")
                 */
-
             }
         }
         val jvmTest by getting {
@@ -192,17 +194,17 @@ kotlin {
                 implementation("androidx.test:rules:1.1.0")
             }
         }
-        val iosMain by getting {
-            dependencies {
-                implementation(files("indylib.klib"))
-                implementation("io.ktor:ktor-client-ios:$ktorVersion")
-            }
-        }
-        val iosTest by getting {
-            dependencies {
-                implementation(files("indylib.klib"))
-            }
-        }
+//        val iosMain by getting {
+//            dependencies {
+//                implementation(files("indylib.klib"))
+//                implementation("io.ktor:ktor-client-ios:$ktorVersion")
+//            }
+//        }
+//        val iosTest by getting {
+//            dependencies {
+//                implementation(files("indylib.klib"))
+//            }
+//        }
     }
 }
 
@@ -297,37 +299,37 @@ tasks.register<Copy>("CopyAll") {
     into(layout.buildDirectory.dir("$projectDir/samples/swiftIosApp/xcframework/kmpa"))
 }
 
-val packForXcode by tasks.creating(Sync::class) {
-    group = "build"
-    val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
-    val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
-    val targetName = "ios"
-    if (sdkName.startsWith("iphoneos")) {
-        val framework =
-            kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
-        inputs.property("mode", mode)
-        dependsOn(framework.linkTask)
-        val targetDir = File(buildDir, "xcode-framework-arm")
-        from({ framework.outputDirectory })
-        into(targetDir)
-    } else {
-        val framework =
-            kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
-        inputs.property("mode", mode)
-        dependsOn(framework.linkTask)
-        val targetDir = File(buildDir, "xcode-framework-X64")
-        from({ framework.outputDirectory })
-        into(targetDir)
-    }
-}
-
-tasks.named<org.jetbrains.kotlin.gradle.tasks.DefFileTask>("generateDefPocketSocket").configure {
-    doLast {
-        outputFile.writeText(
-            """
-            language = Objective-C
-            headers = "$projectDir/socketlib/PocketSocketHeaders/PSWebSocket.h"
-            """
-        )
-    }
-}
+//val packForXcode by tasks.creating(Sync::class) {
+//    group = "build"
+//    val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
+//    val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
+//    val targetName = "ios"
+//    if (sdkName.startsWith("iphoneos")) {
+//        val framework =
+//            kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
+//        inputs.property("mode", mode)
+//        dependsOn(framework.linkTask)
+//        val targetDir = File(buildDir, "xcode-framework-arm")
+//        from({ framework.outputDirectory })
+//        into(targetDir)
+//    } else {
+//        val framework =
+//            kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
+//        inputs.property("mode", mode)
+//        dependsOn(framework.linkTask)
+//        val targetDir = File(buildDir, "xcode-framework-X64")
+//        from({ framework.outputDirectory })
+//        into(targetDir)
+//    }
+//}
+//
+//tasks.named<org.jetbrains.kotlin.gradle.tasks.DefFileTask>("generateDefPocketSocket").configure {
+//    doLast {
+//        outputFile.writeText(
+//            """
+//            language = Objective-C
+//            headers = "$projectDir/socketlib/PocketSocketHeaders/PSWebSocket.h"
+//            """
+//        )
+//    }
+//}

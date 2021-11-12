@@ -7,6 +7,7 @@ import com.dxc.ssi.agent.api.pluggable.wallet.WalletConnector
 import com.dxc.ssi.agent.didcomm.actions.Action
 import com.dxc.ssi.agent.didcomm.actions.ActionParams
 import com.dxc.ssi.agent.didcomm.actions.verify.impl.ProcessPresentationRequestAction
+import com.dxc.ssi.agent.didcomm.actions.verify.impl.ReceivePresentationAckAction
 import com.dxc.ssi.agent.didcomm.actions.verify.impl.ReceivePresentationRequestAction
 import com.dxc.ssi.agent.didcomm.model.verify.container.PresentationRequestContainer
 import com.dxc.ssi.agent.didcomm.processor.AbstractMessageProcessor
@@ -14,7 +15,6 @@ import com.dxc.ssi.agent.didcomm.processor.MessageType
 import com.dxc.ssi.agent.didcomm.processor.Processors
 import com.dxc.ssi.agent.didcomm.services.Services
 import com.dxc.ssi.agent.didcomm.states.verify.CredentialVerificationStateMachine
-import com.dxc.ssi.agent.kermit.Severity
 import com.dxc.ssi.agent.model.PresentationRequestResponseAction
 import com.dxc.ssi.agent.model.messages.Context
 
@@ -43,7 +43,9 @@ class CredVerifierProcessorImpl(
         PRESENTATION_PROPOSAL("^.*present-proof/1.0/propose-presentation$",
             { actionParams -> TODO("Not implemented") }),
         PROBLEM_REPORT("to be done", { actionParams -> kotlin.TODO("Not implemented") }),
-        PRESENTATION_ACK("to be done", { actionParams -> kotlin.TODO("Not implemented") });
+        PRESENTATION_ACK("^.*present-proof/1.0/ack$", { actionParams ->
+            ReceivePresentationAckAction()
+        });
 
         override fun getTypeString(): String = _typeString
         override fun getMessageHandler(): (ActionParams) -> Action = _action

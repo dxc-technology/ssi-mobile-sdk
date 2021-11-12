@@ -5,7 +5,7 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 
-internal actual class PlatformSocket actual constructor(url: String) {
+internal actual class PlatformSocket actual constructor(url: String, ip: String, port: Int) {
     private val socketEndpoint = url
     private var webSocket: WebSocket? = null
     actual fun openSocket(platformSocketListener: PlatformSocketListener) {

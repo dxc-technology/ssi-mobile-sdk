@@ -6,10 +6,8 @@ import com.dxc.ssi.agent.didcomm.actions.ActionResult
 import com.dxc.ssi.agent.didcomm.model.trustping.TrustPingResponse
 import com.dxc.ssi.agent.kermit.Kermit
 import com.dxc.ssi.agent.kermit.LogcatLogger
-import com.dxc.ssi.agent.kermit.Severity
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-
 
 class ReceiveTrustPingResponseAction(private val actionParams: ActionParams) : Action {
     private val logger: Kermit = Kermit(LogcatLogger())
@@ -31,7 +29,7 @@ class ReceiveTrustPingResponseAction(private val actionParams: ActionParams) : A
             val trustPingResponseMessage =
                 json.decodeFromString<TrustPingResponse>(messageContext.receivedUnpackedMessage!!.message)
 
-            logger.d { "Decoded trustPingResponseMessage" }
+            logger.d { "Decoded trustPingResponseMessage $trustPingResponseMessage" }
 
             connectionsTrackerService.trustPingResponseReceivedEvent(connection)
             actionParams.callbacks.trustPingController?.onTrustPingResponseReceived(connection)
